@@ -59,8 +59,8 @@ public interface TarantoolClient extends Closeable {
     /**
      * Execute a function defined on Tarantool instance
      * TODO example function call
-     * @param functionName
-     * @param arguments
+     * @param functionName function name, must not be null or empty
+     * @param arguments the list of function arguments
      * @param <T> the desired function call result type
      * @return some result
      * @throws TarantoolClientException if the client is not connected
