@@ -1,4 +1,4 @@
-package io.tarantool.driver.tuple;
+package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import org.msgpack.value.ArrayValue;

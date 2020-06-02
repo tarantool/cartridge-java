@@ -1,6 +1,6 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 
 import java.util.List;
 
