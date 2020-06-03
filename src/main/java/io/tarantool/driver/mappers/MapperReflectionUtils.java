@@ -1,7 +1,5 @@
 package io.tarantool.driver.mappers;
 
-import org.msgpack.value.Value;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;

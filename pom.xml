@@ -4,17 +4,163 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Tarantool Java driver</name>
+    <description>Driver for Tarantool 1.10+ based on Netty framework</description>
+    <url>https://tarantool.io</url>
+
+    <organization>
+        <name>Tarantool</name>
+        <url>https://tarantool.io/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The BSD License</name>
+            <url>https://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+
     <groupId>io.tarantool</groupId>
     <artifactId>driver</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
+        <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml</checkstyle.suppressions>
+        <logging.config>${project.basedir}/src/test/resources/logback-test.xml</logging.config>
+        <logging.logLevel>debug</logging.logLevel>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
+                    <compilerVersion>1.8</compilerVersion>
+                    <fork>true</fork>
+                    <debug>true</debug>
+                    <optimize>true</optimize>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
                     <source>8</source>
                     <target>8</target>
+                    <excludes>
+                        <exclude>**/package-info.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-tools</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <!-- Enforce JDK 1.8+ for compilation. -->
+                                    <version>[1.8.0,)</version>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.1.1,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>check-style</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <consoleOutput>true</consoleOutput>
+                            <logViolationsToConsole>true</logViolationsToConsole>
+                            <failsOnError>false</failsOnError>
+                            <failOnViolation>false</failOnViolation>
+                            <configLocation>${checkstyle.config}</configLocation>
+                            <suppressionsLocation>${checkstyle.suppressions}</suppressionsLocation>
+                            <propertyExpansion>project.basedir=${project.basedir}</propertyExpansion>
+                            <sourceDirectories>
+                                <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                                <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                            </sourceDirectories>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>8.31</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test*.java</include>
+                    </includes>
+                    <runOrder>random</runOrder>
+                    <systemPropertyVariables>
+                        <logback.configurationFile>${logging.config}</logback.configurationFile>
+                        <logLevel>${logging.logLevel}</logLevel>
+                    </systemPropertyVariables>
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                            <Bundle-Name>${project.name}</Bundle-Name>
+                            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source</Bundle-SymbolicName>
+                            <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>attach-test-sources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>test-jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <detectOfflineLinks>false</detectOfflineLinks>
+                    <breakiterator>true</breakiterator>
+                    <version>false</version>
+                    <author>false</author>
+                    <keywords>true</keywords>
                 </configuration>
             </plugin>
         </plugins>
@@ -36,13 +182,18 @@
             <artifactId>msgpack-core</artifactId>
             <version>0.8.20</version>
         </dependency>
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
-
 </project>
