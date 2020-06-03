@@ -24,7 +24,7 @@ public class TarantoolErrorResultHandler extends SimpleChannelInboundHandler<Tar
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TarantoolErrorResult errorResult) {
-        CompletableFuture requestFuture = futureManager.getRequestFuture(errorResult.getSyncId());
+        CompletableFuture requestFuture = futureManager.getRequest(errorResult.getSyncId()).getFeature();
         if (requestFuture != null && !requestFuture.isDone()) {
             //TODO different error types based on codes (factory)
             requestFuture.completeExceptionally(

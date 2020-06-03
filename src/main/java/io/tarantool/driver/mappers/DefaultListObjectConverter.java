@@ -13,11 +13,11 @@ import java.util.stream.Stream;
  *
  * @author Alexey Kuzin
  */
-public class DefaultListConverter implements ValueConverter<ArrayValue, List<?>>, ObjectConverter<List<?>, ArrayValue> {
+public class DefaultListObjectConverter implements ObjectConverter<List<?>, ArrayValue> {
 
     private MessagePackObjectMapper mapper;
 
-    public DefaultListConverter(MessagePackObjectMapper mapper) {
+    public DefaultListObjectConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -25,10 +25,5 @@ public class DefaultListConverter implements ValueConverter<ArrayValue, List<?>>
     public ArrayValue toValue(List<?> object) {
         Stream<Value> values = object.stream().map(mapper::toValue);
         return ValueFactory.newArray(values.collect(Collectors.toList()));
-    }
-
-    @Override
-    public List fromValue(ArrayValue value) {
-        return value.list().stream().map(mapper::fromValue).collect(Collectors.toList());
     }
 }

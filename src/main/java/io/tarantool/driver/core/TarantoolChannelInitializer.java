@@ -44,12 +44,12 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         socketChannel.pipeline()
-                .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(config.getMapper()))
+                .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(config.getObjectMapper()))
                 // outbound
                 .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
                 // inbound
                 .addLast("TarantoolResponseHandler", new TarantoolResponseHandler())
                 .addLast("TarantoolErrorResultHandler", new TarantoolErrorResultHandler(futureManager))
-                .addLast("TarantoolOkResultHandler", new TarantoolOkResultHandler(futureManager, config.getMapper()));
+                .addLast("TarantoolOkResultHandler", new TarantoolOkResultHandler(futureManager));
     }
 }

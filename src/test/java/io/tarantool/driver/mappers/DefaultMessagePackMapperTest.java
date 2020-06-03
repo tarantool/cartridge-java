@@ -13,11 +13,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultMessagePackObjectMapperTest {
+class DefaultMessagePackMapperTest {
 
     @Test
     void getInstance() throws MessagePackValueMapperException {
-        DefaultMessagePackObjectMapper mapper = DefaultMessagePackObjectMapper.getInstance();
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
 
         // check default Value converters
         assertEquals(ValueFactory.newInteger(111), mapper.toValue(111));
@@ -76,7 +76,7 @@ class DefaultMessagePackObjectMapperTest {
 
     @Test
     void registerValueConverter() throws MessagePackValueMapperException {
-        DefaultMessagePackObjectMapper mapper = DefaultMessagePackObjectMapper.getInstance();
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
         assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newBoolean(true)));
         mapper.registerValueConverter(BooleanValue.class, BooleanValue::getBoolean);
         assertEquals(mapper.fromValue(ValueFactory.newBoolean(false)), Boolean.FALSE);
@@ -84,7 +84,7 @@ class DefaultMessagePackObjectMapperTest {
 
     @Test
     void registerObjectConverter() throws MessagePackValueMapperException {
-        DefaultMessagePackObjectMapper mapper = DefaultMessagePackObjectMapper.getInstance();
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
         assertThrows(MessagePackValueMapperException.class, () -> mapper.toValue(Boolean.TRUE));
         mapper.registerObjectConverter(Boolean.class, ValueFactory::newBoolean);
         assertEquals(mapper.toValue(Boolean.FALSE), ValueFactory.newBoolean(false));

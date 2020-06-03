@@ -13,16 +13,24 @@ import java.util.List;
  */
 public class TarantoolIndexQuery {
 
-    private int indexId;
+    public static final int PRIMARY = 0; // Primary index has always ID 0
+
+    private int indexId = PRIMARY;
     private TarantoolIteratorType iteratorType = TarantoolIteratorType.defaultIterator();
     private List<?> keyValues = Collections.emptyList();
 
     /**
-     * Basic constructor.
-     * @param indexId index ID in the space (the primary index has ID 0)
+     * Basic constructor. Creates a query for all tuples by primary index.
+     */
+    public TarantoolIndexQuery() {
+    }
+
+    /**
+     * Creates a query for index with specified ID.
+     * @param indexId index ID in the space
      */
     public TarantoolIndexQuery(int indexId) {
-        Assert.state(indexId > 0, "Index ID must be greater than 0");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal to 0");
 
         this.indexId = indexId;
     }

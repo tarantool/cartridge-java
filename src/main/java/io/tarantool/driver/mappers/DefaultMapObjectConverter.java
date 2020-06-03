@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
  *
  * @author Alexey Kuzin
  */
-public class DefaultMapConverter implements ValueConverter<MapValue, Map<?, ?>>, ObjectConverter<Map<?, ?>, MapValue> {
+public class DefaultMapObjectConverter implements ObjectConverter<Map<?, ?>, MapValue> {
 
     private MessagePackObjectMapper mapper;
 
-    public DefaultMapConverter(MessagePackObjectMapper mapper) {
+    public DefaultMapObjectConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -25,11 +25,5 @@ public class DefaultMapConverter implements ValueConverter<MapValue, Map<?, ?>>,
         Map<Value, Value> values = object.entrySet().stream()
                 .collect(Collectors.toMap((e) -> mapper.toValue(e.getKey()), (e) -> mapper.toValue(e.getValue())));
         return ValueFactory.newMap(values);
-    }
-
-    @Override
-    public Map<?, ?> fromValue(MapValue value) {
-        return value.map().entrySet().stream()
-                .collect(Collectors.toMap((e) -> mapper.fromValue(e.getKey()), (e) -> mapper.fromValue(e.getValue())));
     }
 }

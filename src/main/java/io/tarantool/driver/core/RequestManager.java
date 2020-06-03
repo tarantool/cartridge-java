@@ -1,6 +1,7 @@
 package io.tarantool.driver.core;
 
 import io.netty.channel.Channel;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,8 +21,8 @@ public class RequestManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request) {
-        CompletableFuture<T> requestFuture = futureManager.addRequestFuture(request.getHeader().getSync());
+    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request, MessagePackValueMapper mapper) {
+        CompletableFuture<T> requestFuture = futureManager.addRequest(request.getHeader().getSync(), mapper);
         channel.writeAndFlush(request);
         return requestFuture;
     }

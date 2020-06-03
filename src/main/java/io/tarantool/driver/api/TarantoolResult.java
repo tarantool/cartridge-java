@@ -1,7 +1,5 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
-
 import java.util.List;
 
 /**
@@ -9,5 +7,5 @@ import java.util.List;
  *
  * @author Alexey Kuzin
  */
-public interface TarantoolResult extends List<TarantoolTuple> {
+public interface TarantoolResult<T> extends List<T> {
 }

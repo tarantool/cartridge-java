@@ -7,12 +7,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
+import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.core.RequestManager;
 import io.tarantool.driver.core.RequestFutureManager;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.space.TarantoolSpace;
 import io.tarantool.driver.space.TarantoolSpaceOperations;
 import org.springframework.util.Assert;
@@ -21,8 +25,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database and manages connections.
@@ -97,8 +103,9 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     /**
      * Connect to a Tarantool server on localhost using the default port (3301)
      * @return connected client
+     * @throws TarantoolClientException
      */
-    public StandaloneTarantoolClient connect() {
+    public StandaloneTarantoolClient connect() throws TarantoolClientException {
         return connect(DEFAULT_HOST, DEFAULT_PORT);
     }
 
@@ -107,8 +114,9 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @param host valid host name or IP address
      * @return connected client
      * @see InetSocketAddress
+     * @throws TarantoolClientException
      */
-    public StandaloneTarantoolClient connect(String host) {
+    public StandaloneTarantoolClient connect(String host) throws TarantoolClientException {
         return connect(host, DEFAULT_PORT);
     }
 
@@ -118,21 +126,31 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @param port valid port
      * @return connected client
      * @see InetSocketAddress
+     * @throws TarantoolClientException
      */
-    public StandaloneTarantoolClient connect(String host, int port) {
+    public StandaloneTarantoolClient connect(String host, int port) throws TarantoolClientException {
         return connect(new InetSocketAddress(host, port));
     }
 
     @Override
-    public StandaloneTarantoolClient connect(InetSocketAddress address) {
+    public StandaloneTarantoolClient connect(InetSocketAddress address) throws TarantoolClientException {
         ChannelFuture future = bootstrap.clone().remoteAddress(address).connect();
         channelFutures.add(future);
+        AtomicReference<TarantoolClientException> caughtException = new AtomicReference<>();
         future.addListener((channelFuture) -> {
             if (channelFuture.isSuccess()) {
                 connected.set(true);
+                try {
+                    this.metadata().refresh();
+                } catch (TarantoolClientException e) {
+                    caughtException.set(e);
+                }
             }
         });
         future.awaitUninterruptibly();
+        if (caughtException.get() != null) {
+            throw caughtException.get();
+        }
         this.requestManager = new RequestManager(future.channel(), requestFutureManager);
         return this;
     }
@@ -158,7 +176,11 @@ public class StandaloneTarantoolClient implements TarantoolClient {
         if (!isConnected()) {
             throw new TarantoolClientException("The client is not connected to Tarantool server");
         }
-        return new TarantoolSpace(this.metadata().getSpaceByName(spaceName).getSpaceId(), this, requestManager);
+        Optional<TarantoolSpaceMetadata> meta = this.metadata().getSpaceByName(spaceName);
+        if (!meta.isPresent()) {
+            throw new TarantoolSpaceNotFoundException(spaceName);
+        }
+        return new TarantoolSpace(meta.get().getSpaceId(), this, requestManager);
     }
 
     @Override
@@ -181,6 +203,16 @@ public class StandaloneTarantoolClient implements TarantoolClient {
 
     @Override
     public <T> CompletableFuture<T> call(String functionName, Object... arguments) throws TarantoolClientException {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper) throws TarantoolClientException {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper, MessagePackValueMapper resultMapper) throws TarantoolClientException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

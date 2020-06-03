@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 import org.springframework.util.Assert;
@@ -21,7 +22,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     private List<TarantoolField<?, ? extends Value>> fields;
 
-    public TarantoolTupleImpl(ArrayValue value, MessagePackObjectMapper mapper) {
+    public TarantoolTupleImpl(ArrayValue value, MessagePackValueMapper mapper) {
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue: value) {
             if (fieldValue.isNilValue()) {

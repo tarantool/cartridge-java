@@ -1,8 +1,9 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.mappers.DefaultMessagePackObjectMapper;
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 
 /**
  * Class-container for {@link StandaloneTarantoolClient} settings
@@ -14,7 +15,8 @@ public class TarantoolClientConfig {
     private int connectTimeout;
     private int readTimeout;
     private int requestTimeout;
-    private MessagePackObjectMapper mapper = DefaultMessagePackObjectMapper.getInstance();
+    private MessagePackObjectMapper objectMapper = DefaultMessagePackMapper.getInstance();
+    private MessagePackValueMapper valueMapper = DefaultMessagePackMapper.getInstance();
 
     public TarantoolClientConfig() {
     }
@@ -86,21 +88,36 @@ public class TarantoolClientConfig {
         this.readTimeout = readTimeout;
     }
 
+    /**
+     * Get object-to-MessagePack entity mapper
+     * @return a {@link MessagePackObjectMapper} instance
+     */
+    public MessagePackObjectMapper getObjectMapper() {
+        return objectMapper;
+    }
 
     /**
-     * Set mapper for MessagePack entity to object conversion
-     * @param mapper a {@link MessagePackObjectMapper} instance
+     * Set mapper for object to MessagePack entity conversion
+     * @param objectMapper a {@link MessagePackObjectMapper} instance
      */
-    public void setMapper(MessagePackObjectMapper mapper) {
-        this.mapper = mapper;
+    public void setObjectMapper(MessagePackObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     /**
      * Get MessagePack entity-to-object mapper
      * @return a {@link MessagePackObjectMapper} instance
      */
-    public MessagePackObjectMapper getMapper() {
-        return mapper;
+    public MessagePackValueMapper getValueMapper() {
+        return valueMapper;
+    }
+
+    /**
+     * Set valueMapper for MessagePack entity to object conversion
+     * @param valueMapper a {@link MessagePackValueMapper} instance
+     */
+    public void setValueMapper(MessagePackValueMapper valueMapper) {
+        this.valueMapper = valueMapper;
     }
 
     /**
@@ -130,7 +147,7 @@ public class TarantoolClientConfig {
          * @see TarantoolClientConfig#setReadTimeout(int)
          */
         public Builder withReadTimeout(int readTimeout) {
-            config.readTimeout = readTimeout;
+            config.setReadTimeout(readTimeout);
             return this;
         }
 
@@ -139,16 +156,34 @@ public class TarantoolClientConfig {
          * @see TarantoolClientConfig#setConnectTimeout(int)
          */
         public Builder withConnectTimeout(int connectTimeout) {
-            config.connectTimeout = connectTimeout;
+            config.setConnectTimeout(connectTimeout);
             return this;
         }
 
         /**
-         * (non-Javadoc
+         * (non-Javadoc)
          * @see TarantoolClientConfig#setRequestTimeout(int)
          */
         public Builder withRequestTimeout(int requestTimeout) {
-            config.requestTimeout = requestTimeout;
+            config.setRequestTimeout(requestTimeout);
+            return this;
+        }
+
+        /**
+         * (non-Javadoc)
+         * @see TarantoolClientConfig#setObjectMapper(MessagePackObjectMapper)
+         */
+        public Builder withObjectMapper(MessagePackObjectMapper mapper) {
+            config.setObjectMapper(mapper);
+            return this;
+        }
+
+        /**
+         * (non-Javadoc)
+         * @see TarantoolClientConfig#setValueMapper(MessagePackValueMapper)
+         */
+        public Builder withValueMapper(MessagePackValueMapper mapper) {
+            config.setValueMapper(mapper);
             return this;
         }
 

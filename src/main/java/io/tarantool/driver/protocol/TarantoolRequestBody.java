@@ -4,7 +4,7 @@ import org.msgpack.value.IntegerValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import io.tarantool.driver.mappers.DefaultMessagePackObjectMapper;
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapperException;
 
@@ -35,7 +35,7 @@ public class TarantoolRequestBody implements Packable<MapValue> {
      * @see #TarantoolRequestBody(Map, MessagePackObjectMapper)
      */
     public TarantoolRequestBody(Map<Integer, ?> body) throws TarantoolProtocolException {
-        this(body, DefaultMessagePackObjectMapper.getInstance());
+        this(body, DefaultMessagePackMapper.getInstance());
     }
 
     /**

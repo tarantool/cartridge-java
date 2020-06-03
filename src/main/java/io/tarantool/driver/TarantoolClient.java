@@ -1,10 +1,13 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.space.TarantoolSpaceOperations;
 
 import java.io.Closeable;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -17,8 +20,9 @@ public interface TarantoolClient extends Closeable {
      * Connect the client to the specified address
      * @param address valid host name or IP address of a Tarantool server
      * @return connected client
+     * @throws TarantoolClientException if connection or client initialization fails
      */
-    TarantoolClient connect(InetSocketAddress address);
+    TarantoolClient connect(InetSocketAddress address) throws TarantoolClientException;
 
     /**
      * Get the client connected status
@@ -60,12 +64,41 @@ public interface TarantoolClient extends Closeable {
      * Execute a function defined on Tarantool instance
      * TODO example function call
      * @param functionName function name, must not be null or empty
-     * @param arguments the list of function arguments
-     * @param <T> the desired function call result type
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     *        will be used for result value conversion from MessagePack entities
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<T> call(String functionName, Object... arguments) throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param functionName function name, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper) throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param functionName function name, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper, MessagePackValueMapper resultMapper) throws TarantoolClientException;
 
     // TODO eval method
 

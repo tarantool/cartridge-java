@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
@@ -13,7 +14,7 @@ public class TarantoolFieldImpl<T> implements TarantoolField<T, Value> {
 
     private T value;
 
-    TarantoolFieldImpl(Value value, MessagePackObjectMapper mapper) {
+    TarantoolFieldImpl(Value value, MessagePackValueMapper mapper) {
         this(mapper.fromValue(value));
     }
 
