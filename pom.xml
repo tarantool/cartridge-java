@@ -8,10 +8,9 @@
     <description>Driver for Tarantool 1.10+ based on Netty framework</description>
     <url>https://tarantool.io</url>
 
-    <organization>
-        <name>Tarantool</name>
-        <url>https://tarantool.io/</url>
-    </organization>
+    <groupId>io.tarantool</groupId>
+    <artifactId>driver</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -20,9 +19,26 @@
         </license>
     </licenses>
 
-    <groupId>io.tarantool</groupId>
-    <artifactId>driver</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <organization>
+        <name>Tarantool</name>
+        <url>https://tarantool.io/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>akudiyar</id>
+            <name>Alexey Kuzin</name>
+            <email>akudiyar@gmail.com</email>
+            <organization>Tarantool</organization>
+            <organizationUrl>https://tarantool.io/</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/akudiyar/tarantool-java-driver.git</connection>
+        <developerConnection>scm:git:ssh://github.com:akudiyar/tarantool-java-driver.git</developerConnection>
+        <url>http://github.com/akudiyar/tarantool-java-driver/tree/master</url>
+    </scm>
 
     <properties>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
@@ -110,6 +126,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
                 <configuration>
                     <includes>
                         <include>**/*Test*.java</include>
@@ -123,36 +140,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-                            <Bundle-Name>${project.name}</Bundle-Name>
-                            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source</Bundle-SymbolicName>
-                            <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>attach-test-sources</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>test-jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
@@ -161,6 +148,27 @@
                     <version>false</version>
                     <author>false</author>
                     <keywords>true</keywords>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
                 </configuration>
             </plugin>
         </plugins>
@@ -196,4 +204,69 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                                    <Bundle-Name>${project.name}</Bundle-Name>
+                                    <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source</Bundle-SymbolicName>
+                                    <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>attach-test-sources</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>test-jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 </project>
