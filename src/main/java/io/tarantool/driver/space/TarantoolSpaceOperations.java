@@ -23,6 +23,7 @@ public interface TarantoolSpaceOperations {
      * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
      */
     CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options) throws TarantoolClientException;
 
@@ -33,6 +34,7 @@ public interface TarantoolSpaceOperations {
      * @param indexName the index name, must not be empty or null
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
      */
     CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options) throws TarantoolClientException;
 
@@ -44,6 +46,7 @@ public interface TarantoolSpaceOperations {
      * @param iteratorType iterator type (EQ, REQ, etc.)
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
      */
     CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolIteratorType iteratorType, TarantoolSelectOptions options) throws TarantoolClientException;
 
@@ -52,6 +55,7 @@ public interface TarantoolSpaceOperations {
      * @param indexQuery the index query, containing information about the used index, iterator type and index key values for matching
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
      */
     CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options) throws TarantoolClientException;
 
@@ -62,6 +66,7 @@ public interface TarantoolSpaceOperations {
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into an object of type {@code T}
      * @param <T> result tuple type
      * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
      */
     <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options, ValueConverter<ArrayValue, T> tupleMapper) throws TarantoolClientException;
 

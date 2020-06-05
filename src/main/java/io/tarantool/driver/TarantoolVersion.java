@@ -22,7 +22,8 @@ public class TarantoolVersion implements Serializable {
     /**
      * Constructs version from a string
      * @param versionString a string containing Tarantool server version
-     * @throws InvalidVersionException
+     * @return new {@link TarantoolVersion} instance incapsulating the specified version
+     * @throws InvalidVersionException if the passed version string is invalid
      */
     public static TarantoolVersion fromString(String versionString) throws InvalidVersionException {
         if (versionString == null || !versionString.startsWith("Tarantool ")) {

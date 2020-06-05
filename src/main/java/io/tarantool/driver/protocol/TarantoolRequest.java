@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
- * Base class for all kinds of requests to Tarantool server. See {@link "https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests"}
+ * Base class for all kinds of requests to Tarantool server. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Alexey Kuzin
  */
@@ -32,7 +32,7 @@ public class TarantoolRequest {
 
     /**
      * Get header
-     * @return
+     * @return header instance
      */
     public TarantoolHeader getHeader() {
         return header;
@@ -40,7 +40,7 @@ public class TarantoolRequest {
 
     /**
      * Get body
-     * @return
+     * @return instance of a {@link Packable}
      */
     public Packable getBody() {
         return body;
@@ -50,6 +50,7 @@ public class TarantoolRequest {
      * Encode incapsulated data using {@link MessagePacker}
      * @param packer configured {@link MessagePacker}
      * @param mapper object-to-entity mapper
+     * @throws Exception if encoding failed
      */
     public void toMessagePack(MessagePacker packer, MessagePackObjectMapper mapper) throws Exception {
         packer.packValue(header.toMessagePackValue(mapper));

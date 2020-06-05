@@ -6,7 +6,9 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 
 /**
- * Class-container for {@link StandaloneTarantoolClient} settings
+ * Class-container for {@link TarantoolClient} configuration.
+ *
+ * It is recommended to use the {@link TarantoolClientConfig.Builder} for constructing the configuration
  *
  * @author Alexey Kuzin
  */
@@ -18,12 +20,15 @@ public class TarantoolClientConfig {
     private MessagePackObjectMapper objectMapper = DefaultMessagePackMapper.getInstance();
     private MessagePackValueMapper valueMapper = DefaultMessagePackMapper.getInstance();
 
+    /**
+     * Basic constructor.
+     */
     public TarantoolClientConfig() {
     }
 
     /**
-     * Get Tarantool credentials store
-     * @return
+     * Get Tarantool credentials
+     * @return configured Tarantool user credentials
      * @see TarantoolCredentials
      */
     public TarantoolCredentials getCredentials() {
@@ -32,7 +37,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set Tarantool credentials store
-     * @return
+     * @param credentials Tarantool user credentials
      * @see TarantoolCredentials
      */
     public void setCredentials(TarantoolCredentials credentials) {
@@ -41,7 +46,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get TCP connection timeout, in milliseconds
-     * @return
+     * @return a number
      */
     public int getConnectTimeout() {
         return connectTimeout;
@@ -49,7 +54,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set TCP connection timeout, in milliseconds
-     * @return
+     * @param connectTimeout timeout for establishing a connection to Tarantool server
      */
     public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
@@ -57,7 +62,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get request completion timeout, in milliseconds
-     * @return
+     * @return a number
      */
     public int getRequestTimeout() {
         return requestTimeout;
@@ -65,16 +70,15 @@ public class TarantoolClientConfig {
 
     /**
      * Set request completion timeout, in milliseconds
-     * @return
+     * @param requestTimeout timeout for receiving the response for a request to Tarantool server
      */
-    public TarantoolClientConfig setRequestTimeout(int requestTimeout) {
+    public void setRequestTimeout(int requestTimeout) {
         this.requestTimeout = requestTimeout;
-        return this;
     }
 
     /**
      * Get socket read timeout, in milliseconds
-     * @return
+     * @return a number
      */
     public int getReadTimeout() {
         return readTimeout;
@@ -82,7 +86,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set socket read timeout, in milliseconds
-     * @return
+     * @param readTimeout timeout for reading data from a socket, in milliseconds
      */
     public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
@@ -122,19 +126,22 @@ public class TarantoolClientConfig {
 
     /**
      * A builder for {@link TarantoolClientConfig}
-     *
-     * @author ALexey Kuzin
      */
     public static final class Builder {
 
         private TarantoolClientConfig config;
 
+        /**
+         * Basic constructor.
+         */
         public Builder() {
             config = new TarantoolClientConfig();
         }
 
         /**
-         * (non-Javadoc)
+         * Specify user credentials
+         * @param credentials the Tarantool user credentials
+         * @return builder
          * @see TarantoolClientConfig#setCredentials(TarantoolCredentials)
          */
         public Builder withCredentials(TarantoolCredentials credentials) {
@@ -143,7 +150,9 @@ public class TarantoolClientConfig {
         }
 
         /**
-         * (non-Javadoc)
+         * Specify read timeout
+         * @param readTimeout the timeout for reading the responses from Tarantool server, in milliseconds
+         * @return builder
          * @see TarantoolClientConfig#setReadTimeout(int)
          */
         public Builder withReadTimeout(int readTimeout) {
@@ -152,7 +161,9 @@ public class TarantoolClientConfig {
         }
 
         /**
-         * (non-Javadoc)
+         * Specify connection timeout
+         * @param connectTimeout the timeout for connecting to the Tarantool server, in milliseconds
+         * @return builder
          * @see TarantoolClientConfig#setConnectTimeout(int)
          */
         public Builder withConnectTimeout(int connectTimeout) {
@@ -161,7 +172,9 @@ public class TarantoolClientConfig {
         }
 
         /**
-         * (non-Javadoc)
+         * Specify request timeout
+         * @param requestTimeout the timeout for receiving a response from the Tarantool server, in milliseconds
+         * @return builder
          * @see TarantoolClientConfig#setRequestTimeout(int)
          */
         public Builder withRequestTimeout(int requestTimeout) {
@@ -170,7 +183,9 @@ public class TarantoolClientConfig {
         }
 
         /**
-         * (non-Javadoc)
+         * Specify object-to-MessagePack entity mapper
+         * @param mapper configured {@link MessagePackObjectMapper} instance
+         * @return builder
          * @see TarantoolClientConfig#setObjectMapper(MessagePackObjectMapper)
          */
         public Builder withObjectMapper(MessagePackObjectMapper mapper) {
@@ -179,7 +194,9 @@ public class TarantoolClientConfig {
         }
 
         /**
-         * (non-Javadoc)
+         * Specify MessagePack entity-to-object mapper
+         * @param mapper configured {@link MessagePackValueMapper} instance
+         * @return builder
          * @see TarantoolClientConfig#setValueMapper(MessagePackValueMapper)
          */
         public Builder withValueMapper(MessagePackValueMapper mapper) {
@@ -189,7 +206,7 @@ public class TarantoolClientConfig {
 
         /**
          * Build a {@link TarantoolClientConfig} instance
-         * @return
+         * @return configured instance
          */
         public TarantoolClientConfig build() {
             return config;
@@ -197,7 +214,7 @@ public class TarantoolClientConfig {
 
         /**
          * Prepare the builder for new configuration process
-         * @return
+         * @return the empty builder
          */
         public Builder clear() {
             config = new TarantoolClientConfig();

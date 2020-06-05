@@ -9,7 +9,7 @@ import java.io.IOException;
 import static io.tarantool.driver.protocol.TarantoolResponseBodyType.IPROTO_ERROR;
 
 /**
- * Base class for all kinds of responses received from Tarantool server. See {@link "https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql"}
+ * Base class for all kinds of responses received from Tarantool server. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql</a>
  *
  * @author Alexey Kuzin
  */
@@ -22,7 +22,9 @@ public class TarantoolResponse {
     /**
      * Basic constructor.
      * @param syncId the request ID passed back from Tarantool server
+     * @param code the result code returned in response header
      * @param body response body
+     * @throws TarantoolProtocolException if the passed body is invalid
      * @see MapValue
      */
     public TarantoolResponse(Long syncId, Long code, TarantoolResponseBody body) throws TarantoolProtocolException {
@@ -50,7 +52,7 @@ public class TarantoolResponse {
 
     /**
      * Get request ID
-     * @return
+     * @return a number
      */
     public Long getSyncId() {
         return syncId;
@@ -58,7 +60,7 @@ public class TarantoolResponse {
 
     /**
      * Get response body
-     * @return
+     * @return a MessagePack entity
      * @see Value
      */
     public TarantoolResponseBody getBody() {
@@ -67,7 +69,7 @@ public class TarantoolResponse {
 
     /**
      * Get response type
-     * @return
+     * @return code of {@link TarantoolRequestType} type
      */
     public TarantoolResponseType getResponseType() {
         return responseType;
@@ -75,7 +77,7 @@ public class TarantoolResponse {
 
     /**
      * Get response code
-     * @return
+     * @return a number, equal to 0 in case of OK response
      * @see TarantoolResponseType
      */
     public Long getResponseCode() {

@@ -12,6 +12,9 @@ public class MapperReflectionUtils {
 
     /**
      * Get class for the runtime target type parameter of a converter
+     * @param converter a converter, must have at least one generic interface with 2 type parameters
+     * @param <T> the target converter type
+     * @return the converter class
      */
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getConverterTargetType(Object converter) {
@@ -29,6 +32,11 @@ public class MapperReflectionUtils {
 
     /**
      * Call {@link #getInterfaceParameterType(Object, Class, int)} and get a class for the returned type
+     * @param converter a converter, must have at least one generic interface with 2 type parameters
+     * @param interfaceClass the target converter generic interface
+     * @param parameterTypePosition the position of the generic type parameter in the interface definition
+     * @param <T> the target generic interface parameter type
+     * @return the generic interface parameter class
      */
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getInterfaceParameterClass(Object converter, Class<?> interfaceClass, int parameterTypePosition) {
@@ -40,9 +48,17 @@ public class MapperReflectionUtils {
     }
 
     /**
-     * {@code SomeClass implements ValueConverter<V, O>, ObjectConverter<O, V>}
-     * <- {@code interfaceClass: ValueConverter, parameterTypePosition: 0 }
-     * -> {@code V}
+     * {@code
+     * <html>
+     * SomeClass implements ValueConverter<V, O>, ObjectConverter<O, V>
+     * <- interfaceClass: ValueConverter, parameterTypePosition: 0
+     * -> V
+     * </html>
+     * }
+     * @param converter a converter, must have at least one generic interface with 2 type parameters
+     * @param interfaceClass the target converter generic interface
+     * @param parameterTypePosition the position of the generic type parameter in the interface definition
+     * @return the generic interface parameter type
      */
     public static Type getInterfaceParameterType(Object converter, Class<?> interfaceClass, int parameterTypePosition) {
         Type[] genericInterfaces = getGenericInterfaces(converter);
@@ -68,9 +84,16 @@ public class MapperReflectionUtils {
     }
 
     /**
-     * {@code ValueConverter<V, O>}
-     * <- {@code parameterTypePosition: 0 }
-     * -> {@code V}
+     * {@code
+     * <html>
+     * ValueConverter<V, O>
+     * <- parameterTypePosition: 0
+     * -> V
+     * </html>
+     * }
+     * @param parameterizedType a type of the generic interface parameter type
+     * @param parameterTypePosition the position of the generic type parameter in the interface definition
+     * @return the generic interface parameter type
      */
     public static Type getParameterType(ParameterizedType parameterizedType, int parameterTypePosition) {
         Type[] typeParams = parameterizedType.getActualTypeArguments();

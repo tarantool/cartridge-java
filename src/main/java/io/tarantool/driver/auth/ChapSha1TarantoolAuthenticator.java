@@ -15,8 +15,10 @@ import java.util.Base64;
  */
 public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<SimpleTarantoolCredentials> {
 
+    /**
+     * Basic constructor
+     */
     public ChapSha1TarantoolAuthenticator() {
-
     }
 
     /**
@@ -40,9 +42,9 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
 
     /**
      * Take the salt from the server connect response, write the authentication data based on the provided {@link SimpleTarantoolCredentials}
-     * See {@link "https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication"}
+     * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
      * @param serverAuthData the auth data responded by server to the connect request
-     *
+     * @param credentials Tarantool user credentials
      * @return binary data for authentication request according to the chap-sha1 algorithm
      */
     @Override

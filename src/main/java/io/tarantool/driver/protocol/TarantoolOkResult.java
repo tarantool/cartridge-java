@@ -24,7 +24,7 @@ public class TarantoolOkResult {
 
     /**
      * Get request ID a.k.a. sync ID
-     * @return
+     * @return a number
      */
     public Long getSyncId() {
         return syncId;
@@ -32,7 +32,7 @@ public class TarantoolOkResult {
 
     /**
      * Get response data
-     * @return
+     * @return a MessagePack entity
      */
     public Value getData() {
         return data;

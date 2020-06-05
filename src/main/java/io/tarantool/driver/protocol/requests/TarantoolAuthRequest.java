@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Authentication request. See {@link "https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication"}
+ * Authentication request. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
  *
  * @author Alexey Kuzin
  */

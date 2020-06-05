@@ -12,6 +12,8 @@ public interface MessagePackObjectMapper {
     /**
      * Create MessagePack entity representation for an object.
      * @param o an object to be converted
+     * @param <V> the target MessagePack entity type
+     * @param <O> the source object type
      * @throws MessagePackValueMapperException if the corresponding conversion cannot be performed
      * @return instance of MessagePack {@link Value}
      */
@@ -21,6 +23,8 @@ public interface MessagePackObjectMapper {
      * Adds a Java object converter to this mappers instance
      * @param objectClass object class to register the converter for
      * @param converter entity-to-object converter
+     * @param <V> the target MessagePack entity type
+     * @param <O> the source object type
      * @see ObjectConverter
      */
     <V extends Value, O> void registerObjectConverter(Class<O> objectClass, ObjectConverter<O, V> converter);

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Select request. See {@link "https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests"}
+ * Select request. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  */
 public class TarantoolSelectRequest extends TarantoolRequest {
 

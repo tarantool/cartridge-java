@@ -36,6 +36,7 @@ public class TarantoolIndexQueryFactory {
      * @param spaceId ID of Tarantool space
      * @param indexName the index name
      * @return new {@link TarantoolIndexQuery} instance
+     * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool server
      */
     public TarantoolIndexQuery byName(int spaceId, String indexName) throws TarantoolClientException {
         Optional<TarantoolIndexMetadata> meta = client.metadata().getIndexForName(spaceId, indexName);

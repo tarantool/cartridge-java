@@ -103,7 +103,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     /**
      * Connect to a Tarantool server on localhost using the default port (3301)
      * @return connected client
-     * @throws TarantoolClientException
+     * @throws TarantoolClientException when connection or request for metadata are failed
      */
     public StandaloneTarantoolClient connect() throws TarantoolClientException {
         return connect(DEFAULT_HOST, DEFAULT_PORT);
@@ -114,7 +114,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @param host valid host name or IP address
      * @return connected client
      * @see InetSocketAddress
-     * @throws TarantoolClientException
+     * @throws TarantoolClientException when connection or request for metadata are failed
      */
     public StandaloneTarantoolClient connect(String host) throws TarantoolClientException {
         return connect(host, DEFAULT_PORT);
@@ -126,7 +126,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @param port valid port
      * @return connected client
      * @see InetSocketAddress
-     * @throws TarantoolClientException
+     * @throws TarantoolClientException when connection or request for metadata are failed
      */
     public StandaloneTarantoolClient connect(String host, int port) throws TarantoolClientException {
         return connect(new InetSocketAddress(host, port));

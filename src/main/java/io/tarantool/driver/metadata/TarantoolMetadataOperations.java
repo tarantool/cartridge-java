@@ -21,7 +21,7 @@ public interface TarantoolMetadataOperations {
      * @param spaceName the space name, must not be null or empty
      * @return nullable space metadata wrapped in {@link Optional}
      */
-    Optional<TarantoolSpaceMetadata> getSpaceByName(String spaceName) throws TarantoolClientException;
+    Optional<TarantoolSpaceMetadata> getSpaceByName(String spaceName);
 
     /**
      * Get metadata for index from the specified space by name
