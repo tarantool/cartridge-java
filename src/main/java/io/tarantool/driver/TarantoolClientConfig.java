@@ -1,7 +1,7 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.mappers.DefaultMessagePackMapper;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 
@@ -17,8 +17,8 @@ public class TarantoolClientConfig {
     private int connectTimeout;
     private int readTimeout;
     private int requestTimeout;
-    private MessagePackObjectMapper objectMapper = DefaultMessagePackMapper.getInstance();
-    private MessagePackValueMapper valueMapper = DefaultMessagePackMapper.getInstance();
+    private MessagePackObjectMapper objectMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+    private MessagePackValueMapper valueMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
 
     /**
      * Basic constructor.

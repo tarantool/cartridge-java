@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.auth.TarantoolAuthMechanism;
-import io.tarantool.driver.mappers.DefaultMessagePackMapper;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.protocol.requests.TarantoolAuthRequest;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
@@ -29,7 +29,7 @@ class TarantoolAuthRequestTest {
                 .withUsername("user")
                 .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1,2,3,4}).build();
         MessagePacker packer = MessagePack.newDefaultBufferPacker();
-        request.toMessagePack(packer, DefaultMessagePackMapper.getInstance());
+        request.toMessagePack(packer, DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
         packer.flush();
         byte[] bytes = ((MessageBufferPacker) packer).toByteArray();
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);

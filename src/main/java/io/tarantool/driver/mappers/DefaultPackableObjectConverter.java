@@ -8,7 +8,7 @@ import org.msgpack.value.Value;
  *
  * @author Alexey Kuzin
  */
-public class DefaultPackableObjectConverter implements ObjectConverter<Packable<? extends Value>, Value> {
+public class DefaultPackableObjectConverter implements ObjectConverter<Packable, Value> {
     private MessagePackObjectMapper mapper;
 
     public DefaultPackableObjectConverter(MessagePackObjectMapper mapper) {
@@ -16,7 +16,7 @@ public class DefaultPackableObjectConverter implements ObjectConverter<Packable<
     }
 
     @Override
-    public Value toValue(Packable<? extends Value> object) {
+    public Value toValue(Packable object) {
         return object.toMessagePackValue(mapper);
     }
 }

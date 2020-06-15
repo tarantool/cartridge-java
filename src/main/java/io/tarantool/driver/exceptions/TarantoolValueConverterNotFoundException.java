@@ -8,7 +8,7 @@ import io.tarantool.driver.TarantoolClientException;
  * @author Alexey Kuzin
  */
 public class TarantoolValueConverterNotFoundException extends TarantoolClientException {
-    public TarantoolValueConverterNotFoundException(Class<?> tupleClass) {
-        super(String.format("Value converter for object type %s not found", tupleClass));
+    public TarantoolValueConverterNotFoundException(Class<?> entityClass, Class<?> tupleClass) {
+        super(String.format("Value converter for source entity type %s and object type %s not found", entityClass, tupleClass));
     }
 }

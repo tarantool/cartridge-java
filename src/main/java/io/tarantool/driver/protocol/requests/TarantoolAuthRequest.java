@@ -1,6 +1,8 @@
 package io.tarantool.driver.protocol.requests;
 
 import io.tarantool.driver.auth.TarantoolAuthMechanism;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
@@ -57,7 +59,8 @@ public class TarantoolAuthRequest extends TarantoolRequest {
             if (authMap.size() < 2) {
                 throw new TarantoolProtocolException("Username and auth data must be specified for Tarantool auth request");
             }
-            return new TarantoolAuthRequest(new TarantoolRequestBody(authMap));
+            MessagePackObjectMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+            return new TarantoolAuthRequest(new TarantoolRequestBody(authMap, mapper));
         }
     }
 }

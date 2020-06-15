@@ -6,7 +6,7 @@ import java.util.Optional;
 
 /**
  * Basic interface for collection of generic converters between MessagePack entities and Java objects.
- * Value converters must be added using the {@link #registerValueConverter(Class, ValueConverter)} method
+ * Value converters must be added using the {@link #registerValueConverter(Class, Class, ValueConverter)} method
  *
  * @author Alexey Kuzin
  */
@@ -23,20 +23,22 @@ public interface MessagePackValueMapper extends Cloneable {
 
     /**
      * Adds a MessagePack entity converter to this mappers instance.
-     * @param valueClass entity class to register the converter for
+     * @param valueClass source entity class
+     * @param objectClass target object class
      * @param converter object-to-entity converter
      * @param <V> source MessagePack entity type
      * @param <O> target object type
      * @see ValueConverter
      */
-    <V extends Value, O> void registerValueConverter(Class<V> valueClass, ValueConverter<V, O> converter);
+    <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass, ValueConverter<V, O> converter);
 
     /**
-     * Get a converter capable of converting the target class
+     * Get a converter capable of converting from the source entity class to the target class
+     * @param entityClass the source entity class
      * @param objectClass the target conversion class
      * @param <V> source MessagePack entity type
      * @param <O> target object type
      * @return a nullable converter instance wrapped in {@code Optional}
      */
-    <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<O> objectClass);
+    <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<V> entityClass, Class<O> objectClass);
 }

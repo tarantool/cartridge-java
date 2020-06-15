@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.tuple;
 
+import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.ArrayValue;
@@ -20,21 +21,27 @@ import java.util.function.Consumer;
  */
 public class TarantoolTupleImpl implements TarantoolTuple {
 
-    private List<TarantoolField<?, ? extends Value>> fields;
+    private List<TarantoolField> fields;
 
+    /**
+     * Basic constructor.
+     * @param value messagePack entity
+     * @param mapper for converting the entity into the Java objects
+     */
+    @SuppressWarnings("unchecked")
     public TarantoolTupleImpl(ArrayValue value, MessagePackValueMapper mapper) {
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue: value) {
             if (fieldValue.isNilValue()) {
-                fields.add(new TarantoolNullField<>());
+                fields.add(new TarantoolNullField());
             } else {
-                fields.add(new TarantoolFieldImpl<>(value, mapper));
+                fields.add(new TarantoolFieldImpl(fieldValue, mapper));
             }
         }
     }
 
     @Override
-    public Optional<TarantoolField<?, ? extends Value>> get(int fieldPosition) {
+    public Optional<TarantoolField> getField(int fieldPosition) {
         Assert.state(fieldPosition >= 0, "Field position starts with 0");
 
         if (fieldPosition < fields.size()) {
@@ -44,22 +51,28 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public Iterator<TarantoolField<?, ? extends Value>> iterator() {
+    public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass) throws TarantoolValueConverterNotFoundException {
+        Optional<TarantoolField> field = getField(fieldPosition);
+        return field.isPresent() ? Optional.ofNullable(field.get().getValue(objectClass)) : Optional.empty();
+    }
+
+    @Override
+    public Iterator<TarantoolField> iterator() {
         return fields.iterator();
     }
 
     @Override
-    public void forEach(Consumer<? super TarantoolField<?, ? extends Value>> action) {
+    public void forEach(Consumer<? super TarantoolField> action) {
         fields.forEach(action);
     }
 
     @Override
-    public Spliterator<TarantoolField<?, ? extends Value>> spliterator() {
+    public Spliterator<TarantoolField> spliterator() {
         return fields.spliterator();
     }
 
     @Override
-    public ArrayValue toMessagePackValue(MessagePackObjectMapper mapper) {
+    public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(fields);
     }
 }

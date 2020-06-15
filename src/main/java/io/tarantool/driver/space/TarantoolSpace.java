@@ -17,7 +17,6 @@ import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.Value;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +39,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         this.client = client;
         this.requestManager = requestManager;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(client);
-        this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory(client);
+        this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
     }
 
     /**
@@ -83,9 +82,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options) throws TarantoolClientException {
-        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter = client.getConfig().getValueMapper().getValueConverter(TarantoolTuple.class);
+        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter = client.getConfig().getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
         if (!converter.isPresent()) {
-            throw new TarantoolValueConverterNotFoundException(TarantoolTuple.class);
+            throw new TarantoolValueConverterNotFoundException(ArrayValue.class, TarantoolTuple.class);
         }
         return select(indexQuery, options, converter.get());
     }

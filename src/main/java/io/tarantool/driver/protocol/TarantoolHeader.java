@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author Alexey Kuzin
  */
-public final class TarantoolHeader implements Packable<MapValue> {
+public final class TarantoolHeader implements Packable {
 
     private static final int IPROTO_REQUEST_TYPE = 0x00;
     private static final int IPROTO_SYNC = 0x01;
@@ -70,7 +70,7 @@ public final class TarantoolHeader implements Packable<MapValue> {
      * Converts the current header contents into a MessagePack {@link Value}
      * @return MessagePack representation of the header
      */
-    public MapValue toMessagePackValue(MessagePackObjectMapper mapper) {
+    public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         Map<IntegerValue, IntegerValue> values = new HashMap<>();
         values.put(ValueFactory.newInteger(IPROTO_REQUEST_TYPE), ValueFactory.newInteger(code));
         values.put(ValueFactory.newInteger(IPROTO_SYNC), ValueFactory.newInteger(sync));

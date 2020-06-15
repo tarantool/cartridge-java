@@ -2,28 +2,55 @@ package io.tarantool.driver.mappers;
 
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.BooleanValue;
+import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DefaultMessagePackMapperTest {
 
     @Test
-    void getInstance() throws MessagePackValueMapperException {
-        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
+    void getDefaultConverter() throws MessagePackValueMapperException {
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
 
         // check default Value converters
+        assertEquals(ValueFactory.newBoolean(false), mapper.toValue(Boolean.FALSE));
         assertEquals(ValueFactory.newInteger(111), mapper.toValue(111));
         assertEquals(ValueFactory.newInteger(100500L), mapper.toValue(100500L));
+        assertEquals(ValueFactory.newFloat(111.0F), mapper.toValue(111.0F));
+        assertEquals(ValueFactory.newFloat(100.500D), mapper.toValue(100.500D));
         assertEquals(ValueFactory.newString("hello"), mapper.toValue("hello"));
         assertEquals(ValueFactory.newBinary(new byte[]{1,2,3,4}), mapper.toValue(new byte[]{1,2,3,4}));
+
+        // check default Object converters
+        assertEquals(Boolean.TRUE, mapper.fromValue(ValueFactory.newBoolean(true)));
+        assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111)));
+        assertEquals(Long.valueOf(4_000_000_000_000L), mapper.fromValue(ValueFactory.newInteger(4_000_000_000_000L)));
+        assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0F)));
+        assertEquals(Double.valueOf(Float.MAX_VALUE * 10D), mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
+        assertEquals("hello", mapper.fromValue(ValueFactory.newString("hello")));
+        assertArrayEquals(new byte[]{1,2,3,4}, mapper.fromValue(ValueFactory.newBinary(new byte[]{1,2,3,4})));
+
+        // decimal
+        assertEquals(BigDecimal.ONE, mapper.fromValue(mapper.toValue(BigDecimal.ONE)));
+
+        // uuid
+        UUID uuid = UUID.fromString("84b56906-aeed-11ea-b3de-0242ac130004");
+        assertEquals(uuid, mapper.fromValue(mapper.toValue(uuid)));
+    }
+
+    @Test
+    void testDefaultComplexConverters() {
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
 
         // check default complex type Value converters
         List<Object> testList = Arrays.asList("Hello", 111);
@@ -36,12 +63,6 @@ class DefaultMessagePackMapperTest {
         expectedMap.put(ValueFactory.newInteger(1), ValueFactory.newString("Hello"));
         expectedMap.put(ValueFactory.newInteger(2), ValueFactory.newString("World"));
         assertEquals(ValueFactory.newMap(expectedMap), mapper.toValue(testMap));
-
-        // check default Object converters
-        assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111)));
-        assertEquals(Long.valueOf(4_000_000_000_000L), mapper.fromValue(ValueFactory.newInteger(4_000_000_000_000L)));
-        assertEquals("hello", mapper.fromValue(ValueFactory.newString("hello")));
-        assertArrayEquals(new byte[]{1,2,3,4}, (byte[]) mapper.fromValue(ValueFactory.newBinary(new byte[]{1,2,3,4})));
 
         // check default complex type Object converters
         ArrayValue testValue = ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
@@ -76,17 +97,79 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void registerValueConverter() throws MessagePackValueMapperException {
-        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
-        assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newBoolean(true)));
-        mapper.registerValueConverter(BooleanValue.class, BooleanValue::getBoolean);
-        assertEquals(mapper.fromValue(ValueFactory.newBoolean(false)), Boolean.FALSE);
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
+        Map<Value, Value> testValue = new HashMap<>();
+        CustomTuple testTuple = new CustomTuple(1234, "Test");
+        testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
+        testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
+        assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newMap(testValue)));
+        mapper.registerValueConverter(MapValue.class, CustomTuple.class, (v) -> {
+            CustomTuple tuple = new CustomTuple();
+            Map<Value, Value> keyValue = v.map();
+            tuple.setId(keyValue.get(ValueFactory.newString("id")).asIntegerValue().asInt());
+            tuple.setName(keyValue.get(ValueFactory.newString("name")).asStringValue().asString());
+            return tuple;
+        });
+        assertEquals(testTuple, mapper.fromValue(ValueFactory.newMap(testValue)));
     }
 
     @Test
-    void registerObjectConverter() throws MessagePackValueMapperException {
-        DefaultMessagePackMapper mapper = DefaultMessagePackMapper.getInstance();
-        assertThrows(MessagePackValueMapperException.class, () -> mapper.toValue(Boolean.TRUE));
-        mapper.registerObjectConverter(Boolean.class, ValueFactory::newBoolean);
-        assertEquals(mapper.toValue(Boolean.FALSE), ValueFactory.newBoolean(false));
+    void registerObjectConverter() throws MessagePackObjectMapperException {
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
+        CustomTuple testTuple = new CustomTuple(1234, "Test");
+        assertThrows(MessagePackObjectMapperException.class, () -> mapper.toValue(testTuple));
+        mapper.registerObjectConverter(CustomTuple.class, MapValue.class, (t) -> {
+            Map<Value, Value> keyValue = new HashMap<>();
+            keyValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(t.getId()));
+            keyValue.put(ValueFactory.newString("name"), ValueFactory.newString(t.getName()));
+            return ValueFactory.newMap(keyValue);
+        });
+        Map<Value, Value> testValue = new HashMap<>();
+        testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
+        testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
+        assertEquals(testValue, mapper.toValue(testTuple).asMapValue().map());
+    }
+
+    private static final class CustomTuple {
+        private int id;
+        private String name;
+
+        public CustomTuple() {
+        }
+
+        public CustomTuple(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CustomTuple that = (CustomTuple) o;
+            return id == that.id &&
+                    Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
     }
 }

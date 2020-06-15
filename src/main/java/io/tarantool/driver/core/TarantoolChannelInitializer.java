@@ -8,7 +8,12 @@ import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.codecs.MessagePackFrameCodec;
-import io.tarantool.driver.handlers.*;
+import io.tarantool.driver.handlers.TarantoolAuthenticationHandler;
+import io.tarantool.driver.handlers.TarantoolErrorResultHandler;
+import io.tarantool.driver.handlers.TarantoolOkResultHandler;
+import io.tarantool.driver.handlers.TarantoolRequestHandler;
+import io.tarantool.driver.handlers.TarantoolResponseHandler;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 
 /**
  * The main channel pipeline initializer.
@@ -44,7 +49,8 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         socketChannel.pipeline()
-                .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(config.getObjectMapper()))
+                .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(
+                        DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper()))
                 // outbound
                 .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
                 // inbound

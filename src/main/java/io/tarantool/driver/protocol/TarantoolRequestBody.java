@@ -1,10 +1,8 @@
 package io.tarantool.driver.protocol;
 
 import org.msgpack.value.IntegerValue;
-import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapperException;
 
@@ -17,7 +15,7 @@ import java.util.Map;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolRequestBody implements Packable<MapValue> {
+public class TarantoolRequestBody implements Packable {
 
     private Map<IntegerValue, Value> values;
 
@@ -26,16 +24,6 @@ public class TarantoolRequestBody implements Packable<MapValue> {
      */
     public TarantoolRequestBody() {
         values = Collections.emptyMap();
-    }
-
-    /**
-     * Uses default {@link MessagePackObjectMapper} for converting values.
-     * @param body request body
-     * @throws TarantoolProtocolException in case if mapping of body parts to objects failed
-     * @see #TarantoolRequestBody(Map, MessagePackObjectMapper)
-     */
-    public TarantoolRequestBody(Map<Integer, ?> body) throws TarantoolProtocolException {
-        this(body, DefaultMessagePackMapper.getInstance());
     }
 
     /**
@@ -58,7 +46,7 @@ public class TarantoolRequestBody implements Packable<MapValue> {
     }
 
     @Override
-    public MapValue toMessagePackValue(MessagePackObjectMapper mapper) {
+    public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return ValueFactory.newMap(values);
     }
 }
