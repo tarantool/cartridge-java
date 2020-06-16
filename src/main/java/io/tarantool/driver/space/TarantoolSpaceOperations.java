@@ -25,7 +25,8 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options) throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options)
+            throws TarantoolClientException;
 
     /**
      * Select all tuples using the index specified by name.
@@ -36,7 +37,8 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options) throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options)
+            throws TarantoolClientException;
 
     /**
      * Select all tuples using the index specified by name with the specified iterator type.
@@ -48,27 +50,36 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolIteratorType iteratorType, TarantoolSelectOptions options) throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolIteratorType iteratorType,
+                                                              TarantoolSelectOptions options)
+            throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified index query.
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key values for matching
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options) throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
+                                                              TarantoolSelectOptions options)
+            throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified index query.
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key values for matching
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
      * @param options query options such as offset and limit
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into an object of type {@code T}
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                    an object of type {@code T}
      * @param <T> result tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options, ValueConverter<ArrayValue, T> tupleMapper) throws TarantoolClientException;
+    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options,
+                                                     ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
 
     CompletableFuture<TarantoolResult> update(); // TODO update parameters
     CompletableFuture<TarantoolResult> replace(); // TODO replace parameters

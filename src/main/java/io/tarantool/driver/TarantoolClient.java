@@ -84,7 +84,8 @@ public interface TarantoolClient extends Closeable {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper) throws TarantoolClientException;
+    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
 
     /**
      * Execute a function defined on Tarantool instance
@@ -98,7 +99,9 @@ public interface TarantoolClient extends Closeable {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper, MessagePackValueMapper resultMapper) throws TarantoolClientException;
+    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper,
+                                  MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
 
     // TODO eval method
 

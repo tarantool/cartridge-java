@@ -15,7 +15,8 @@ public class TarantoolResponseBody {
      * Basic constructor.
      * @param code first key in the body MP_MAP value
      * @param data the data (of type MP_OBJECT)
-     * @throws TarantoolProtocolException if the specified code doesn't correspond to a valid {@link TarantoolResponseBodyType}
+     * @throws TarantoolProtocolException if the specified code doesn't correspond to a valid
+     * {@link TarantoolResponseBodyType}
      */
     public TarantoolResponseBody(int code, Value data) throws TarantoolProtocolException {
         this.responseBodyType = TarantoolResponseBodyType.fromCode(code);

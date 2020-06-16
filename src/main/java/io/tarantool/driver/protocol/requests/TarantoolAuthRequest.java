@@ -14,11 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Authentication request. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
+ * Authentication request.
+ * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">
+ *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
  *
  * @author Alexey Kuzin
  */
-public class TarantoolAuthRequest extends TarantoolRequest {
+public final class TarantoolAuthRequest extends TarantoolRequest {
 
     private static final int IPROTO_USER_NAME = 0x23;
     private static final int IPROTO_AUTH_DATA = 0x21;
@@ -57,7 +59,8 @@ public class TarantoolAuthRequest extends TarantoolRequest {
 
         public TarantoolAuthRequest build() throws TarantoolProtocolException {
             if (authMap.size() < 2) {
-                throw new TarantoolProtocolException("Username and auth data must be specified for Tarantool auth request");
+                throw new TarantoolProtocolException(
+                        "Username and auth data must be specified for Tarantool auth request");
             }
             MessagePackObjectMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
             return new TarantoolAuthRequest(new TarantoolRequestBody(authMap, mapper));

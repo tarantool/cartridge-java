@@ -41,14 +41,17 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
     }
 
     /**
-     * Take the salt from the server connect response, write the authentication data based on the provided {@link SimpleTarantoolCredentials}
-     * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
+     * Take the salt from the server connect response, write the authentication data based on the provided
+     * {@link SimpleTarantoolCredentials}
+     * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">
+     *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
      * @param serverAuthData the auth data responded by server to the connect request
      * @param credentials Tarantool user credentials
      * @return binary data for authentication request according to the chap-sha1 algorithm
      */
     @Override
-    public byte[] prepareUserAuthData(byte[] serverAuthData, SimpleTarantoolCredentials credentials) throws TarantoolAuthenticationException {
+    public byte[] prepareUserAuthData(byte[] serverAuthData,
+                                      SimpleTarantoolCredentials credentials) throws TarantoolAuthenticationException {
         Assert.notNull(serverAuthData, "Server response must not be null");
         Assert.notNull(credentials, "Credentials must not be null");
 

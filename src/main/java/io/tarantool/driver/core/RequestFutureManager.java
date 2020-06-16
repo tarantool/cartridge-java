@@ -51,14 +51,16 @@ public class RequestFutureManager {
      * @param <T> target response body type
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    public <T> CompletableFuture<T> addRequest(Long requestId, int requestTimeout, MessagePackValueMapper resultMapper) {
+    public <T> CompletableFuture<T> addRequest(Long requestId, int requestTimeout,
+                                               MessagePackValueMapper resultMapper) {
         CompletableFuture<T> requestFuture = new CompletableFuture<>();
         requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
         requestFutures.put(requestId, new TarantoolRequestMetadata(requestFuture, resultMapper));
         timeoutScheduler.schedule(() -> {
-            if (!requestFuture.isDone())
-                requestFuture.completeExceptionally(new TimeoutException(
-                        String.format("Failed to get response for request %d within %d ms", requestId, requestTimeout)));
+            if (!requestFuture.isDone()) {
+                requestFuture.completeExceptionally(new TimeoutException(String.format(
+                        "Failed to get response for request %d within %d ms", requestId, requestTimeout)));
+            }
         }, requestTimeout, TimeUnit.MILLISECONDS);
         return requestFuture;
     }

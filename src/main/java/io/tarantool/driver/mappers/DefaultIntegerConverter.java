@@ -8,7 +8,8 @@ import org.msgpack.value.ValueFactory;
  *
  * @author Alexey Kuzin
  */
-public class DefaultIntegerConverter implements ValueConverter<IntegerValue, Integer>, ObjectConverter<Integer, IntegerValue> {
+public class DefaultIntegerConverter implements
+        ValueConverter<IntegerValue, Integer>, ObjectConverter<Integer, IntegerValue> {
     @Override
     public IntegerValue toValue(Integer object) {
         return ValueFactory.newInteger(object);

@@ -39,8 +39,12 @@ public class TarantoolVersion implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TarantoolVersion that = (TarantoolVersion) o;
         return Objects.equals(fullVersion, that.fullVersion);
     }

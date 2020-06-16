@@ -9,7 +9,8 @@ import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.protocol.requests.TarantoolAuthRequest;
 
 /**
- * Reads the greeting received from Tarantool server and optionally sends an authentication request with passed credentials.
+ * Reads the greeting received from Tarantool server and optionally sends an authentication request with passed
+ * credentials.
  *
  * @author Alexey Kuzin
  */

@@ -8,7 +8,8 @@ import org.msgpack.value.ValueFactory;
  *
  * @author Alexey Kuzin
  */
-public class DefaultBooleanConverter implements ValueConverter<BooleanValue, Boolean>, ObjectConverter<Boolean, BooleanValue> {
+public class DefaultBooleanConverter implements
+        ValueConverter<BooleanValue, Boolean>, ObjectConverter<Boolean, BooleanValue> {
     @Override
     public BooleanValue toValue(Boolean object) {
         return ValueFactory.newBoolean(object);

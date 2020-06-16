@@ -48,22 +48,25 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
         CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = client.space(VSPACE_SPACE_ID)
                 .select(query, options, spaceMetadataMapper);
-        spaces.thenApply((result) -> {
+        spaces.thenApply(result -> {
                         spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
                         spaceMetadataById.clear();
                         return result;
                     })
-                .thenAccept((result) -> result.stream()
-                    .forEach((meta) -> {
+                .thenAccept(result -> result.stream()
+                    .forEach(meta -> {
                         spaceMetadata.put(meta.getSpaceName(), meta);
                         spaceMetadataById.put(meta.getSpaceId(), meta);
                     }));
 
         CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = client.space(VINDEX_SPACE_ID)
                 .select(query, options, indexMetadataMapper);
-        indexes.thenApply((result) -> { indexMetadata.clear(); return result; })
-                .thenAccept((result) -> result.stream()
-                    .forEach((meta) -> {
+        indexes.thenApply(result -> {
+                    indexMetadata.clear();
+                    return result;
+                })
+                .thenAccept(result -> result.stream()
+                    .forEach(meta -> {
                         indexMetadata.putIfAbsent(meta.getSpaceId(), new HashMap<>());
                         indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
                     }));

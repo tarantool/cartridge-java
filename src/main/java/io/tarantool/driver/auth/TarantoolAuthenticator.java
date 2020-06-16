@@ -27,9 +27,11 @@ public interface TarantoolAuthenticator<T extends TarantoolCredentials> {
      * the necessary transformations and writes the serialized authentication data to a byte array
      * @param serverAuthData bytes with auth data from the Tarantool server greeting
      * @param credentials Tarantool user credentials
-     * @return the auth data in the form of byte array, ready to be transferred in an authentication request to Tarantool server
+     * @return the auth data in the form of byte array, ready to be transferred in an authentication request to
+     * Tarantool server
      * @throws TarantoolAuthenticationException id authentication failed
-     * @see <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
+     * @see <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication">
+     *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
      */
     byte[] prepareUserAuthData(byte[] serverAuthData, T credentials) throws TarantoolAuthenticationException;
 }

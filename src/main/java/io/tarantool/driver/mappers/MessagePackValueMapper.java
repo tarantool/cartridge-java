@@ -30,7 +30,8 @@ public interface MessagePackValueMapper extends Cloneable {
      * @param <O> target object type
      * @see ValueConverter
      */
-    <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass, ValueConverter<V, O> converter);
+    <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass,
+                                                     ValueConverter<V, O> converter);
 
     /**
      * Get a converter capable of converting from the source entity class to the target class

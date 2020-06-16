@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 /**
  * Contains helper methods for converter classes lookup and determining its parameters at runtime
  */
-public class MapperReflectionUtils {
+final class MapperReflectionUtils {
 
     /**
      * Get class for the runtime target type parameter of a converter
@@ -18,13 +18,17 @@ public class MapperReflectionUtils {
      * @throws ConverterParameterTypeNotFoundException if the target parameter type cannot be determined
      */
     @SuppressWarnings("unchecked")
-    public static <T> Class<T> getConverterTargetType(Object converter) throws ConverterParameterTypeNotFoundException {
+    static <T> Class<T> getConverterTargetType(Object converter) throws ConverterParameterTypeNotFoundException {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         if (genericInterfaces.length < 1) {
-            throw new RuntimeException(String.format("The passed converter object of type %s does not extend any generic interface", converter.getClass()));
+            throw new RuntimeException(
+                    String.format("The passed converter object of type %s does not extend any generic interface",
+                            converter.getClass()));
         }
         if (genericInterfaces.length > 1) {
-            throw new RuntimeException(String.format("The passed converter object of type %s has more than one generic interfaces, unable to determine the target", converter.getClass()));
+            throw new RuntimeException(
+                    String.format("The passed converter object of type %s has more than one generic interfaces, " +
+                            "unable to determine the target", converter.getClass()));
         }
         try {
             Class<?> interfaceClass = Class.forName(genericInterfaces[0].getTypeName());
@@ -41,32 +45,40 @@ public class MapperReflectionUtils {
      * @param parameterTypePosition the position of the generic type parameter in the interface definition
      * @param <T> the target generic interface parameter type
      * @return the generic interface parameter class
-     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be determined
+     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be
+     * determined
      */
     @SuppressWarnings("unchecked")
-    public static <T> Class<T> getInterfaceParameterClass(Object converter, Class<?> interfaceClass, int parameterTypePosition) throws ConverterParameterTypeNotFoundException {
+    static <T> Class<T> getInterfaceParameterClass(Object converter,
+                                                   Class<?> interfaceClass,
+                                                   int parameterTypePosition)
+            throws ConverterParameterTypeNotFoundException {
         try {
-            return (Class<T>) Class.forName(getInterfaceParameterType(converter, interfaceClass, parameterTypePosition).getTypeName());
+            return (Class<T>) Class.forName(
+                    getInterfaceParameterType(converter, interfaceClass, parameterTypePosition).getTypeName());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * {@code
-     * <html>
+     *
+     * <pre>{@code
      * SomeClass implements ValueConverter<V, O>, ObjectConverter<O, V>
      * <- interfaceClass: ValueConverter, parameterTypePosition: 0
      * -> V
-     * </html>
-     * }
+     * }</pre>
      * @param converter a converter, must have at least one generic interface with 2 type parameters
      * @param interfaceClass the target converter generic interface
      * @param parameterTypePosition the position of the generic type parameter in the interface definition
      * @return the generic interface parameter type
-     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be determined
+     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be
+     * determined
      */
-    public static Type getInterfaceParameterType(Object converter, Class<?> interfaceClass, int parameterTypePosition) throws ConverterParameterTypeNotFoundException {
+    private static Type getInterfaceParameterType(Object converter,
+                                                  Class<?> interfaceClass,
+                                                  int parameterTypePosition)
+            throws ConverterParameterTypeNotFoundException {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         try {
             for (Type iface : genericInterfaces) {
@@ -80,38 +92,39 @@ public class MapperReflectionUtils {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        throw new ConverterParameterTypeNotFoundException("Unable to determine the generic parameter type on position %d for %s. " +
-                "Either the class does not implement any generic interfaces or the parametrized types cannot be determined due to type erasure",
-                parameterTypePosition, converter.getClass());
+        throw new ConverterParameterTypeNotFoundException(
+                "Unable to determine the generic parameter type on position %d for %s. " +
+                "Either the class does not implement any generic interfaces or the parametrized types " +
+                "cannot be determined due to type erasure", parameterTypePosition, converter.getClass());
     }
 
     private static Type[] getGenericInterfaces(Object converter) {
         Type[] genericInterfaces = converter.getClass().getGenericInterfaces();
         if (genericInterfaces == null) {
-            throw new RuntimeException(String.format("Unable to determine the generic interfaces for %s", converter.getClass()));
+            throw new RuntimeException(
+                    String.format("Unable to determine the generic interfaces for %s", converter.getClass()));
         }
         return genericInterfaces;
     }
 
     /**
-     * {@code
-     * <html>
+     * <pre>{@code
      * ValueConverter<V, O>
      * <- parameterTypePosition: 0
      * -> V
-     * </html>
-     * }
+     * }</pre>
      * @param parameterizedType a type of the generic interface parameter type
      * @param parameterTypePosition the position of the generic type parameter in the interface definition
      * @return the generic interface parameter type
      */
-    public static Type getParameterType(ParameterizedType parameterizedType, int parameterTypePosition) {
+    private static Type getParameterType(ParameterizedType parameterizedType, int parameterTypePosition) {
         Type[] typeParams = parameterizedType.getActualTypeArguments();
         if (typeParams == null || typeParams.length != 2) {
             throw new RuntimeException(String.format("Type %s does not have 2 type parameters", parameterizedType));
         }
         if (typeParams[parameterTypePosition] instanceof ParameterizedType &&
-                Stream.of(((ParameterizedType) typeParams[parameterTypePosition]).getActualTypeArguments()).allMatch(t -> t instanceof WildcardType)) {
+                Stream.of(((ParameterizedType) typeParams[parameterTypePosition]).getActualTypeArguments())
+                        .allMatch(t -> t instanceof WildcardType)) {
             return ((ParameterizedType) typeParams[parameterTypePosition]).getRawType();
         } else {
             return typeParams[parameterTypePosition];

@@ -23,6 +23,6 @@ public class DefaultMapValueConverter implements ValueConverter<MapValue, Map<?,
     @Override
     public Map<?, ?> fromValue(MapValue value) {
         return value.map().entrySet().stream()
-                .collect(Collectors.toMap((e) -> mapper.fromValue(e.getKey()), (e) -> mapper.fromValue(e.getValue())));
+                .collect(Collectors.toMap(e -> mapper.fromValue(e.getKey()), e -> mapper.fromValue(e.getValue())));
     }
 }

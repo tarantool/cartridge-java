@@ -11,7 +11,8 @@ import java.util.UUID;
  *
  * @author Alexey Kuzin
  */
-public class DefaultUUIDConverter implements ValueConverter<ExtensionValue, UUID>, ObjectConverter<UUID, ExtensionValue> {
+public class DefaultUUIDConverter implements
+        ValueConverter<ExtensionValue, UUID>, ObjectConverter<UUID, ExtensionValue> {
 
     private static final byte UUID_TYPE = 0x02;
 

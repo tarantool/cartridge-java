@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents the Tarantool packet frame header. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header</a>
+ * Represents the Tarantool packet frame header.
+ * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header">
+ *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header</a>
  *
  * @author Alexey Kuzin
  */

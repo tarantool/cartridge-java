@@ -30,7 +30,8 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     private TarantoolVersionHolder versionHolder;
     private RequestFutureManager futureManager;
 
-    public TarantoolChannelInitializer(TarantoolClientConfig config, TarantoolVersionHolder versionHolder, RequestFutureManager futureManager) {
+    public TarantoolChannelInitializer(TarantoolClientConfig config, TarantoolVersionHolder versionHolder,
+                                       RequestFutureManager futureManager) {
         this.config = config;
         this.versionHolder = versionHolder;
         this.futureManager = futureManager;

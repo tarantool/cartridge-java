@@ -13,7 +13,7 @@ public class TarantoolRequestMetadata {
     private CompletableFuture<?> feature;
     private MessagePackValueMapper mapper;
 
-    public TarantoolRequestMetadata(CompletableFuture<?> feature, MessagePackValueMapper mapper) {
+    TarantoolRequestMetadata(CompletableFuture<?> feature, MessagePackValueMapper mapper) {
         this.feature = feature;
         this.mapper = mapper;
     }

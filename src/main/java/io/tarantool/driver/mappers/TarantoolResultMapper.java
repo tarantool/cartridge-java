@@ -21,7 +21,8 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
      * @param tupleClass target tuple class
      * @param tupleConverter MessagePack entity to tuple converter
      */
-    public TarantoolResultMapper(MessagePackValueMapper valueMapper, Class<T> tupleClass, ValueConverter<ArrayValue, T> tupleConverter) {
+    public TarantoolResultMapper(MessagePackValueMapper valueMapper, Class<T> tupleClass,
+                                 ValueConverter<ArrayValue, T> tupleConverter) {
         this.valueMapper = valueMapper;
         valueMapper.registerValueConverter(ArrayValue.class, tupleClass, tupleConverter);
     }
@@ -32,12 +33,14 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass, ValueConverter<V, O> converter) {
+    public <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass,
+                                                            ValueConverter<V, O> converter) {
         valueMapper.registerValueConverter(valueClass, objectClass, converter);
     }
 
     @Override
-    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<V> entityClass, Class<O> objectClass) {
+    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<V> entityClass,
+                                                                                 Class<O> objectClass) {
         return valueMapper.getValueConverter(entityClass, objectClass);
     }
 }

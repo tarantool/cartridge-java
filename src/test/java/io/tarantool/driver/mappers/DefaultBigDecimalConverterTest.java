@@ -32,10 +32,12 @@ class DefaultBigDecimalConverterTest {
         result = ((MessageBufferPacker) packer.packValue(converter.toValue(new BigDecimal(1111111)))).toByteArray();
         assertEquals("xwUBABERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
-        result = ((MessageBufferPacker) packer.packValue(converter.toValue(new BigDecimal(1111111111111111111L)))).toByteArray();
+        result = ((MessageBufferPacker) packer.packValue(
+                converter.toValue(new BigDecimal(1111111111111111111L)))).toByteArray();
         assertEquals("xwsBABERERERERERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
-        result = ((MessageBufferPacker) packer.packValue(converter.toValue(new BigDecimal("1111111111111111111111111")))).toByteArray();
+        result = ((MessageBufferPacker) packer.packValue(
+                converter.toValue(new BigDecimal("1111111111111111111111111")))).toByteArray();
         assertEquals("xw4BABERERERERERERERERw=", encoder.encodeToString(result));
     }
 

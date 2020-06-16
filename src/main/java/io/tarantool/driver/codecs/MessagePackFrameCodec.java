@@ -29,7 +29,8 @@ public class MessagePackFrameCodec extends ByteToMessageCodec<TarantoolRequest> 
     }
 
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, TarantoolRequest tarantoolRequest, ByteBuf byteBuf) throws Exception {
+    protected void encode(ChannelHandlerContext channelHandlerContext, TarantoolRequest tarantoolRequest,
+                          ByteBuf byteBuf) throws Exception {
         if (byteBuf.writableBytes() >= MINIMAL_PACKET_SIZE) {
             MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
             tarantoolRequest.toMessagePack(packer, mapper);
@@ -45,7 +46,8 @@ public class MessagePackFrameCodec extends ByteToMessageCodec<TarantoolRequest> 
     }
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
+                          List<Object> list) throws Exception {
         if (byteBuf.readableBytes() > MINIMAL_HEADER_SIZE) {
             byteBuf.markReaderIndex();
             MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(byteBuf.nioBuffer(0, MINIMAL_HEADER_SIZE));

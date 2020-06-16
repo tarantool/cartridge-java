@@ -29,12 +29,14 @@ public class TarantoolRequestBody implements Packable {
     /**
      * Basic constructor. Takes a typical {@link Map} with {@code Integer} keys and {@code Object} values.
      * Converts values into MessagePack entities using the passed instance of {@link MessagePackObjectMapper}.
-     * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+     * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
+     *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
      * @param body request body
      * @param mapper provides mapping for Java objects to MessagePack entities
      * @throws TarantoolProtocolException in case if mapping of body parts to objects failed
      */
-    public TarantoolRequestBody(Map<Integer, ?> body, MessagePackObjectMapper mapper) throws TarantoolProtocolException {
+    public TarantoolRequestBody(Map<Integer, ?> body, MessagePackObjectMapper mapper)
+            throws TarantoolProtocolException {
         try {
             this.values = new HashMap<>(body.size(), 1);
             for (Integer key: body.keySet()) {

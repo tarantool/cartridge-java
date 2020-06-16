@@ -20,7 +20,9 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
     private List<T> tuples;
 
     public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter) {
-        this.tuples = value.list().stream().map((v) -> tupleConverter.fromValue(v.asArrayValue())).collect(Collectors.toList());
+        this.tuples = value.list().stream()
+                .map(v -> tupleConverter.fromValue(v.asArrayValue()))
+                .collect(Collectors.toList());
     }
 
     @Override

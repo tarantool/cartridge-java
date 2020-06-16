@@ -17,8 +17,10 @@ public class TarantoolClientConfig {
     private int connectTimeout;
     private int readTimeout;
     private int requestTimeout;
-    private MessagePackObjectMapper objectMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-    private MessagePackValueMapper valueMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+    private MessagePackObjectMapper objectMapper =
+            DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+    private MessagePackValueMapper valueMapper =
+            DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
 
     /**
      * Basic constructor.

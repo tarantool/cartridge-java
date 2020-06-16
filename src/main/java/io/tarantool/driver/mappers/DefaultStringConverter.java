@@ -8,7 +8,8 @@ import org.msgpack.value.ValueFactory;
  *
  * @author Alexey Kuzin
  */
-public class DefaultStringConverter implements ValueConverter<StringValue, String>, ObjectConverter<String, StringValue> {
+public class DefaultStringConverter implements
+        ValueConverter<StringValue, String>, ObjectConverter<String, StringValue> {
     @Override
     public StringValue toValue(String object) {
         return ValueFactory.newString(object);

@@ -8,7 +8,8 @@ import org.msgpack.value.ValueFactory;
  *
  * @author Alexey Kuzin
  */
-public class DefaultByteArrayConverter implements ValueConverter<BinaryValue, byte[]>, ObjectConverter<byte[], BinaryValue> {
+public class DefaultByteArrayConverter implements
+        ValueConverter<BinaryValue, byte[]>, ObjectConverter<byte[], BinaryValue> {
     @Override
     public BinaryValue toValue(byte[] object) {
         return ValueFactory.newBinary(object);

@@ -23,7 +23,7 @@ public class DefaultMapObjectConverter implements ObjectConverter<Map<?, ?>, Map
     @Override
     public MapValue toValue(Map<?, ?> object) {
         Map<Value, Value> values = object.entrySet().stream()
-                .collect(Collectors.toMap((e) -> mapper.toValue(e.getKey()), (e) -> mapper.toValue(e.getValue())));
+                .collect(Collectors.toMap(e -> mapper.toValue(e.getKey()), e -> mapper.toValue(e.getValue())));
         return ValueFactory.newMap(values);
     }
 }

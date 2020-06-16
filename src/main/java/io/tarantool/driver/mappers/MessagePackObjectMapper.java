@@ -28,5 +28,6 @@ public interface MessagePackObjectMapper {
      * @param <O> the source object type
      * @see ObjectConverter
      */
-    <V extends Value, O> void registerObjectConverter(Class<O> objectClass, Class<V> valueClass, ObjectConverter<O, V> converter);
+    <V extends Value, O> void registerObjectConverter(Class<O> objectClass, Class<V> valueClass,
+                                                      ObjectConverter<O, V> converter);
 }

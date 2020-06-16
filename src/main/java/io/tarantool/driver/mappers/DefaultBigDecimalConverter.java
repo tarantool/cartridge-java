@@ -17,11 +17,12 @@ import java.nio.ByteBuffer;
  *
  * @author Alexey Kuzin
  */
-public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue, BigDecimal>, ObjectConverter<BigDecimal, ExtensionValue> {
+public class DefaultBigDecimalConverter implements
+        ValueConverter<ExtensionValue, BigDecimal>, ObjectConverter<BigDecimal, ExtensionValue> {
 
     private static final byte DECIMAL_TYPE = 0x01;
     private static final int DECIMAL_MAX_DIGITS = 38;
-    // See <a href="https://github.com/tarantool/decNumber/blob/4f318a5d5a1fce1f16f2d6a4e23aa5661647c779/decPacked.h">decNumber/decPacked.h</a>
+    // See https://github.com/tarantool/decNumber/blob/master/decPacked.h
     private static final byte DECIMAL_MINUS = 0x0D;
     private static final byte DECIMAL_PLUS = 0x0C;
     private static final byte DECIMAL_MINUS_ALT = 0x0B;
@@ -29,7 +30,8 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
     private byte[] toBytes(BigDecimal object) throws IOException {
         int scale = -object.scale();
         if (scale > DECIMAL_MAX_DIGITS || scale < -DECIMAL_MAX_DIGITS) {
-            throw new IOException(String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
+            throw new IOException(
+                    String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
         }
         String number = object.unscaledValue().toString();
         byte signum = DECIMAL_PLUS;
@@ -40,8 +42,8 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
         }
         int len = (digits >> 1) + 1;
         byte[] bcd = new byte[len];
-        bcd[len-1] = signum;
-        for (int i = len-1, pos = number.length() - 1; i >= 0; i--) {
+        bcd[len - 1] = signum;
+        for (int i = len - 1, pos = number.length() - 1; i >= 0; i--) {
             bcd[i] |= Character.digit(number.charAt(pos--), 10) << 4;
             if (i > 0) {
                 bcd[i - 1] |= Character.digit(number.charAt(pos--), 10);
@@ -54,14 +56,15 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
     }
 
     /*
-     * See <a href="https://github.com/tarantool/tarantool/blob/a38c861e841a6f39beac313125fdcb854af8244a/src/lib/core/decimal.c#L401">lib/core/decimal.c</a>
+     * See https://github.com/tarantool/tarantool/blob/master/src/lib/core/decimal.c#L401
      */
     private BigDecimal fromBytes(byte[] data) throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(buffer);
         int scale = -unpacker.unpackInt();
         if (scale > DECIMAL_MAX_DIGITS || scale < -DECIMAL_MAX_DIGITS) {
-            throw new IOException(String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
+            throw new IOException(
+                    String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
         }
         if (!buffer.hasRemaining()) {
             throw new IOException("Not enough bytes in the packed data");
@@ -77,7 +80,9 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
             signum = 1;
         }
         int i;
-        for (i = buffer.position(); i < len && data[i] == 0; i++); // skip zero bytes
+        for (i = buffer.position(); i < len && data[i] == 0; i++) {
+            // skip zero bytes
+        }
         if (len == i + 1 && (data[i] & 0xF0) == 0) {
             return BigDecimal.ZERO;
         }
@@ -86,12 +91,12 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
         for (int j = len - 1; j >= i; j--) {
             digit = (byte) ((data[j] & 0xF0) >>> 4);
             if (digit > 9) {
-                throw new IOException(String.format("Invalid digit at position %d", 2*(j-i)));
+                throw new IOException(String.format("Invalid digit at position %d", 2 * (j - i)));
             }
             sb.insert(0, digit);
-            digit = (byte) (data[j-1] & 0x0F);
+            digit = (byte) (data[j - 1] & 0x0F);
             if (digit > 9) {
-                throw new IOException(String.format("Invalid digit at position %d", 2*(j-i)-1));
+                throw new IOException(String.format("Invalid digit at position %d", 2 * (j - i) - 1));
             }
             sb.insert(0, digit);
         }
@@ -106,7 +111,8 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
         try {
             return ValueFactory.newExtension(DECIMAL_TYPE, toBytes(object));
         } catch (IOException e) {
-            throw new MessagePackValueMapperException(String.format("Failed to pack BigDecimal %s to MessagePack entity", object), e);
+            throw new MessagePackValueMapperException(
+                    String.format("Failed to pack BigDecimal %s to MessagePack entity", object), e);
         }
     }
 
@@ -115,7 +121,8 @@ public class DefaultBigDecimalConverter implements ValueConverter<ExtensionValue
         try {
             return fromBytes(value.getData());
         } catch (IOException e) {
-            throw new MessagePackValueMapperException(String.format("Failed to unpack BigDecimal from MessagePack entity %s", value.toString()), e);
+            throw new MessagePackValueMapperException(
+                    String.format("Failed to unpack BigDecimal from MessagePack entity %s", value.toString()), e);
         }
     }
 

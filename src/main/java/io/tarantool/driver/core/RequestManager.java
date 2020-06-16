@@ -15,6 +15,11 @@ public class RequestManager {
     private final Channel channel;
     private final RequestFutureManager futureManager;
 
+    /**
+     * Basic constructor.
+     * @param channel Netty channel
+     * @param futureManager keeps track of sent requests
+     */
     public RequestManager(Channel channel, RequestFutureManager futureManager) {
         this.channel = channel;
         this.futureManager = futureManager;

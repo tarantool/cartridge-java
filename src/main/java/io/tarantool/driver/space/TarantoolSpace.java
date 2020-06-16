@@ -64,25 +64,34 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options) throws TarantoolClientException {
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options)
+            throws TarantoolClientException {
         return select(indexQueryFactory.primary(), options);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options) throws TarantoolClientException {
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName,
+                                                                     TarantoolSelectOptions options)
+            throws TarantoolClientException {
         TarantoolIndexQuery indexQuery = indexQueryFactory.byName(spaceId, indexName);
         return select(indexQuery, options);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolIteratorType iteratorType, TarantoolSelectOptions options) throws TarantoolClientException {
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName,
+                                                                     TarantoolIteratorType iteratorType,
+                                                                     TarantoolSelectOptions options)
+            throws TarantoolClientException {
         TarantoolIndexQuery indexQuery = indexQueryFactory.byName(spaceId, indexName).withIteratorType(iteratorType);
         return select(indexQuery, options);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options) throws TarantoolClientException {
-        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter = client.getConfig().getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
+                                                                     TarantoolSelectOptions options)
+            throws TarantoolClientException {
+        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter =
+                client.getConfig().getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
         if (!converter.isPresent()) {
             throw new TarantoolValueConverterNotFoundException(ArrayValue.class, TarantoolTuple.class);
         }
@@ -90,7 +99,10 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options, ValueConverter<ArrayValue, T> tupleMapper) throws TarantoolClientException {
+    public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                            TarantoolSelectOptions options,
+                                                            ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
         try {
             TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
                     .withSpaceId(spaceId)

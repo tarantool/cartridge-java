@@ -31,9 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database and manages connections.
- *
- * TODO example
+ * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
+ * and manages connections.
  *
  * @author Alexey Kuzin
  */
@@ -55,7 +54,6 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     private Bootstrap bootstrap;
     private AtomicBoolean connected = new AtomicBoolean(false);
     private RequestManager requestManager;
-
 
     /**
      * Create a client. Default credentials will be used.
@@ -137,7 +135,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
         ChannelFuture future = bootstrap.clone().remoteAddress(address).connect();
         channelFutures.add(future);
         AtomicReference<TarantoolClientException> caughtException = new AtomicReference<>();
-        future.addListener((channelFuture) -> {
+        future.addListener(channelFuture -> {
             if (channelFuture.isSuccess()) {
                 connected.set(true);
                 try {
@@ -154,7 +152,6 @@ public class StandaloneTarantoolClient implements TarantoolClient {
         this.requestManager = new RequestManager(future.channel(), requestFutureManager);
         return this;
     }
-
 
     @Override
     public boolean isConnected() {
@@ -207,12 +204,15 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
+                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper, MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
+                                         MessagePackObjectMapper argumentsMapper,
+                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

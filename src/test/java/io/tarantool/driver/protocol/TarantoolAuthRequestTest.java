@@ -19,15 +19,19 @@ class TarantoolAuthRequestTest {
 
     @Test
     void createAndSerialize() throws Exception {
-        assertThrows(TarantoolProtocolException.class, () -> new TarantoolAuthRequest.Builder().withUsername("user").build(),
+        assertThrows(TarantoolProtocolException.class,
+                () -> new TarantoolAuthRequest.Builder().withUsername("user").build(),
                 "Username and auth data must be specified for Tarantool auth request");
-        assertThrows(IllegalArgumentException.class, () -> new TarantoolAuthRequest.Builder().withUsername(null).build(),
+        assertThrows(IllegalArgumentException.class,
+                () -> new TarantoolAuthRequest.Builder().withUsername(null).build(),
                 "Username must not be empty");
-        assertThrows(IllegalArgumentException.class, () -> new TarantoolAuthRequest.Builder().withAuthData(TarantoolAuthMechanism.CHAPSHA1, null).build(),
+        assertThrows(IllegalArgumentException.class,
+                () -> new TarantoolAuthRequest.Builder()
+                        .withAuthData(TarantoolAuthMechanism.CHAPSHA1, null).build(),
                 "Auth data must not be empty");
         TarantoolAuthRequest request = new TarantoolAuthRequest.Builder()
                 .withUsername("user")
-                .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1,2,3,4}).build();
+                .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1, 2, 3, 4}).build();
         MessagePacker packer = MessagePack.newDefaultBufferPacker();
         request.toMessagePack(packer, DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
         packer.flush();
@@ -46,6 +50,6 @@ class TarantoolAuthRequestTest {
         Value authArray = values.get(ValueFactory.newInteger(0x21));
         assertTrue(authArray.isArrayValue());
         assertEquals("chap-sha1", authArray.asArrayValue().get(0).asStringValue().asString());
-        assertArrayEquals(new byte[]{1,2,3,4}, authArray.asArrayValue().get(1).asBinaryValue().asByteArray());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, authArray.asArrayValue().get(1).asBinaryValue().asByteArray());
     }
 }

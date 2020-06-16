@@ -9,7 +9,9 @@ import java.io.IOException;
 import static io.tarantool.driver.protocol.TarantoolResponseBodyType.IPROTO_ERROR;
 
 /**
- * Base class for all kinds of responses received from Tarantool server. See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql">https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql</a>
+ * Base class for all kinds of responses received from Tarantool server.
+ * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql">
+ *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql</a>
  *
  * @author Alexey Kuzin
  */
@@ -35,13 +37,15 @@ public class TarantoolResponse {
                     case IPROTO_SQL:
                         throw new UnsupportedOperationException("Tarantool SQL is not supported yet");
                     case IPROTO_ERROR:
-                        throw new TarantoolProtocolException("Response body first key for IPROTO_OK code must be either IPROTO_DATA or IPROTO_SQL");
+                        throw new TarantoolProtocolException(
+                                "Response body first key for IPROTO_OK code must be either IPROTO_DATA or IPROTO_SQL");
                 }
             case IPROTO_NOT_OK:
                 switch (body.getResponseBodyType()) {
                     case IPROTO_DATA:
                     case IPROTO_SQL:
-                        throw new TarantoolProtocolException("Response body first key for code other from IPROTO_OK must be only IPROTO_ERROR");
+                        throw new TarantoolProtocolException(
+                                "Response body first key for code other from IPROTO_OK must be only IPROTO_ERROR");
                 }
         }
         this.responseType = responseType;

@@ -12,7 +12,7 @@ public class TarantoolSelectOptions {
     private static final long MAX_OFFSET = 0xff_ff_ff_ffL;
     private static final long MAX_LIMIT = 0xff_ff_ff_ffL;
 
-    private long offset = 0L;
+    private long offset;
     private long limit = MAX_LIMIT;
     //TODO query timeouts
 

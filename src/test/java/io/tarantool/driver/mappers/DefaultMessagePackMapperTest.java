@@ -29,16 +29,17 @@ class DefaultMessagePackMapperTest {
         assertEquals(ValueFactory.newFloat(111.0F), mapper.toValue(111.0F));
         assertEquals(ValueFactory.newFloat(100.500D), mapper.toValue(100.500D));
         assertEquals(ValueFactory.newString("hello"), mapper.toValue("hello"));
-        assertEquals(ValueFactory.newBinary(new byte[]{1,2,3,4}), mapper.toValue(new byte[]{1,2,3,4}));
+        assertEquals(ValueFactory.newBinary(new byte[]{1, 2, 3, 4}), mapper.toValue(new byte[]{1, 2, 3, 4}));
 
         // check default Object converters
         assertEquals(Boolean.TRUE, mapper.fromValue(ValueFactory.newBoolean(true)));
         assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111)));
         assertEquals(Long.valueOf(4_000_000_000_000L), mapper.fromValue(ValueFactory.newInteger(4_000_000_000_000L)));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0F)));
-        assertEquals(Double.valueOf(Float.MAX_VALUE * 10D), mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
+        assertEquals(Double.valueOf(Float.MAX_VALUE * 10D),
+                mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
         assertEquals("hello", mapper.fromValue(ValueFactory.newString("hello")));
-        assertArrayEquals(new byte[]{1,2,3,4}, mapper.fromValue(ValueFactory.newBinary(new byte[]{1,2,3,4})));
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, mapper.fromValue(ValueFactory.newBinary(new byte[]{1, 2, 3, 4})));
 
         // decimal
         assertEquals(BigDecimal.ONE, mapper.fromValue(mapper.toValue(BigDecimal.ONE)));
@@ -54,7 +55,8 @@ class DefaultMessagePackMapperTest {
 
         // check default complex type Value converters
         List<Object> testList = Arrays.asList("Hello", 111);
-        ArrayValue expectedValue = ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
+        ArrayValue expectedValue = ValueFactory.newArray(
+                ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         assertEquals(expectedValue, mapper.toValue(testList));
         Map<Integer, String> testMap = new HashMap<>();
         testMap.put(1, "Hello");
@@ -65,7 +67,8 @@ class DefaultMessagePackMapperTest {
         assertEquals(ValueFactory.newMap(expectedMap), mapper.toValue(testMap));
 
         // check default complex type Object converters
-        ArrayValue testValue = ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
+        ArrayValue testValue =
+                ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         List<Object> expectedList = Arrays.asList("Hello", 111);
         assertEquals(expectedList, mapper.fromValue(testValue));
         Map<Value, Value> testMap1 = new HashMap<>();
@@ -103,7 +106,7 @@ class DefaultMessagePackMapperTest {
         testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
         testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
         assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newMap(testValue)));
-        mapper.registerValueConverter(MapValue.class, CustomTuple.class, (v) -> {
+        mapper.registerValueConverter(MapValue.class, CustomTuple.class, v -> {
             CustomTuple tuple = new CustomTuple();
             Map<Value, Value> keyValue = v.map();
             tuple.setId(keyValue.get(ValueFactory.newString("id")).asIntegerValue().asInt());
@@ -118,7 +121,7 @@ class DefaultMessagePackMapperTest {
         DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
         CustomTuple testTuple = new CustomTuple(1234, "Test");
         assertThrows(MessagePackObjectMapperException.class, () -> mapper.toValue(testTuple));
-        mapper.registerObjectConverter(CustomTuple.class, MapValue.class, (t) -> {
+        mapper.registerObjectConverter(CustomTuple.class, MapValue.class, t -> {
             Map<Value, Value> keyValue = new HashMap<>();
             keyValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(t.getId()));
             keyValue.put(ValueFactory.newString("name"), ValueFactory.newString(t.getName()));
@@ -134,34 +137,38 @@ class DefaultMessagePackMapperTest {
         private int id;
         private String name;
 
-        public CustomTuple() {
+        CustomTuple() {
         }
 
-        public CustomTuple(int id, String name) {
+        CustomTuple(int id, String name) {
             this.id = id;
             this.name = name;
         }
 
-        public int getId() {
+        int getId() {
             return id;
         }
 
-        public void setId(int id) {
+        void setId(int id) {
             this.id = id;
         }
 
-        public String getName() {
+        String getName() {
             return name;
         }
 
-        public void setName(String name) {
+        void setName(String name) {
             this.name = name;
         }
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             CustomTuple that = (CustomTuple) o;
             return id == that.id &&
                     Objects.equals(name, that.name);
