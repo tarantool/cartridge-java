@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.util.Nullable;
 import org.msgpack.value.Value;
-import org.springframework.lang.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;

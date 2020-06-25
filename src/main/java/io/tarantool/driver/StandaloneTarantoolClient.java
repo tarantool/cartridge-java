@@ -19,7 +19,7 @@ import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.space.TarantoolSpace;
 import io.tarantool.driver.space.TarantoolSpaceOperations;
-import org.springframework.util.Assert;
+import io.tarantool.driver.util.Assert;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

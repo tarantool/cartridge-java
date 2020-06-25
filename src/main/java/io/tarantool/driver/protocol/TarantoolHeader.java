@@ -1,11 +1,11 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.util.Nullable;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.springframework.lang.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,7 @@
 /**
  * Contains tuple representation classes and helpers
  */
-@org.springframework.lang.NonNullApi
+@NonNullApi
 package io.tarantool.driver.api.tuple;
+
+import io.tarantool.driver.util.NonNullApi;

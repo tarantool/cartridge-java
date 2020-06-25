@@ -3,5 +3,7 @@
  *
  * @author Alexey Kuzin
  */
-@org.springframework.lang.NonNullApi
+@NonNullApi
 package io.tarantool.driver.protocol;
+
+import io.tarantool.driver.util.NonNullApi;

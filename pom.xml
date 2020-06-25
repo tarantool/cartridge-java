@@ -42,7 +42,8 @@
 
     <properties>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
-        <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml</checkstyle.suppressions>
+        <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml
+        </checkstyle.suppressions>
         <logging.config>${project.basedir}/src/test/resources/logback-test.xml</logging.config>
         <logging.logLevel>debug</logging.logLevel>
     </properties>
@@ -176,11 +177,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>5.2.6.RELEASE</version>
-        </dependency>
-        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.50.Final</version>
@@ -190,6 +186,14 @@
             <artifactId>msgpack-core</artifactId>
             <version>0.8.20</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -218,7 +222,8 @@
                                 <manifestEntries>
                                     <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
                                     <Bundle-Name>${project.name}</Bundle-Name>
-                                    <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source</Bundle-SymbolicName>
+                                    <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source
+                                    </Bundle-SymbolicName>
                                     <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                                 </manifestEntries>
                             </archive>

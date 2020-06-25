@@ -3,9 +3,9 @@ package io.tarantool.driver.api.tuple;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.util.Assert;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -1,6 +1,6 @@
 package io.tarantool.driver.api;
 
-import org.springframework.util.Assert;
+import io.tarantool.driver.util.Assert;
 
 /**
  * Represents common tuple selection options not related to the index and filtration, e.g. limit and offset

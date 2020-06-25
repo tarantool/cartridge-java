@@ -1,7 +1,8 @@
 package io.tarantool.driver.auth;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+
+import io.tarantool.driver.util.Assert;
+import io.tarantool.driver.util.StringUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

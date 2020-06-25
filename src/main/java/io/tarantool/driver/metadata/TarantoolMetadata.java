@@ -6,7 +6,7 @@ import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
-import org.springframework.util.Assert;
+import io.tarantool.driver.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;

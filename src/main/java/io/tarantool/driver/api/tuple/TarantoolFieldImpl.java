@@ -3,9 +3,9 @@ package io.tarantool.driver.api.tuple;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.util.Nullable;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.util.UUID;

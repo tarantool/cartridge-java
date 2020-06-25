@@ -1,6 +1,6 @@
 package io.tarantool.driver.auth;
 
-import org.springframework.util.Assert;
+import io.tarantool.driver.util.Assert;
 
 /**
  * Container for plain user and password data for authentication

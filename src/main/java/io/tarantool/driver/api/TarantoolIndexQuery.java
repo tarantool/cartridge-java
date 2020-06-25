@@ -1,7 +1,7 @@
 package io.tarantool.driver.api;
 
 import io.tarantool.driver.protocol.TarantoolIteratorType;
-import org.springframework.util.Assert;
+import io.tarantool.driver.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
