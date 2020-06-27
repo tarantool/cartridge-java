@@ -1,7 +1,7 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 
@@ -13,14 +13,14 @@ import java.util.Optional;
  * @author Alexey Kuzin
  */
 public class TarantoolIndexQueryFactory {
-    private TarantoolClient client;
+    private TarantoolConnection connection;
 
     /**
      * Basic constructor.
-     * @param client a configured {@link TarantoolClient} instance
+     * @param connection a connected {@link TarantoolConnection} instance
      */
-    public TarantoolIndexQueryFactory(TarantoolClient client) {
-        this.client = client;
+    public TarantoolIndexQueryFactory(TarantoolConnection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -39,7 +39,7 @@ public class TarantoolIndexQueryFactory {
      * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool server
      */
     public TarantoolIndexQuery byName(int spaceId, String indexName) throws TarantoolClientException {
-        Optional<TarantoolIndexMetadata> meta = client.metadata().getIndexForName(spaceId, indexName);
+        Optional<TarantoolIndexMetadata> meta = connection.metadata().getIndexForName(spaceId, indexName);
         if (!meta.isPresent()) {
             throw new TarantoolIndexNotFoundException(spaceId, indexName);
         }

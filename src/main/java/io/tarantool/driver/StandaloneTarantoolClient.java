@@ -1,34 +1,24 @@
 package io.tarantool.driver;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.tarantool.driver.core.TarantoolChannelInitializer;
-import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
-import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.metadata.TarantoolMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.core.RequestManager;
 import io.tarantool.driver.core.RequestFutureManager;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.space.TarantoolSpace;
-import io.tarantool.driver.space.TarantoolSpaceOperations;
-import org.springframework.util.Assert;
+import io.tarantool.driver.core.TarantoolChannelInitializer;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
@@ -47,13 +37,9 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
 
     private EventLoopGroup eventLoopGroup;
-    private List<ChannelFuture> channelFutures;
-    private TarantoolVersionHolder versionHolder;
-    private RequestFutureManager requestFutureManager;
     private TarantoolClientConfig config;
     private Bootstrap bootstrap;
-    private AtomicBoolean connected = new AtomicBoolean(false);
-    private RequestManager requestManager;
+    private ConcurrentHashMap<InetSocketAddress, TarantoolConnection> connections;
 
     /**
      * Create a client. Default credentials will be used.
@@ -84,18 +70,15 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config) {
         this.config = config;
-        eventLoopGroup = new NioEventLoopGroup();
-        channelFutures = new LinkedList<>();
-        versionHolder = new TarantoolVersionHolder();
-        requestFutureManager = new RequestFutureManager(config);
+        this.eventLoopGroup = new NioEventLoopGroup();
+        this.connections = new ConcurrentHashMap<>();
         this.bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout())
-                .handler(new TarantoolChannelInitializer(config, versionHolder, requestFutureManager)); // TODO +pool
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
     }
 
     /**
@@ -103,7 +86,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @return connected client
      * @throws TarantoolClientException when connection or request for metadata are failed
      */
-    public StandaloneTarantoolClient connect() throws TarantoolClientException {
+    public TarantoolConnection connect() throws TarantoolClientException {
         return connect(DEFAULT_HOST, DEFAULT_PORT);
     }
 
@@ -114,7 +97,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @see InetSocketAddress
      * @throws TarantoolClientException when connection or request for metadata are failed
      */
-    public StandaloneTarantoolClient connect(String host) throws TarantoolClientException {
+    public TarantoolConnection connect(String host) throws TarantoolClientException {
         return connect(host, DEFAULT_PORT);
     }
 
@@ -126,94 +109,46 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @see InetSocketAddress
      * @throws TarantoolClientException when connection or request for metadata are failed
      */
-    public StandaloneTarantoolClient connect(String host, int port) throws TarantoolClientException {
+    public TarantoolConnection connect(String host, int port) throws TarantoolClientException {
         return connect(new InetSocketAddress(host, port));
     }
 
     @Override
-    public StandaloneTarantoolClient connect(InetSocketAddress address) throws TarantoolClientException {
-        ChannelFuture future = bootstrap.clone().remoteAddress(address).connect();
-        channelFutures.add(future);
-        AtomicReference<TarantoolClientException> caughtException = new AtomicReference<>();
-        future.addListener(channelFuture -> {
-            if (channelFuture.isSuccess()) {
-                connected.set(true);
-                try {
-                    this.metadata().refresh();
-                } catch (TarantoolClientException e) {
-                    caughtException.set(e);
-                }
+    public TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException {
+        TarantoolConnection conn = connections.get(address); // TODO pool of multiple connections
+        if (conn == null || conn.isClosed()) {
+            CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
+            RequestFutureManager futureManager = new RequestFutureManager(config);
+            TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
+            ChannelFuture future = bootstrap.clone()
+                    .handler(new TarantoolChannelInitializer(config, futureManager, versionHolder, connectionFuture))
+                    .remoteAddress(address).connect();
+            try {
+                future.syncUninterruptibly();
+            } catch (Throwable e) {
+                throw new TarantoolClientException(e);
             }
-        });
-        future.awaitUninterruptibly();
-        if (caughtException.get() != null) {
-            throw caughtException.get();
+            if (!future.isSuccess()) {
+                throw new TarantoolClientException(
+                        "Failed to connect to the Tarantool server in %d milliseconds", config.getConnectTimeout());
+            }
+            try {
+                conn = connectionFuture
+                        .thenApply(ch -> new TarantoolConnectionImpl(config, versionHolder, futureManager, ch))
+                        .thenApplyAsync(c -> {
+                            try {
+                                c.metadata().refresh().get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+                                return c;
+                            } catch (Throwable e) {
+                                throw new CompletionException(e);
+                            }
+                        })
+                        .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new TarantoolClientException(e);
+            }
         }
-        this.requestManager = new RequestManager(future.channel(), requestFutureManager);
-        return this;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return connected.get();
-    }
-
-    @Override
-    public TarantoolVersion getVersion() throws TarantoolClientException {
-        if (!isConnected()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        return versionHolder.getVersion();
-    }
-
-    @Override
-    public TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException {
-        Assert.hasText(spaceName, "Space name must not be null or empty");
-
-        if (!isConnected()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        Optional<TarantoolSpaceMetadata> meta = this.metadata().getSpaceByName(spaceName);
-        if (!meta.isPresent()) {
-            throw new TarantoolSpaceNotFoundException(spaceName);
-        }
-        return new TarantoolSpace(meta.get().getSpaceId(), this, requestManager);
-    }
-
-    @Override
-    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
-        Assert.state(spaceId > 0, "Space ID must be greater than 0");
-
-        if (!isConnected()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        return new TarantoolSpace(spaceId, this, requestManager);
-    }
-
-    @Override
-    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        if (!isConnected()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        return new TarantoolMetadata(this);
-    }
-
-    @Override
-    public <T> CompletableFuture<T> call(String functionName, Object... arguments) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
-                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
-                                         MessagePackObjectMapper argumentsMapper,
-                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return conn;
     }
 
     @Override
@@ -222,15 +157,11 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         try {
-            for (ChannelFuture f: channelFutures) {
-                connected.compareAndSet(true, false);
-                f.channel().close();
-                f.channel().closeFuture().sync();
+            for (TarantoolConnection conn: connections.values()) {
+                conn.close();
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             try {
                 eventLoopGroup.shutdownGracefully().sync();

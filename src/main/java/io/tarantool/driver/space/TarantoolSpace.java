@@ -1,13 +1,14 @@
 package io.tarantool.driver.space;
 
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.RequestManager;
+import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
@@ -29,16 +30,18 @@ import java.util.concurrent.CompletableFuture;
 public class TarantoolSpace implements TarantoolSpaceOperations {
 
     private int spaceId;
-    private TarantoolClient client;
-    private RequestManager requestManager;
+    private TarantoolClientConfig config;
+    private TarantoolConnection connection;
+    private RequestFutureManager requestManager;
     private TarantoolIndexQueryFactory indexQueryFactory;
     private TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
-    public TarantoolSpace(int spaceId, TarantoolClient client, RequestManager requestManager) {
+    public TarantoolSpace(int spaceId, TarantoolClientConfig config, TarantoolConnection connection, RequestFutureManager requestManager) {
         this.spaceId = spaceId;
-        this.client = client;
+        this.config = config;
+        this.connection = connection;
         this.requestManager = requestManager;
-        this.indexQueryFactory = new TarantoolIndexQueryFactory(client);
+        this.indexQueryFactory = new TarantoolIndexQueryFactory(connection);
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
     }
 
@@ -56,7 +59,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
      * @throws TarantoolClientException if failed to retrieve the space information from Tarantool server
      */
     public String getName() throws TarantoolClientException {
-        Optional<TarantoolSpaceMetadata> meta = client.metadata().getSpaceById(spaceId);
+        Optional<TarantoolSpaceMetadata> meta = connection.metadata().getSpaceById(spaceId);
         if (!meta.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
@@ -91,7 +94,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                                      TarantoolSelectOptions options)
             throws TarantoolClientException {
         Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter =
-                client.getConfig().getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
+                config.getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
         if (!converter.isPresent()) {
             throw new TarantoolValueConverterNotFoundException(ArrayValue.class, TarantoolTuple.class);
         }
@@ -111,8 +114,16 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                     .withKeyValues(indexQuery.getKeyValues())
                     .withLimit(options.getLimit())
                     .withOffset(options.getOffset())
-                    .build(client.getConfig().getObjectMapper());
-            return requestManager.submitRequest(request, tarantoolResultMapperFactory.withConverter(tupleMapper));
+                    .build(config.getObjectMapper());
+            CompletableFuture<TarantoolResult<T>> requestFuture = requestManager.submitRequest(
+                    request, tarantoolResultMapperFactory.withConverter(tupleMapper));
+            connection.getChannel().writeAndFlush(request).addListener(f -> {
+                if (!f.isSuccess()) {
+                    requestFuture.completeExceptionally(
+                            new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
+                }
+            });
+            return requestFuture;
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

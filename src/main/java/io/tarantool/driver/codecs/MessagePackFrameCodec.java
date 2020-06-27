@@ -1,15 +1,18 @@
 package io.tarantool.driver.codecs;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolResponse;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -29,35 +32,39 @@ public class MessagePackFrameCodec extends ByteToMessageCodec<TarantoolRequest> 
     }
 
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, TarantoolRequest tarantoolRequest,
+    protected void encode(ChannelHandlerContext ctx, TarantoolRequest tarantoolRequest,
                           ByteBuf byteBuf) throws Exception {
-        if (byteBuf.writableBytes() >= MINIMAL_PACKET_SIZE) {
-            MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-            tarantoolRequest.toMessagePack(packer, mapper);
-            long outputSize = packer.getTotalWrittenBytes();
-            byte[] output = packer.toByteArray();
-            packer.close();
-            packer = MessagePack.newDefaultBufferPacker();
-            packer.packLong(outputSize);
-            byteBuf.writeBytes(packer.toByteArray());
-            packer.close();
-            byteBuf.writeBytes(output);
-        }
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+        tarantoolRequest.toMessagePack(packer, mapper);
+        long outputSize = packer.getTotalWrittenBytes();
+        byteBuf.capacity((int) (outputSize + MINIMAL_HEADER_SIZE));
+        byte[] output = packer.toByteArray();
+        packer.clear();
+        packer.packLong(outputSize);
+        byteBuf.writeBytes(packer.toByteArray());
+        packer.close();
+        byteBuf.writeBytes(output);
     }
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf,
-                          List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf byteBuf,
+                          List<Object> list) throws IOException, TarantoolProtocolException {
         if (byteBuf.readableBytes() > MINIMAL_HEADER_SIZE) {
             byteBuf.markReaderIndex();
-            MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(byteBuf.nioBuffer(0, MINIMAL_HEADER_SIZE));
-            int size = unpacker.unpackInt();
-            unpacker.close();
-            if (byteBuf.readableBytes() >= size) {
-                unpacker = MessagePack.newDefaultUnpacker(byteBuf.nioBuffer(0, size));
-                list.add(TarantoolResponse.fromMessagePack(unpacker));
-            } else {
-                byteBuf.resetReaderIndex();
+            try (ByteBufInputStream in = new ByteBufInputStream(byteBuf)) {
+                MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
+                int size = unpacker.unpackInt();
+                if (size > 0) {
+                    byteBuf.readerIndex(MINIMAL_HEADER_SIZE);
+                    if (byteBuf.readableBytes() >= size) {
+                        list.add(TarantoolResponse.fromMessagePack(unpacker));
+                        byteBuf.readerIndex(MINIMAL_HEADER_SIZE + size);
+                    } else {
+                        byteBuf.resetReaderIndex();
+                    }
+                }
+            } catch (IOException | TarantoolProtocolException e) {
+                throw e;
             }
         }
     }

@@ -58,11 +58,12 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
         try {
             MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
             byte[] auth = sha1.digest(credentials.getPassword().getBytes());
+            byte[] auth2 = sha1.digest(auth);
             byte[] salt = Base64.getDecoder().decode(serverAuthData);
             sha1.update(salt, 0, 20);
-            sha1.update(sha1.digest(auth));
+            sha1.update(auth2);
             byte[] scramble = sha1.digest();
-            for (int i = 0, e = 20; i < e; i++) {
+            for (int i = 0; i < 20; i++) {
                 auth[i] ^= scramble[i];
             }
             return auth;

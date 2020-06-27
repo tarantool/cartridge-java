@@ -5,8 +5,7 @@ import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 
 import java.io.IOException;
-
-import static io.tarantool.driver.protocol.TarantoolResponseBodyType.IPROTO_ERROR;
+import java.util.Iterator;
 
 /**
  * Base class for all kinds of responses received from Tarantool server.
@@ -15,7 +14,7 @@ import static io.tarantool.driver.protocol.TarantoolResponseBodyType.IPROTO_ERRO
  *
  * @author Alexey Kuzin
  */
-public class TarantoolResponse {
+public final class TarantoolResponse {
     private final Long syncId;
     private final Long code;
     private final TarantoolResponseBody body;
@@ -29,7 +28,7 @@ public class TarantoolResponse {
      * @throws TarantoolProtocolException if the passed body is invalid
      * @see MapValue
      */
-    public TarantoolResponse(Long syncId, Long code, TarantoolResponseBody body) throws TarantoolProtocolException {
+    private TarantoolResponse(Long syncId, Long code, TarantoolResponseBody body) throws TarantoolProtocolException {
         TarantoolResponseType responseType = TarantoolResponseType.fromCode(code);
         switch (responseType) {
             case IPROTO_OK:
@@ -40,6 +39,7 @@ public class TarantoolResponse {
                         throw new TarantoolProtocolException(
                                 "Response body first key for IPROTO_OK code must be either IPROTO_DATA or IPROTO_SQL");
                 }
+                break;
             case IPROTO_NOT_OK:
                 switch (body.getResponseBodyType()) {
                     case IPROTO_DATA:
@@ -102,15 +102,18 @@ public class TarantoolResponse {
                 throw new TarantoolProtocolException("Response body must be of MP_MAP type");
             }
             MapValue values = bodyMap.asMapValue();
-            for (Value key: values.keySet()) {
+            TarantoolResponseBody responseBody;
+            Iterator<Value> it = values.keySet().iterator();
+            if (it.hasNext()) {
+                Value key = it.next();
                 if (!key.isIntegerValue()) {
                     throw new TarantoolProtocolException("Response body first key must be of MP_INT type");
                 }
-                TarantoolResponseBody responseBody = new TarantoolResponseBody(
-                        key.asIntegerValue().asInt(), values.map().get(key));
-                return new TarantoolResponse(header.getSync(), header.getCode(), responseBody);
+                responseBody = new NotEmptyTarantoolResponseBody(key.asIntegerValue().asInt(), values.map().get(key));
+            } else {
+                responseBody = new EmptyTarantoolResponseBody();
             }
-            throw new TarantoolProtocolException("Response body must not be empty");
+            return new TarantoolResponse(header.getSync(), header.getCode(), responseBody);
         } catch (IOException e) {
             throw new TarantoolProtocolException(e);
         }

@@ -2,6 +2,7 @@ package io.tarantool.driver.core;
 
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,27 +34,28 @@ public class RequestFutureManager {
     /**
      * Submit a request ID for tracking. Provides a {@link CompletableFuture} for tracking the request completion.
      * The request timeout is taken from the client configuration
-     * @param requestId ID of a request to Tarantool server (sync ID)
+     * @param request request to Tarantool server
      * @param resultMapper result message entity-to-object mapper
      * @param <T> target response body type
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    public <T> CompletableFuture<T> addRequest(Long requestId, MessagePackValueMapper resultMapper) {
-        return addRequest(requestId, config.getRequestTimeout(), resultMapper);
+    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
+        return submitRequest(request, config.getRequestTimeout(), resultMapper);
     }
 
     /**
      * Submit a request ID for tracking. Provides a {@link CompletableFuture} for tracking the request completion.
      * The request timeout is taken from the client configuration
-     * @param requestId ID of a request to Tarantool server (sync ID)
+     * @param request request to Tarantool server
      * @param requestTimeout timeout after which the request will be automatically failed, milliseconds
      * @param resultMapper result message entity-to-object mapper
      * @param <T> target response body type
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    public <T> CompletableFuture<T> addRequest(Long requestId, int requestTimeout,
-                                               MessagePackValueMapper resultMapper) {
+    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request, int requestTimeout,
+                                                  MessagePackValueMapper resultMapper) {
         CompletableFuture<T> requestFuture = new CompletableFuture<>();
+        long requestId = request.getHeader().getSync();
         requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
         requestFutures.put(requestId, new TarantoolRequestMetadata(requestFuture, resultMapper));
         timeoutScheduler.schedule(() -> {

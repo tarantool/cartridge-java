@@ -27,12 +27,7 @@ public class TarantoolResultMapperFactory {
      * @return TarantoolResultMapper instance
      */
     public <T> MessagePackValueMapper withConverter(ValueConverter<ArrayValue, T> valueConverter) {
-        try {
-            return withConverter(MapperReflectionUtils.getConverterTargetType(valueConverter), valueConverter);
-        } catch (ConverterParameterTypeNotFoundException e) {
-            throw new RuntimeException("Failed to determine the target parameter type of the generic interface, " +
-                    "try to use the method withConverter(tupleClass, valueConverter) for registering the converter");
-        }
+        return withConverter(MapperReflectionUtils.getConverterTargetType(valueConverter), valueConverter);
     }
 
     /**
@@ -46,14 +41,14 @@ public class TarantoolResultMapperFactory {
     public <T> MessagePackValueMapper withConverter(Class<T> tupleClass, ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = mapperCache.get(tupleClass);
         if (mapper == null) {
-            mapper = createMapper(tupleClass, valueConverter);
+            mapper = createMapper(valueConverter);
             mapperCache.put(tupleClass, mapper);
         }
         return mapper;
     }
 
-    private <T> MessagePackValueMapper createMapper(Class<T> tupleClass, ValueConverter<ArrayValue, T> valueConverter) {
+    private <T> MessagePackValueMapper createMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
-        return new TarantoolResultMapper<>(mapper, tupleClass, valueConverter);
+        return new TarantoolResultMapper<>(mapper, valueConverter);
     }
 }

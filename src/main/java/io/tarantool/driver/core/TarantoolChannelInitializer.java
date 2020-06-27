@@ -1,19 +1,23 @@
 package io.tarantool.driver.core;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolConnection;
+import io.tarantool.driver.TarantoolConnectionImpl;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.codecs.MessagePackFrameCodec;
 import io.tarantool.driver.handlers.TarantoolAuthenticationHandler;
-import io.tarantool.driver.handlers.TarantoolErrorResultHandler;
-import io.tarantool.driver.handlers.TarantoolOkResultHandler;
+import io.tarantool.driver.handlers.TarantoolAuthenticationResponseHandler;
 import io.tarantool.driver.handlers.TarantoolRequestHandler;
 import io.tarantool.driver.handlers.TarantoolResponseHandler;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The main channel pipeline initializer.
@@ -28,35 +32,37 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
 
     private TarantoolClientConfig config;
     private TarantoolVersionHolder versionHolder;
+    private CompletableFuture<Channel> connectionFuture;
     private RequestFutureManager futureManager;
 
-    public TarantoolChannelInitializer(TarantoolClientConfig config, TarantoolVersionHolder versionHolder,
-                                       RequestFutureManager futureManager) {
+    public TarantoolChannelInitializer(TarantoolClientConfig config,
+                                       RequestFutureManager futureManager,
+                                       TarantoolVersionHolder versionHolder,
+                                       CompletableFuture<Channel> connectionFuture) {
         this.config = config;
         this.versionHolder = versionHolder;
+        this.connectionFuture = connectionFuture;
         this.futureManager = futureManager;
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        ctx.pipeline().addFirst("TarantoolAuthenticationHandler", new TarantoolAuthenticationHandler<>(
-                versionHolder,
-                (SimpleTarantoolCredentials) config.getCredentials(),
-                new ChapSha1TarantoolAuthenticator()));
-        ctx.fireChannelActive();
     }
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         socketChannel.pipeline()
+                // greeting and authentication (will be removed after successful authentication)
+                .addLast("TarantoolAuthenticationHandler", new TarantoolAuthenticationHandler<>(
+                        connectionFuture,
+                        versionHolder,
+                        (SimpleTarantoolCredentials) config.getCredentials(),
+                        new ChapSha1TarantoolAuthenticator()))
+                // frame decoder
                 .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(
                         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper()))
                 // outbound
                 .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
+                // inbound auth response handler
+                .addLast("TarantoolAuthenticationResponseHandler", new TarantoolAuthenticationResponseHandler(
+                        connectionFuture))
                 // inbound
-                .addLast("TarantoolResponseHandler", new TarantoolResponseHandler())
-                .addLast("TarantoolErrorResultHandler", new TarantoolErrorResultHandler(futureManager))
-                .addLast("TarantoolOkResultHandler", new TarantoolOkResultHandler(futureManager));
+                .addLast("TarantoolResponseHandler", new TarantoolResponseHandler(futureManager));
     }
 }

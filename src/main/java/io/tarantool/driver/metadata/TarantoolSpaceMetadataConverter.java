@@ -25,8 +25,8 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
         Iterator<Value> it = value.iterator();
         TarantoolSpaceMetadata metadata = new TarantoolSpaceMetadata();
         metadata.setSpaceId(mapper.fromValue(it.next().asIntegerValue()));
-        metadata.setSpaceName(mapper.fromValue(it.next().asStringValue()));
         metadata.setOwnerId(mapper.fromValue(it.next().asIntegerValue()));
+        metadata.setSpaceName(mapper.fromValue(it.next().asStringValue()));
         return metadata;
     }
 }

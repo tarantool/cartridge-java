@@ -1,7 +1,8 @@
 package io.tarantool.driver.metadata;
 
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
@@ -23,7 +24,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     private static final int VSPACE_SPACE_ID = 281; // System space with all space descriptions (_vspace)
     private static final int VINDEX_SPACE_ID = 289; // System space with all index descriptions (_vindex)
 
-    private final TarantoolClient client;
+    private final TarantoolConnection connection;
     private final TarantoolSpaceMetadataConverter spaceMetadataMapper;
     private final TarantoolIndexMetadataConverter indexMetadataMapper;
 
@@ -33,20 +34,21 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
 
     /**
      * Basic constructor.
-     * @param client configured {@link TarantoolClient} instance
+     * @param config client configuration
+     * @param connection configured {@link TarantoolConnection} instance
      */
-    public TarantoolMetadata(TarantoolClient client) {
-        this.client = client;
-        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(client.getConfig().getValueMapper());
-        this.indexMetadataMapper = new TarantoolIndexMetadataConverter(client.getConfig().getValueMapper());
+    public TarantoolMetadata(TarantoolClientConfig config, TarantoolConnection connection) {
+        this.connection = connection;
+        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(config.getValueMapper());
+        this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getValueMapper());
     }
 
     @Override
-    public void refresh() throws TarantoolClientException {
+    public CompletableFuture<Void> refresh() throws TarantoolClientException {
         TarantoolIndexQuery query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
                 .withIteratorType(TarantoolIteratorType.ITER_ALL);
         TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
-        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = client.space(VSPACE_SPACE_ID)
+        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = connection.space(VSPACE_SPACE_ID)
                 .select(query, options, spaceMetadataMapper);
         spaces.thenApply(result -> {
                         spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
@@ -59,7 +61,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                         spaceMetadataById.put(meta.getSpaceId(), meta);
                     }));
 
-        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = client.space(VINDEX_SPACE_ID)
+        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = connection.space(VINDEX_SPACE_ID)
                 .select(query, options, indexMetadataMapper);
         indexes.thenApply(result -> {
                     indexMetadata.clear();
@@ -70,12 +72,8 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                         indexMetadata.putIfAbsent(meta.getSpaceId(), new HashMap<>());
                         indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
                     }));
-        try {
-            spaces.get();
-            indexes.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new TarantoolClientException(e);
-        }
+
+        return CompletableFuture.allOf(spaces, indexes);
     }
 
     @Override

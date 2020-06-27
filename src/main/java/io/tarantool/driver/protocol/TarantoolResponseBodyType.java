@@ -4,6 +4,7 @@ package io.tarantool.driver.protocol;
  * Incapsulates Tarantool response body types
  */
 public enum TarantoolResponseBodyType {
+    EMPTY,
     IPROTO_DATA,
     IPROTO_ERROR,
     IPROTO_SQL;

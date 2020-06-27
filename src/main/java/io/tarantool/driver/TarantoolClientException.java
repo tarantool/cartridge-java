@@ -11,4 +11,12 @@ public class TarantoolClientException extends Throwable {
     public TarantoolClientException(String message) {
         super(message);
     }
+
+    public TarantoolClientException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TarantoolClientException(String format, Object... args) {
+        super(String.format(format, args));
+    }
 }

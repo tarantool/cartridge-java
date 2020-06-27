@@ -3,6 +3,7 @@ package io.tarantool.driver.metadata;
 import io.tarantool.driver.TarantoolClientException;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tarantool metadata operations interface (get space by name, get index by name, etc.)
@@ -12,9 +13,10 @@ import java.util.Optional;
 public interface TarantoolMetadataOperations {
     /**
      * Refresh metadata cache
+     * @return future with empty value for tracking the refresh progress
      * @throws TarantoolClientException if fetching data failed with error
      */
-    void refresh() throws TarantoolClientException;
+    CompletableFuture<Void> refresh() throws TarantoolClientException;
 
     /**
      * Get metadata for the space specified by name

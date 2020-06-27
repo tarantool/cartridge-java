@@ -15,10 +15,9 @@ final class MapperReflectionUtils {
      * @param converter a converter, must have at least one generic interface with 2 type parameters
      * @param <T> the target converter type
      * @return the converter class
-     * @throws ConverterParameterTypeNotFoundException if the target parameter type cannot be determined
      */
     @SuppressWarnings("unchecked")
-    static <T> Class<T> getConverterTargetType(Object converter) throws ConverterParameterTypeNotFoundException {
+    static <T> Class<T> getConverterTargetType(Object converter) {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         if (genericInterfaces.length < 1) {
             throw new RuntimeException(
@@ -30,9 +29,14 @@ final class MapperReflectionUtils {
                     String.format("The passed converter object of type %s has more than one generic interfaces, " +
                             "unable to determine the target", converter.getClass()));
         }
+        if (!(genericInterfaces[0] instanceof ParameterizedType)) {
+            throw new RuntimeException(
+                    String.format("The passed converter object of type %s interfacetype is not a parameterized type",
+                        converter.getClass()));
+        }
         try {
-            Class<?> interfaceClass = Class.forName(genericInterfaces[0].getTypeName());
-            return getInterfaceParameterClass(converter, interfaceClass, 1);
+            return (Class<T>) Class.forName(
+                    ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments()[1].getTypeName());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
