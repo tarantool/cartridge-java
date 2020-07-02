@@ -144,6 +144,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
                             }
                         })
                         .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+                connections.put(address, conn);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 throw new TarantoolClientException(e);
             }
