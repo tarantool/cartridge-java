@@ -23,19 +23,21 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     private List<TarantoolField> fields;
 
+    private final MessagePackValueMapper valueMapper;
+
     /**
      * Basic constructor.
      * @param value messagePack entity
      * @param mapper for converting the entity into the Java objects
      */
-    @SuppressWarnings("unchecked")
     public TarantoolTupleImpl(ArrayValue value, MessagePackValueMapper mapper) {
+        this.valueMapper = mapper;
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue: value) {
             if (fieldValue.isNilValue()) {
                 fields.add(new TarantoolNullField());
             } else {
-                fields.add(new TarantoolFieldImpl(fieldValue, mapper));
+                fields.add(new TarantoolFieldImpl<>(fieldValue, valueMapper));
             }
         }
     }
@@ -74,5 +76,26 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(fields);
+    }
+
+    @Override
+    public <V extends Value> void setField(int fieldPosition, V value) throws TarantoolValueConverterNotFoundException {
+        if (fieldPosition < 0) {
+            throw new IndexOutOfBoundsException("Index: " + fieldPosition);
+        }
+
+        TarantoolField tarantoolField = value.isNilValue() ? new TarantoolNullField() : new TarantoolFieldImpl<>(value, valueMapper);
+
+        if (fields.size() < fieldPosition) {
+            for (int i = fields.size(); i < fieldPosition; i++) {
+                fields.add(new TarantoolNullField());
+            }
+        }
+
+        if (fields.size() == fieldPosition) {
+            fields.add(fieldPosition, tarantoolField);
+        } else {
+            fields.set(fieldPosition, tarantoolField);
+        }
     }
 }
