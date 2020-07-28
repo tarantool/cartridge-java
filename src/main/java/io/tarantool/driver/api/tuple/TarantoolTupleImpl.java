@@ -2,6 +2,7 @@ package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapperException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -79,12 +80,38 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public int size() {
+        return this.fields.size();
+    }
+
+    @Override
     public <V extends Value> void setField(int fieldPosition, V value) throws TarantoolValueConverterNotFoundException {
         if (fieldPosition < 0) {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
         TarantoolField tarantoolField = value.isNilValue() ? new TarantoolNullField() : new TarantoolFieldImpl<>(value, valueMapper);
+
+        if (fields.size() < fieldPosition) {
+            for (int i = fields.size(); i < fieldPosition; i++) {
+                fields.add(new TarantoolNullField());
+            }
+        }
+
+        if (fields.size() == fieldPosition) {
+            fields.add(fieldPosition, tarantoolField);
+        } else {
+            fields.set(fieldPosition, tarantoolField);
+        }
+    }
+
+    @Override
+    public void setField(int fieldPosition, Object value) throws MessagePackObjectMapperException {
+        if (fieldPosition < 0) {
+            throw new IndexOutOfBoundsException("Index: " + fieldPosition);
+        }
+
+        TarantoolField tarantoolField = new TarantoolFieldImpl<>(value, (MessagePackObjectMapper) valueMapper);
 
         if (fields.size() < fieldPosition) {
             for (int i = fields.size(); i < fieldPosition; i++) {

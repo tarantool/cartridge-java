@@ -27,6 +27,7 @@ public class TarantoolFieldImpl<V extends Value> implements TarantoolField {
 
     <O> TarantoolFieldImpl(@Nullable O value, MessagePackObjectMapper mapper) {
         this.entity = value == null ? null : mapper.toValue(value);
+        this.valueMapper = (MessagePackValueMapper) mapper;
     }
 
     @Override

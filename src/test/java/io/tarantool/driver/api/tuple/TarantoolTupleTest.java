@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackObjectMapperException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;
@@ -9,6 +10,9 @@ import org.msgpack.value.impl.ImmutableBooleanValueImpl;
 import org.msgpack.value.impl.ImmutableDoubleValueImpl;
 import org.msgpack.value.impl.ImmutableLongValueImpl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,18 +45,38 @@ public class TarantoolTupleTest {
         assertTrue(tarantoolTuple.getField(2).isPresent());
         assertTrue(tarantoolTuple.getField(2).get().getBoolean());
 
-        //add new value with index more than current fields size
-        tarantoolTuple.setField(4, new ImmutableDoubleValueImpl(4.4));
+        //add new object value
+        tarantoolTuple.setField(3, 3);
         assertTrue(tarantoolTuple.getField(3).isPresent());
-        assertNull(tarantoolTuple.getField(3).get().getInteger());
+        assertEquals(3, tarantoolTuple.getField(3).get().getInteger());
 
+        //replace object value
+        tarantoolTuple.setField(3, 15);
+        assertTrue(tarantoolTuple.getField(3).isPresent());
+        assertEquals(15, tarantoolTuple.getField(3).get().getInteger());
+
+        //add new value with index more than current fields size
+        tarantoolTuple.setField(5, new ImmutableDoubleValueImpl(4.4));
+        tarantoolTuple.setField(7, Arrays.asList("Apple", "Ananas"));
         assertTrue(tarantoolTuple.getField(4).isPresent());
-        assertEquals(4.4, tarantoolTuple.getField(4).get().getDouble());
+        assertNull(tarantoolTuple.getField(4).get().getInteger());
 
-        assertFalse(tarantoolTuple.getField(5).isPresent());
-        assertFalse(tarantoolTuple.getField(6).isPresent());
+        assertTrue(tarantoolTuple.getField(6).isPresent());
+        assertNull(tarantoolTuple.getField(6).get().getInteger());
+
+        assertEquals(8, tarantoolTuple.size());
+
+        assertEquals(4.4, tarantoolTuple.getField(5).get().getDouble());
+        List<String> expectedList = new ArrayList<>();
+        expectedList.add("Apple");
+        expectedList.add("Ananas");
+        assertEquals(expectedList, tarantoolTuple.getField(7).get().getValue(List.class));
 
         //add value for negative index
         assertThrows(IndexOutOfBoundsException.class, () -> tarantoolTuple.setField(-2, ImmutableBooleanValueImpl.FALSE));
+        assertThrows(IndexOutOfBoundsException.class, () -> tarantoolTuple.setField(-1, 0));
+
+        //trying to add complex object
+        assertThrows(MessagePackObjectMapperException.class, () -> tarantoolTuple.setField(9, mapper));
     }
 }
