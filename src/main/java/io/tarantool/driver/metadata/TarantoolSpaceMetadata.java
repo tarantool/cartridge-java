@@ -1,5 +1,7 @@
 package io.tarantool.driver.metadata;
 
+import java.util.LinkedHashMap;
+
 /**
  * Represents Tarantool space metadata (space ID, space name, etc.)
  *
@@ -10,8 +12,8 @@ public class TarantoolSpaceMetadata {
     private int spaceId;
     private int ownerId;
     private String spaceName;
+    private LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata;
     //TODO private TarantoolEngine engine;
-    //TODO format
 
     /**
      * Basic constructor.
@@ -53,6 +55,14 @@ public class TarantoolSpaceMetadata {
 
     void setSpaceName(String spaceName) {
         this.spaceName = spaceName;
+    }
+
+    public LinkedHashMap<String, TarantoolFieldFormatMetadata> getSpaceFormatMetadata() {
+        return spaceFormatMetadata;
+    }
+
+    void setSpaceFormatMetadata(LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata) {
+        this.spaceFormatMetadata = spaceFormatMetadata;
     }
 
     /*
