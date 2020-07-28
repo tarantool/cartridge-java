@@ -1,7 +1,9 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
+import io.tarantool.driver.mappers.MessagePackObjectMapperException;
 import io.tarantool.driver.protocol.Packable;
+import org.msgpack.value.Value;
 
 import java.util.Optional;
 
@@ -27,4 +29,25 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * @throws TarantoolValueConverterNotFoundException if the converter for the target type is not found
      */
     <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass) throws TarantoolValueConverterNotFoundException;
+
+    /**
+     * Returns the number of fields in this tuple
+     *
+     * @return the number of fields in this tuple
+     */
+    int size();
+
+    /**
+     * Set a tuple field by its position
+     * @param fieldPosition the field position from the the tuple start, starting from 0
+     * @param value new field value
+     */
+    <V extends Value> void setField(int fieldPosition, V value) throws TarantoolValueConverterNotFoundException;
+
+    /**
+     * Set a tuple field by its position
+     * @param fieldPosition the field position from the the tuple start, starting from 0
+     * @param value new field value
+     */
+     void setField(int fieldPosition, Object value) throws MessagePackObjectMapperException;
 }
