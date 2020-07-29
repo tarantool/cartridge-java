@@ -21,6 +21,7 @@ import java.util.function.Consumer;
  * Basic Tarantool tuple implementation
  *
  * @author Alexey Kuzin
+ * @author Sergey Volgin
  */
 public class TarantoolTupleImpl implements TarantoolTuple {
 
