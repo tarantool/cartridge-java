@@ -65,6 +65,20 @@ public class TarantoolSpaceMetadata {
         this.spaceFormatMetadata = spaceFormatMetadata;
     }
 
+    /**
+     * Get field position in space by name starts with 0, or -1 if this field not found in format metadata
+     *
+     * @return field position by name starts with 0, or -1 if this field not found in format metadata
+     */
+    public int getFieldPositionByName(String fieldName) {
+        int fieldPosition = -1;
+        if (spaceFormatMetadata.containsKey(fieldName)) {
+            fieldPosition = spaceFormatMetadata.get(fieldName).getFieldPosition();
+        }
+
+        return  fieldPosition;
+    }
+
     /*
       - [281, 1, '_vspace', 'sysview', 0, {}, [{'name': 'id', 'type': 'unsigned'}, {'name': 'owner',
         'type': 'unsigned'}, {'name': 'name', 'type': 'string'}, {'name': 'engine',

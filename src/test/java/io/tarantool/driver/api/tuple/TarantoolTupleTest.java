@@ -94,9 +94,9 @@ public class TarantoolTupleTest {
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
 
         LinkedHashMap<String, TarantoolFieldFormatMetadata> formatMetadata = new LinkedHashMap<>();
-        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned"));
-        formatMetadata.put("book_name", new TarantoolFieldFormatMetadata("book_name", "string"));
-        formatMetadata.put("author", new TarantoolFieldFormatMetadata("author", "string"));
+        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned", 0));
+        formatMetadata.put("book_name", new TarantoolFieldFormatMetadata("book_name", "string", 1));
+        formatMetadata.put("author", new TarantoolFieldFormatMetadata("author", "string", 2));
 
         setFormatMethod.invoke(spaceMetadata, formatMetadata);
 

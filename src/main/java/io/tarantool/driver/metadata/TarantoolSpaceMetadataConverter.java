@@ -42,15 +42,18 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
 
         LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata = new LinkedHashMap<>();
 
+        int fieldPosition = 0;
         for (Value fieldValueMetadata : spaceMetadataValue.asArrayValue()) {
             Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
             spaceFormatMetadata.put(
                     fieldMap.get(FORMAT_FIELD_NAME).toString(),
                     new TarantoolFieldFormatMetadata(
                             fieldMap.get(FORMAT_FIELD_NAME).toString(),
-                            fieldMap.get(FORMAT_FIELD_TYPE).toString()
+                            fieldMap.get(FORMAT_FIELD_TYPE).toString(),
+                            fieldPosition
                     )
             );
+            fieldPosition++;
         }
 
         metadata.setSpaceFormatMetadata(spaceFormatMetadata);

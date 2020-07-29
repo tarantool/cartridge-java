@@ -4,7 +4,6 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.metadata.TarantoolFieldFormatMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -14,7 +13,6 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -51,7 +49,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         this.spaceMetadata = spaceMetadata;
         this.valueMapper = mapper;
         this.fields = new ArrayList<>(value.size());
-        for (Value fieldValue: value) {
+        for (Value fieldValue : value) {
             if (fieldValue.isNilValue()) {
                 fields.add(new TarantoolNullField());
             } else {
@@ -72,7 +70,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public Optional<TarantoolField> getField(String fieldName) {
-        int fieldPosition = getFieldIndexByName(fieldName);
+        int fieldPosition = getFieldPositionByName(fieldName);
         if (fieldPosition < 0) {
             fieldPosition = Integer.MAX_VALUE;
         }
@@ -114,7 +112,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public <V extends Value> void setField(int fieldPosition, V value) {
         if (fieldPosition < 0 ||
-                (spaceMetadata != null && fieldPosition > spaceMetadata.getSpaceFormatMetadata().size() - 1)) {
+                (spaceMetadata != null && fieldPosition >= spaceMetadata.getSpaceFormatMetadata().size())) {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
@@ -135,13 +133,13 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public void setField(int fieldPosition, Object value) {
-        Value messagePackValue =  (value == null) ? ValueFactory.newNil() : ((MessagePackObjectMapper) valueMapper).toValue(value);
+        Value messagePackValue = (value == null) ? ValueFactory.newNil() : ((MessagePackObjectMapper) valueMapper).toValue(value);
         setField(fieldPosition, messagePackValue);
     }
 
     @Override
     public void setField(String fieldName, Object value) {
-        int fieldPosition = getFieldIndexByName(fieldName);
+        int fieldPosition = getFieldPositionByName(fieldName);
         if (fieldPosition < 0) {
             throw new TarantoolSpaceFieldNotFoundException(fieldName);
         }
@@ -149,19 +147,12 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         setField(fieldPosition, value);
     }
 
-    protected int getFieldIndexByName(String fieldName) {
+    protected int getFieldPositionByName(String fieldName) {
         int fieldPosition = -1;
-
-        if (spaceMetadata != null && spaceMetadata.getSpaceFormatMetadata().containsKey(fieldName)) {
-            for (Map.Entry<String, TarantoolFieldFormatMetadata> entry : spaceMetadata.getSpaceFormatMetadata().entrySet()) {
-                fieldPosition++;
-                String key = entry.getKey();
-                if (key.equals(fieldName)) {
-                    break;
-                }
-            }
+        if (spaceMetadata != null) {
+            fieldPosition = spaceMetadata.getFieldPositionByName(fieldName);
         }
 
-        return  fieldPosition;
+        return fieldPosition;
     }
 }
