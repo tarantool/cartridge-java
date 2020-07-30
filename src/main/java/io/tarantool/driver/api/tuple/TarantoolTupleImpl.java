@@ -2,7 +2,7 @@ package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
@@ -29,27 +29,25 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     private List<TarantoolField> fields;
 
-    private DefaultMessagePackMapperFactory mapperFactory;
+    private MessagePackMapper mapper;
 
     /**
-     * TarantoolTupleImpl constructor
-     *
-     * @param value messagePack entity
-     * @param mapperFactory for getting convectors between entity and Java objects
+     * Constructor. Assumes that Tarantool space metadata is empty.
+     * @param value serialized Tarantool tuple
+     * @param mapper provides conversion between MessagePack values and Java objects
      */
-    public TarantoolTupleImpl(ArrayValue value, DefaultMessagePackMapperFactory mapperFactory) {
-        this(value, mapperFactory, null);
+    public TarantoolTupleImpl(ArrayValue value, MessagePackMapper mapper) {
+        this(value, mapper, null);
     }
 
     /**
-     * Basic constructor.
-     *
-     * @param value messagePack entity
-     * @param mapperFactory for getting convectors between entity and Java objects
-     * @param spaceMetadata tarantool space metadata {@link TarantoolSpaceMetadata}
+     * Basic constructor. Used for converting Tarantool server responses into Java entities.
+     * @param value serialized Tarantool tuple
+     * @param mapper provides conversion between MessagePack values and Java objects
+     * @param spaceMetadata provides field names and other metadata
      */
-    public TarantoolTupleImpl(ArrayValue value,  DefaultMessagePackMapperFactory mapperFactory, TarantoolSpaceMetadata spaceMetadata) {
-        this.mapperFactory = mapperFactory;
+    public TarantoolTupleImpl(ArrayValue value, MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
+        this.mapper = mapper;
         this.spaceMetadata = spaceMetadata;
 
         this.fields = new ArrayList<>(value.size());
@@ -57,7 +55,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             if (fieldValue.isNilValue()) {
                 fields.add(new TarantoolNullField());
             } else {
-                fields.add(new TarantoolFieldImpl<>(fieldValue, mapperFactory));
+                fields.add(new TarantoolFieldImpl<>(fieldValue, mapper));
             }
         }
     }
@@ -83,7 +81,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass) throws TarantoolValueConverterNotFoundException {
+    public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass)
+            throws TarantoolValueConverterNotFoundException {
         Optional<TarantoolField> field = getField(fieldPosition);
         return field.isPresent() ? Optional.ofNullable(field.get().getValue(objectClass)) : Optional.empty();
     }
@@ -120,7 +119,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
-        TarantoolField tarantoolField = value.isNilValue() ? new TarantoolNullField() : new TarantoolFieldImpl<>(value, mapperFactory);
+        TarantoolField tarantoolField = value.isNilValue() ?
+                new TarantoolNullField() : new TarantoolFieldImpl<>(value, mapper);
 
         if (fields.size() < fieldPosition) {
             for (int i = fields.size(); i < fieldPosition; i++) {
@@ -137,8 +137,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public void setField(int fieldPosition, Object value) {
-        Value messagePackValue = (value == null) ? ValueFactory.newNil() :
-                mapperFactory.defaultComplexTypesMapper().toValue(value);
+        Value messagePackValue = (value == null) ? ValueFactory.newNil() : mapper.toValue(value);
         setField(fieldPosition, messagePackValue);
     }
 

@@ -2,6 +2,7 @@ package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolFieldFormatMetadata;
@@ -31,7 +32,7 @@ public class TarantoolTupleTest {
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         ImmutableArrayValue values = ValueFactory.newArray(new ImmutableDoubleValueImpl(1.0), new ImmutableLongValueImpl(50L));
 
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory);
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
 
         assertTrue(tarantoolTuple.getField(0).isPresent());
         assertEquals(1.0, tarantoolTuple.getField(0).get().getDouble());
@@ -102,8 +103,9 @@ public class TarantoolTupleTest {
 
         ImmutableArrayValue values = ValueFactory.newArray();
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
-        TarantoolTuple tupleWithoutSpaceMetadata = new TarantoolTupleImpl(values, mapperFactory);
-        TarantoolTuple tupleWithSpaceMetadata = new TarantoolTupleImpl(values, mapperFactory, spaceMetadata);
+        MessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
+        TarantoolTuple tupleWithoutSpaceMetadata = new TarantoolTupleImpl(values, mapper);
+        TarantoolTuple tupleWithSpaceMetadata = new TarantoolTupleImpl(values, mapper, spaceMetadata);
 
         assertThrows(TarantoolSpaceFieldNotFoundException.class, () -> tupleWithoutSpaceMetadata.setField("book_name", "Book 1"));
 

@@ -19,7 +19,7 @@ import static io.tarantool.driver.mappers.MapperReflectionUtils.getInterfacePara
  *
  * @author Alexey Kuzin
  */
-public class DefaultMessagePackMapper implements MessagePackObjectMapper, MessagePackValueMapper {
+public class DefaultMessagePackMapper implements MessagePackMapper {
 
     private Map<String, List<ValueConverter<? extends Value, ?>>> valueConverters;
     private Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
