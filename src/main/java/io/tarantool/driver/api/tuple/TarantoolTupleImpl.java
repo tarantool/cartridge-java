@@ -2,6 +2,7 @@ package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
@@ -31,24 +32,28 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     private final MessagePackValueMapper valueMapper;
 
+    private final MessagePackObjectMapper objectMapper;
+
     /**
      * @param value messagePack entity
-     * @param mapper for converting the entity into the Java objects
+     * @param mapperFactory for getting convectors between entity and Java objects
      */
-    public TarantoolTupleImpl(ArrayValue value, MessagePackValueMapper mapper) {
-        this(value, mapper, null);
+    public TarantoolTupleImpl(ArrayValue value, DefaultMessagePackMapperFactory mapperFactory) {
+        this(value, mapperFactory, null);
     }
 
     /**
      * Basic constructor.
      *
      * @param value messagePack entity
-     * @param mapper for converting the entity into the Java objects
+     * @param mapperFactory for getting convectors between entity and Java objects
      * @param spaceMetadata tarantool space metadata {@link TarantoolSpaceMetadata}
      */
-    public TarantoolTupleImpl(ArrayValue value, MessagePackValueMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolTupleImpl(ArrayValue value, DefaultMessagePackMapperFactory mapperFactory, TarantoolSpaceMetadata spaceMetadata) {
         this.spaceMetadata = spaceMetadata;
-        this.valueMapper = mapper;
+        this.valueMapper = mapperFactory.defaultComplexTypesMapper();
+        this.objectMapper = mapperFactory.defaultComplexTypesMapper();
+
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue : value) {
             if (fieldValue.isNilValue()) {
@@ -134,7 +139,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public void setField(int fieldPosition, Object value) {
-        Value messagePackValue = (value == null) ? ValueFactory.newNil() : ((MessagePackObjectMapper) valueMapper).toValue(value);
+        Value messagePackValue = (value == null) ? ValueFactory.newNil() : objectMapper.toValue(value);
         setField(fieldPosition, messagePackValue);
     }
 
