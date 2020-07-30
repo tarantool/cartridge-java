@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 import org.springframework.lang.Nullable;
@@ -18,16 +18,17 @@ import java.util.UUID;
 public class TarantoolFieldImpl<V extends Value> implements TarantoolField {
 
     private V entity;
-    private MessagePackValueMapper valueMapper;
 
-    TarantoolFieldImpl(V entity, MessagePackValueMapper valueMapper) {
+    private DefaultMessagePackMapperFactory mapperFactory;
+
+    TarantoolFieldImpl(V entity, DefaultMessagePackMapperFactory mapperFactory) {
+        this.mapperFactory = mapperFactory;
         this.entity = entity;
-        this.valueMapper = valueMapper;
     }
 
-    <O> TarantoolFieldImpl(@Nullable O value, MessagePackObjectMapper mapper) {
-        this.entity = value == null ? null : mapper.toValue(value);
-        this.valueMapper = (MessagePackValueMapper) mapper;
+    <O> TarantoolFieldImpl(@Nullable O value, DefaultMessagePackMapperFactory mapperFactory) {
+        this.mapperFactory = mapperFactory;
+        this.entity = value == null ? null : this.mapperFactory.defaultComplexTypesMapper().toValue(value);
     }
 
     @Override
@@ -38,7 +39,8 @@ public class TarantoolFieldImpl<V extends Value> implements TarantoolField {
     @Override
     @SuppressWarnings("unchecked")
     public <O> O getValue(Class<O> targetClass) throws TarantoolValueConverterNotFoundException {
-        return valueMapper.getValueConverter((Class<V>) entity.getClass(), targetClass)
+        return this.mapperFactory.defaultComplexTypesMapper()
+                .getValueConverter((Class<V>) entity.getClass(), targetClass)
                 .orElseThrow(() -> new TarantoolValueConverterNotFoundException(entity.getClass(), targetClass))
                 .fromValue(entity);
     }

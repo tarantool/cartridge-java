@@ -4,7 +4,6 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -30,11 +29,11 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     private List<TarantoolField> fields;
 
-    private final MessagePackValueMapper valueMapper;
-
-    private final MessagePackObjectMapper objectMapper;
+    private DefaultMessagePackMapperFactory mapperFactory;
 
     /**
+     * TarantoolTupleImpl constructor
+     *
      * @param value messagePack entity
      * @param mapperFactory for getting convectors between entity and Java objects
      */
@@ -49,17 +48,16 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param mapperFactory for getting convectors between entity and Java objects
      * @param spaceMetadata tarantool space metadata {@link TarantoolSpaceMetadata}
      */
-    public TarantoolTupleImpl(ArrayValue value, DefaultMessagePackMapperFactory mapperFactory, TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolTupleImpl(ArrayValue value,  DefaultMessagePackMapperFactory mapperFactory, TarantoolSpaceMetadata spaceMetadata) {
+        this.mapperFactory = mapperFactory;
         this.spaceMetadata = spaceMetadata;
-        this.valueMapper = mapperFactory.defaultComplexTypesMapper();
-        this.objectMapper = mapperFactory.defaultComplexTypesMapper();
 
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue : value) {
             if (fieldValue.isNilValue()) {
                 fields.add(new TarantoolNullField());
             } else {
-                fields.add(new TarantoolFieldImpl<>(fieldValue, valueMapper));
+                fields.add(new TarantoolFieldImpl<>(fieldValue, mapperFactory));
             }
         }
     }
@@ -122,7 +120,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
-        TarantoolField tarantoolField = value.isNilValue() ? new TarantoolNullField() : new TarantoolFieldImpl<>(value, valueMapper);
+        TarantoolField tarantoolField = value.isNilValue() ? new TarantoolNullField() : new TarantoolFieldImpl<>(value, mapperFactory);
 
         if (fields.size() < fieldPosition) {
             for (int i = fields.size(); i < fieldPosition; i++) {
@@ -139,7 +137,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public void setField(int fieldPosition, Object value) {
-        Value messagePackValue = (value == null) ? ValueFactory.newNil() : objectMapper.toValue(value);
+        Value messagePackValue = (value == null) ? ValueFactory.newNil() :
+                mapperFactory.defaultComplexTypesMapper().toValue(value);
         setField(fieldPosition, messagePackValue);
     }
 

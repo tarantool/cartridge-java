@@ -28,9 +28,10 @@ public class TarantoolTupleTest {
 
     @Test
     void modifyTuple() {
+        DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         ImmutableArrayValue values = ValueFactory.newArray(new ImmutableDoubleValueImpl(1.0), new ImmutableLongValueImpl(50L));
 
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, DefaultMessagePackMapperFactory.getInstance());
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory);
 
         assertTrue(tarantoolTuple.getField(0).isPresent());
         assertEquals(1.0, tarantoolTuple.getField(0).get().getDouble());
@@ -100,9 +101,9 @@ public class TarantoolTupleTest {
         setFormatMethod.invoke(spaceMetadata, formatMetadata);
 
         ImmutableArrayValue values = ValueFactory.newArray();
-
-        TarantoolTuple tupleWithoutSpaceMetadata = new TarantoolTupleImpl(values, DefaultMessagePackMapperFactory.getInstance());
-        TarantoolTuple tupleWithSpaceMetadata = new TarantoolTupleImpl(values, DefaultMessagePackMapperFactory.getInstance(), spaceMetadata);
+        DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+        TarantoolTuple tupleWithoutSpaceMetadata = new TarantoolTupleImpl(values, mapperFactory);
+        TarantoolTuple tupleWithSpaceMetadata = new TarantoolTupleImpl(values, mapperFactory, spaceMetadata);
 
         assertThrows(TarantoolSpaceFieldNotFoundException.class, () -> tupleWithoutSpaceMetadata.setField("book_name", "Book 1"));
 
