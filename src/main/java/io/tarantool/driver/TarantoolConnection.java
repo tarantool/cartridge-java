@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

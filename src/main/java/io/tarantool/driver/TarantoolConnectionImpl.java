@@ -8,8 +8,8 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.space.TarantoolSpace;
-import io.tarantool.driver.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.TarantoolSpace;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import org.springframework.util.Assert;
 
 import java.util.List;

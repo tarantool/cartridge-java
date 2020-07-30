@@ -4,4 +4,4 @@
  * @author Alexey Kuzin
  */
 @org.springframework.lang.NonNullApi
-package io.tarantool.driver.space;
+package io.tarantool.driver.api.space;
