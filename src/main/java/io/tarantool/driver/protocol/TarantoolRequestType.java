@@ -13,6 +13,7 @@ public enum TarantoolRequestType {
     IPROTO_UPDATE(0x04),
     IPROTO_DELETE(0x05),
     IPROTO_AUTH(0x07),
+    IPROTO_UPSERT(0x09),
     IPROTO_CALL(0x0a);
 
     private long code;

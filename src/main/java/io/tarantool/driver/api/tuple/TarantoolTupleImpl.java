@@ -81,6 +81,11 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public List<TarantoolField> getFields() {
+        return fields;
+    }
+
+    @Override
     public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass)
             throws TarantoolValueConverterNotFoundException {
         Optional<TarantoolField> field = getField(fieldPosition);
