@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
+import io.netty.handler.codec.DecoderException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
@@ -58,12 +59,13 @@ public class MessagePackFrameCodec extends ByteToMessageCodec<TarantoolRequest> 
                     byteBuf.readerIndex(MINIMAL_HEADER_SIZE);
                     if (byteBuf.readableBytes() >= size) {
                         list.add(TarantoolResponse.fromMessagePack(unpacker));
-                        byteBuf.readerIndex(MINIMAL_HEADER_SIZE + size);
+                        byteBuf.readerIndex(byteBuf.readerIndex() + size);
+                        byteBuf.discardReadBytes();
                     } else {
                         byteBuf.resetReaderIndex();
                     }
                 }
-            } catch (IOException | TarantoolProtocolException e) {
+            } catch (IOException | TarantoolProtocolException | DecoderException e) {
                 throw e;
             }
         }
