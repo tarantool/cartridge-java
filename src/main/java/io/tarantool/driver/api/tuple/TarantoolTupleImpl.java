@@ -32,7 +32,18 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     private MessagePackMapper mapper;
 
     /**
-     * Constructor. Assumes that Tarantool space metadata is empty.
+     * Construct an instance of {@link TarantoolTuple } from list of object
+     *
+     * @param value list of tuple data
+     * @param mapper provides conversion between MessagePack values and Java objects
+     */
+    public TarantoolTupleImpl(List<Object> value, MessagePackMapper mapper) {
+        this(mapper.toValue(value), mapper, null);
+    }
+
+    /**
+     * Construct an instance of {@link TarantoolTuple }
+     *
      * @param value serialized Tarantool tuple
      * @param mapper provides conversion between MessagePack values and Java objects
      */
@@ -78,6 +89,11 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         }
 
         return getField(fieldPosition);
+    }
+
+    @Override
+    public List<TarantoolField> getFields() {
+        return fields;
     }
 
     @Override

@@ -17,6 +17,74 @@ import java.util.concurrent.CompletableFuture;
  * @author Alexey Kuzin
  */
 public interface TarantoolSpaceOperations {
+
+    /**
+     * Delete a tuple
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                         values for matching
+     * @return a future that will contain removed tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery) throws TarantoolClientException;
+
+    /**
+     * Delete a tuple
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                         values for matching
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                          an object of type {@code T}
+     * @param <T> result type
+     * @return a future that will contain removed tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery, ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
+     *
+     * @param tuple new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple) throws TarantoolClientException;
+
+    /**
+     * Insert a tuple into the space or replace an existing one.
+     *
+     * @param tuple new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
+
+    /**
+     * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
+     *
+     * @param tuple new data
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                    an object of type {@code T}
+     * @param <T> result tuple type
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
+    /**
+     * Insert a tuple into the space or replace an existing one.
+     *
+     * @param tuple new data
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                    an object of type {@code T}
+     * @param <T> result tuple type
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
+
     /**
      * Select all tuples using the default (primary) index.
      * Warning: this operation can result in significant amount of data transferred over network and saved in
@@ -80,8 +148,4 @@ public interface TarantoolSpaceOperations {
     <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
-
-    CompletableFuture<TarantoolResult> update(); // TODO update parameters
-    CompletableFuture<TarantoolResult> replace(); // TODO replace parameters
-    CompletableFuture<TarantoolResult> delete(); // TODO delete parameters
 }

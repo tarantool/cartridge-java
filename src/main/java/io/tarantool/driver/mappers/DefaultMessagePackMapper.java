@@ -123,7 +123,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O> object type
      * @see ValueConverter
      */
-    @SuppressWarnings("unchecked")
     public <V extends Value, O> void registerValueConverter(Class<V> valueClass, ValueConverter<V, O> converter) {
         try {
             Class<O> objectClass = getInterfaceParameterClass(converter, ValueConverter.class, 1);
@@ -148,13 +147,15 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * Check if the specified converter can convert to the specified object type
      */
     private boolean checkTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
+        boolean isAssignable;
         try {
-            return valueConvertersByTarget.get(targetClass.getTypeName()) == converter ||
-                    getInterfaceParameterClass(converter, converter.getClass(), 1)
-                            .isAssignableFrom(targetClass);
+            isAssignable = getInterfaceParameterClass(converter, converter.getClass(), 1)
+                    .isAssignableFrom(targetClass);
         } catch (ConverterParameterTypeNotFoundException e) {
-            return false;
+            isAssignable = false;
         }
+
+        return isAssignable || valueConvertersByTarget.get(targetClass.getTypeName()) == converter;
     }
 
     @Override

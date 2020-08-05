@@ -4,6 +4,7 @@ import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.protocol.Packable;
 import org.msgpack.value.Value;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +27,13 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * @return field or empty optional if the field not exist in space
      */
     Optional<TarantoolField> getField(String fieldName);
+
+    /**
+     * Get all tuple fields as list
+     *
+     * @return all type fields as list
+     */
+    List<TarantoolField> getFields();
 
     /**
      * Get a tuple field value by its position specifying the target value type

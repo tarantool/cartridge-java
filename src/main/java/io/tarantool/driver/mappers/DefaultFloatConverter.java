@@ -1,7 +1,6 @@
 package io.tarantool.driver.mappers;
 
 import org.msgpack.value.FloatValue;
-import org.msgpack.value.IntegerValue;
 import org.msgpack.value.ValueFactory;
 
 /**

@@ -15,13 +15,13 @@ import java.util.Map;
 /**
  * Select request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>,
+ *     <a href="https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select">
+ *         https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select</a>
+ *
  */
 public final class TarantoolSelectRequest extends TarantoolRequest {
 
-    /**
-     * (non-Javadoc)
-     */
     private TarantoolSelectRequest(TarantoolRequestBody body) {
         super(TarantoolRequestType.IPROTO_SELECT, body);
     }
@@ -31,62 +31,98 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
      */
     public static class Builder {
 
-        Map<Integer, Object> selectMap;
+        Map<Integer, Object> bodyMap;
 
         public Builder() {
-            this.selectMap = new HashMap<>(6, 1);
+            this.bodyMap = new HashMap<>(6, 1);
         }
 
+        /**
+         * Specify tarantool space ID for operation
+         * @param spaceId tarantool space ID
+         * @return builder
+         */
         public Builder withSpaceId(int spaceId) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_SPACE_ID.getCode(), spaceId);
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_SPACE_ID.getCode(), spaceId);
             return this;
         }
 
+        /**
+         * Specify tarantool index ID for operation
+         * @param indexId tarantool index ID
+         * @return builder
+         */
         public Builder withIndexId(int indexId) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode(), indexId);
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode(), indexId);
             return this;
         }
 
+        /**
+         * Specify the maximum number of tuples returned by the request.
+         * @param limit number
+         * @return builder
+         */
         public Builder withLimit(long limit) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_LIMIT.getCode(), limit);
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_LIMIT.getCode(), limit);
             return this;
         }
 
+        /**
+         * Specify the offset of the first tuple returned by the request
+         * @param offset number
+         * @return builder
+         */
         public Builder withOffset(long offset) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_OFFSET.getCode(), offset);
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_OFFSET.getCode(), offset);
             return this;
         }
 
+        /**
+         * Specify iterator type
+         * @param iteratorType iterator type
+         * @return builder
+         */
         public Builder withIteratorType(TarantoolIteratorType iteratorType) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_ITERATOR.getCode(), iteratorType.getCode());
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_ITERATOR.getCode(), iteratorType.getCode());
             return this;
         }
 
+        /**
+         * Specify key values to be matched against the index key
+         * @param keyValues key value
+         * @return builder
+         */
         public Builder withKeyValues(List<?> keyValues) {
-            this.selectMap.put(TarantoolRequestFieldType.IPROTO_KEY.getCode(), keyValues);
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_KEY.getCode(), keyValues);
             return this;
         }
 
+        /**
+         * Build a {@link TarantoolSelectRequest} instance
+         * @param mapper configured {@link MessagePackObjectMapper} instance
+         * @return instance of select request
+         * @throws TarantoolProtocolException if some required params is missing
+         */
         public TarantoolSelectRequest build(MessagePackObjectMapper mapper) throws TarantoolProtocolException {
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_SPACE_ID.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_SPACE_ID.getCode())) {
                 throw new TarantoolProtocolException("Space ID must be specified in the select request");
             }
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode())) {
                 throw new TarantoolProtocolException("Index ID must be specified in the select request");
             }
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_OFFSET.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_OFFSET.getCode())) {
                 throw new TarantoolProtocolException("Offset must be specified in the select request");
             }
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_LIMIT.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_LIMIT.getCode())) {
                 throw new TarantoolProtocolException("Limit must be specified in the select request");
             }
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_ITERATOR.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_ITERATOR.getCode())) {
                 throw new TarantoolProtocolException("Iterator type must be specified in the select request");
             }
-            if (!selectMap.containsKey(TarantoolRequestFieldType.IPROTO_KEY.getCode())) {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_KEY.getCode())) {
                 throw new TarantoolProtocolException("Key values must be specified in the select request");
             }
-            return new TarantoolSelectRequest(new TarantoolRequestBody(selectMap, mapper));
+            return new TarantoolSelectRequest(new TarantoolRequestBody(bodyMap, mapper));
         }
     }
 }

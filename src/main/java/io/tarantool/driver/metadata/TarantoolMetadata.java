@@ -39,8 +39,8 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
      */
     public TarantoolMetadata(TarantoolClientConfig config, TarantoolConnection connection) {
         this.connection = connection;
-        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(config.getValueMapper());
-        this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getValueMapper());
+        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(config.getMessagePackMapper());
+        this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getMessagePackMapper());
     }
 
     @Override

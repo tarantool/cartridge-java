@@ -1,8 +1,6 @@
 package io.tarantool.driver.mappers;
 
 import org.msgpack.value.MapValue;
-import org.msgpack.value.Value;
-import org.msgpack.value.ValueFactory;
 
 import java.util.Map;
 import java.util.stream.Collectors;
