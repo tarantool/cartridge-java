@@ -16,17 +16,15 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.msgpack.value.ImmutableArrayValue;
-import org.msgpack.value.ValueFactory;
-import org.msgpack.value.impl.ImmutableLongValueImpl;
-import org.msgpack.value.impl.ImmutableStringValueImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -86,6 +84,7 @@ public class StandaloneTarantoolClientIT {
         log.info("Retrieved ID from metadata for space '{}': {}", spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
     }
 
+    //TODO: reset space before each test
     @Test
     public void insertAndSelectRequests() throws TarantoolClientException, Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
@@ -94,7 +93,7 @@ public class StandaloneTarantoolClientIT {
         TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
 
         int countBeforeInsert = selectResult.size();
-        assertTrue(countBeforeInsert >= 3);
+        assertTrue(countBeforeInsert >= 2);
 
         TarantoolTuple tuple = selectResult.get(0);
         assertEquals(1, tuple.getField(0).get().getInteger());
@@ -103,12 +102,7 @@ public class StandaloneTarantoolClientIT {
         assertEquals(1605, tuple.getField(3).get().getInteger());
 
         //insert new data
-        ImmutableArrayValue values = ValueFactory.newArray(
-                new ImmutableLongValueImpl(4L),
-                new ImmutableStringValueImpl("Nineteen Eighty-Four"),
-                new ImmutableStringValueImpl("George Orwell"),
-                new ImmutableLongValueImpl(1984L)
-        );
+        List<Object> values = Arrays.asList(4, "Nineteen Eighty-Four", "George Orwell", 1984);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
         TarantoolResult<TarantoolTuple> insertTuples = testSpace.insert(tarantoolTuple).get();
 
@@ -137,12 +131,7 @@ public class StandaloneTarantoolClientIT {
     public void replaceRequest() throws TarantoolClientException, Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
 
-        ImmutableArrayValue arrayValue = ValueFactory.newArray(
-                new ImmutableLongValueImpl(200L),
-                new ImmutableStringValueImpl("Harry Potter and the Philosopher's Stone"),
-                new ImmutableStringValueImpl("J. K. Rowling"),
-                new ImmutableLongValueImpl(1997L)
-        );
+        List<Object> arrayValue = Arrays.asList(200, "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(arrayValue, mapperFactory.defaultComplexTypesMapper());
         TarantoolResult<TarantoolTuple> insertTuples = testSpace.replace(tarantoolTuple).get();
 
@@ -153,12 +142,7 @@ public class StandaloneTarantoolClientIT {
         //repeat insert same data
         assertDoesNotThrow(() -> testSpace.replace(tarantoolTuple).get());
 
-        ImmutableArrayValue newValues = ValueFactory.newArray(
-                new ImmutableLongValueImpl(200L),
-                new ImmutableStringValueImpl("Jane Eyre"),
-                new ImmutableStringValueImpl("Charlotte Brontë"),
-                new ImmutableLongValueImpl(1847L)
-        );
+        List<Object> newValues = Arrays.asList(200L, "Jane Eyre", "Charlotte Brontë", 1847);
         TarantoolTuple newTupleWithSameId = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
 
         testSpace.replace(newTupleWithSameId);

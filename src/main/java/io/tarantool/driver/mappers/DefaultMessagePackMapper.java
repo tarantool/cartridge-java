@@ -124,7 +124,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O> object type
      * @see ValueConverter
      */
-    @SuppressWarnings("unchecked")
     public <V extends Value, O> void registerValueConverter(Class<V> valueClass, ValueConverter<V, O> converter) {
         try {
             Class<O> objectClass = getInterfaceParameterClass(converter, ValueConverter.class, 1);
