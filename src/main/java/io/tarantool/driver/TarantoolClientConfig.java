@@ -100,7 +100,7 @@ public class TarantoolClientConfig {
     }
 
     /**
-     * Get mapper between Java objects and MessagePack entities
+     * Set mapper between Java objects and MessagePack entities
      * @param messagePackMapper {@link MessagePackMapper} instance
      */
     public void setMessagePackMapper(MessagePackMapper messagePackMapper) {
