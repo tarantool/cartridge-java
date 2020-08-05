@@ -45,7 +45,6 @@ public class DefaultMessagePackMapperFactory {
                 .withDefaultArrayValueConverter()
                 .withDefaultMapObjectConverter()
                 .withDefaultMapValueConverter()
-                .withDefaultArrayValueToTarantoolTupleConverter()
                 .build();
     }
 

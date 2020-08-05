@@ -10,7 +10,6 @@ import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
-import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
@@ -73,7 +72,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery)
             throws TarantoolClientException {
-        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultArrayValueToTupleConverter();
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return delete(indexQuery, converter);
     }
 
@@ -85,7 +84,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
-                    .build(config.getObjectMapper());
+                    .build(config.getMessagePackMapper());
 
             return sendRequest(request, tupleMapper);
         } catch (TarantoolProtocolException e) {
@@ -96,7 +95,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple)
             throws TarantoolClientException {
-        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultArrayValueToTupleConverter();
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return insert(tuple, converter);
     }
 
@@ -107,7 +106,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
                     .withSpaceId(spaceId)
                     .withTuple(tuple)
-                    .build(config.getObjectMapper());
+                    .build(config.getMessagePackMapper());
 
             return sendRequest(request, tupleMapper);
         } catch (TarantoolProtocolException e) {
@@ -117,7 +116,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException {
-        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultArrayValueToTupleConverter();
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return replace(tuple, converter);
     }
 
@@ -128,7 +127,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
                     .withSpaceId(spaceId)
                     .withTuple(tuple)
-                    .build(config.getObjectMapper());
+                    .build(config.getMessagePackMapper());
 
             return sendRequest(request, tupleMapper);
         } catch (TarantoolProtocolException e) {
@@ -163,7 +162,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
                                                                      TarantoolSelectOptions options)
             throws TarantoolClientException {
-        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultArrayValueToTupleConverter();
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return select(indexQuery, options, converter);
     }
 
@@ -180,7 +179,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                     .withKeyValues(indexQuery.getKeyValues())
                     .withLimit(options.getLimit())
                     .withOffset(options.getOffset())
-                    .build(config.getObjectMapper());
+                    .build(config.getMessagePackMapper());
 
             return sendRequest(request, tupleMapper);
         } catch (TarantoolProtocolException e) {
@@ -202,13 +201,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         return requestFuture;
     }
 
-    private ValueConverter<ArrayValue, TarantoolTuple> getDefaultArrayValueToTupleConverter() {
-        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter =
-                config.getValueMapper().getValueConverter(ArrayValue.class, TarantoolTuple.class);
-        if (!converter.isPresent()) {
-            throw new TarantoolValueConverterNotFoundException(ArrayValue.class, TarantoolTuple.class);
-        }
-        return converter.get();
+    private ValueConverter<ArrayValue, TarantoolTuple> getDefaultTarantoolTupleValueConverter() {
+        return tarantoolResultMapperFactory.getDefaultTupleValueConverter(config.getMessagePackMapper());
     }
 
     @Override

@@ -1,6 +1,5 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import org.msgpack.value.Value;
 import org.springframework.lang.Nullable;
 
@@ -148,13 +147,15 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * Check if the specified converter can convert to the specified object type
      */
     private boolean checkTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
+        boolean isAssignable;
         try {
-            return valueConvertersByTarget.get(targetClass.getTypeName()) == converter ||
-                    getInterfaceParameterClass(converter, converter.getClass(), 1)
-                            .isAssignableFrom(targetClass);
+            isAssignable = getInterfaceParameterClass(converter, converter.getClass(), 1)
+                    .isAssignableFrom(targetClass);
         } catch (ConverterParameterTypeNotFoundException e) {
-            return false;
+            isAssignable = false;
         }
+
+        return isAssignable || valueConvertersByTarget.get(targetClass.getTypeName()) == converter;
     }
 
     @Override
@@ -286,15 +287,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
          */
         public Builder withDefaultListObjectConverter() {
             mapper.registerObjectConverter(new DefaultListObjectConverter(mapper));
-            return this;
-        }
-
-        /**
-         * Configure the mapper with default {@code MP_ARRAY} entity to {@link TarantoolTuple} converter
-         * @return builder
-         */
-        public Builder withDefaultArrayValueToTarantoolTupleConverter() {
-            mapper.registerValueConverter(new DefaultArrayValueToTarantoolTupleConverter(mapper));
             return this;
         }
 

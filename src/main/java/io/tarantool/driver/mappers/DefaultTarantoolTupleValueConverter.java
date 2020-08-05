@@ -9,11 +9,11 @@ import org.msgpack.value.ArrayValue;
  *
  * @author Sergey Volgin
  */
-public class DefaultArrayValueToTarantoolTupleConverter  implements ValueConverter<ArrayValue, TarantoolTuple> {
+public class DefaultTarantoolTupleValueConverter implements ValueConverter<ArrayValue, TarantoolTuple> {
 
     private MessagePackMapper mapper;
 
-    public DefaultArrayValueToTarantoolTupleConverter(MessagePackMapper mapper) {
+    public DefaultTarantoolTupleValueConverter(MessagePackMapper mapper) {
         this.mapper = mapper;
     }
 
