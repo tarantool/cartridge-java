@@ -23,6 +23,7 @@ public class TarantoolResultMapperFactory {
 
     /**
      * Get default {@link TarantoolTuple} converter
+     * @param mapper configured {@link MessagePackMapper} instance
      * @return default DefaultTarantoolTupleValueConverter instance
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(MessagePackMapper mapper) {

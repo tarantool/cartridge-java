@@ -44,27 +44,33 @@ public interface TarantoolConnection extends AutoCloseable {
      * Execute a function defined on Tarantool instance
      * TODO example function call
      * @param functionName function name, must not be null or empty
-     * @param arguments the list of function arguments. The object mapper specified in the client configuration
-     *        will be used for arguments conversion to MessagePack entities
-     * @param <T> the desired function call result type. The object mapper specified in the client configuration
-     *        will be used for result value conversion from MessagePack entities
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    <T> CompletableFuture<T> call(String functionName, Object... arguments) throws TarantoolClientException;
+    CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException;
 
     /**
      * Execute a function defined on Tarantool instance
      * @param functionName function name, must not be null or empty
      * @param arguments the list of function arguments. The object mapper specified in the client configuration
-     *        will be used for arguments conversion to MessagePack entities
-     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
-     * @param <T> the desired function call result type. The object mapper specified in the client configuration
-     * will be used for result value conversion
+     *                  will be used for arguments conversion to MessagePack entities
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper)
+    CompletableFuture<List<Object>> call(String functionName, List<Object> arguments) throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @param functionName function name, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments, MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
     /**
@@ -79,7 +85,7 @@ public interface TarantoolConnection extends AutoCloseable {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    <T> CompletableFuture<T> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper,
+    <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments, MessagePackObjectMapper argumentsMapper,
                                   MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
