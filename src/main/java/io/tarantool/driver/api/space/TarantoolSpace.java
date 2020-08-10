@@ -39,7 +39,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     private TarantoolIndexQueryFactory indexQueryFactory;
     private TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
-    public TarantoolSpace(int spaceId, TarantoolClientConfig config, TarantoolConnection connection, RequestFutureManager requestManager) {
+    public TarantoolSpace(int spaceId, TarantoolClientConfig config, TarantoolConnection connection,
+                          RequestFutureManager requestManager) {
         this.spaceId = spaceId;
         this.config = config;
         this.connection = connection;
@@ -77,7 +78,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery, ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery,
+                                                            ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
             TarantoolDeleteRequest request = new TarantoolDeleteRequest.Builder()
@@ -100,7 +102,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
+                                                            ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
@@ -115,13 +118,15 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException {
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple)
+            throws TarantoolClientException {
         ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return replace(tuple, converter);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
+                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
@@ -187,7 +192,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> sendRequest(TarantoolRequest request, ValueConverter<ArrayValue, T> tupleMapper) {
+    private <T> CompletableFuture<TarantoolResult<T>> sendRequest(TarantoolRequest request,
+                                                                  ValueConverter<ArrayValue, T> tupleMapper) {
         CompletableFuture<TarantoolResult<T>> requestFuture = requestManager.submitRequest(
                 request, tarantoolResultMapperFactory.withConverter(tupleMapper));
 

@@ -11,6 +11,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
@@ -74,14 +75,16 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void connectAndCheckMetadata() throws TarantoolClientException {
-        assertTrue(connection.metadata().getSpaceByName("_space").isPresent(), "Failed to get space metadata");
+        Optional<TarantoolSpaceMetadata> spaceHolder = connection.metadata().getSpaceByName("_space");
+        assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
         log.info("Retrieved ID from metadata for space '_space': {}",
-                connection.metadata().getSpaceByName("_space").get().getSpaceId());
+                spaceHolder.get().getSpaceId());
 
         Optional<TarantoolSpaceMetadata> spaceMetadata = connection.metadata().getSpaceByName(TEST_SPACE_NAME);
         assertTrue(spaceMetadata.isPresent(), String.format("Failed to get '%s' metadata", TEST_SPACE_NAME));
         assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
-        log.info("Retrieved ID from metadata for space '{}': {}", spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
+        log.info("Retrieved ID from metadata for space '{}': {}",
+                spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
     }
 
     //TODO: reset space before each test
@@ -116,11 +119,14 @@ public class StandaloneTarantoolClientIT {
         "Duplicate key exists in unique index 'primary' in space 'test_space'");
 
         //repeat select request
-        TarantoolResult<TarantoolTuple> selectAfterInsertResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectAfterInsertResult =
+                testSpace.select(query, new TarantoolSelectOptions()).get();
 
         assertEquals(countBeforeInsert + 1, selectAfterInsertResult.size());
 
-        TarantoolTuple newTuple = selectAfterInsertResult.stream().filter(e -> e.getField(0).get().getInteger() == 4).findFirst().get();
+        TarantoolTuple newTuple = selectAfterInsertResult.stream()
+                .filter(e -> e.getField(0).get().getInteger() == 4)
+                .findFirst().get();
         assertEquals(4, newTuple.getField(0).get().getInteger());
         assertEquals("Nineteen Eighty-Four", newTuple.getField(1).get().getString());
         assertEquals("George Orwell", newTuple.getField(2).get().getString());
@@ -132,7 +138,8 @@ public class StandaloneTarantoolClientIT {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
 
         List<Object> arrayValue = Arrays.asList(200, "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(arrayValue, mapperFactory.defaultComplexTypesMapper());
+        DefaultMessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(arrayValue, mapper);
         TarantoolResult<TarantoolTuple> insertTuples = testSpace.replace(tarantoolTuple).get();
 
         assertEquals(1, insertTuples.size());
@@ -143,14 +150,15 @@ public class StandaloneTarantoolClientIT {
         assertDoesNotThrow(() -> testSpace.replace(tarantoolTuple).get());
 
         List<Object> newValues = Arrays.asList(200L, "Jane Eyre", "Charlotte Brontë", 1847);
-        TarantoolTuple newTupleWithSameId = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
+        TarantoolTuple newTupleWithSameId = new TarantoolTupleImpl(newValues, mapper);
 
         testSpace.replace(newTupleWithSameId);
 
         //select request
         TarantoolIndexQuery query = new TarantoolIndexQuery();
         query.withKeyValues(Collections.singletonList(200));
-        TarantoolResult<TarantoolTuple> selectAfterReplaceResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectAfterReplaceResult =
+                testSpace.select(query, new TarantoolSelectOptions()).get();
 
         assertEquals(1, selectAfterReplaceResult.size());
 
@@ -183,10 +191,11 @@ public class StandaloneTarantoolClientIT {
         assertEquals(deletedId, deleteRequestResult.get(0).getField(0).get().getInteger());
 
         //select after delete request
-        TarantoolResult<TarantoolTuple> selectAfterDeleteResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectAfterDeleteResult =
+                testSpace.select(query, new TarantoolSelectOptions()).get();
 
         Optional<TarantoolTuple> deletedValue = selectAfterDeleteResult.stream()
-                .filter((v) -> v.getField(0).get().getInteger() == deletedId).findFirst();
+                .filter(v -> v.getField(0).get().getInteger() == deletedId).findFirst();
         assertEquals(0, selectAfterDeleteResult.size());
         assertFalse(deletedValue.isPresent());
     }

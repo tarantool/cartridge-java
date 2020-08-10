@@ -48,7 +48,8 @@ public class TarantoolResultMapperFactory {
      * @return TarantoolResultMapper instance
      */
     @SuppressWarnings("unchecked")
-    public <T> TarantoolResultMapper<T> withConverter(Class<T> tupleClass, ValueConverter<ArrayValue, T> valueConverter) {
+    public <T> TarantoolResultMapper<T> withConverter(Class<T> tupleClass,
+                                                      ValueConverter<ArrayValue, T> valueConverter) {
         TarantoolResultMapper<T> mapper = (TarantoolResultMapper<T>) mapperCache.get(tupleClass);
         if (mapper == null) {
             mapper = createMapper(valueConverter);
