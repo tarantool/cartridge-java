@@ -34,6 +34,11 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
     }
 
     @Override
+    public <V extends Value, O> O fromValue(V v, Class<O> targetClass) throws MessagePackValueMapperException {
+        return valueMapper.fromValue(v, targetClass);
+    }
+
+    @Override
     public <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass,
                                                             ValueConverter<V, O> converter) {
         valueMapper.registerValueConverter(valueClass, objectClass, converter);
