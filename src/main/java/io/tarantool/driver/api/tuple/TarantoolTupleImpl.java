@@ -1,13 +1,11 @@
 package io.tarantool.driver.api.tuple;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
-import io.tarantool.driver.exceptions.TarantoolValueConverterNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
-import org.msgpack.value.ValueFactory;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -66,7 +64,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             if (fieldValue.isNilValue()) {
                 fields.add(new TarantoolNullField());
             } else {
-                fields.add(new TarantoolFieldImpl<>(fieldValue, mapper));
+                fields.add(new TarantoolFieldImpl(fieldValue, mapper));
             }
         }
     }
@@ -97,10 +95,15 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass)
-            throws TarantoolValueConverterNotFoundException {
+    public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass) {
         Optional<TarantoolField> field = getField(fieldPosition);
-        return field.isPresent() ? Optional.ofNullable(field.get().getValue(objectClass)) : Optional.empty();
+        return field.map(tarantoolField -> tarantoolField.getValue(objectClass));
+    }
+
+    @Override
+    public <O> Optional<O> getObject(String fieldName, Class<O> objectClass) {
+        Optional<TarantoolField> field = getField(fieldName);
+        return field.map(tarantoolField -> tarantoolField.getValue(objectClass));
     }
 
     @Override
@@ -129,14 +132,15 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public <V extends Value> void setField(int fieldPosition, V value) {
+    public void setField(int fieldPosition, TarantoolField field) {
         if (fieldPosition < 0 ||
                 (spaceMetadata != null && fieldPosition >= spaceMetadata.getSpaceFormatMetadata().size())) {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
-        TarantoolField tarantoolField = value.isNilValue() ?
-                new TarantoolNullField() : new TarantoolFieldImpl<>(value, mapper);
+        if (field == null) {
+            field = new TarantoolNullField();
+        }
 
         if (fields.size() < fieldPosition) {
             for (int i = fields.size(); i < fieldPosition; i++) {
@@ -145,26 +149,36 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         }
 
         if (fields.size() == fieldPosition) {
-            fields.add(fieldPosition, tarantoolField);
+            fields.add(fieldPosition, field);
         } else {
-            fields.set(fieldPosition, tarantoolField);
+            fields.set(fieldPosition, field);
         }
     }
 
     @Override
-    public void setField(int fieldPosition, Object value) {
-        Value messagePackValue = (value == null) ? ValueFactory.newNil() : mapper.toValue(value);
-        setField(fieldPosition, messagePackValue);
-    }
-
-    @Override
-    public void setField(String fieldName, Object value) {
+    public void setField(String fieldName, TarantoolField field) {
         int fieldPosition = getFieldPositionByName(fieldName);
         if (fieldPosition < 0) {
             throw new TarantoolSpaceFieldNotFoundException(fieldName);
         }
 
-        setField(fieldPosition, value);
+        setField(fieldPosition, field);
+    }
+
+    @Override
+    public void putObject(int fieldPosition, Object value) {
+        TarantoolField tarantoolField = value == null ?
+                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value), mapper);
+
+        setField(fieldPosition, tarantoolField);
+    }
+
+    @Override
+    public void putObject(String fieldName, Object value) {
+        TarantoolField tarantoolField = value == null ?
+                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value), mapper);
+
+        setField(fieldName, tarantoolField);
     }
 
     protected int getFieldPositionByName(String fieldName) {

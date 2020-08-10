@@ -26,7 +26,8 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery) throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery)
+            throws TarantoolClientException;
 
     /**
      * Delete a tuple
@@ -39,7 +40,8 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery, ValueConverter<ArrayValue, T> tupleMapper)
+    <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery,
+                                                     ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
     /**

@@ -22,6 +22,18 @@ public interface MessagePackValueMapper extends Cloneable {
     <V extends Value, O> O fromValue(V v) throws MessagePackValueMapperException;
 
     /**
+     * Create Java object out of its MessagePack representation. Converters will be checked to match the target
+     * object type.
+     * @param v MessagePack entity
+     * @param targetClass Java object class
+     * @param <V> source MessagePack entity type
+     * @param <O> target object type
+     * @return Java object
+     * @throws MessagePackValueMapperException if the corresponding conversion cannot be performed
+     */
+    <V extends Value, O> O fromValue(V v, Class<O> targetClass) throws MessagePackValueMapperException;
+
+    /**
      * Adds a MessagePack entity converter to this mappers instance.
      * @param valueClass source entity class
      * @param objectClass target object class

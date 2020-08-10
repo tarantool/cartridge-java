@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.CustomTuple;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.MapValue;
@@ -22,7 +23,7 @@ class DefaultMessagePackMapperTest {
     void getDefaultConverter() throws MessagePackValueMapperException {
         DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
 
-        // check default Value converters
+        // check default Object converters
         assertEquals(ValueFactory.newBoolean(false), mapper.toValue(Boolean.FALSE));
         assertEquals(ValueFactory.newInteger(111), mapper.toValue(111));
         assertEquals(ValueFactory.newInteger(100500L), mapper.toValue(100500L));
@@ -31,13 +32,23 @@ class DefaultMessagePackMapperTest {
         assertEquals(ValueFactory.newString("hello"), mapper.toValue("hello"));
         assertEquals(ValueFactory.newBinary(new byte[]{1, 2, 3, 4}), mapper.toValue(new byte[]{1, 2, 3, 4}));
 
-        // check default Object converters
+        // check default Value converters
         assertEquals(Boolean.TRUE, mapper.fromValue(ValueFactory.newBoolean(true)));
         assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111)));
         assertEquals(Long.valueOf(4_000_000_000_000L), mapper.fromValue(ValueFactory.newInteger(4_000_000_000_000L)));
+        assertThrows(ClassCastException.class, () -> {
+            Long result = mapper.fromValue(ValueFactory.newInteger(111L));
+        });
+        assertEquals(Long.valueOf(111L), mapper.fromValue(ValueFactory.newInteger(111), Long.class));
+        assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111L), Integer.class));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0F)));
         assertEquals(Double.valueOf(Float.MAX_VALUE * 10D),
                 mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
+        assertThrows(ClassCastException.class, () -> {
+            Double result = mapper.fromValue(ValueFactory.newFloat(111.0D));
+        });
+        assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newFloat(111.0F), Double.class));
+        assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0D), Float.class));
         assertEquals("hello", mapper.fromValue(ValueFactory.newString("hello")));
         assertArrayEquals(new byte[]{1, 2, 3, 4}, mapper.fromValue(ValueFactory.newBinary(new byte[]{1, 2, 3, 4})));
 
@@ -133,50 +144,4 @@ class DefaultMessagePackMapperTest {
         assertEquals(testValue, mapper.toValue(testTuple).asMapValue().map());
     }
 
-    private static final class CustomTuple {
-        private int id;
-        private String name;
-
-        CustomTuple() {
-        }
-
-        CustomTuple(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        int getId() {
-            return id;
-        }
-
-        void setId(int id) {
-            this.id = id;
-        }
-
-        String getName() {
-            return name;
-        }
-
-        void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CustomTuple that = (CustomTuple) o;
-            return id == that.id &&
-                    Objects.equals(name, that.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, name);
-        }
-    }
 }

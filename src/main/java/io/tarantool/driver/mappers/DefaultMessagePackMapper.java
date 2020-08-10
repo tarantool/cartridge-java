@@ -71,6 +71,22 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                         .map(c -> (ValueConverter<V, O>) c)
                         .filter(c -> c.canConvertValue(v))
                         .findFirst();
+        return fromValue(v, getter);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends Value, O> O fromValue(V v, Class<O> targetClass) {
+        Function<String, Optional<ValueConverter<V, O>>> getter =
+                typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
+                        .map(c -> (ValueConverter<V, O>) c)
+                        .filter(c -> c.canConvertValue(v))
+                        .filter(c -> checkConverterByTargetType(c, targetClass))
+                        .findFirst();
+        return fromValue(v, getter);
+    }
+
+    private <V extends Value, O> O fromValue(V v, Function<String, Optional<ValueConverter<V, O>>> getter) {
         Optional<ValueConverter<V, O>> converter = findConverter(v.getClass(), getter);
         if (!converter.isPresent()) {
             throw new MessagePackValueMapperException("ValueConverter for type %s is not found", v.getClass());
@@ -146,16 +162,14 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Check if the specified converter can convert to the specified object type
      */
-    private boolean checkTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
-        boolean isAssignable;
+    private boolean checkConverterByTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
         try {
-            isAssignable = getInterfaceParameterClass(converter, converter.getClass(), 1)
-                    .isAssignableFrom(targetClass);
+            return valueConvertersByTarget.get(targetClass.getTypeName()) == converter ||
+                    getInterfaceParameterClass(converter, converter.getClass(), 1)
+                            .isAssignableFrom(targetClass);
         } catch (ConverterParameterTypeNotFoundException e) {
-            isAssignable = false;
+            return false;
         }
-
-        return isAssignable || valueConvertersByTarget.get(targetClass.getTypeName()) == converter;
     }
 
     @Override
@@ -164,7 +178,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                                                                                  Class<O> targetClass) {
         Function<String, Optional<ValueConverter<V, O>>> getter =
                 typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .filter(c -> checkTargetType(c, targetClass))
+                        .filter(c -> checkConverterByTargetType(c, targetClass))
                         .map(c -> (ValueConverter<V, O>) c)
                         .findFirst();
         return findConverter(entityClass, getter);

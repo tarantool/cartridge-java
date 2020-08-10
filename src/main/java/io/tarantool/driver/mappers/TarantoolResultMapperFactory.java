@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TarantoolResultMapperFactory {
 
-    private Map<Class<?>, MessagePackValueMapper> mapperCache = new ConcurrentHashMap<>();
+    private Map<Class<?>, TarantoolResultMapper<?>> mapperCache = new ConcurrentHashMap<>();
 
     /**
      * Basic constructor
@@ -35,7 +35,7 @@ public class TarantoolResultMapperFactory {
      * @param <T> target object type
      * @return TarantoolResultMapper instance
      */
-    public <T> MessagePackValueMapper withConverter(ValueConverter<ArrayValue, T> valueConverter) {
+    public <T> TarantoolResultMapper<T> withConverter(ValueConverter<ArrayValue, T> valueConverter) {
         return withConverter(MapperReflectionUtils.getConverterTargetType(valueConverter), valueConverter);
     }
 
@@ -47,8 +47,10 @@ public class TarantoolResultMapperFactory {
      * @param <T> target object type
      * @return TarantoolResultMapper instance
      */
-    public <T> MessagePackValueMapper withConverter(Class<T> tupleClass, ValueConverter<ArrayValue, T> valueConverter) {
-        MessagePackValueMapper mapper = mapperCache.get(tupleClass);
+    @SuppressWarnings("unchecked")
+    public <T> TarantoolResultMapper<T> withConverter(Class<T> tupleClass,
+                                                      ValueConverter<ArrayValue, T> valueConverter) {
+        TarantoolResultMapper<T> mapper = (TarantoolResultMapper<T>) mapperCache.get(tupleClass);
         if (mapper == null) {
             mapper = createMapper(valueConverter);
             mapperCache.put(tupleClass, mapper);
@@ -56,7 +58,7 @@ public class TarantoolResultMapperFactory {
         return mapper;
     }
 
-    private <T> MessagePackValueMapper createMapper(ValueConverter<ArrayValue, T> valueConverter) {
+    private <T> TarantoolResultMapper<T> createMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
         return new TarantoolResultMapper<>(mapper, valueConverter);
     }
