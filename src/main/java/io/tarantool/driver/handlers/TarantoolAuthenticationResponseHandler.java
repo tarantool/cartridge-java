@@ -3,7 +3,7 @@ package io.tarantool.driver.handlers;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.tarantool.driver.TarantoolServerException;
+import io.tarantool.driver.exceptions.TarantoolServerException;
 import io.tarantool.driver.protocol.TarantoolErrorResult;
 import io.tarantool.driver.protocol.TarantoolResponse;
 

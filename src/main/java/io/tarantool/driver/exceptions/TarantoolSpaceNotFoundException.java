@@ -1,13 +1,11 @@
 package io.tarantool.driver.exceptions;
 
-import io.tarantool.driver.TarantoolClientException;
-
 /**
  * Represents space not found error
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpaceNotFoundException extends TarantoolClientException {
+public class TarantoolSpaceNotFoundException extends TarantoolRuntimeException {
     public TarantoolSpaceNotFoundException(int spaceId) {
         super(String.format("Space with id %d not found", spaceId));
     }

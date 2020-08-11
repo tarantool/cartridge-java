@@ -1,14 +1,17 @@
-package io.tarantool.driver;
+package io.tarantool.driver.exceptions;
 
 /**
  * Basic exception returned by Tarantool server for unsuccessful operations.
+ *
+ * @author Alexey Kuzin
  */
-public class TarantoolServerException extends Throwable {
+public class TarantoolServerException extends TarantoolRuntimeException {
 
     private Long errorCode;
     private String errorMessage;
 
     public TarantoolServerException(Long errorCode, String errorMessage) {
+        super();
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }

@@ -2,6 +2,8 @@ package io.tarantool.driver;
 
 /**
  * Basic exception class for client errors like connection errors, configuration error etc
+ *
+ * @author Alexey Kuzin
  */
 public class TarantoolClientException extends Throwable {
     public TarantoolClientException(Throwable cause) {
