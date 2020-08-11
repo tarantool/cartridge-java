@@ -13,6 +13,7 @@ public enum TarantoolRequestFieldType {
     IPROTO_ITERATOR(0x14),
     IPROTO_KEY(0x20),
     IPROTO_TUPLE(0x21),
+    IPROTO_FUNCTION_NAME(0x22),
     IPROTO_OPS(0x28);
 
     private int code;

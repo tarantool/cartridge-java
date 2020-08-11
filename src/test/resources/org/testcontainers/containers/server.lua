@@ -24,3 +24,11 @@ s:create_index('primary', {
 s:insert{1, 'Don Quixote', 'Miguel de Cervantes', 1605}
 s:insert{2, 'The Great Gatsby', 'F. Scott Fitzgerald', 1925}
 s:insert{3, 'War and Peace', 'Leo Tolstoy', 1869}
+
+function user_function_no_param()
+    return 5;
+end
+
+function user_function_two_param(a, b)
+    return a, b, 'Hello, '..a..' '..b;
+end

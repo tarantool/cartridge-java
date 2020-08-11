@@ -17,12 +17,14 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.msgpack.value.ArrayValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -198,5 +200,18 @@ public class StandaloneTarantoolClientIT {
                 .filter(v -> v.getField(0).get().getInteger() == deletedId).findFirst();
         assertEquals(0, selectAfterDeleteResult.size());
         assertFalse(deletedValue.isPresent());
+    }
+
+    @Test
+    public void callTest() throws Exception, TarantoolClientException {
+        List<Object> resultNoParam = connection.call("user_function_no_param").get();
+
+        assertEquals(1, resultNoParam.size());
+        assertEquals(5, resultNoParam.get(0));
+
+        List<Object> resultTwoParams = connection.call("user_function_two_param", Arrays.asList(1, "abc")).get();
+
+        assertEquals(3, resultTwoParams.size());
+        assertEquals("Hello, 1 abc", resultTwoParams.get(2));
     }
 }

@@ -10,8 +10,11 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.protocol.TarantoolProtocolException;
+import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import org.springframework.util.Assert;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -80,21 +83,50 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, Object... arguments) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException {
+        return call(functionName, Collections.emptyList());
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
-                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public CompletableFuture<List<Object>> call(String functionName, List<Object> arguments)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper());
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, List<Object> arguments,
+    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
+                                                               MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
                                          MessagePackObjectMapper argumentsMapper,
                                          MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        try {
+            TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
+                    .withFunctionName(functionName);
+
+            if (arguments.size() > 0) {
+                builder.withArguments(arguments);
+            }
+
+            TarantoolCallRequest request = builder.build(argumentsMapper);
+
+            CompletableFuture<List<T>> requestFuture = requestManager.submitRequest(request, resultMapper);
+
+            getChannel().writeAndFlush(request).addListener(f -> {
+                if (!f.isSuccess()) {
+                    requestFuture.completeExceptionally(
+                            new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
+                }
+            });
+
+            return requestFuture;
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     @Override
