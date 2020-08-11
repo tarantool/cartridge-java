@@ -4,7 +4,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.protocol.TarantoolRequest;
 

@@ -1,6 +1,7 @@
 package io.tarantool.driver;
 
 import io.netty.channel.Channel;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;

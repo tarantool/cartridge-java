@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;

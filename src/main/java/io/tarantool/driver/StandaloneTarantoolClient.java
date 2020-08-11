@@ -11,6 +11,7 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;

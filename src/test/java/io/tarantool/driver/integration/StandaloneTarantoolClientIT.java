@@ -2,7 +2,7 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
@@ -17,14 +17,12 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.msgpack.value.ArrayValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

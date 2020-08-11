@@ -1,5 +1,7 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
+
 import java.net.InetSocketAddress;
 
 /**

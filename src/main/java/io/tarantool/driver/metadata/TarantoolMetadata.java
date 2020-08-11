@@ -1,7 +1,7 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Basic Tarantool spaces and indexes metadata implementation for standalone server

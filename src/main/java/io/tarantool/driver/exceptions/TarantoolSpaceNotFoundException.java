@@ -5,7 +5,7 @@ package io.tarantool.driver.exceptions;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpaceNotFoundException extends TarantoolRuntimeException {
+public class TarantoolSpaceNotFoundException extends TarantoolException {
     public TarantoolSpaceNotFoundException(int spaceId) {
         super(String.format("Space with id %d not found", spaceId));
     }

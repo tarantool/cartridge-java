@@ -1,6 +1,6 @@
 package io.tarantool.driver.metadata;
 
-import io.tarantool.driver.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

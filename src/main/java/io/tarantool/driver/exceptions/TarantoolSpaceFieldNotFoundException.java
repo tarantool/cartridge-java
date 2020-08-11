@@ -5,7 +5,7 @@ package io.tarantool.driver.exceptions;
  *
  *  @author Sergey Volgin
  */
-public class TarantoolSpaceFieldNotFoundException extends TarantoolRuntimeException {
+public class TarantoolSpaceFieldNotFoundException extends TarantoolException {
     public TarantoolSpaceFieldNotFoundException(String fieldName) {
         super(String.format("Field \"%s\" not found in space format metadata", fieldName));
     }

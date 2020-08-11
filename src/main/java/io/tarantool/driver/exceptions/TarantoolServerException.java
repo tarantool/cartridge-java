@@ -5,7 +5,7 @@ package io.tarantool.driver.exceptions;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolServerException extends TarantoolRuntimeException {
+public class TarantoolServerException extends TarantoolException {
 
     private Long errorCode;
     private String errorMessage;
