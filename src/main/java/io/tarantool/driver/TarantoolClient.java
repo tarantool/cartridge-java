@@ -1,9 +1,6 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
-
-import java.net.InetSocketAddress;
-
 /**
  * Basic Tarantool client interface
  *
@@ -11,12 +8,12 @@ import java.net.InetSocketAddress;
  */
 public interface TarantoolClient extends AutoCloseable {
     /**
-     * Connect the client to the specified address
-     * @param address valid host name or IP address of a Tarantool server
+     * Connect the client to server
+     *
      * @return configured connection to the Tarantool server
      * @throws TarantoolClientException if connection or client initialization fails
      */
-    TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException;
+    TarantoolConnection connect() throws TarantoolClientException;
 
     /**
      * Get the Tarantool client config passed to this client

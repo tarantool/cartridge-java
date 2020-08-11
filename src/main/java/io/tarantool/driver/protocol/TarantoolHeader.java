@@ -91,7 +91,7 @@ public final class TarantoolHeader implements Packable {
      */
     public static TarantoolHeader fromMessagePackValue(Value value) throws TarantoolProtocolException {
         if (!value.isMapValue()) {
-            throw new TarantoolProtocolException("TarantoolHeader can be unpacked only from MP_MAP");
+            throw new TarantoolProtocolException("TarantoolHeader can be unpacked only from MP_MAP " + value.toString() );
         }
         Map<Value, Value> values = value.asMapValue().map();
         TarantoolHeader header = new TarantoolHeader();

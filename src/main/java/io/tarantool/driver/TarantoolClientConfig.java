@@ -1,8 +1,20 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.AddressProvider;
+import io.tarantool.driver.cluster.RoundRobinAddressProvider;
+import io.tarantool.driver.cluster.ClusterDiscoveryEndpoint;
+import io.tarantool.driver.cluster.SingleAddressProvider;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class-container for {@link TarantoolClient} configuration.
@@ -12,10 +24,17 @@ import io.tarantool.driver.mappers.MessagePackMapper;
  * @author Alexey Kuzin
  */
 public class TarantoolClientConfig {
+    private static final String DEFAULT_USER = "admin";
+    private static final String DEFAULT_PASSWORD = "password";
+
     private TarantoolCredentials credentials;
-    private int connectTimeout;
-    private int readTimeout;
-    private int requestTimeout;
+    private int connectTimeout = 1000;
+    private int readTimeout = 1000;
+    private int requestTimeout = 2000;
+    private int serviceDiscoveryDelay = 60_000;
+    private ClusterDiscoveryEndpoint clusterDiscoveryEndpoint;
+    private AddressProvider addressProvider;
+    private List<ServerAddress> hosts;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
 
@@ -108,6 +127,82 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * Get strategy for selecting server
+     * @return a {@link AddressProvider}
+     */
+    public AddressProvider getAddressProvider() {
+        return addressProvider;
+    }
+
+    /**
+     * Set strategy for selecting server
+     * @param addressProvider a {@link AddressProvider} instance
+     */
+    public void setAddressProvider(AddressProvider addressProvider) {
+        this.addressProvider = addressProvider;
+    }
+
+    /**
+     * Get list of tarantool hosts to use when connection to tarantool server or cluster
+     * @return list of {@link ServerAddress} addresses
+     */
+    public List<ServerAddress> getHosts() {
+        return hosts;
+    }
+
+    /**
+     * Set list of tarantool hosts to use when connection to tarantool cluster
+     * @param hosts list of {@link ServerAddress} addresses
+     */
+    public void setHosts(List<ServerAddress> hosts) {
+        this.hosts = hosts;
+    }
+
+    /**
+     * Get config of service discovery endpoint
+     * @return a {@link ClusterDiscoveryEndpoint} instance
+     */
+    public ClusterDiscoveryEndpoint getClusterDiscoveryEndpoint() {
+        return clusterDiscoveryEndpoint;
+    }
+
+    /**
+     * Set service discovery endpoint config and enable cluster connection
+     * @param endpoint a {@link ClusterDiscoveryEndpoint} instance
+     */
+    public void setClusterDiscoveryEndpoint(ClusterDiscoveryEndpoint endpoint) {
+        this.clusterDiscoveryEndpoint = endpoint;
+    }
+
+    /**
+     * Get cluster discovery delay
+     * @return cluster discovery delay, milliseconds
+     */
+    public int getServiceDiscoveryDelay() {
+        return serviceDiscoveryDelay;
+    }
+
+    /**
+     * Set scan period of receiving a new list of instances
+     * @param serviceDiscoveryDelay period of receiving a new list of instances
+     */
+    public void setServiceDiscoveryDelay(int serviceDiscoveryDelay) {
+        if (serviceDiscoveryDelay <= 0) {
+            throw new IllegalArgumentException("Discovery delay must be greater than 0");
+        }
+        this.serviceDiscoveryDelay = serviceDiscoveryDelay;
+    }
+
+    /**
+     * Create a builder instance.
+     *
+     * @return a builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * A builder for {@link TarantoolClientConfig}
      */
     public static final class Builder {
@@ -177,10 +272,97 @@ public class TarantoolClientConfig {
         }
 
         /**
+         * Specify strategy for selecting server
+         * @param addressProvider a {@link AddressProvider}, which the server selection strategy
+         * @return builder
+         * @see TarantoolClientConfig#setAddressProvider(AddressProvider)
+         */
+        public Builder withAddressProvider(AddressProvider addressProvider) {
+            config.setAddressProvider(addressProvider);
+            return this;
+        }
+
+        /**
+         * Specify service discovery config and enable using service discovery
+         * @return builder
+         * @see TarantoolClientConfig#setClusterDiscoveryEndpoint(ClusterDiscoveryEndpoint)
+         */
+        public Builder withServiceDiscovery(ClusterDiscoveryEndpoint endpoint) {
+            config.setClusterDiscoveryEndpoint(endpoint);
+            return this;
+        }
+
+        /**
+         *Specify .
+         * @param delay
+         * @return builder
+         * @see TarantoolClientConfig#setServiceDiscoveryDelay(int)
+         */
+        public Builder withServiceDiscoveryDelay(int delay) {
+            config.setServiceDiscoveryDelay(delay);
+            return this;
+        }
+
+        /**
+         * Specify tarantool hosts addresses. A duplicate server addresses are removed from the list.
+         * @param hosts the initial host list
+         * @return builder
+         * @see TarantoolClientConfig#setHosts(List)
+         */
+        public Builder withHosts(List<ServerAddress> hosts) {
+            Assert.notNull(hosts, "Hosts list must not be null");
+            if (hosts.isEmpty()) {
+                throw new IllegalArgumentException("hosts list may not be empty");
+            }
+            if (config.getHosts() != null) {
+                throw new IllegalArgumentException("The host list is already set");
+            }
+
+            Set<ServerAddress> hostsSet = new LinkedHashSet<>(hosts.size());
+            for (ServerAddress serverAddress : hosts) {
+                Assert.notNull(serverAddress, "ServerAddress must not be null");
+                hostsSet.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+            }
+
+            config.setHosts(new ArrayList<>(hostsSet));
+            return this;
+        }
+
+        /**
+         * Specify tarantool server address
+         * @param host tarantool address
+         * @param port tarantool port
+         * @return builder
+         */
+        public Builder withHost(String host, int port) {
+            if (config.getHosts() != null) {
+                throw new IllegalArgumentException("The host list is already set");
+            }
+            config.setHosts(Collections.singletonList(new ServerAddress(host, port)));
+            return this;
+        }
+
+        /**
          * Build a {@link TarantoolClientConfig} instance
          * @return configured instance
          */
         public TarantoolClientConfig build() {
+            if (config.getHosts() == null) {
+                config.setHosts(Collections.singletonList(new ServerAddress()));
+            }
+
+            if (config.getCredentials() == null) {
+                config.setCredentials(new SimpleTarantoolCredentials(DEFAULT_USER, DEFAULT_PASSWORD));
+            }
+
+            if (config.getAddressProvider() == null) {
+                if (config.getHosts().size() == 1 && config.getClusterDiscoveryEndpoint() == null) {
+                    config.setAddressProvider(new SingleAddressProvider(config.getHosts().get(0)));
+                } else {
+                    config.setAddressProvider(new RoundRobinAddressProvider(config.getHosts()));
+                }
+            }
+
             return config;
         }
 

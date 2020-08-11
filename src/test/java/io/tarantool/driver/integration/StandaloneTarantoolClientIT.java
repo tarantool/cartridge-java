@@ -68,11 +68,11 @@ public class StandaloneTarantoolClientIT {
                 .withConnectTimeout(1000 * 5)
                 .withReadTimeout(1000 * 5)
                 .withRequestTimeout(1000 * 5)
+                .withHost(tarantoolContainer.getHost(), tarantoolContainer.getPort())
                 .build();
 
         log.info("Attempting connect to Tarantool");
-        connection = new StandaloneTarantoolClient(config)
-                .connect(tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        connection = new StandaloneTarantoolClient(config).connect();
         log.info("Successfully connected to Tarantool, version = {}", connection.getVersion());
     }
 
@@ -344,6 +344,8 @@ public class StandaloneTarantoolClientIT {
                 connection.call("user_function_two_param", Arrays.asList(1, "abc")).get();
 
         assertEquals(3, resultTwoParams.size());
+        assertEquals(1, resultTwoParams.get(0));
+        assertEquals("abc", resultTwoParams.get(1));
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));
     }
 

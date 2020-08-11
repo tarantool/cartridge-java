@@ -1,6 +1,7 @@
 package io.tarantool.driver.core;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class RequestFutureManager {
     private Map<Long, TarantoolRequestMetadata> requestFutures;
-    private ScheduledExecutorService timeoutScheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService timeoutScheduler =
+            Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-timeout"));
     private TarantoolClientConfig config;
 
     /**

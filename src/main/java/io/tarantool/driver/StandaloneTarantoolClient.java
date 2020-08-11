@@ -7,8 +7,9 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.AddressProvider;
+import io.tarantool.driver.cluster.AddressProviderWithClusterDiscovery;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
@@ -29,25 +31,19 @@ import java.util.concurrent.TimeoutException;
  */
 public class StandaloneTarantoolClient implements TarantoolClient {
 
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 3301;
-    private static final String DEFAULT_USER = "admin";
-    private static final String DEFAULT_PASSWORD = "password";
-    private static final int DEFAULT_CONNECT_TIMEOUT = 1000; // milliseconds
-    private static final int DEFAULT_READ_TIMEOUT = 1000; // milliseconds
-    private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
-
     private EventLoopGroup eventLoopGroup;
     private TarantoolClientConfig config;
     private Bootstrap bootstrap;
     private ConcurrentHashMap<InetSocketAddress, TarantoolConnection> connections;
+    private AddressProvider addressProvider;
+    private AtomicBoolean isDiscoveryTaskActive = new AtomicBoolean(false);
 
     /**
      * Create a client. Default credentials will be used.
      * @see InetSocketAddress
      */
     public StandaloneTarantoolClient() {
-        this(new SimpleTarantoolCredentials(DEFAULT_USER, DEFAULT_PASSWORD));
+        this(TarantoolClientConfig.builder().build());
     }
 
     /**
@@ -56,11 +52,8 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      * @see TarantoolCredentials
      */
     public StandaloneTarantoolClient(TarantoolCredentials credentials) {
-       this(new TarantoolClientConfig.Builder()
+       this(TarantoolClientConfig.builder()
                .withCredentials(credentials)
-               .withReadTimeout(DEFAULT_READ_TIMEOUT)
-               .withConnectTimeout(DEFAULT_CONNECT_TIMEOUT)
-               .withRequestTimeout(DEFAULT_REQUEST_TIMEOUT)
                .build());
     }
 
@@ -71,6 +64,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config) {
         this.config = config;
+        this.addressProvider = config.getAddressProvider();
         this.eventLoopGroup = new NioEventLoopGroup();
         this.connections = new ConcurrentHashMap<>();
         this.bootstrap = new Bootstrap()
@@ -83,40 +77,24 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     }
 
     /**
-     * Connect to a Tarantool server on localhost using the default port (3301)
+     * Connects to the Tarantool server and, if necessary, starts a discovery task.
      * @return connected client
      * @throws TarantoolClientException when connection or request for metadata are failed
      */
-    public TarantoolConnection connect() throws TarantoolClientException {
-        return connect(DEFAULT_HOST, DEFAULT_PORT);
-    }
-
-    /**
-     * Connect to a Tarantool server using the specified host and the default port (3301).
-     * @param host valid host name or IP address
-     * @return connected client
-     * @see InetSocketAddress
-     * @throws TarantoolClientException when connection or request for metadata are failed
-     */
-    public TarantoolConnection connect(String host) throws TarantoolClientException {
-        return connect(host, DEFAULT_PORT);
-    }
-
-    /**
-     * Connect to a Tarantool server using the specified host and port.
-     * @param host valid host name or IP address
-     * @param port valid port
-     * @return connected client
-     * @see InetSocketAddress
-     * @throws TarantoolClientException when connection or request for metadata are failed
-     */
-    public TarantoolConnection connect(String host, int port) throws TarantoolClientException {
-        return connect(new InetSocketAddress(host, port));
-    }
-
     @Override
-    public TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException {
-        TarantoolConnection conn = connections.get(address); // TODO pool of multiple connections
+    public TarantoolConnection connect() throws TarantoolClientException {
+        if (config.getClusterDiscoveryEndpoint() != null &&
+                addressProvider instanceof AddressProviderWithClusterDiscovery &&
+                isDiscoveryTaskActive.compareAndSet(false, true)) {
+            ((AddressProviderWithClusterDiscovery)addressProvider).runClusterDiscovery(config, this);
+        }
+
+        ServerAddress serverAddress = addressProvider.getNext();
+        return connect(serverAddress.getSocketAddress());
+    }
+
+    private TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException {
+        TarantoolConnection conn = connections.get(address);
         if (conn == null || conn.isClosed()) {
             CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
             RequestFutureManager futureManager = new RequestFutureManager(config);

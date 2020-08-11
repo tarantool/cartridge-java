@@ -113,14 +113,10 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
                                          MessagePackObjectMapper argumentsMapper,
                                          MessagePackValueMapper resultMapper) throws TarantoolClientException {
         try {
-            TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
-                    .withFunctionName(functionName);
-
-            if (arguments.size() > 0) {
-                builder.withArguments(arguments);
-            }
-
-            TarantoolCallRequest request = builder.build(argumentsMapper);
+            TarantoolCallRequest request = new TarantoolCallRequest.Builder()
+                    .withFunctionName(functionName)
+                    .withArguments(arguments)
+                    .build(argumentsMapper);
 
             CompletableFuture<List<T>> requestFuture = requestManager.submitRequest(request, resultMapper);
 
