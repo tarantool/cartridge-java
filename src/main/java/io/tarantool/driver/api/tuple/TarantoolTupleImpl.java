@@ -6,13 +6,18 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -30,13 +35,47 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     private MessagePackMapper mapper;
 
     /**
-     * Construct an instance of {@link TarantoolTuple } from list of object
+     * Constructor for empty tuple
+     */
+    public TarantoolTupleImpl(MessagePackMapper mapper) {
+        this(Collections.emptyList(), mapper, null);
+    }
+
+    /**
+     * Construct an instance of {@link TarantoolTuple } from a list of objects
      *
-     * @param value list of tuple data
+     * @param values list of tuple fields data
      * @param mapper provides conversion between MessagePack values and Java objects
      */
-    public TarantoolTupleImpl(List<Object> value, MessagePackMapper mapper) {
-        this(mapper.toValue(value), mapper, null);
+    public TarantoolTupleImpl(List<Object> values, MessagePackMapper mapper) {
+        this(values, mapper, null);
+    }
+
+    /**
+     * Construct an instance of {@link TarantoolTuple } from a list of objects. Provides space metadata which adds
+     * extra functionality for working with fields and indexes.
+     *
+     * @param values list of tuple fields data
+     * @param mapper provides conversion between MessagePack values and Java objects
+     */
+    public TarantoolTupleImpl(List<Object> values, MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
+        Assert.notNull(mapper, "MessagePack mapper should not be null");
+
+        this.mapper = mapper;
+        this.spaceMetadata = metadata;
+
+        if (values != null) {
+            this.fields = new ArrayList<>(values.size());
+            for (Object value : values) {
+                if (value == null) {
+                    this.fields.add(new TarantoolNullField());
+                } else {
+                    this.fields.add(new TarantoolFieldImpl(value));
+                }
+            }
+        } else {
+            this.fields = new ArrayList<>();
+        }
     }
 
     /**
@@ -56,16 +95,22 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param spaceMetadata provides field names and other metadata
      */
     public TarantoolTupleImpl(ArrayValue value, MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
+        Assert.notNull(mapper, "MessagePack mapper should not be null");
+
         this.mapper = mapper;
         this.spaceMetadata = spaceMetadata;
 
-        this.fields = new ArrayList<>(value.size());
-        for (Value fieldValue : value) {
-            if (fieldValue.isNilValue()) {
-                fields.add(new TarantoolNullField());
-            } else {
-                fields.add(new TarantoolFieldImpl(fieldValue, mapper));
+        if (value != null) {
+            this.fields = new ArrayList<>(value.size());
+            for (Value fieldValue : value) {
+                if (fieldValue.isNilValue()) {
+                    fields.add(new TarantoolNullField());
+                } else {
+                    fields.add(new TarantoolFieldImpl(fieldValue));
+                }
             }
+        } else {
+            this.fields = new ArrayList<>();
         }
     }
 
@@ -97,13 +142,13 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass) {
         Optional<TarantoolField> field = getField(fieldPosition);
-        return field.map(tarantoolField -> tarantoolField.getValue(objectClass));
+        return field.map(tarantoolField -> tarantoolField.getValue(objectClass, mapper));
     }
 
     @Override
     public <O> Optional<O> getObject(String fieldName, Class<O> objectClass) {
         Optional<TarantoolField> field = getField(fieldName);
-        return field.map(tarantoolField -> tarantoolField.getValue(objectClass));
+        return field.map(tarantoolField -> tarantoolField.getValue(objectClass, mapper));
     }
 
     @Override
@@ -168,7 +213,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(int fieldPosition, Object value) {
         TarantoolField tarantoolField = value == null ?
-                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value), mapper);
+                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldPosition, tarantoolField);
     }
@@ -176,9 +221,140 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(String fieldName, Object value) {
         TarantoolField tarantoolField = value == null ?
-                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value), mapper);
+                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldName, tarantoolField);
+    }
+
+    @Nullable
+    @Override
+    public byte[] getByteArray(int fieldPosition) {
+        return getObject(fieldPosition, byte[].class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public byte[] getByteArray(String fieldName) {
+        return getObject(fieldName, byte[].class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Boolean getBoolean(int fieldPosition) {
+        return getObject(fieldPosition, Boolean.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Boolean getBoolean(String fieldName) {
+        return getObject(fieldName, Boolean.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Double getDouble(int fieldPosition) {
+        return getObject(fieldPosition, Double.class).orElse(null);
+    }
+
+    @Override
+    public Double getDouble(String fieldName) {
+        return getObject(fieldName, Double.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Float getFloat(int fieldPosition) {
+        return getObject(fieldPosition, Float.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Float getFloat(String fieldName) {
+        return getObject(fieldName, Float.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Integer getInteger(int fieldPosition) {
+        return getObject(fieldPosition, Integer.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Integer getInteger(String fieldName) {
+        return getObject(fieldName, Integer.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Long getLong(int fieldPosition) {
+        return getObject(fieldPosition, Long.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Long getLong(String fieldName) {
+        return getObject(fieldName, Long.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public String getString(int fieldPosition) {
+        return getObject(fieldPosition, String.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public String getString(String fieldName) {
+        return getObject(fieldName, String.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public UUID getUUID(int fieldPosition) {
+        return getObject(fieldPosition, UUID.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public UUID getUUID(String fieldName) {
+        return getObject(fieldName, UUID.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public BigDecimal getDecimal(int fieldPosition) {
+        return getObject(fieldPosition, BigDecimal.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public BigDecimal getDecimal(String fieldName) {
+        return getObject(fieldName, BigDecimal.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public List getList(int fieldPosition) {
+        return getObject(fieldPosition, List.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public List getList(String fieldName) {
+        return getObject(fieldName, List.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Map getMap(int fieldPosition) {
+        return getObject(fieldPosition, Map.class).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public Map getMap(String fieldName) {
+        return getObject(fieldName, Map.class).orElse(null);
     }
 
     protected int getFieldPositionByName(String fieldName) {

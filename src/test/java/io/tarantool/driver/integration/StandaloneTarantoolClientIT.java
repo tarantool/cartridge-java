@@ -99,10 +99,10 @@ public class StandaloneTarantoolClientIT {
         assertTrue(countBeforeInsert >= 2);
 
         TarantoolTuple tuple = selectResult.get(0);
-        assertEquals(1, tuple.getField(0).get().getInteger());
-        assertEquals("Don Quixote", tuple.getField(1).get().getString());
-        assertEquals("Miguel de Cervantes", tuple.getField(2).get().getString());
-        assertEquals(1605, tuple.getField(3).get().getInteger());
+        assertEquals(1, tuple.getInteger(0));
+        assertEquals("Don Quixote", tuple.getString(1));
+        assertEquals("Miguel de Cervantes", tuple.getString(2));
+        assertEquals(1605, tuple.getInteger(3));
 
         //insert new data
         List<Object> values = Arrays.asList(4, "Nineteen Eighty-Four", "George Orwell", 1984);
@@ -111,10 +111,10 @@ public class StandaloneTarantoolClientIT {
 
         assertEquals(1, insertTuples.size());
         assertEquals(4, insertTuples.get(0).size());
-        assertEquals("George Orwell", insertTuples.get(0).getField(2).get().getString());
+        assertEquals("George Orwell", insertTuples.get(0).getString(2));
 
         //repeat insert same data
-         assertThrows(ExecutionException.class,
+        assertThrows(ExecutionException.class,
                  () -> testSpace.insert(tarantoolTuple).get(),
         "Duplicate key exists in unique index 'primary' in space 'test_space'");
 
@@ -125,12 +125,12 @@ public class StandaloneTarantoolClientIT {
         assertEquals(countBeforeInsert + 1, selectAfterInsertResult.size());
 
         TarantoolTuple newTuple = selectAfterInsertResult.stream()
-                .filter(e -> e.getField(0).get().getInteger() == 4)
+                .filter(e -> e.getInteger(0) == 4)
                 .findFirst().get();
-        assertEquals(4, newTuple.getField(0).get().getInteger());
-        assertEquals("Nineteen Eighty-Four", newTuple.getField(1).get().getString());
-        assertEquals("George Orwell", newTuple.getField(2).get().getString());
-        assertEquals(1984, newTuple.getField(3).get().getInteger());
+        assertEquals(4, newTuple.getInteger(0));
+        assertEquals("Nineteen Eighty-Four", newTuple.getString(1));
+        assertEquals("George Orwell", newTuple.getString(2));
+        assertEquals(1984, newTuple.getInteger(3));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class StandaloneTarantoolClientIT {
 
         assertEquals(1, insertTuples.size());
         assertEquals(4, insertTuples.get(0).size());
-        assertEquals("J. K. Rowling", insertTuples.get(0).getField(2).get().getString());
+        assertEquals("J. K. Rowling", insertTuples.get(0).getString(2));
 
         //repeat insert same data
         assertDoesNotThrow(() -> testSpace.replace(tarantoolTuple).get());
@@ -165,10 +165,10 @@ public class StandaloneTarantoolClientIT {
         Optional<TarantoolTuple> value = selectAfterReplaceResult.stream().findFirst();
         assertTrue(value.isPresent());
 
-        assertEquals(200, value.get().getField(0).get().getInteger());
-        assertEquals("Jane Eyre", value.get().getField(1).get().getString());
-        assertEquals("Charlotte Brontë", value.get().getField(2).get().getString());
-        assertEquals(1847, value.get().getField(3).get().getInteger());
+        assertEquals(200, value.get().getInteger(0));
+        assertEquals("Jane Eyre", value.get().getString(1));
+        assertEquals("Charlotte Brontë", value.get().getString(2));
+        assertEquals(1847, value.get().getInteger(3));
     }
 
     @Test
@@ -188,14 +188,14 @@ public class StandaloneTarantoolClientIT {
         //delete tuple by id
         TarantoolResult<TarantoolTuple> deleteRequestResult = testSpace.delete(query).get();
         assertEquals(1, deleteRequestResult.size());
-        assertEquals(deletedId, deleteRequestResult.get(0).getField(0).get().getInteger());
+        assertEquals(deletedId, deleteRequestResult.get(0).getInteger(0));
 
         //select after delete request
         TarantoolResult<TarantoolTuple> selectAfterDeleteResult =
                 testSpace.select(query, new TarantoolSelectOptions()).get();
 
         Optional<TarantoolTuple> deletedValue = selectAfterDeleteResult.stream()
-                .filter(v -> v.getField(0).get().getInteger() == deletedId).findFirst();
+                .filter(v -> v.getInteger(0) == deletedId).findFirst();
         assertEquals(0, selectAfterDeleteResult.size());
         assertFalse(deletedValue.isPresent());
     }
@@ -207,7 +207,8 @@ public class StandaloneTarantoolClientIT {
         assertEquals(1, resultNoParam.size());
         assertEquals(5, resultNoParam.get(0));
 
-        List<Object> resultTwoParams = connection.call("user_function_two_param", Arrays.asList(1, "abc")).get();
+        List<Object> resultTwoParams =
+                connection.call("user_function_two_param", Arrays.asList(1, "abc")).get();
 
         assertEquals(3, resultTwoParams.size());
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));

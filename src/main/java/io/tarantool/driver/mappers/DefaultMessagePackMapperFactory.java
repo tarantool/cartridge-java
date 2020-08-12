@@ -38,14 +38,15 @@ public class DefaultMessagePackMapperFactory {
                 .withConverter(ExtensionValue.class, UUID.class, new DefaultUUIDConverter())
                 .withConverter(ExtensionValue.class, BigDecimal.class, new DefaultBigDecimalConverter())
                 .build();
-        // internal types converter
-        defaultSimpleTypesMapper.registerObjectConverter(new DefaultPackableObjectConverter(defaultSimpleTypesMapper));
         defaultComplexTypesMapper = new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
                 .withDefaultListObjectConverter()
                 .withDefaultArrayValueConverter()
                 .withDefaultMapObjectConverter()
                 .withDefaultMapValueConverter()
                 .build();
+        // internal types converter
+        defaultComplexTypesMapper.registerObjectConverter(
+                new DefaultPackableObjectConverter(defaultComplexTypesMapper));
     }
 
     /**

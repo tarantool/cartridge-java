@@ -5,6 +5,8 @@ import org.msgpack.value.Value;
 
 /**
  * Classes implementing this interface can be converted into MessagePack representation
+ *
+ * @author Alexey Kuzin
  */
 public interface Packable {
     /**

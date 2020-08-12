@@ -1,8 +1,5 @@
 package io.tarantool.driver.protocol.requests;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
-import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
@@ -21,7 +18,7 @@ import java.util.Map;
  *
  * @author Sergey Volgin
  */
-public class TarantoolCallRequest extends TarantoolRequest {
+public final class TarantoolCallRequest extends TarantoolRequest {
 
     private TarantoolCallRequest(TarantoolRequestBody body) {
         super(TarantoolRequestType.IPROTO_CALL, body);

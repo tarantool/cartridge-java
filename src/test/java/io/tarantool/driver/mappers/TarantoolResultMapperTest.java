@@ -2,7 +2,6 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,12 +29,12 @@ class TarantoolResultMapperTest {
                 tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
         TarantoolResult<TarantoolTuple> result = mapper.fromValue(testTuples);
         assertEquals(2, result.size());
-        assertEquals("abc", result.get(0).getField(0).map(TarantoolField::getString).get());
-        assertEquals(1234, result.get(0).getField(1).map(TarantoolField::getInteger).get());
-        assertEquals(nestedList1, result.get(0).getField(2).map(f -> f.getValue(ArrayList.class)).get());
-        assertEquals("def", result.get(1).getField(0).map(TarantoolField::getString).get());
-        assertEquals(5678, result.get(1).getField(1).map(TarantoolField::getInteger).get());
-        assertEquals(nestedList2, result.get(1).getField(2).map(f -> f.getValue(ArrayList.class)).get());
+        assertEquals("abc", result.get(0).getString(0));
+        assertEquals(1234, result.get(0).getInteger(1));
+        assertEquals(nestedList1, result.get(0).getList(2));
+        assertEquals("def", result.get(1).getString(0));
+        assertEquals(5678, result.get(1).getInteger(1));
+        assertEquals(nestedList2, result.get(1).getList(2));
     }
 
     @Test
