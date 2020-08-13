@@ -87,7 +87,7 @@ public final class TarantoolUpsertRequest extends TarantoolRequest {
                 throw new TarantoolProtocolException("Tuple value must be specified for the upsert request");
             }
             if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_OPS.getCode())) {
-                throw new TarantoolProtocolException("Update tuple(OPS) value must be specified for the upsert request");
+                throw new TarantoolProtocolException("Update operations must be specified for the upsert request");
             }
 
             return new TarantoolUpsertRequest(new TarantoolRequestBody(bodyMap, mapper));

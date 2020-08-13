@@ -1,7 +1,11 @@
 package io.tarantool.driver.protocol.operations;
 
+
+import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Create list of {@link TupleOperation} for update and upsert requests
@@ -25,6 +29,21 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations addOperation(TupleOperation operation) {
+        Integer filedIndex = operation.getFieldIndex();
+        String fieldName = operation.getFieldName();
+
+        Optional<TupleOperation> existField;
+        if (filedIndex != null) {
+            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldIndex())).findFirst();
+        } else {
+            existField = this.operations.stream().filter(op -> fieldName.equals(op.getFieldName())).findFirst();
+        }
+
+        if (existField.isPresent()) {
+            throw new TarantoolSpaceOperationException("Double update of the same field (%s)",
+                    filedIndex != null ? filedIndex : fieldName);
+        }
+
         this.operations.add(operation);
         return this;
     }
@@ -41,7 +60,7 @@ public final class TupleOperations {
     /**
      * Adds the specified value to the field value
      *
-     * @param fieldNumber field number starting with 1 
+     * @param fieldNumber field number starting with 0
      * @param value increment
      * @return new instance
      */
@@ -52,7 +71,7 @@ public final class TupleOperations {
     /**
      * Adds the specified value to the field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value increment
      * @return this
      */
@@ -85,7 +104,7 @@ public final class TupleOperations {
     /**
      * Bitwise AND(&) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return new instance
      */
@@ -96,7 +115,7 @@ public final class TupleOperations {
     /**
      * Bitwise AND(&) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return this
      */
@@ -129,7 +148,7 @@ public final class TupleOperations {
     /**
      * Bitwise OR(|) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return new instance
      */
@@ -140,7 +159,7 @@ public final class TupleOperations {
     /**
      * Bitwise OR(|) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return this
      */
@@ -173,7 +192,7 @@ public final class TupleOperations {
     /**
      * Bitwise XOR(^) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return new instance
      */
@@ -184,7 +203,7 @@ public final class TupleOperations {
     /**
      * Bitwise XOR(^) operation
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value value
      * @return this
      */
@@ -217,21 +236,29 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber start field number starting with 0
+     * @param fieldsCount the number of fields to remove
      * @return new instance
      */
-    public static TupleOperations delete(int fieldNumber, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, value));
+    public static TupleOperations delete(int fieldNumber, int fieldsCount) {
+        if (fieldsCount <= 0) {
+            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
+        }
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
     }
 
     /**
      * Remove field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber start field number starting with 0
+     * @param fieldsCount the number of fields to remove
      * @return this
      */
-    public TupleOperations andDelete(int fieldNumber, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, value));
+    public TupleOperations andDelete(int fieldNumber, int fieldsCount) {
+        if (fieldsCount <= 0) {
+            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
+        }
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
     }
 
     /**
@@ -240,8 +267,11 @@ public final class TupleOperations {
      * @param fieldName field name
      * @return new instance
      */
-    public static TupleOperations delete(String fieldName, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, value));
+    public static TupleOperations delete(String fieldName, int fieldsCount) {
+        if (fieldsCount <= 0) {
+            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
+        }
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
     }
 
     /**
@@ -250,14 +280,17 @@ public final class TupleOperations {
      * @param fieldName field name
      * @return this
      */
-    public TupleOperations andDelete(String fieldName, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, value));
+    public TupleOperations andDelete(String fieldName, int fieldsCount) {
+        if (fieldsCount <= 0) {
+            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
+        }
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
     }
 
     /**
      * Insert field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @return new instance
      */
     public static TupleOperations insert(int fieldNumber, Object value) {
@@ -267,7 +300,7 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @return this
      */
     public TupleOperations andInsert(int fieldNumber, Object value) {
@@ -297,7 +330,7 @@ public final class TupleOperations {
     /**
      * Set field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @return new instance
      */
     public static TupleOperations set(int fieldNumber, Object value) {
@@ -307,7 +340,7 @@ public final class TupleOperations {
     /**
      * Set field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @return this
      */
     public TupleOperations andSet(int fieldNumber, Object value) {
@@ -337,7 +370,7 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param position the start'th position
      * @param offset length of substring
      * @param replacement new value
@@ -350,7 +383,7 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param position the start'th position
      * @param offset length of substring
      * @param replacement new value
@@ -389,7 +422,7 @@ public final class TupleOperations {
     /**
      * Subtracts the specified value to the field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value increment
      * @return this
      */
@@ -400,7 +433,7 @@ public final class TupleOperations {
     /**
      * Subtracts the specified value to the field value
      *
-     * @param fieldNumber field number starting with 1
+     * @param fieldNumber field number starting with 0
      * @param value increment
      * @return this
      */

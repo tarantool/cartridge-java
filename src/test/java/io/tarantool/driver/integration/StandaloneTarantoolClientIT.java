@@ -1,5 +1,6 @@
 package io.tarantool.driver.integration;
 
+
 import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -236,6 +237,13 @@ public class StandaloneTarantoolClientIT {
         updateResult = testSpace.update(query, TupleOperations.set(2, "new string").andSet(3, 999)).get();
         assertEquals("new string", updateResult.get(0).getString(2));
         assertEquals(999, updateResult.get(0).getInteger(3));
+        assertEquals(4, updateResult.get(0).size());
+
+        updateResult = testSpace.update(query, TupleOperations.delete(3, 1)).get();
+        assertEquals(3, updateResult.get(0).size());
+
+        updateResult = testSpace.update(query, TupleOperations.insert(3, 1888)).get();
+        assertEquals(4, updateResult.get(0).size());
     }
 
     @Test
@@ -258,7 +266,7 @@ public class StandaloneTarantoolClientIT {
     public void upsertTest() throws Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
 
-        List<Object> newValues = Arrays.asList(255, "Animal Farm: A Fairy Story", "George Orwell",1945);
+        List<Object> newValues = Arrays.asList(255, "Animal Farm: A Fairy Story", "George Orwell", 1945);
 
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
 
