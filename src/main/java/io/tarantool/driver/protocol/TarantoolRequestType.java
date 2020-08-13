@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol;
 
 /**
- * Incapsulates a set of supported Tarantool request codes
+ * Encapsulates a set of supported Tarantool request codes
  *
  * @author Alexey Kuzin
  */

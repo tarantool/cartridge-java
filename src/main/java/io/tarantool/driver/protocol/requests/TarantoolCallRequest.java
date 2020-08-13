@@ -40,7 +40,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
          * @param functionName function name
          * @return builder
          */
-        public TarantoolCallRequest.Builder withFunctionName(String functionName) {
+        public Builder withFunctionName(String functionName) {
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_FUNCTION_NAME.getCode(), functionName);
             return this;
         }
@@ -50,7 +50,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
          * @param arguments function arguments
          * @return builder
          */
-        public TarantoolCallRequest.Builder withArguments(List<Object> arguments) {
+        public Builder withArguments(List<Object> arguments) {
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), arguments);
             return this;
         }

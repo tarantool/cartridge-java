@@ -15,6 +15,7 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,21 +51,21 @@ public class StandaloneTarantoolClientIT {
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
-    public static void setUp() throws TarantoolClientException {
+    public static void setUp() {
         assertTrue(tarantoolContainer.isRunning());
         initConnection();
     }
 
-    private static void initConnection() throws TarantoolClientException {
+    private static void initConnection() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
                 //"guest", "");
                 tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
+                .withConnectTimeout(1000 * 500)
+                .withReadTimeout(1000 * 500)
+                .withRequestTimeout(1000 * 500)
                 .build();
 
         log.info("Attempting connect to Tarantool");
@@ -74,7 +75,7 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void connectAndCheckMetadata() throws TarantoolClientException {
+    public void connectAndCheckMetadata() {
         Optional<TarantoolSpaceMetadata> spaceHolder = connection.metadata().getSpaceByName("_space");
         assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
         log.info("Retrieved ID from metadata for space '_space': {}",
@@ -89,7 +90,7 @@ public class StandaloneTarantoolClientIT {
 
     //TODO: reset space before each test
     @Test
-    public void insertAndSelectRequests() throws TarantoolClientException, Exception {
+    public void insertAndSelectRequests() throws Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
         //make select request
         TarantoolIndexQuery query = new TarantoolIndexQuery();
@@ -134,7 +135,7 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void replaceRequest() throws TarantoolClientException, Exception {
+    public void replaceRequest() throws Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
 
         List<Object> arrayValue = Arrays.asList(200, "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
@@ -172,7 +173,7 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void deleteRequest() throws TarantoolClientException, Exception {
+    public void deleteRequest() throws Exception {
         TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
         int deletedId = 2;
 
@@ -198,6 +199,91 @@ public class StandaloneTarantoolClientIT {
                 .filter(v -> v.getInteger(0) == deletedId).findFirst();
         assertEquals(0, selectAfterDeleteResult.size());
         assertFalse(deletedValue.isPresent());
+    }
+
+    @Test
+    public void updateTest() throws Exception {
+        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+
+        List<Object> newValues = Arrays.asList(123, "The Lord of the Rings", "J. R. R. Tolkien", 1968);
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
+        testSpace.insert(tarantoolTuple);
+
+        TarantoolIndexQuery query = new TarantoolIndexQuery();
+        query.withKeyValues(Collections.singletonList(123));
+
+        TarantoolResult<TarantoolTuple> updateResult;
+
+        updateResult = testSpace.update(query, TupleOperations.add(3, 100000)).get();
+        assertEquals(101968, updateResult.get(0).getInteger(3));
+
+        updateResult = testSpace.update(query, TupleOperations.subtract(3, 50000)).get();
+        assertEquals(51968, updateResult.get(0).getInteger(3));
+
+        updateResult = testSpace.update(query, TupleOperations.set(3, 10)).get();
+        assertEquals(10, updateResult.get(0).getInteger(3));
+
+        updateResult = testSpace.update(query, TupleOperations.bitwiseXor(3, 10)).get();
+        assertEquals(0, updateResult.get(0).getInteger(3));
+
+        updateResult = testSpace.update(query, TupleOperations.bitwiseOr(3, 5)).get();
+        assertEquals(5, updateResult.get(0).getInteger(3));
+
+        updateResult = testSpace.update(query, TupleOperations.bitwiseAnd(3, 6)).get();
+        assertEquals(4, updateResult.get(0).getInteger(3));
+
+        // set multiple fields
+        updateResult = testSpace.update(query, TupleOperations.set(2, "new string").andSet(3, 999)).get();
+        assertEquals("new string", updateResult.get(0).getString(2));
+        assertEquals(999, updateResult.get(0).getInteger(3));
+    }
+
+    @Test
+    public void updateByFieldName() throws Exception {
+        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+
+        List<Object> newValues = Arrays.asList(105534, "The Jungle Book", "Sir Joseph Rudyard Kipling", 1893);
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
+        testSpace.insert(tarantoolTuple);
+
+        TarantoolIndexQuery query = new TarantoolIndexQuery();
+        query.withKeyValues(Collections.singletonList(105534));
+
+        TarantoolResult<TarantoolTuple> updateResult;
+        updateResult = testSpace.update(query, TupleOperations.add("year", 7)).get();
+        assertEquals(1900, updateResult.get(0).getInteger(3));
+    }
+
+    @Test
+    public void upsertTest() throws Exception {
+        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+
+        List<Object> newValues = Arrays.asList(255, "Animal Farm: A Fairy Story", "George Orwell",1945);
+
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
+
+        TarantoolIndexQuery query = new TarantoolIndexQuery();
+        query.withKeyValues(Collections.singletonList(255));
+
+        TupleOperations ops = TupleOperations.set(3, 2020)
+                .andSplice(1, 5, 1, "aaa");
+
+        //run upsert first time tuple
+        TarantoolResult<TarantoolTuple> upsertResult = testSpace.upsert(query, tarantoolTuple, ops).get();
+
+        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+
+        assertEquals(1, selectResult.size());
+        assertEquals(1945, selectResult.get(0).getInteger(3));
+        assertEquals("Animal Farm: A Fairy Story", selectResult.get(0).getString(1));
+
+        //run upsert second time
+        upsertResult = testSpace.upsert(query, tarantoolTuple, ops).get();
+
+        selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        assertEquals(1, selectResult.size());
+        assertEquals(2020, selectResult.get(0).getInteger(3));
+        assertEquals("Animaaaa Farm: A Fairy Story", selectResult.get(0).getString(1));
     }
 
     @Test

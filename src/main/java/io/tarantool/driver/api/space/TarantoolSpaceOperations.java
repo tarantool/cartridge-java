@@ -7,6 +7,7 @@ import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
+import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.msgpack.value.ArrayValue;
 
 import java.util.concurrent.CompletableFuture;
@@ -150,4 +151,64 @@ public interface TarantoolSpaceOperations {
     <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
+
+    /**
+     * Update a tuple
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @param operations the list update operations
+     * @return a future that will contain corresponding tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(TarantoolIndexQuery indexQuery,
+                                                              TupleOperations operations);
+
+    /**
+     * Update a tuple
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @param operations the list update operations
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                    an object of type {@code T}
+     * @param <T> result type
+     * @return a future that will contain corresponding tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> update(TarantoolIndexQuery indexQuery,
+                                                     TupleOperations operations,
+                                                     ValueConverter<ArrayValue, T> tupleMapper);
+
+    /**
+     * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                         values for matching
+     * @param tuple new data that will be insert if tuple will be not found
+     * @param operations the list of update operations to be performed if the tuple exists
+     * @return a future that will empty list
+     * @throws TarantoolClientException in case if the request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(TarantoolIndexQuery indexQuery,
+                                                              TarantoolTuple tuple,
+                                                              TupleOperations operations);
+
+    /**
+     * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                         values for matching
+     * @param tuple new data that will be insert if tuple will be not found
+     * @param operations the list of update operations to be performed if the tuple exists
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                          an object of type {@code T}
+     * @param <T> result type
+     * @return a future that will empty list
+     * @throws TarantoolClientException in case if the request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> upsert(TarantoolIndexQuery indexQuery,
+                                                     TarantoolTuple tuple,
+                                                     TupleOperations operations,
+                                                     ValueConverter<ArrayValue, T> tupleMapper);
 }

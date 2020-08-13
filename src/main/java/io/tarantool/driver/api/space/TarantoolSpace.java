@@ -16,10 +16,13 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
+import io.tarantool.driver.protocol.operations.TupleOperations;
 import io.tarantool.driver.protocol.requests.TarantoolDeleteRequest;
 import io.tarantool.driver.protocol.requests.TarantoolInsertRequest;
 import io.tarantool.driver.protocol.requests.TarantoolReplaceRequest;
 import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
+import io.tarantool.driver.protocol.requests.TarantoolUpdateRequest;
+import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Optional;
@@ -184,6 +187,69 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                     .withKeyValues(indexQuery.getKeyValues())
                     .withLimit(options.getLimit())
                     .withOffset(options.getOffset())
+                    .build(config.getMessagePackMapper());
+
+            return sendRequest(request, tupleMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(TarantoolIndexQuery indexQuery,
+                                                                     TupleOperations operations) {
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
+        return update(indexQuery, operations, converter);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> update(TarantoolIndexQuery indexQuery,
+                                                            TupleOperations operations,
+                                                            ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        try {
+            Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
+            if (!metadata.isPresent()) {
+                throw new TarantoolSpaceNotFoundException(spaceId);
+            }
+            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(metadata.get())
+                    .withSpaceId(spaceId)
+                    .withIndexId(indexQuery.getIndexId())
+                    .withKeyValues(indexQuery.getKeyValues())
+                    .withTupleOperations(operations)
+                    .build(config.getMessagePackMapper());
+
+            return sendRequest(request, tupleMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(TarantoolIndexQuery indexQuery,
+                                                                     TarantoolTuple tuple,
+                                                                     TupleOperations operations) {
+        ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
+        return upsert(indexQuery, tuple, operations, converter);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> upsert(TarantoolIndexQuery indexQuery,
+                                                            TarantoolTuple tuple,
+                                                            TupleOperations operations,
+                                                            ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        try {
+            Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
+            if (!metadata.isPresent()) {
+                throw new TarantoolSpaceNotFoundException(spaceId);
+            }
+            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(metadata.get())
+                    .withSpaceId(spaceId)
+                    .withIndexId(indexQuery.getIndexId())
+                    .withKeyValues(indexQuery.getKeyValues())
+                    .withTuple(tuple)
+                    .withTupleOperations(operations)
                     .build(config.getMessagePackMapper());
 
             return sendRequest(request, tupleMapper);
