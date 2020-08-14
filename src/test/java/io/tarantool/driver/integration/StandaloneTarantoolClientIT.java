@@ -64,9 +64,9 @@ public class StandaloneTarantoolClientIT {
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
-                .withConnectTimeout(1000 * 500)
-                .withReadTimeout(1000 * 500)
-                .withRequestTimeout(1000 * 500)
+                .withConnectTimeout(1000 * 5)
+                .withReadTimeout(1000 * 5)
+                .withRequestTimeout(1000 * 5)
                 .build();
 
         log.info("Attempting connect to Tarantool");

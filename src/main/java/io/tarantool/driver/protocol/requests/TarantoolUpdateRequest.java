@@ -60,8 +60,8 @@ public final class TarantoolUpdateRequest extends TarantoolRequest {
 
         public Builder withTupleOperations(TupleOperations operations) {
             operations.asList().forEach(op -> {
-                if (op.getFieldIndex() == null) {
-                    op.setFieldIndex(metadata.getFieldPositionByName(op.getFieldName()));
+                if (op.getFieldNumber() == null) {
+                    op.setFieldNumber(metadata.getFieldPositionByName(op.getFieldName()));
                 }
             });
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), operations.asList());

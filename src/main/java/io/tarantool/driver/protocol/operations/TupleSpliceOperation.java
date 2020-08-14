@@ -10,7 +10,7 @@ import java.util.Arrays;
  *
  * @author Sergey Volgin
  */
-public class TupleSpliceOperation extends TupleUpdateOperation implements TupleOperation {
+public class TupleSpliceOperation extends TupleUpdateOperation {
 
     private final int position;
     private final int offset;
@@ -30,7 +30,7 @@ public class TupleSpliceOperation extends TupleUpdateOperation implements TupleO
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(Arrays.asList(
-                getOperationType().toString(), getFieldIndex(), getPosition(), getOffset(), getValue()));
+                getOperationType().toString(), getFieldNumber(), getPosition(), getOffset(), getValue()));
     }
 
     public int getPosition() {

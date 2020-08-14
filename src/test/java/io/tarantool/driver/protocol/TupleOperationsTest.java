@@ -1,11 +1,19 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+import io.tarantool.driver.protocol.operations.TarantoolOperationType;
+import io.tarantool.driver.protocol.operations.TupleOperation;
 import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.protocol.operations.TupleSpliceOperation;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleOperationsTest {
 
@@ -46,5 +54,21 @@ public class TupleOperationsTest {
         operations.andSplice("field_9", 6, 10, "ndnd");
 
         assertEquals(18, operations.asList().size());
+
+        List<TarantoolOperationType> expectedOperationTypes = Arrays.asList(
+                TarantoolOperationType.BITWISEXOR, TarantoolOperationType.BITWISEXOR,
+                TarantoolOperationType.BITWISEAND, TarantoolOperationType.BITWISEAND,
+                TarantoolOperationType.BITWISEOR, TarantoolOperationType.BITWISEOR,
+                TarantoolOperationType.BITWISEXOR, TarantoolOperationType.BITWISEXOR,
+                TarantoolOperationType.ADD, TarantoolOperationType.ADD,
+                TarantoolOperationType.SET, TarantoolOperationType.SET,
+                TarantoolOperationType.SUBTRACT, TarantoolOperationType.SUBTRACT,
+                TarantoolOperationType.INSERT, TarantoolOperationType.INSERT,
+                TarantoolOperationType.SPLICE, TarantoolOperationType.SPLICE);
+
+        List<TarantoolOperationType> actualOperationTypes = operations.asList().stream()
+                .map(TupleOperation::getOperationType).collect(Collectors.toList());
+
+        assertEquals(expectedOperationTypes, actualOperationTypes);
     }
 }

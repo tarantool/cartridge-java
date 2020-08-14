@@ -29,12 +29,12 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations addOperation(TupleOperation operation) {
-        Integer filedIndex = operation.getFieldIndex();
+        Integer filedIndex = operation.getFieldNumber();
         String fieldName = operation.getFieldName();
 
         Optional<TupleOperation> existField;
         if (filedIndex != null) {
-            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldIndex())).findFirst();
+            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldNumber())).findFirst();
         } else {
             existField = this.operations.stream().filter(op -> fieldName.equals(op.getFieldName())).findFirst();
         }
@@ -108,7 +108,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseAnd(int fieldNumber, Number value) {
+    public static TupleOperations bitwiseAnd(int fieldNumber, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldNumber, value));
     }
 
@@ -119,7 +119,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseAnd(int fieldNumber, Number value) {
+    public TupleOperations andBitwiseAnd(int fieldNumber, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldNumber, value));
     }
 
@@ -130,7 +130,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseAnd(String fieldName, Number value) {
+    public static TupleOperations bitwiseAnd(String fieldName, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldName, value));
     }
 
@@ -141,7 +141,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseAnd(String fieldName, Number value) {
+    public TupleOperations andBitwiseAnd(String fieldName, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldName, value));
     }
 
@@ -152,7 +152,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseOr(int fieldNumber, Number value) {
+    public static TupleOperations bitwiseOr(int fieldNumber, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldNumber, value));
     }
 
@@ -163,7 +163,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseOr(int fieldNumber, Number value) {
+    public TupleOperations andBitwiseOr(int fieldNumber, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldNumber, value));
     }
 
@@ -174,7 +174,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseOr(String fieldName, Number value) {
+    public static TupleOperations bitwiseOr(String fieldName, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldName, value));
     }
 
@@ -185,7 +185,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseOr(String fieldName, Number value) {
+    public TupleOperations andBitwiseOr(String fieldName, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldName, value));
     }
 
@@ -196,7 +196,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseXor(int fieldNumber, Number value) {
+    public static TupleOperations bitwiseXor(int fieldNumber, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldNumber, value));
     }
 
@@ -207,7 +207,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseXor(int fieldNumber, Number value) {
+    public TupleOperations andBitwiseXor(int fieldNumber, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldNumber, value));
     }
 
@@ -218,7 +218,7 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseXor(String fieldName, Number value) {
+    public static TupleOperations bitwiseXor(String fieldName, int value) {
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldName, value));
     }
 
@@ -229,7 +229,7 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseXor(String fieldName, Number value) {
+    public TupleOperations andBitwiseXor(String fieldName, int value) {
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldName, value));
     }
 
@@ -241,9 +241,6 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations delete(int fieldNumber, int fieldsCount) {
-        if (fieldsCount <= 0) {
-            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
-        }
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
     }
 
@@ -255,9 +252,6 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andDelete(int fieldNumber, int fieldsCount) {
-        if (fieldsCount <= 0) {
-            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
-        }
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
     }
 
@@ -268,9 +262,6 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations delete(String fieldName, int fieldsCount) {
-        if (fieldsCount <= 0) {
-            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
-        }
         return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
     }
 
@@ -281,9 +272,6 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andDelete(String fieldName, int fieldsCount) {
-        if (fieldsCount <= 0) {
-            throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
-        }
         return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
     }
 
