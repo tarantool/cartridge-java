@@ -66,11 +66,15 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
      * @throws TarantoolClientException if failed to retrieve the space information from Tarantool server
      */
     public String getName() throws TarantoolClientException {
-        Optional<TarantoolSpaceMetadata> meta = connection.metadata().getSpaceById(spaceId);
-        if (!meta.isPresent()) {
+        return getMetadata().getSpaceName();
+    }
+
+    private TarantoolSpaceMetadata getMetadata() {
+        Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
+        if (!metadata.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
-        return meta.get().getSpaceName();
+        return metadata.get();
     }
 
     @Override
@@ -208,11 +212,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
-            Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
-            if (!metadata.isPresent()) {
-                throw new TarantoolSpaceNotFoundException(spaceId);
-            }
-            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(metadata.get())
+            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(getMetadata())
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
@@ -240,11 +240,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
-            Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
-            if (!metadata.isPresent()) {
-                throw new TarantoolSpaceNotFoundException(spaceId);
-            }
-            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(metadata.get())
+            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(getMetadata())
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
