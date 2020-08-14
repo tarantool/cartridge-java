@@ -4,14 +4,16 @@ import java.util.Objects;
 
 /**
  * <p>This class is not part of the public API.</p>
+ *
+ * @author Sergey Volgin
  */
 final class ServerNodeInfo {
     private String uuid;
     private String uri;
     private String status;
-    private Double network_timeout;
+    private Double networkTimeout;
 
-    public ServerNodeInfo() {
+    ServerNodeInfo() {
     }
 
     public String getUuid() {
@@ -38,27 +40,31 @@ final class ServerNodeInfo {
         this.status = status;
     }
 
-    public Double getNetwork_timeout() {
-        return network_timeout;
+    public Double getNetworkTimeout() {
+        return networkTimeout;
     }
 
-    public void setNetwork_timeout(Double network_timeout) {
-        this.network_timeout = network_timeout;
+    public void setNetworkTimeout(Double networkTimeout) {
+        this.networkTimeout = networkTimeout;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ServerNodeInfo that = (ServerNodeInfo) o;
         return Objects.equals(uuid, that.uuid) &&
                 Objects.equals(uri, that.uri) &&
                 Objects.equals(status, that.status) &&
-                Objects.equals(network_timeout, that.network_timeout);
+                Objects.equals(networkTimeout, that.networkTimeout);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, uri, status, network_timeout);
+        return Objects.hash(uuid, uri, status, networkTimeout);
     }
 }

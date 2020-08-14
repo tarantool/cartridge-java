@@ -2,6 +2,8 @@ package io.tarantool.driver;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 /**
@@ -9,7 +11,7 @@ import java.net.UnknownHostException;
  *
  * @author Sergey Volgin
  */
-public class ServerAddress {
+public class TarantoolServerAddress {
 
     private static final String DEFAULT_HOST = "127.0.0.1";
     private static final int DEFAULT_PORT = 3301;
@@ -18,50 +20,41 @@ public class ServerAddress {
     private final int port;
 
     /**
-     * Create a ServerAddress with default host and port
+     * Create a TarantoolServerAddress with default host and port
      */
-    public ServerAddress() {
+    public TarantoolServerAddress() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
     /**
-     * Create a ServerAddress with default port
+     * Create a TarantoolServerAddress with default port
      *
      * @param host hostname
      */
-    public ServerAddress(final String host) {
+    public TarantoolServerAddress(final String host) {
         this(host, DEFAULT_PORT);
     }
 
     /**
-     * Create a {@link ServerAddress} instance
+     * Create a {@link TarantoolServerAddress} instance
      *
      * @param host hostname
      * @param port tarantool port
      */
-    public ServerAddress(final String host, final int port) {
-        int portNumber = port;
-        String hostName = host;
-
-        int firstIndex = host.indexOf(":");
-        int lastIndex = host.lastIndexOf(":");
-        if (firstIndex > 0 && firstIndex == lastIndex) {
-            if (port != DEFAULT_PORT) {
-                throw new IllegalArgumentException("can't specify port in construct and in host name");
-            }
-            try {
-                portNumber = Integer.parseInt(hostName.substring(firstIndex + 1));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid port number: host and port should be specified in host:port format");
-            }
-            if (portNumber <= 0 || portNumber > 65535) {
-                throw new IllegalArgumentException(String.format("Invalid port number : %s", portNumber));
-            }
-            hostName = host.substring(0, firstIndex).trim();
+    public TarantoolServerAddress(final String host, final int port) {
+        if (port <= 0 || port > 65535) {
+            throw new IllegalArgumentException(String.format("Invalid port number : %s", port));
         }
 
-        this.port = portNumber;
-        this.host = hostName;
+        URI uri;
+        try {
+            uri = new URI(host);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(String.format("Invalid host name: %s", host), e);
+        }
+
+        this.host = uri.getHost();
+        this.port = (uri.getPort() != -1) ? uri.getPort() : port;
     }
 
     /**
@@ -104,7 +97,7 @@ public class ServerAddress {
             return false;
         }
 
-        ServerAddress that = (ServerAddress) o;
+        TarantoolServerAddress that = (TarantoolServerAddress) o;
         if (port != that.port) {
             return false;
         }

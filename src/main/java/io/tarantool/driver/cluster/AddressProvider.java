@@ -1,6 +1,6 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.ServerAddress;
+import io.tarantool.driver.TarantoolServerAddress;
 
 import java.util.Collection;
 
@@ -13,20 +13,20 @@ public interface AddressProvider {
 
     /**
      * Get an current node address
-     * @return the {@link ServerAddress}
+     * @return the {@link TarantoolServerAddress}
      */
-    ServerAddress getAddress();
+    TarantoolServerAddress getAddress();
 
     /**
      * Get the next node address
-     * @return the {@link ServerAddress}
+     * @return the {@link TarantoolServerAddress}
      */
-    ServerAddress getNext();
+    TarantoolServerAddress getNext();
 
     /**
      * Update current address list by new list
      *
-     * @param addresses list {@link ServerAddress} of cluster nodes
+     * @param addresses list {@link TarantoolServerAddress} of cluster nodes
      */
-    void updateAddressList(Collection<ServerAddress> addresses);
+    void updateAddressList(Collection<TarantoolServerAddress> addresses);
 }

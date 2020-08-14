@@ -9,32 +9,32 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
  */
 public class TarantoolSocketException extends TarantoolClientException {
 
-    private final ServerAddress serverAddress;
+    private final TarantoolServerAddress tarantoolServerAddress;
 
     /**
      * @param message the message
-     * @param serverAddress the address
+     * @param tarantoolServerAddress the address
      * @param cause the cause
      */
-    public TarantoolSocketException(String message, ServerAddress serverAddress, Throwable cause) {
+    public TarantoolSocketException(String message, TarantoolServerAddress tarantoolServerAddress, Throwable cause) {
         super(message, cause);
-        this.serverAddress = serverAddress;
+        this.tarantoolServerAddress = tarantoolServerAddress;
     }
 
     /**
      * @param message the message
-     * @param serverAddress the cause
+     * @param tarantoolServerAddress the cause
      */
-    public TarantoolSocketException(String message, ServerAddress serverAddress) {
+    public TarantoolSocketException(String message, TarantoolServerAddress tarantoolServerAddress) {
         super(message);
-        this.serverAddress = serverAddress;
+        this.tarantoolServerAddress = tarantoolServerAddress;
     }
 
     /**
-     * Get {@link ServerAddress} for this exception
+     * Get {@link TarantoolServerAddress} for this exception
      * @return the address
      */
-    public ServerAddress getServerAddress() {
-        return serverAddress;
+    public TarantoolServerAddress getTarantoolServerAddress() {
+        return tarantoolServerAddress;
     }
 }

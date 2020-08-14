@@ -1,6 +1,6 @@
 package io.tarantool.driver.providers;
 
-import io.tarantool.driver.ServerAddress;
+import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.cluster.RoundRobinAddressProvider;
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +13,11 @@ public class RoundRobinAddressProviderTest {
 
     @Test
     public void getAddress() {
-        List<ServerAddress> addressList = Arrays.asList(
-                new ServerAddress("127.0.0.1", 3301),
-                new ServerAddress("127.0.0.2", 3302),
-                new ServerAddress("127.0.0.3", 3303),
-                new ServerAddress("127.0.0.1", 3301) //duplicate
+        List<TarantoolServerAddress> addressList = Arrays.asList(
+                new TarantoolServerAddress("127.0.0.1", 3301),
+                new TarantoolServerAddress("127.0.0.2", 3302),
+                new TarantoolServerAddress("127.0.0.3", 3303),
+                new TarantoolServerAddress("127.0.0.1", 3301) //duplicate
         );
 
         RoundRobinAddressProvider provider = new RoundRobinAddressProvider(addressList);
@@ -38,10 +38,10 @@ public class RoundRobinAddressProviderTest {
 
     @Test
     public void updateAddressList() {
-        List<ServerAddress> addressList = Arrays.asList(
-                new ServerAddress("127.0.0.1", 3301),
-                new ServerAddress("127.0.0.2", 3301),
-                new ServerAddress("127.0.0.3", 3301)
+        List<TarantoolServerAddress> addressList = Arrays.asList(
+                new TarantoolServerAddress("127.0.0.1", 3301),
+                new TarantoolServerAddress("127.0.0.2", 3301),
+                new TarantoolServerAddress("127.0.0.3", 3301)
         );
 
         RoundRobinAddressProvider provider = new RoundRobinAddressProvider(addressList);
@@ -51,12 +51,12 @@ public class RoundRobinAddressProviderTest {
         assertEquals("127.0.0.2", provider.getNext().getHost());
         assertEquals("127.0.0.3", provider.getNext().getHost());
 
-        List<ServerAddress> newAddressList = Arrays.asList(
-                new ServerAddress("10.0.2.10", 3301),
-                new ServerAddress("10.0.2.11", 3301),
-                new ServerAddress("127.0.0.3", 3301), //current address
-                new ServerAddress("10.0.2.12", 3301),
-                new ServerAddress("10.0.2.13", 3301)
+        List<TarantoolServerAddress> newAddressList = Arrays.asList(
+                new TarantoolServerAddress("10.0.2.10", 3301),
+                new TarantoolServerAddress("10.0.2.11", 3301),
+                new TarantoolServerAddress("127.0.0.3", 3301), //current address
+                new TarantoolServerAddress("10.0.2.12", 3301),
+                new TarantoolServerAddress("10.0.2.13", 3301)
         );
 
         provider.updateAddressList(newAddressList);

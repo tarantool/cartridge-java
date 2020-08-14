@@ -9,7 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.AddressProvider;
-import io.tarantool.driver.cluster.AddressProviderWithClusterDiscovery;
+import io.tarantool.driver.cluster.ClusterDiscovererFactory;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
@@ -36,7 +35,6 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     private Bootstrap bootstrap;
     private ConcurrentHashMap<InetSocketAddress, TarantoolConnection> connections;
     private AddressProvider addressProvider;
-    private AtomicBoolean isDiscoveryTaskActive = new AtomicBoolean(false);
 
     /**
      * Create a client. Default credentials will be used.
@@ -64,7 +62,8 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config) {
         this.config = config;
-        this.addressProvider = config.getAddressProvider();
+        this.addressProvider = ClusterDiscovererFactory.create(config.getServerSelectStrategy(), config.getClusterDiscoveryConfig());
+
         this.eventLoopGroup = new NioEventLoopGroup();
         this.connections = new ConcurrentHashMap<>();
         this.bootstrap = new Bootstrap()
@@ -77,20 +76,14 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     }
 
     /**
-     * Connects to the Tarantool server and, if necessary, starts a discovery task.
+     * Connect to a Tarantool server
      * @return connected client
      * @throws TarantoolClientException when connection or request for metadata are failed
      */
     @Override
     public TarantoolConnection connect() throws TarantoolClientException {
-        if (config.getClusterDiscoveryEndpoint() != null &&
-                addressProvider instanceof AddressProviderWithClusterDiscovery &&
-                isDiscoveryTaskActive.compareAndSet(false, true)) {
-            ((AddressProviderWithClusterDiscovery)addressProvider).runClusterDiscovery(config, this);
-        }
-
-        ServerAddress serverAddress = addressProvider.getNext();
-        return connect(serverAddress.getSocketAddress());
+        TarantoolServerAddress tarantoolServerAddress = addressProvider.getNext();
+        return connect(tarantoolServerAddress.getSocketAddress());
     }
 
     private TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException {

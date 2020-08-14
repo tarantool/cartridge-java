@@ -9,6 +9,8 @@ public class HTTPClusterDiscoveryEndpoint implements ClusterDiscoveryEndpoint {
 
     private final String uri;
 
+
+
     public HTTPClusterDiscoveryEndpoint(String uri) {
         this.uri = uri;
     }

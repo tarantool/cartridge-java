@@ -1,6 +1,6 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.ServerAddress;
+import io.tarantool.driver.TarantoolServerAddress;
 
 import java.util.List;
 
@@ -9,12 +9,12 @@ import java.util.List;
  *
  * @author Sergey Volgin
  */
-public interface ClusterDiscoverer extends AutoCloseable {
+public interface ClusterDiscoverer extends AddressProvider, AutoCloseable {
 
     /**
-     * Get list of {@link ServerAddress}
+     * Get list of {@link TarantoolServerAddress}
      *
      * @return list of cluster nodes
      */
-    List<ServerAddress> getNodes();
+    List<TarantoolServerAddress> getNodes();
 }

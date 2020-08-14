@@ -2,10 +2,11 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.cluster.AddressProvider;
+import io.tarantool.driver.cluster.ServerSelectStrategy;
+import io.tarantool.driver.cluster.ClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.RoundRobinAddressProvider;
-import io.tarantool.driver.cluster.ClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.SingleAddressProvider;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryEndpoint;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import org.springframework.util.Assert;
@@ -31,10 +32,9 @@ public class TarantoolClientConfig {
     private int connectTimeout = 1000;
     private int readTimeout = 1000;
     private int requestTimeout = 2000;
-    private int serviceDiscoveryDelay = 60_000;
-    private ClusterDiscoveryEndpoint clusterDiscoveryEndpoint;
-    private AddressProvider addressProvider;
-    private List<ServerAddress> hosts;
+    private ClusterDiscoveryConfig clusterDiscoveryConfig;
+    private ServerSelectStrategy serverSelectStrategy;
+    private List<TarantoolServerAddress> hosts;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
 
@@ -128,69 +128,50 @@ public class TarantoolClientConfig {
 
     /**
      * Get strategy for selecting server
-     * @return a {@link AddressProvider}
+     * @return a {@link ServerSelectStrategy}
      */
-    public AddressProvider getAddressProvider() {
-        return addressProvider;
+    public ServerSelectStrategy getServerSelectStrategy() {
+        return serverSelectStrategy;
     }
 
     /**
      * Set strategy for selecting server
-     * @param addressProvider a {@link AddressProvider} instance
+     * @param serverSelectStrategy a {@link ServerSelectStrategy} instance
      */
-    public void setAddressProvider(AddressProvider addressProvider) {
-        this.addressProvider = addressProvider;
+    public void setServerSelectStrategy(ServerSelectStrategy serverSelectStrategy) {
+        this.serverSelectStrategy = serverSelectStrategy;
     }
 
     /**
      * Get list of tarantool hosts to use when connection to tarantool server or cluster
-     * @return list of {@link ServerAddress} addresses
+     * @return list of {@link TarantoolServerAddress} addresses
      */
-    public List<ServerAddress> getHosts() {
+    public List<TarantoolServerAddress> getHosts() {
         return hosts;
     }
 
     /**
      * Set list of tarantool hosts to use when connection to tarantool cluster
-     * @param hosts list of {@link ServerAddress} addresses
+     * @param hosts list of {@link TarantoolServerAddress} addresses
      */
-    public void setHosts(List<ServerAddress> hosts) {
+    public void setHosts(List<TarantoolServerAddress> hosts) {
         this.hosts = hosts;
     }
 
     /**
-     * Get config of service discovery endpoint
-     * @return a {@link ClusterDiscoveryEndpoint} instance
+     * Get config for cluster discovery
+     * @return a {@link ClusterDiscoveryConfig}
      */
-    public ClusterDiscoveryEndpoint getClusterDiscoveryEndpoint() {
-        return clusterDiscoveryEndpoint;
+    public ClusterDiscoveryConfig getClusterDiscoveryConfig() {
+        return clusterDiscoveryConfig;
     }
 
     /**
-     * Set service discovery endpoint config and enable cluster connection
-     * @param endpoint a {@link ClusterDiscoveryEndpoint} instance
+     * Set config for cluster discovery
+     * @param clusterDiscoveryConfig a {@link ClusterDiscoveryConfig} instance
      */
-    public void setClusterDiscoveryEndpoint(ClusterDiscoveryEndpoint endpoint) {
-        this.clusterDiscoveryEndpoint = endpoint;
-    }
-
-    /**
-     * Get cluster discovery delay
-     * @return cluster discovery delay, milliseconds
-     */
-    public int getServiceDiscoveryDelay() {
-        return serviceDiscoveryDelay;
-    }
-
-    /**
-     * Set scan period of receiving a new list of instances
-     * @param serviceDiscoveryDelay period of receiving a new list of instances
-     */
-    public void setServiceDiscoveryDelay(int serviceDiscoveryDelay) {
-        if (serviceDiscoveryDelay <= 0) {
-            throw new IllegalArgumentException("Discovery delay must be greater than 0");
-        }
-        this.serviceDiscoveryDelay = serviceDiscoveryDelay;
+    public void setClusterDiscoveryConfig(ClusterDiscoveryConfig clusterDiscoveryConfig) {
+        this.clusterDiscoveryConfig = clusterDiscoveryConfig;
     }
 
     /**
@@ -273,33 +254,23 @@ public class TarantoolClientConfig {
 
         /**
          * Specify strategy for selecting server
-         * @param addressProvider a {@link AddressProvider}, which the server selection strategy
+         * @param strategy a {@link ServerSelectStrategy}, which the server selection strategy
          * @return builder
-         * @see TarantoolClientConfig#setAddressProvider(AddressProvider)
+         * @see TarantoolClientConfig#setServerSelectStrategy(ServerSelectStrategy)
          */
-        public Builder withAddressProvider(AddressProvider addressProvider) {
-            config.setAddressProvider(addressProvider);
+        public Builder withServerSelectStrategy(ServerSelectStrategy strategy) {
+            config.setServerSelectStrategy(strategy);
             return this;
         }
 
         /**
-         * Specify service discovery config and enable using service discovery
+         * Specify cluster discovery config
+         * @param clusterDiscoveryConfig a {@link ClusterDiscoveryConfig} instance
          * @return builder
-         * @see TarantoolClientConfig#setClusterDiscoveryEndpoint(ClusterDiscoveryEndpoint)
+         * @see TarantoolClientConfig#setClusterDiscoveryConfig(ClusterDiscoveryConfig)
          */
-        public Builder withServiceDiscovery(ClusterDiscoveryEndpoint endpoint) {
-            config.setClusterDiscoveryEndpoint(endpoint);
-            return this;
-        }
-
-        /**
-         *Specify .
-         * @param delay
-         * @return builder
-         * @see TarantoolClientConfig#setServiceDiscoveryDelay(int)
-         */
-        public Builder withServiceDiscoveryDelay(int delay) {
-            config.setServiceDiscoveryDelay(delay);
+        public Builder withClusterDiscoveryConfig(ClusterDiscoveryConfig clusterDiscoveryConfig) {
+            config.setClusterDiscoveryConfig(clusterDiscoveryConfig);
             return this;
         }
 
@@ -309,7 +280,7 @@ public class TarantoolClientConfig {
          * @return builder
          * @see TarantoolClientConfig#setHosts(List)
          */
-        public Builder withHosts(List<ServerAddress> hosts) {
+        public Builder withHosts(List<TarantoolServerAddress> hosts) {
             Assert.notNull(hosts, "Hosts list must not be null");
             if (hosts.isEmpty()) {
                 throw new IllegalArgumentException("hosts list may not be empty");
@@ -318,10 +289,11 @@ public class TarantoolClientConfig {
                 throw new IllegalArgumentException("The host list is already set");
             }
 
-            Set<ServerAddress> hostsSet = new LinkedHashSet<>(hosts.size());
-            for (ServerAddress serverAddress : hosts) {
-                Assert.notNull(serverAddress, "ServerAddress must not be null");
-                hostsSet.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+            Set<TarantoolServerAddress> hostsSet = new LinkedHashSet<>(hosts.size());
+            for (TarantoolServerAddress tarantoolServerAddress : hosts) {
+                Assert.notNull(tarantoolServerAddress, "TarantoolServerAddress must not be null");
+                hostsSet.add(new TarantoolServerAddress(tarantoolServerAddress.getHost(),
+                        tarantoolServerAddress.getPort()));
             }
 
             config.setHosts(new ArrayList<>(hostsSet));
@@ -338,7 +310,7 @@ public class TarantoolClientConfig {
             if (config.getHosts() != null) {
                 throw new IllegalArgumentException("The host list is already set");
             }
-            config.setHosts(Collections.singletonList(new ServerAddress(host, port)));
+            config.setHosts(Collections.singletonList(new TarantoolServerAddress(host, port)));
             return this;
         }
 
@@ -348,19 +320,26 @@ public class TarantoolClientConfig {
          */
         public TarantoolClientConfig build() {
             if (config.getHosts() == null) {
-                config.setHosts(Collections.singletonList(new ServerAddress()));
+                config.setHosts(Collections.singletonList(new TarantoolServerAddress()));
             }
 
             if (config.getCredentials() == null) {
                 config.setCredentials(new SimpleTarantoolCredentials(DEFAULT_USER, DEFAULT_PASSWORD));
             }
 
-            if (config.getAddressProvider() == null) {
-                if (config.getHosts().size() == 1 && config.getClusterDiscoveryEndpoint() == null) {
-                    config.setAddressProvider(new SingleAddressProvider(config.getHosts().get(0)));
+            if (config.getServerSelectStrategy() == null) {
+                if (config.getHosts().size() == 1 && config.getClusterDiscoveryConfig() == null) {
+                    config.setServerSelectStrategy(new SingleAddressProvider(config.getHosts().get(0)));
                 } else {
-                    config.setAddressProvider(new RoundRobinAddressProvider(config.getHosts()));
+                    config.setServerSelectStrategy(new RoundRobinAddressProvider(config.getHosts()));
                 }
+            }
+
+            final ClusterDiscoveryConfig clusterConfig = config.getClusterDiscoveryConfig();
+            if (clusterConfig != null && clusterConfig.getEndpoint() instanceof TarantoolClusterDiscoveryEndpoint &&
+                    ((TarantoolClusterDiscoveryEndpoint) clusterConfig.getEndpoint()).getCredentials() == null) {
+                ((TarantoolClusterDiscoveryEndpoint) clusterConfig.getEndpoint())
+                        .setCredentials(config.getCredentials());
             }
 
             return config;

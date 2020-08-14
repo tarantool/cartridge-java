@@ -1,26 +1,21 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.TarantoolClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.exceptions.TarantoolClientException;
-
 /**
- * Factory for {@link ClusterDiscoverer} instances.
+ * Factory for {@link AddressProvider} instances.
  *
  * @author Sergey Volgin
  */
-public class ClusterDiscovererFactory {
+public final class ClusterDiscovererFactory {
 
-    public static ClusterDiscoverer create(ClusterDiscoveryEndpoint endpoint,
-                                           TarantoolClient client, TarantoolClientConfig config) {
+    public static ClusterDiscoverer create(ServerSelectStrategy serverSelectStrategy, ClusterDiscoveryConfig config) {
         ClusterDiscoverer clusterDiscoverer;
-        if (endpoint instanceof TarantoolClusterDiscoveryEndpoint) {
-            clusterDiscoverer = new TarantoolClusterDiscoverer(client, (TarantoolClusterDiscoveryEndpoint) endpoint);
-        } else if (endpoint instanceof HTTPClusterDiscoveryEndpoint) {
-            clusterDiscoverer = new HTTPClusterDiscoverer((HTTPClusterDiscoveryEndpoint) endpoint, config.getConnectTimeout());
+
+        if (config.getEndpoint() instanceof TarantoolClusterDiscoveryEndpoint) {
+            clusterDiscoverer = new TarantoolClusterDiscoverer(serverSelectStrategy, config);
         } else {
-            throw new TarantoolClientException("Unsupported service discovery type.");
+            clusterDiscoverer = new HTTPClusterDiscoverer(serverSelectStrategy, config);
         }
+
         return clusterDiscoverer;
     }
 

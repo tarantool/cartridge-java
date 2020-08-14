@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * applications that neglect to close the client will not exit.
  *
  * <p>This class is not part of the public API.</p>
+ *
+ * @author Sergey Volgin
  */
 public class TarantoolDaemonThreadFactory implements ThreadFactory {
     private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);

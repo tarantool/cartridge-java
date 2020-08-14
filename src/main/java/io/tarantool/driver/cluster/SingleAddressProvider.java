@@ -1,6 +1,6 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.ServerAddress;
+import io.tarantool.driver.TarantoolServerAddress;
 
 import java.util.Collection;
 
@@ -9,34 +9,34 @@ import java.util.Collection;
  *
  * @author Sergey Volgin
  */
-public class SingleAddressProvider implements AddressProvider {
+public class SingleAddressProvider implements AddressProvider, ServerSelectStrategy {
 
-    private ServerAddress serverAddress;
+    private TarantoolServerAddress tarantoolServerAddress;
 
-    public SingleAddressProvider(ServerAddress serverAddress) {
-        this.serverAddress = serverAddress;
+    public SingleAddressProvider(TarantoolServerAddress tarantoolServerAddress) {
+        this.tarantoolServerAddress = tarantoolServerAddress;
     }
 
     @Override
-    public ServerAddress getAddress() {
-        return serverAddress;
+    public TarantoolServerAddress getAddress() {
+        return tarantoolServerAddress;
     }
 
     @Override
-    public ServerAddress getNext() {
-        return serverAddress;
+    public TarantoolServerAddress getNext() {
+        return tarantoolServerAddress;
     }
 
     /**
      * Update server address. Only first item will be used.
      *
-     * @param addresses list {@link ServerAddress} of cluster nodes
+     * @param addresses list {@link TarantoolServerAddress} of cluster nodes
      */
     @Override
-    public void updateAddressList(Collection<ServerAddress> addresses) {
+    public void updateAddressList(Collection<TarantoolServerAddress> addresses) {
         if (addresses == null || addresses.size() == 0) {
             throw new IllegalArgumentException("At least one server address must be provided");
         }
-        this.serverAddress = addresses.stream().findFirst().get();
+        this.tarantoolServerAddress = addresses.stream().findFirst().get();
     }
 }

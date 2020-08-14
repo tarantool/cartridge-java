@@ -30,17 +30,23 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.CharsetUtil;
-import io.tarantool.driver.ServerAddress;
+import io.tarantool.driver.TarantoolDaemonThreadFactory;
+import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -109,17 +115,18 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
     private String scheme;
 
     private final SslContext sslContext;
-    private EventLoopGroup eventLoopGroup;
-    private Bootstrap bootstrap;
+    private final EventLoopGroup eventLoopGroup;
+    private final Bootstrap bootstrap;
 
-    /**
-     * Base constructor
-     *
-     * @param endpoint a {@link HTTPClusterDiscoveryEndpoint}
-     * @throws TarantoolClientException if uri is incorrect
-     */
-    public HTTPClusterDiscoverer(HTTPClusterDiscoveryEndpoint endpoint, int connectionTimeout) {
+    private final ClusterDiscoveryConfig config;
+    private final ServerSelectStrategy wrapped;
+    private ScheduledExecutorService scheduledExecutorService;
+    private AtomicBoolean taskStarted = new AtomicBoolean(false);
 
+    public HTTPClusterDiscoverer(ServerSelectStrategy wrapped, ClusterDiscoveryConfig config) {
+        this.wrapped = wrapped;
+        this.config = config;
+        HTTPClusterDiscoveryEndpoint endpoint = (HTTPClusterDiscoveryEndpoint) config.getEndpoint();
         try {
             parseUri(endpoint.getUri());
 
@@ -138,7 +145,7 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
                 .group(this.eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout);
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
     }
 
     private void parseUri(final String uri) throws URISyntaxException, TarantoolClientException {
@@ -158,6 +165,47 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
         if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
             throw new TarantoolClientException("Only HTTP(S) is supported. (%s)", uri);
         }
+    }
+
+    @Override
+    public TarantoolServerAddress getAddress() {
+        startDiscoveryTask();
+        return wrapped.getAddress();
+    }
+
+    @Override
+    public TarantoolServerAddress getNext() {
+        startDiscoveryTask();
+        return wrapped.getNext();
+    }
+
+    @Override
+    public void updateAddressList(Collection<TarantoolServerAddress> addresses) {
+        wrapped.updateAddressList(addresses);
+    }
+
+    private void startDiscoveryTask() throws TarantoolClientException {
+        if (taskStarted.compareAndSet(false, true)) {
+            this.scheduledExecutorService =
+                    Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-discovery"));
+            this.createDiscoveryTask();
+        }
+    }
+
+    private void createDiscoveryTask() throws TarantoolClientException {
+        Runnable discoveryTask = () -> {
+            List<TarantoolServerAddress> addresses = this.getNodes();
+            this.updateAddressList(addresses);
+        };
+
+        discoveryTask.run();
+
+        this.scheduledExecutorService.scheduleWithFixedDelay(
+                discoveryTask,
+                config.getServiceDiscoveryDelay(),
+                config.getServiceDiscoveryDelay(),
+                TimeUnit.MILLISECONDS
+        );
     }
 
     public CompletableFuture<Map<String, ServerNodeInfo>> sendRequest() throws InterruptedException {
@@ -189,25 +237,27 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
     }
 
     @Override
-    public List<ServerAddress> getNodes() {
+    public List<TarantoolServerAddress> getNodes() {
         try {
             CompletableFuture<Map<String, ServerNodeInfo>> completableFuture = sendRequest();
             Map<String, ServerNodeInfo> addressMap = completableFuture.get();
 
             return addressMap.values().stream()
                     .filter(v -> v.getStatus().equals("available"))
-                    .map(v -> new ServerAddress(v.getUri())).collect(Collectors.toList());
-        } catch (InterruptedException | ExecutionException ignored) {
+                    .map(v -> new TarantoolServerAddress(v.getUri())).collect(Collectors.toList());
+        } catch (InterruptedException | ExecutionException e) {
+            throw new TarantoolClientException("Cluster discovery task error", e);
         }
-        return null;
     }
+
 
     private static class SimpleHttpClientInitializer extends ChannelInitializer<SocketChannel> {
 
         private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
         private final SslContext sslCtx;
 
-        public SimpleHttpClientInitializer(SslContext sslCtx, CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
+        SimpleHttpClientInitializer(SslContext sslCtx,
+                                    CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
             this.sslCtx = sslCtx;
             this.completableFuture = completableFuture;
         }
@@ -232,7 +282,7 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
         private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
         private ObjectMapper objectMapper = new ObjectMapper();
 
-        public SimpleHttpClientHandler(CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
+        SimpleHttpClientHandler(CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
             super();
             this.completableFuture = completableFuture;
         }
@@ -244,14 +294,14 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
                 String contentString = content.content().toString(CharsetUtil.UTF_8);
 
                 TypeReference<HashMap<String, ServerNodeInfo>> typeReference =
-                        new TypeReference<HashMap<String, ServerNodeInfo>>() {};
+                        new TypeReference<HashMap<String, ServerNodeInfo>>() {
+                        };
 
                 Map<String, ServerNodeInfo> responseMap;
                 try {
                     responseMap = objectMapper.readValue(contentString, typeReference);
-                } catch (Exception ignored) {
-                    //TODO: logger
-                    responseMap = null;
+                } catch (Exception e) {
+                    throw new TarantoolClientException("Cluster discovery task error", e);
                 }
 
                 completableFuture.complete(responseMap);
