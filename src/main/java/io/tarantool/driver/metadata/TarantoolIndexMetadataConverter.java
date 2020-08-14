@@ -27,6 +27,9 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
         metadata.setSpaceId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setIndexId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setIndexName(mapper.fromValue(it.next().asStringValue()));
+        metadata.setIndexType(TarantoolIndexType.fromString(mapper.fromValue(it.next().asStringValue())));
+        metadata.setIndexOptions(mapper.fromValue(it.next().asMapValue()));
+
         return metadata;
     }
 }

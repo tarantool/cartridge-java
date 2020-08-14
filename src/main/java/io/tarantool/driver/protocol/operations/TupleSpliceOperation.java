@@ -30,7 +30,7 @@ public class TupleSpliceOperation extends TupleUpdateOperation {
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(Arrays.asList(
-                getOperationType().toString(), getFieldNumber(), getPosition(), getOffset(), getValue()));
+                getOperationType().toString(), getFieldIndex(), getPosition(), getOffset(), getValue()));
     }
 
     public int getPosition() {

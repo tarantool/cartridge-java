@@ -29,12 +29,12 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations addOperation(TupleOperation operation) {
-        Integer filedIndex = operation.getFieldNumber();
+        Integer filedIndex = operation.getFieldIndex();
         String fieldName = operation.getFieldName();
 
         Optional<TupleOperation> existField;
         if (filedIndex != null) {
-            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldNumber())).findFirst();
+            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldIndex())).findFirst();
         } else {
             existField = this.operations.stream().filter(op -> fieldName.equals(op.getFieldName())).findFirst();
         }
@@ -60,23 +60,23 @@ public final class TupleOperations {
     /**
      * Adds the specified value to the field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value increment
      * @return new instance
      */
-    public static TupleOperations add(int fieldNumber, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldNumber, value));
+    public static TupleOperations add(int fieldIndex, Number value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldIndex, value));
     }
 
     /**
      * Adds the specified value to the field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value increment
      * @return this
      */
-    public TupleOperations andAdd(int fieldNumber, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldNumber, value));
+    public TupleOperations andAdd(int fieldIndex, Number value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldIndex, value));
     }
 
     /**
@@ -104,23 +104,23 @@ public final class TupleOperations {
     /**
      * Bitwise AND(&) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseAnd(int fieldNumber, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldNumber, value));
+    public static TupleOperations bitwiseAnd(int fieldIndex, int value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldIndex, value));
     }
 
     /**
      * Bitwise AND(&) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseAnd(int fieldNumber, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldNumber, value));
+    public TupleOperations andBitwiseAnd(int fieldIndex, int value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldIndex, value));
     }
 
     /**
@@ -148,23 +148,23 @@ public final class TupleOperations {
     /**
      * Bitwise OR(|) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseOr(int fieldNumber, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldNumber, value));
+    public static TupleOperations bitwiseOr(int fieldIndex, int value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldIndex, value));
     }
 
     /**
      * Bitwise OR(|) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseOr(int fieldNumber, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldNumber, value));
+    public TupleOperations andBitwiseOr(int fieldIndex, int value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldIndex, value));
     }
 
     /**
@@ -192,23 +192,23 @@ public final class TupleOperations {
     /**
      * Bitwise XOR(^) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseXor(int fieldNumber, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldNumber, value));
+    public static TupleOperations bitwiseXor(int fieldIndex, int value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldIndex, value));
     }
 
     /**
      * Bitwise XOR(^) operation
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseXor(int fieldNumber, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldNumber, value));
+    public TupleOperations andBitwiseXor(int fieldIndex, int value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldIndex, value));
     }
 
     /**
@@ -236,23 +236,23 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldNumber start field number starting with 0
+     * @param fieldIndex start field number starting with 0
      * @param fieldsCount the number of fields to remove
      * @return new instance
      */
-    public static TupleOperations delete(int fieldNumber, int fieldsCount) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
+    public static TupleOperations delete(int fieldIndex, int fieldsCount) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldIndex, fieldsCount));
     }
 
     /**
      * Remove field value
      *
-     * @param fieldNumber start field number starting with 0
+     * @param fieldIndex start field number starting with 0
      * @param fieldsCount the number of fields to remove
      * @return this
      */
-    public TupleOperations andDelete(int fieldNumber, int fieldsCount) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldNumber, fieldsCount));
+    public TupleOperations andDelete(int fieldIndex, int fieldsCount) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldIndex, fieldsCount));
     }
 
     /**
@@ -278,21 +278,21 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @return new instance
      */
-    public static TupleOperations insert(int fieldNumber, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldNumber, value));
+    public static TupleOperations insert(int fieldIndex, Object value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldIndex, value));
     }
 
     /**
      * Insert field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @return this
      */
-    public TupleOperations andInsert(int fieldNumber, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldNumber, value));
+    public TupleOperations andInsert(int fieldIndex, Object value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldIndex, value));
     }
 
     /**
@@ -318,21 +318,21 @@ public final class TupleOperations {
     /**
      * Set field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @return new instance
      */
-    public static TupleOperations set(int fieldNumber, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SET, fieldNumber, value));
+    public static TupleOperations set(int fieldIndex, Object value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SET, fieldIndex, value));
     }
 
     /**
      * Set field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @return this
      */
-    public TupleOperations andSet(int fieldNumber, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SET, fieldNumber, value));
+    public TupleOperations andSet(int fieldIndex, Object value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SET, fieldIndex, value));
     }
 
     /**
@@ -358,27 +358,27 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param position the start'th position
      * @param offset length of substring
      * @param replacement new value
      * @return new instance
      */
-    public static TupleOperations splice(int fieldNumber, int position, int offset, String replacement) {
-        return new TupleOperations(new TupleSpliceOperation(fieldNumber, position, offset, replacement));
+    public static TupleOperations splice(int fieldIndex, int position, int offset, String replacement) {
+        return new TupleOperations(new TupleSpliceOperation(fieldIndex, position, offset, replacement));
     }
 
     /**
      * Replace substring
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param position the start'th position
      * @param offset length of substring
      * @param replacement new value
      * @return this
      */
-    public TupleOperations andSplice(int fieldNumber, int position, int offset, String replacement) {
-        return addOperation(new TupleSpliceOperation(fieldNumber, position, offset, replacement));
+    public TupleOperations andSplice(int fieldIndex, int position, int offset, String replacement) {
+        return addOperation(new TupleSpliceOperation(fieldIndex, position, offset, replacement));
     }
 
     /**
@@ -410,23 +410,23 @@ public final class TupleOperations {
     /**
      * Subtracts the specified value to the field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value increment
      * @return this
      */
-    public static TupleOperations subtract(int fieldNumber, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldNumber, value));
+    public static TupleOperations subtract(int fieldIndex, Number value) {
+        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldIndex, value));
     }
 
     /**
      * Subtracts the specified value to the field value
      *
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value increment
      * @return this
      */
-    public TupleOperations andSubtract(int fieldNumber, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldNumber, value));
+    public TupleOperations andSubtract(int fieldIndex, Number value) {
+        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldIndex, value));
     }
 
     /**

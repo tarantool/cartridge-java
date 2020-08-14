@@ -13,6 +13,7 @@ box.schema.user.grant('api_user', 'read,write,execute', 'universe')
 s = box.schema.space.create('test_space')
 s:format({
     {name = 'id', type = 'unsigned'},
+    {name = 'unique_key', type = 'string'},
     {name = 'book_name', type = 'string'},
     {name = 'author', type = 'string'},
     {name = 'year', type = 'unsigned',is_nullable=true},
@@ -23,9 +24,20 @@ s:create_index('primary', {
     type = 'tree',
     parts = {'id'}
 })
-s:insert{1, 'Don Quixote', 'Miguel de Cervantes', 1605}
-s:insert{2, 'The Great Gatsby', 'F. Scott Fitzgerald', 1925}
-s:insert{3, 'War and Peace', 'Leo Tolstoy', 1869}
+s:create_index('inx_author', {
+    type = 'tree',
+    unique = false,
+    parts = {'author'}
+})
+s:create_index('secondary', {
+    type = 'hash',
+    unique = true,
+    parts = {'unique_key'}
+})
+
+s:insert{1, 'a1', 'Don Quixote', 'Miguel de Cervantes', 1605}
+s:insert{2, 'a2', 'The Great Gatsby', 'F. Scott Fitzgerald', 1925}
+s:insert{3, 'a3', 'War and Peace', 'Leo Tolstoy', 1869}
 
 function user_function_no_param()
     return 5;

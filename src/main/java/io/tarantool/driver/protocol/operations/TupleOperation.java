@@ -13,9 +13,9 @@ public interface TupleOperation extends Packable {
 
     TarantoolOperationType getOperationType();
 
-    Integer getFieldNumber();
+    Integer getFieldIndex();
 
     String getFieldName();
 
-    void setFieldNumber(Integer fieldNumber);
+    void setFieldIndex(Integer fieldIndex);
 }

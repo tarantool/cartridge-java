@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class TupleUpdateOperation implements TupleOperation {
 
     protected final TarantoolOperationType operationType;
-    protected Integer fieldNumber;
+    protected Integer fieldIndex;
     protected String fieldName;
     protected final Object value;
 
@@ -22,16 +22,14 @@ public class TupleUpdateOperation implements TupleOperation {
      * Create instance
      *
      * @param operationType operation type
-     * @param fieldNumber field number starting with 0
+     * @param fieldIndex field number starting with 0
      * @param value operation value
      */
-    public TupleUpdateOperation(TarantoolOperationType operationType, int fieldNumber, Object value) {
-        if (fieldNumber < 0) {
-            throw new IllegalArgumentException("Field number must be >= 0");
-        }
+    public TupleUpdateOperation(TarantoolOperationType operationType, int fieldIndex, Object value) {
+
         checkValue(operationType, value);
         this.operationType = operationType;
-        this.fieldNumber = fieldNumber;
+        this.fieldIndex = fieldIndex;
         this.value = value;
     }
 
@@ -44,7 +42,7 @@ public class TupleUpdateOperation implements TupleOperation {
      */
     public TupleUpdateOperation(TarantoolOperationType operationType, String fieldName, Object value) {
         if (StringUtils.isEmpty(fieldName)) {
-            throw new IllegalArgumentException("Filed name must be not empty");
+            throw new IllegalArgumentException("Field name must be not empty");
         }
         checkValue(operationType, value);
         this.operationType = operationType;
@@ -55,7 +53,7 @@ public class TupleUpdateOperation implements TupleOperation {
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(
-                Arrays.asList(getOperationType().toString(), getFieldNumber(), getValue()));
+                Arrays.asList(getOperationType().toString(), getFieldIndex(), getValue()));
     }
 
     @Override
@@ -64,13 +62,13 @@ public class TupleUpdateOperation implements TupleOperation {
     }
 
     @Override
-    public Integer getFieldNumber() {
-        return fieldNumber;
+    public Integer getFieldIndex() {
+        return fieldIndex;
     }
 
     @Override
-    public void setFieldNumber(Integer fieldNumber) {
-        this.fieldNumber = fieldNumber;
+    public void setFieldIndex(Integer fieldIndex) {
+        this.fieldIndex = fieldIndex;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class TupleUpdateOperation implements TupleOperation {
             case BITWISEOR:
             case BITWISEAND:
                 if (value == null || (int) value < 0) {
-                    throw new IllegalArgumentException("The number of fields to remove must be >= 0");
+                    throw new IllegalArgumentException("Bitwise operations can perform only with values >= 0");
                 }
                 break;
             case DELETE:

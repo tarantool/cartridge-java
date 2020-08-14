@@ -95,6 +95,19 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     }
 
     @Override
+    public Optional<TarantoolIndexMetadata> getIndexForId(int spaceId, int indexId) {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
+
+        Map<String, TarantoolIndexMetadata> metaMap = indexMetadata.get(spaceId);
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return metaMap.values().stream().filter(i -> i.getIndexId() == indexId).findFirst();
+    }
+
+    @Override
     public Optional<TarantoolSpaceMetadata> getSpaceById(int spaceId) {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 

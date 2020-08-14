@@ -10,8 +10,10 @@ import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
@@ -76,6 +78,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
         return metadata.get();
     }
+
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery)
@@ -212,7 +215,15 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         try {
-            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(getMetadata())
+            TarantoolSpaceMetadata metadata = getMetadata();
+            Optional<TarantoolIndexMetadata> indexMetadata = connection.metadata()
+                    .getIndexForId(spaceId, indexQuery.getIndexId());
+
+            if (!indexMetadata.isPresent() || !indexMetadata.get().isUnique()) {
+                throw new TarantoolSpaceOperationException("Index must be primary or unique for update operation");
+            }
+
+            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(metadata)
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
@@ -242,7 +253,6 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         try {
             TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(getMetadata())
                     .withSpaceId(spaceId)
-                    .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
                     .withTuple(tuple)
                     .withTupleOperations(operations)
