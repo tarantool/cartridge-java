@@ -32,11 +32,7 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
 
         TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
         Map<String, Object> optionsMap = mapper.fromValue(it.next().asMapValue());
-        for (Map.Entry<String, Object> entry : optionsMap.entrySet()) {
-            if ("unique".equals(entry.getKey())) {
-                indexOptions.setUnique((Boolean) entry.getValue());
-            }
-        }
+        indexOptions.setUnique((Boolean) optionsMap.get("unique"));
 
         metadata.setIndexOptions(indexOptions);
 
