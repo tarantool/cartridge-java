@@ -9,11 +9,14 @@ import java.util.Arrays;
 /**
  * An operation specifies one value.
  *
+ * @see <a href="https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update">
+ *     https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update</a>
+ *
  * @author Sergey Volgin
  */
-public class TupleUpdateOperation implements TupleOperation {
+abstract class TupleUpdateOperation implements TupleOperation {
 
-    protected final TarantoolOperationType operationType;
+    protected final TarantoolUpdateOperationType operationType;
     protected Integer fieldIndex;
     protected String fieldName;
     protected final Object value;
@@ -25,9 +28,7 @@ public class TupleUpdateOperation implements TupleOperation {
      * @param fieldIndex field number starting with 0
      * @param value operation value
      */
-    public TupleUpdateOperation(TarantoolOperationType operationType, int fieldIndex, Object value) {
-
-        checkValue(operationType, value);
+    TupleUpdateOperation(TarantoolUpdateOperationType operationType, int fieldIndex, Object value) {
         this.operationType = operationType;
         this.fieldIndex = fieldIndex;
         this.value = value;
@@ -40,11 +41,10 @@ public class TupleUpdateOperation implements TupleOperation {
      * @param fieldName field name
      * @param value operation value
      */
-    public TupleUpdateOperation(TarantoolOperationType operationType, String fieldName, Object value) {
+    TupleUpdateOperation(TarantoolUpdateOperationType operationType, String fieldName, Object value) {
         if (StringUtils.isEmpty(fieldName)) {
             throw new IllegalArgumentException("Field name must be not empty");
         }
-        checkValue(operationType, value);
         this.operationType = operationType;
         this.fieldName = fieldName;
         this.value = value;
@@ -57,7 +57,7 @@ public class TupleUpdateOperation implements TupleOperation {
     }
 
     @Override
-    public TarantoolOperationType getOperationType() {
+    public TarantoolUpdateOperationType getOperationType() {
         return operationType;
     }
 
@@ -78,23 +78,5 @@ public class TupleUpdateOperation implements TupleOperation {
 
     public Object getValue() {
         return value;
-    }
-
-    private void checkValue(TarantoolOperationType operationType, Object value) {
-
-        switch (operationType) {
-            case BITWISEXOR:
-            case BITWISEOR:
-            case BITWISEAND:
-                if (value == null || (int) value < 0) {
-                    throw new IllegalArgumentException("Bitwise operations can perform only with values >= 0");
-                }
-                break;
-            case DELETE:
-                if (value == null || (int) value <= 0) {
-                    throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
-                }
-                break;
-        }
     }
 }

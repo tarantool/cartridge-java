@@ -65,7 +65,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations add(int fieldIndex, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldIndex, value));
+        return new TupleOperations(new TupleOperationAdd(fieldIndex, value));
     }
 
     /**
@@ -76,7 +76,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andAdd(int fieldIndex, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldIndex, value));
+        return addOperation(new TupleOperationAdd(fieldIndex, value));
     }
 
     /**
@@ -87,7 +87,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations add(String fieldName, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldName, value));
+        return new TupleOperations(new TupleOperationAdd(fieldName, value));
     }
 
     /**
@@ -98,7 +98,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andAdd(String fieldName, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.ADD, fieldName, value));
+        return addOperation(new TupleOperationAdd(fieldName, value));
     }
 
     /**
@@ -108,8 +108,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseAnd(int fieldIndex, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldIndex, value));
+    public static TupleOperations bitwiseAnd(int fieldIndex, long value) {
+        return new TupleOperations(new TupleOperationBitwiseAnd(fieldIndex, value));
     }
 
     /**
@@ -119,8 +119,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseAnd(int fieldIndex, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldIndex, value));
+    public TupleOperations andBitwiseAnd(int fieldIndex, long value) {
+        return addOperation(new TupleOperationBitwiseAnd(fieldIndex, value));
     }
 
     /**
@@ -130,8 +130,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseAnd(String fieldName, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldName, value));
+    public static TupleOperations bitwiseAnd(String fieldName, long value) {
+        return new TupleOperations(new TupleOperationBitwiseAnd(fieldName, value));
     }
 
     /**
@@ -141,8 +141,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseAnd(String fieldName, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEAND, fieldName, value));
+    public TupleOperations andBitwiseAnd(String fieldName, long value) {
+        return addOperation(new TupleOperationBitwiseAnd(fieldName, value));
     }
 
     /**
@@ -152,8 +152,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseOr(int fieldIndex, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldIndex, value));
+    public static TupleOperations bitwiseOr(int fieldIndex, long value) {
+        return new TupleOperations(new TupleOperationBitwiseOr(fieldIndex, value));
     }
 
     /**
@@ -163,8 +163,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseOr(int fieldIndex, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldIndex, value));
+    public TupleOperations andBitwiseOr(int fieldIndex, long value) {
+        return addOperation(new TupleOperationBitwiseOr(fieldIndex, value));
     }
 
     /**
@@ -174,8 +174,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseOr(String fieldName, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldName, value));
+    public static TupleOperations bitwiseOr(String fieldName, long value) {
+        return new TupleOperations(new TupleOperationBitwiseOr(fieldName, value));
     }
 
     /**
@@ -185,8 +185,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseOr(String fieldName, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEOR, fieldName, value));
+    public TupleOperations andBitwiseOr(String fieldName, long value) {
+        return addOperation(new TupleOperationBitwiseOr(fieldName, value));
     }
 
     /**
@@ -196,8 +196,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseXor(int fieldIndex, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldIndex, value));
+    public static TupleOperations bitwiseXor(int fieldIndex, long value) {
+        return new TupleOperations(new TupleOperationBitwiseXor(fieldIndex, value));
     }
 
     /**
@@ -207,8 +207,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseXor(int fieldIndex, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldIndex, value));
+    public TupleOperations andBitwiseXor(int fieldIndex, long value) {
+        return addOperation(new TupleOperationBitwiseXor(fieldIndex, value));
     }
 
     /**
@@ -218,8 +218,8 @@ public final class TupleOperations {
      * @param value value
      * @return new instance
      */
-    public static TupleOperations bitwiseXor(String fieldName, int value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldName, value));
+    public static TupleOperations bitwiseXor(String fieldName, long value) {
+        return new TupleOperations(new TupleOperationBitwiseXor(fieldName, value));
     }
 
     /**
@@ -229,8 +229,8 @@ public final class TupleOperations {
      * @param value value
      * @return this
      */
-    public TupleOperations andBitwiseXor(String fieldName, int value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.BITWISEXOR, fieldName, value));
+    public TupleOperations andBitwiseXor(String fieldName, long value) {
+        return addOperation(new TupleOperationBitwiseXor(fieldName, value));
     }
 
     /**
@@ -241,7 +241,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations delete(int fieldIndex, int fieldsCount) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldIndex, fieldsCount));
+        return new TupleOperations(new TupleOperationDelete(fieldIndex, fieldsCount));
     }
 
     /**
@@ -252,7 +252,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andDelete(int fieldIndex, int fieldsCount) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldIndex, fieldsCount));
+        return addOperation(new TupleOperationDelete(fieldIndex, fieldsCount));
     }
 
     /**
@@ -262,7 +262,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations delete(String fieldName, int fieldsCount) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
+        return new TupleOperations(new TupleOperationDelete(fieldName, fieldsCount));
     }
 
     /**
@@ -272,7 +272,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andDelete(String fieldName, int fieldsCount) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.DELETE, fieldName, fieldsCount));
+        return addOperation(new TupleOperationDelete(fieldName, fieldsCount));
     }
 
     /**
@@ -282,7 +282,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations insert(int fieldIndex, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldIndex, value));
+        return new TupleOperations(new TupleOperationInsert(fieldIndex, value));
     }
 
     /**
@@ -292,7 +292,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andInsert(int fieldIndex, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldIndex, value));
+        return addOperation(new TupleOperationInsert(fieldIndex, value));
     }
 
     /**
@@ -302,7 +302,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations insert(String fieldName, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldName, value));
+        return new TupleOperations(new TupleOperationInsert(fieldName, value));
     }
 
     /**
@@ -312,7 +312,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andInsert(String fieldName, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.INSERT, fieldName, value));
+        return addOperation(new TupleOperationInsert(fieldName, value));
     }
 
     /**
@@ -322,7 +322,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations set(int fieldIndex, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SET, fieldIndex, value));
+        return new TupleOperations(new TupleOperationSet(fieldIndex, value));
     }
 
     /**
@@ -332,7 +332,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andSet(int fieldIndex, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SET, fieldIndex, value));
+        return addOperation(new TupleOperationSet(fieldIndex, value));
     }
 
     /**
@@ -342,7 +342,7 @@ public final class TupleOperations {
      * @return new instance
      */
     public static TupleOperations set(String fieldName, Object value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SET, fieldName, value));
+        return new TupleOperations(new TupleOperationSet(fieldName, value));
     }
 
     /**
@@ -352,7 +352,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andSet(String fieldName, Object value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SET, fieldName, value));
+        return addOperation(new TupleOperationSet(fieldName, value));
     }
 
     /**
@@ -415,7 +415,7 @@ public final class TupleOperations {
      * @return this
      */
     public static TupleOperations subtract(int fieldIndex, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldIndex, value));
+        return new TupleOperations(new TupleOperationSubtract(fieldIndex, value));
     }
 
     /**
@@ -426,7 +426,7 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andSubtract(int fieldIndex, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldIndex, value));
+        return addOperation(new TupleOperationSubtract(fieldIndex, value));
     }
 
     /**
@@ -437,7 +437,7 @@ public final class TupleOperations {
      * @return this
      */
     public static TupleOperations subtract(String fieldName, Number value) {
-        return new TupleOperations(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldName, value));
+        return new TupleOperations(new TupleOperationSubtract(fieldName, value));
     }
 
     /**
@@ -448,6 +448,6 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations andSubtract(String fieldName, Number value) {
-        return addOperation(new TupleUpdateOperation(TarantoolOperationType.SUBTRACT, fieldName, value));
+        return addOperation(new TupleOperationSubtract(fieldName, value));
     }
 }

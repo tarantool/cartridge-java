@@ -7,7 +7,7 @@ package io.tarantool.driver.protocol.operations;
  *
  * @author Sergey Volgin
  */
-public enum TarantoolOperationType {
+public enum TarantoolUpdateOperationType {
 
     ADD('+'),
     BITWISEAND('&'),
@@ -22,7 +22,7 @@ public enum TarantoolOperationType {
 
     private final Character code;
 
-    TarantoolOperationType(Character code) {
+    TarantoolUpdateOperationType(Character code) {
         this.code = code;
     }
 

@@ -6,6 +6,7 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Maps MessagePack {@link ArrayValue} into {@link TarantoolIndexMetadata}
@@ -28,7 +29,16 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
         metadata.setIndexId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setIndexName(mapper.fromValue(it.next().asStringValue()));
         metadata.setIndexType(TarantoolIndexType.fromString(mapper.fromValue(it.next().asStringValue())));
-        metadata.setIndexOptions(mapper.fromValue(it.next().asMapValue()));
+
+        TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
+        Map<String, Object> optionsMap = mapper.fromValue(it.next().asMapValue());
+        for (Map.Entry<String, Object> entry : optionsMap.entrySet()) {
+            if ("unique".equals(entry.getKey())) {
+                indexOptions.setUnique((Boolean) entry.getValue());
+            }
+        }
+
+        metadata.setIndexOptions(indexOptions);
 
         return metadata;
     }

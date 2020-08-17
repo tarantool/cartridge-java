@@ -265,6 +265,7 @@ public class StandaloneTarantoolClientIT {
         updateResult = testSpace.update(query, TupleOperations.add(4, 10)).get();
         assertEquals(1978, updateResult.get(0).getInteger(4));
 
+        //First from the end
         updateResult = testSpace.update(query, TupleOperations.add(-1, 10)).get();
         assertEquals(1988, updateResult.get(0).getInteger(4));
 
@@ -274,7 +275,6 @@ public class StandaloneTarantoolClientIT {
 
         updateResult = testSpace.update(queryByUniqIndex, TupleOperations.add(4, 12)).get();
         assertEquals(2000, updateResult.get(0).getInteger(4));
-
 
         //Update by not unique index
         TarantoolIndexQuery queryByNotUniqIndex = new TarantoolIndexQuery(1);

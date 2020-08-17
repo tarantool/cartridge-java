@@ -2,8 +2,6 @@ package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.api.TarantoolIndexQuery;
 
-import java.util.Map;
-
 /**
  * Represents Tarantool index metadata (index ID, name, etc.)
  *
@@ -15,7 +13,7 @@ public class TarantoolIndexMetadata {
     private int indexId;
     private String indexName;
     private TarantoolIndexType indexType;
-    private Map<String, Object> indexOptions;
+    private TarantoolIndexOptions indexOptions;
     //TODO index parts
 
     /**
@@ -84,17 +82,17 @@ public class TarantoolIndexMetadata {
 
     /**
      * Get index options
-     * @return map with index options
+     * @return index options
      */
-    public Map<String, Object> getIndexOptions() {
+    public TarantoolIndexOptions getIndexOptions() {
         return indexOptions;
     }
 
     /**
      * Set index options
-     * @param indexOptions map with index options
+     * @param indexOptions a not-empty {@link TarantoolIndexOptions}
      */
-    public void setIndexOptions(Map<String, Object> indexOptions) {
+    public void setIndexOptions(TarantoolIndexOptions indexOptions) {
         this.indexOptions = indexOptions;
     }
 
@@ -111,7 +109,7 @@ public class TarantoolIndexMetadata {
      * @return true if this is a unique index, false otherwise.
      */
     public boolean isUnique() {
-        return isPrimary() || (Boolean) indexOptions.get("unique");
+        return isPrimary() || indexOptions.isUnique();
     }
     /*
     - [289, 1, '_vindex', 'sysview', 0, {}, [{'name': 'id', 'type': 'unsigned'}, {'name': 'iid',

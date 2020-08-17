@@ -6,7 +6,7 @@ import org.msgpack.value.Value;
 import java.util.Arrays;
 
 /**
- * Represent splice operation
+ * Represent splice operation on tuple field
  *
  * @author Sergey Volgin
  */
@@ -16,13 +16,13 @@ public class TupleSpliceOperation extends TupleUpdateOperation {
     private final int offset;
 
     public TupleSpliceOperation(int fieldIndex, int position, int offset, String value) {
-        super(TarantoolOperationType.SPLICE, fieldIndex, value);
+        super(TarantoolUpdateOperationType.SPLICE, fieldIndex, value);
         this.position = position;
         this.offset = offset;
     }
 
     public TupleSpliceOperation(String fieldName, int position, int offset, String value) {
-        super(TarantoolOperationType.SPLICE, fieldName, value);
+        super(TarantoolUpdateOperationType.SPLICE, fieldName, value);
         this.position = position;
         this.offset = offset;
     }

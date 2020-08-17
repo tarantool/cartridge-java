@@ -1,10 +1,9 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
-import io.tarantool.driver.protocol.operations.TarantoolOperationType;
+import io.tarantool.driver.protocol.operations.TarantoolUpdateOperationType;
 import io.tarantool.driver.protocol.operations.TupleOperation;
 import io.tarantool.driver.protocol.operations.TupleOperations;
-import io.tarantool.driver.protocol.operations.TupleSpliceOperation;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -55,18 +54,18 @@ public class TupleOperationsTest {
 
         assertEquals(18, operations.asList().size());
 
-        List<TarantoolOperationType> expectedOperationTypes = Arrays.asList(
-                TarantoolOperationType.BITWISEXOR, TarantoolOperationType.BITWISEXOR,
-                TarantoolOperationType.BITWISEAND, TarantoolOperationType.BITWISEAND,
-                TarantoolOperationType.BITWISEOR, TarantoolOperationType.BITWISEOR,
-                TarantoolOperationType.BITWISEXOR, TarantoolOperationType.BITWISEXOR,
-                TarantoolOperationType.ADD, TarantoolOperationType.ADD,
-                TarantoolOperationType.SET, TarantoolOperationType.SET,
-                TarantoolOperationType.SUBTRACT, TarantoolOperationType.SUBTRACT,
-                TarantoolOperationType.INSERT, TarantoolOperationType.INSERT,
-                TarantoolOperationType.SPLICE, TarantoolOperationType.SPLICE);
+        List<TarantoolUpdateOperationType> expectedOperationTypes = Arrays.asList(
+                TarantoolUpdateOperationType.BITWISEXOR, TarantoolUpdateOperationType.BITWISEXOR,
+                TarantoolUpdateOperationType.BITWISEAND, TarantoolUpdateOperationType.BITWISEAND,
+                TarantoolUpdateOperationType.BITWISEOR, TarantoolUpdateOperationType.BITWISEOR,
+                TarantoolUpdateOperationType.BITWISEXOR, TarantoolUpdateOperationType.BITWISEXOR,
+                TarantoolUpdateOperationType.ADD, TarantoolUpdateOperationType.ADD,
+                TarantoolUpdateOperationType.SET, TarantoolUpdateOperationType.SET,
+                TarantoolUpdateOperationType.SUBTRACT, TarantoolUpdateOperationType.SUBTRACT,
+                TarantoolUpdateOperationType.INSERT, TarantoolUpdateOperationType.INSERT,
+                TarantoolUpdateOperationType.SPLICE, TarantoolUpdateOperationType.SPLICE);
 
-        List<TarantoolOperationType> actualOperationTypes = operations.asList().stream()
+        List<TarantoolUpdateOperationType> actualOperationTypes = operations.asList().stream()
                 .map(TupleOperation::getOperationType).collect(Collectors.toList());
 
         assertEquals(expectedOperationTypes, actualOperationTypes);

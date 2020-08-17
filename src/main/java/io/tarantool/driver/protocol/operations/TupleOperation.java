@@ -11,7 +11,7 @@ import io.tarantool.driver.protocol.Packable;
  */
 public interface TupleOperation extends Packable {
 
-    TarantoolOperationType getOperationType();
+    TarantoolUpdateOperationType getOperationType();
 
     Integer getFieldIndex();
 
