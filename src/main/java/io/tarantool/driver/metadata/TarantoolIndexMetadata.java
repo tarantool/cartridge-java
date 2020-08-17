@@ -1,5 +1,7 @@
 package io.tarantool.driver.metadata;
 
+import io.tarantool.driver.api.TarantoolIndexQuery;
+
 /**
  * Represents Tarantool index metadata (index ID, name, etc.)
  *
@@ -10,8 +12,8 @@ public class TarantoolIndexMetadata {
     private int spaceId;
     private int indexId;
     private String indexName;
-    //TODO private TarantoolIndexType indexType
-    //TODO index opts
+    private TarantoolIndexType indexType;
+    private TarantoolIndexOptions indexOptions;
     //TODO index parts
 
     /**
@@ -62,6 +64,53 @@ public class TarantoolIndexMetadata {
         this.indexName = indexName;
     }
 
+    /**
+     * Get index type
+     * @return the index type
+     */
+    public TarantoolIndexType getIndexType() {
+        return indexType;
+    }
+
+    /**
+     * Set index type
+     * @param indexType a non-empty {@link TarantoolIndexType}
+     */
+    public void setIndexType(TarantoolIndexType indexType) {
+        this.indexType = indexType;
+    }
+
+    /**
+     * Get index options
+     * @return index options
+     */
+    public TarantoolIndexOptions getIndexOptions() {
+        return indexOptions;
+    }
+
+    /**
+     * Set index options
+     * @param indexOptions a not-empty {@link TarantoolIndexOptions}
+     */
+    public void setIndexOptions(TarantoolIndexOptions indexOptions) {
+        this.indexOptions = indexOptions;
+    }
+
+    /**
+     * Returns true if this is a primary index, false otherwise.
+     * @return true if this is a primary index, false otherwise.
+     */
+    public boolean isPrimary() {
+        return indexId == TarantoolIndexQuery.PRIMARY;
+    }
+
+    /**
+     * Returns true if this is a unique index, false otherwise.
+     * @return true if this is a unique index, false otherwise.
+     */
+    public boolean isUnique() {
+        return isPrimary() || indexOptions.isUnique();
+    }
     /*
     - [289, 1, '_vindex', 'sysview', 0, {}, [{'name': 'id', 'type': 'unsigned'}, {'name': 'iid',
         'type': 'unsigned'}, {'name': 'name', 'type': 'string'}, {'name': 'type',

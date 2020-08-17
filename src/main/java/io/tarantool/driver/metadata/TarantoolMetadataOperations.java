@@ -34,6 +34,14 @@ public interface TarantoolMetadataOperations {
     Optional<TarantoolIndexMetadata> getIndexForName(int spaceId, String indexName);
 
     /**
+     * Get metadata for index from the specified space by index ID
+     * @param spaceId the space ID, must be greater than 0
+     * @param indexId index ID, must not be  must be greater or equal than 0
+     * @return nullable index metadata wrapped in {@link Optional}
+     */
+    Optional<TarantoolIndexMetadata> getIndexForId(int spaceId, int indexId);
+
+    /**
      * Get metadata for the space specified by id
      * @param spaceId the space ID, must be greater than 0
      * @return nullable space metadata wrapped in {@link Optional}
