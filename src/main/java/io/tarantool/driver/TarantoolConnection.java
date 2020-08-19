@@ -62,6 +62,16 @@ public interface TarantoolConnection extends AutoCloseable {
 
     /**
      * Execute a function defined on Tarantool instance
+     * @param functionName function name, must not be null or empty
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
      * @param <T> the desired function call result type. The object mapper specified in the client configuration
      * will be used for result value conversion
      * @param functionName function name, must not be null or empty
@@ -90,7 +100,65 @@ public interface TarantoolConnection extends AutoCloseable {
                                   MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
-    // TODO eval method
+    /**
+     * Eval lua expression on Tarantool instance
+     * @param expression lua expression, must not be null or empty
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException;
+
+    /**
+     * Eval lua expression on Tarantool instance
+     * @param expression lua expression, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *                  will be used for arguments conversion to MessagePack entities
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    CompletableFuture<List<Object>> eval(String expression, List<Object> arguments) throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @param expression lua expression, must not be null or empty
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<List<T>> eval(String expression, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @param expression lua expression, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     * @param expression lua expression, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *        will be used for arguments conversion to MessagePack entities
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments,
+                                        MessagePackObjectMapper argumentsMapper,
+                                        MessagePackValueMapper resultMapper) throws TarantoolClientException;
 
     /**
      * Get the connection closed status

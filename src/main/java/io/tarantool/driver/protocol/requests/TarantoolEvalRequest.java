@@ -12,20 +12,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Call request.
+ * Eval request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
  *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
-public final class TarantoolCallRequest extends TarantoolRequest {
+public class TarantoolEvalRequest extends TarantoolRequest {
 
-    private TarantoolCallRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_CALL, body);
+    private TarantoolEvalRequest(TarantoolRequestBody body) {
+        super(TarantoolRequestType.IPROTO_EVAL, body);
     }
 
     /**
-     * Tarantool call request builder
+     * Tarantool eval request builder
      */
     public static class Builder {
 
@@ -36,18 +36,18 @@ public final class TarantoolCallRequest extends TarantoolRequest {
         }
 
         /**
-         * Specify function name
-         * @param functionName function name
+         * Specify lua expression
+         * @param expression lua expression
          * @return builder
          */
-        public Builder withFunctionName(String functionName) {
-            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_FUNCTION_NAME.getCode(), functionName);
+        public Builder withExpression(String expression) {
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_EXPRESSION.getCode(), expression);
             return this;
         }
 
         /**
-         * Specify function arguments
-         * @param arguments function arguments
+         * Specify eval arguments
+         * @param arguments eval arguments
          * @return builder
          */
         public Builder withArguments(List<Object> arguments) {
@@ -56,17 +56,17 @@ public final class TarantoolCallRequest extends TarantoolRequest {
         }
 
         /**
-         * Build a {@link TarantoolCallRequest} instance
+         * Build a {@link TarantoolEvalRequest} instance
          * @param mapper configured {@link MessagePackObjectMapper} instance
-         * @return instance of call request
+         * @return instance of eval request
          * @throws TarantoolProtocolException if some required params is missing
          */
-        public TarantoolCallRequest build(MessagePackObjectMapper mapper) throws TarantoolProtocolException {
-            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_FUNCTION_NAME.getCode())) {
-                throw new TarantoolProtocolException("Function name must be specified in the call request");
+        public TarantoolEvalRequest build(MessagePackObjectMapper mapper) throws TarantoolProtocolException {
+            if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_EXPRESSION.getCode())) {
+                throw new TarantoolProtocolException("Lua expression must be specified in the eval request");
             }
 
-            return new TarantoolCallRequest(new TarantoolRequestBody(bodyMap, mapper));
+            return new TarantoolEvalRequest(new TarantoolRequestBody(bodyMap, mapper));
         }
     }
 }

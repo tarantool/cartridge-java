@@ -346,4 +346,19 @@ public class StandaloneTarantoolClientIT {
         assertEquals(3, resultTwoParams.size());
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));
     }
+
+    @Test
+    public void evalTest() throws ExecutionException, InterruptedException {
+        List<Object> result =
+                connection.eval("return 2+2").get();
+
+        assertEquals(1, result.size());
+        assertEquals(4, result.get(0));
+
+        result = connection.eval("return 5*5, 'abc'").get();
+
+        assertEquals(2, result.size());
+        assertEquals(25, result.get(0));
+        assertEquals("abc", result.get(1));
+    }
 }
