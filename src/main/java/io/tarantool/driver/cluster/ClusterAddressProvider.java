@@ -5,11 +5,11 @@ import io.tarantool.driver.TarantoolServerAddress;
 import java.util.List;
 
 /**
- * Discovery strategy to obtain a list of addresses the cluster nodes.
+ * Address provider aware of a list of the Tarantool cluster nodes.
  *
  * @author Sergey Volgin
  */
-public interface ClusterDiscoverer extends AddressProvider, AutoCloseable {
+public interface ClusterAddressProvider extends AddressProvider, AutoCloseable {
 
     /**
      * Get list of {@link TarantoolServerAddress}

@@ -4,7 +4,7 @@ import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.auth.TarantoolCredentials;
 
 /**
- * Class-container for {@link TarantoolClusterDiscoverer} configuration
+ * Class-container for {@link TarantoolClusterAddressProvider} configuration
  *
  * @author Sergey Volgin
  */
@@ -17,7 +17,7 @@ public class TarantoolClusterDiscoveryEndpoint implements ClusterDiscoveryEndpoi
     /**
      * Create an instance
      *
-     * @see TarantoolClusterDiscoverer
+     * @see TarantoolClusterAddressProvider
      */
     public TarantoolClusterDiscoveryEndpoint() {
 

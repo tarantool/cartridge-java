@@ -23,17 +23,17 @@ public class RoundRobinAddressProviderTest {
         RoundRobinAddressProvider provider = new RoundRobinAddressProvider(addressList);
 
         assertEquals(3, provider.size());
-        assertEquals("127.0.0.1", provider.getNext().getHost());
-        assertEquals("127.0.0.2", provider.getNext().getHost());
-        assertEquals("127.0.0.3", provider.getNext().getHost());
+        assertEquals("127.0.0.1", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.2", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.3", provider.getNextAddress().getHost());
 
-        assertEquals("127.0.0.1", provider.getNext().getHost());
-        assertEquals("127.0.0.2", provider.getNext().getHost());
-        assertEquals("127.0.0.2", provider.getAddress().getHost());
-        assertEquals(3302, provider.getAddress().getPort());
-        assertEquals("127.0.0.3", provider.getNext().getHost());
+        assertEquals("127.0.0.1", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.2", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.2", provider.getCurrentAddress().getHost());
+        assertEquals(3302, provider.getCurrentAddress().getPort());
+        assertEquals("127.0.0.3", provider.getNextAddress().getHost());
 
-        assertEquals("127.0.0.1", provider.getNext().getHost());
+        assertEquals("127.0.0.1", provider.getNextAddress().getHost());
     }
 
     @Test
@@ -47,9 +47,9 @@ public class RoundRobinAddressProviderTest {
         RoundRobinAddressProvider provider = new RoundRobinAddressProvider(addressList);
 
         assertEquals(3, provider.size());
-        assertEquals("127.0.0.1", provider.getNext().getHost());
-        assertEquals("127.0.0.2", provider.getNext().getHost());
-        assertEquals("127.0.0.3", provider.getNext().getHost());
+        assertEquals("127.0.0.1", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.2", provider.getNextAddress().getHost());
+        assertEquals("127.0.0.3", provider.getNextAddress().getHost());
 
         List<TarantoolServerAddress> newAddressList = Arrays.asList(
                 new TarantoolServerAddress("10.0.2.10", 3301),
@@ -62,9 +62,9 @@ public class RoundRobinAddressProviderTest {
         provider.updateAddressList(newAddressList);
 
         assertEquals(5, provider.size());
-        assertEquals("127.0.0.3", provider.getAddress().getHost());
-        assertEquals("10.0.2.12", provider.getNext().getHost());
-        assertEquals("10.0.2.13", provider.getNext().getHost());
-        assertEquals("10.0.2.10", provider.getNext().getHost());
+        assertEquals("127.0.0.3", provider.getCurrentAddress().getHost());
+        assertEquals("10.0.2.12", provider.getNextAddress().getHost());
+        assertEquals("10.0.2.13", provider.getNextAddress().getHost());
+        assertEquals("10.0.2.10", provider.getNextAddress().getHost());
     }
 }

@@ -9,7 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.AddressProvider;
-import io.tarantool.driver.cluster.ClusterDiscovererFactory;
+import io.tarantool.driver.cluster.AddressProviderFactory;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -62,7 +62,8 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config) {
         this.config = config;
-        this.addressProvider = ClusterDiscovererFactory.create(config.getServerSelectStrategy(), config.getClusterDiscoveryConfig());
+        this.addressProvider = AddressProviderFactory.create(config.getSimpleAddressProvider(),
+                config.getClusterDiscoveryConfig());
 
         this.eventLoopGroup = new NioEventLoopGroup();
         this.connections = new ConcurrentHashMap<>();
@@ -82,7 +83,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     @Override
     public TarantoolConnection connect() throws TarantoolClientException {
-        TarantoolServerAddress tarantoolServerAddress = addressProvider.getNext();
+        TarantoolServerAddress tarantoolServerAddress = addressProvider.getNextAddress();
         return connect(tarantoolServerAddress.getSocketAddress());
     }
 

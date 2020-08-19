@@ -2,8 +2,6 @@ package io.tarantool.driver;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 /**
@@ -42,19 +40,29 @@ public class TarantoolServerAddress {
      * @param port tarantool port
      */
     public TarantoolServerAddress(final String host, final int port) {
-        if (port <= 0 || port > 65535) {
-            throw new IllegalArgumentException(String.format("Invalid port number : %s", port));
+        //discard username if specified
+        String[] parts = host.split("@");
+        String[] addressParts = parts[parts.length - 1].split(":");
+
+        if (addressParts.length > 2) {
+            throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
         }
 
-        URI uri;
-        try {
-            uri = new URI(host);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(String.format("Invalid host name: %s", host), e);
+        int portNumber = port;
+        if (addressParts.length == 2) {
+            try {
+                portNumber = Integer.parseInt(addressParts[1]);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
+            }
         }
 
-        this.host = uri.getHost();
-        this.port = (uri.getPort() != -1) ? uri.getPort() : port;
+        if (portNumber <= 0 || portNumber > 65535) {
+            throw new IllegalArgumentException(String.format("Invalid port number : %s", portNumber));
+        }
+
+        this.host = addressParts[0];
+        this.port = portNumber;
     }
 
     /**

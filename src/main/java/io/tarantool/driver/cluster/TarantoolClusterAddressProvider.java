@@ -65,19 +65,18 @@ import java.util.stream.Collectors;
  *
  * @author Sergey Volgin
  */
-public class TarantoolClusterDiscoverer implements ClusterDiscoverer {
+public class TarantoolClusterAddressProvider implements ClusterAddressProvider {
 
     private final ClusterDiscoveryConfig config;
     private final TarantoolClusterDiscoveryEndpoint endpoint;
     private final TarantoolClient client;
     private final ObjectMapper objectMapper;
-    protected final ServerSelectStrategy wrapped;
+    protected final SimpleAddressProvider wrapped;
     protected ScheduledExecutorService scheduledExecutorService;
     protected AtomicBoolean taskStarted = new AtomicBoolean(false);
 
-
-    public TarantoolClusterDiscoverer(ServerSelectStrategy strategy,
-                                      ClusterDiscoveryConfig config) {
+    public TarantoolClusterAddressProvider(SimpleAddressProvider strategy,
+                                           ClusterDiscoveryConfig config) {
         this.wrapped = strategy;
         this.endpoint = (TarantoolClusterDiscoveryEndpoint) config.getEndpoint();
         this.config = config;
@@ -122,15 +121,15 @@ public class TarantoolClusterDiscoverer implements ClusterDiscoverer {
     }
 
     @Override
-    public TarantoolServerAddress getAddress() {
+    public TarantoolServerAddress getCurrentAddress() {
         startDiscoveryTask();
-        return wrapped.getAddress();
+        return wrapped.getCurrentAddress();
     }
 
     @Override
-    public TarantoolServerAddress getNext() {
+    public TarantoolServerAddress getNextAddress() {
         startDiscoveryTask();
-        return wrapped.getNext();
+        return wrapped.getNextAddress();
     }
 
     @Override

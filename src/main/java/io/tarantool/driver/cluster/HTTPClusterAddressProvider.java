@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -107,7 +108,7 @@ import java.util.stream.Collectors;
  *
  * @author Sergey Volgin
  */
-public class HTTPClusterDiscoverer implements ClusterDiscoverer {
+public class HTTPClusterAddressProvider implements ClusterAddressProvider {
 
     private URI uri;
     private int port;
@@ -119,11 +120,12 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
     private final Bootstrap bootstrap;
 
     private final ClusterDiscoveryConfig config;
-    private final ServerSelectStrategy wrapped;
-    private ScheduledExecutorService scheduledExecutorService;
+    private final SimpleAddressProvider wrapped;
+    private ScheduledExecutorService scheduledExecutorService =
+            Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-discovery"));
     private AtomicBoolean taskStarted = new AtomicBoolean(false);
 
-    public HTTPClusterDiscoverer(ServerSelectStrategy wrapped, ClusterDiscoveryConfig config) {
+    public HTTPClusterAddressProvider(SimpleAddressProvider wrapped, ClusterDiscoveryConfig config) {
         this.wrapped = wrapped;
         this.config = config;
         HTTPClusterDiscoveryEndpoint endpoint = (HTTPClusterDiscoveryEndpoint) config.getEndpoint();
@@ -168,15 +170,15 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
     }
 
     @Override
-    public TarantoolServerAddress getAddress() {
+    public TarantoolServerAddress getCurrentAddress() {
         startDiscoveryTask();
-        return wrapped.getAddress();
+        return wrapped.getCurrentAddress();
     }
 
     @Override
-    public TarantoolServerAddress getNext() {
+    public TarantoolServerAddress getNextAddress() {
         startDiscoveryTask();
-        return wrapped.getNext();
+        return wrapped.getNextAddress();
     }
 
     @Override
@@ -186,8 +188,6 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
 
     private void startDiscoveryTask() throws TarantoolClientException {
         if (taskStarted.compareAndSet(false, true)) {
-            this.scheduledExecutorService =
-                    Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-discovery"));
             this.createDiscoveryTask();
         }
     }
@@ -211,6 +211,13 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
     public CompletableFuture<Map<String, ServerNodeInfo>> sendRequest() throws InterruptedException {
         CompletableFuture<Map<String, ServerNodeInfo>> completableFuture = new CompletableFuture<>();
 
+        scheduledExecutorService.schedule(() -> {
+            if (!completableFuture.isDone()) {
+                completableFuture.completeExceptionally(new TimeoutException(String.format(
+                        "Failed to get response for request in %d ms", config.getReadTimeout())));
+            }
+        }, config.getReadTimeout(), TimeUnit.MILLISECONDS);
+
         Bootstrap bootstrap = this.bootstrap.clone()
                 .handler(new SimpleHttpClientInitializer(sslContext, completableFuture));
 
@@ -229,6 +236,9 @@ public class HTTPClusterDiscoverer implements ClusterDiscoverer {
 
     @Override
     public void close() {
+        if (scheduledExecutorService != null) {
+            scheduledExecutorService.shutdownNow();
+        }
         try {
             eventLoopGroup.shutdownGracefully().sync();
         } catch (InterruptedException e) {

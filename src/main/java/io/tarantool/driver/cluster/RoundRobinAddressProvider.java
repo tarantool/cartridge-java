@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Sergey Volgin
  */
-public class RoundRobinAddressProvider implements AddressProvider, ServerSelectStrategy {
+public class RoundRobinAddressProvider implements AddressProvider, SimpleAddressProvider {
 
     private final List<TarantoolServerAddress> addressList = new ArrayList<>();
     private AtomicInteger currentPosition = new AtomicInteger(-1);
@@ -31,7 +31,7 @@ public class RoundRobinAddressProvider implements AddressProvider, ServerSelectS
     }
 
     @Override
-    public TarantoolServerAddress getAddress() {
+    public TarantoolServerAddress getCurrentAddress() {
         synchronized (addressList) {
             if (addressList.size() > 0 && currentPosition.get() >= 0) {
                 int position = currentPosition.get() % addressList.size();
@@ -43,7 +43,7 @@ public class RoundRobinAddressProvider implements AddressProvider, ServerSelectS
     }
 
     @Override
-    public TarantoolServerAddress getNext() {
+    public TarantoolServerAddress getNextAddress() {
         synchronized (addressList) {
             int position = currentPosition.updateAndGet(i -> (i + 1) % addressList.size());
             return addressList.get(position);
@@ -61,7 +61,7 @@ public class RoundRobinAddressProvider implements AddressProvider, ServerSelectS
             throw new IllegalArgumentException("At least one server address must be provided");
         }
         synchronized (addressList) {
-            TarantoolServerAddress currentAddress = getAddress();
+            TarantoolServerAddress currentAddress = getCurrentAddress();
             Set<TarantoolServerAddress> hostsSet = new LinkedHashSet<>(addresses.size());
             addressList.clear();
 

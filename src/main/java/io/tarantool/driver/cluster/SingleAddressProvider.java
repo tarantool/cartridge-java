@@ -9,7 +9,7 @@ import java.util.Collection;
  *
  * @author Sergey Volgin
  */
-public class SingleAddressProvider implements AddressProvider, ServerSelectStrategy {
+public class SingleAddressProvider implements AddressProvider, SimpleAddressProvider {
 
     private TarantoolServerAddress tarantoolServerAddress;
 
@@ -18,12 +18,12 @@ public class SingleAddressProvider implements AddressProvider, ServerSelectStrat
     }
 
     @Override
-    public TarantoolServerAddress getAddress() {
+    public TarantoolServerAddress getCurrentAddress() {
         return tarantoolServerAddress;
     }
 
     @Override
-    public TarantoolServerAddress getNext() {
+    public TarantoolServerAddress getNextAddress() {
         return tarantoolServerAddress;
     }
 

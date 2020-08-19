@@ -15,13 +15,13 @@ public interface AddressProvider {
      * Get an current node address
      * @return the {@link TarantoolServerAddress}
      */
-    TarantoolServerAddress getAddress();
+    TarantoolServerAddress getCurrentAddress();
 
     /**
      * Get the next node address
      * @return the {@link TarantoolServerAddress}
      */
-    TarantoolServerAddress getNext();
+    TarantoolServerAddress getNextAddress();
 
     /**
      * Update current address list by new list

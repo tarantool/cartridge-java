@@ -1,5 +1,7 @@
 package io.tarantool.driver.cluster;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,7 @@ final class ServerNodeInfo {
     private String uuid;
     private String uri;
     private String status;
+    @JsonProperty("network_timeout")
     private Double networkTimeout;
 
     ServerNodeInfo() {

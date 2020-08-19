@@ -2,7 +2,7 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.cluster.ServerSelectStrategy;
+import io.tarantool.driver.cluster.SimpleAddressProvider;
 import io.tarantool.driver.cluster.ClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.RoundRobinAddressProvider;
 import io.tarantool.driver.cluster.SingleAddressProvider;
@@ -33,7 +33,7 @@ public class TarantoolClientConfig {
     private int readTimeout = 1000;
     private int requestTimeout = 2000;
     private ClusterDiscoveryConfig clusterDiscoveryConfig;
-    private ServerSelectStrategy serverSelectStrategy;
+    private SimpleAddressProvider simpleAddressProvider;
     private List<TarantoolServerAddress> hosts;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
@@ -128,18 +128,18 @@ public class TarantoolClientConfig {
 
     /**
      * Get strategy for selecting server
-     * @return a {@link ServerSelectStrategy}
+     * @return a {@link SimpleAddressProvider}
      */
-    public ServerSelectStrategy getServerSelectStrategy() {
-        return serverSelectStrategy;
+    public SimpleAddressProvider getSimpleAddressProvider() {
+        return simpleAddressProvider;
     }
 
     /**
      * Set strategy for selecting server
-     * @param serverSelectStrategy a {@link ServerSelectStrategy} instance
+     * @param simpleAddressProvider a {@link SimpleAddressProvider} instance
      */
-    public void setServerSelectStrategy(ServerSelectStrategy serverSelectStrategy) {
-        this.serverSelectStrategy = serverSelectStrategy;
+    public void setSimpleAddressProvider(SimpleAddressProvider simpleAddressProvider) {
+        this.simpleAddressProvider = simpleAddressProvider;
     }
 
     /**
@@ -254,12 +254,12 @@ public class TarantoolClientConfig {
 
         /**
          * Specify strategy for selecting server
-         * @param strategy a {@link ServerSelectStrategy}, which the server selection strategy
+         * @param addressProvider a {@link SimpleAddressProvider}, which the server selection strategy
          * @return builder
-         * @see TarantoolClientConfig#setServerSelectStrategy(ServerSelectStrategy)
+         * @see TarantoolClientConfig#setSimpleAddressProvider(SimpleAddressProvider)
          */
-        public Builder withServerSelectStrategy(ServerSelectStrategy strategy) {
-            config.setServerSelectStrategy(strategy);
+        public Builder withAddressProvider(SimpleAddressProvider addressProvider) {
+            config.setSimpleAddressProvider(addressProvider);
             return this;
         }
 
@@ -327,11 +327,11 @@ public class TarantoolClientConfig {
                 config.setCredentials(new SimpleTarantoolCredentials(DEFAULT_USER, DEFAULT_PASSWORD));
             }
 
-            if (config.getServerSelectStrategy() == null) {
+            if (config.getSimpleAddressProvider() == null) {
                 if (config.getHosts().size() == 1 && config.getClusterDiscoveryConfig() == null) {
-                    config.setServerSelectStrategy(new SingleAddressProvider(config.getHosts().get(0)));
+                    config.setSimpleAddressProvider(new SingleAddressProvider(config.getHosts().get(0)));
                 } else {
-                    config.setServerSelectStrategy(new RoundRobinAddressProvider(config.getHosts()));
+                    config.setSimpleAddressProvider(new RoundRobinAddressProvider(config.getHosts()));
                 }
             }
 

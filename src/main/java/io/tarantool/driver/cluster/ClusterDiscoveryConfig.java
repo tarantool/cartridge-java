@@ -1,7 +1,9 @@
 package io.tarantool.driver.cluster;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
+
 /**
- * Class-container for {@link ClusterDiscoverer} configuration.
+ * Class-container for {@link ClusterAddressProvider} configuration.
  * <p>
  * It is recommended to use the {@link ClusterDiscoveryConfig.Builder} for constructing the configuration
  *
@@ -135,6 +137,9 @@ public final class ClusterDiscoveryConfig {
          * @return configured instance
          */
         public ClusterDiscoveryConfig build() {
+            if (config.getEndpoint() == null) {
+                throw new TarantoolClientException("Cluster discovery endpoint must be not null");
+            }
             return config;
         }
     }

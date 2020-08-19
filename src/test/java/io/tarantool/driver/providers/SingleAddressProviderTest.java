@@ -18,9 +18,9 @@ public class SingleAddressProviderTest {
         TarantoolServerAddress tarantoolServerAddress = new TarantoolServerAddress("10.0.2.15", 3301);
         SingleAddressProvider provider = new SingleAddressProvider(tarantoolServerAddress);
 
-        assertEquals("10.0.2.15", provider.getAddress().getHost());
-        assertEquals("10.0.2.15", provider.getNext().getHost());
-        assertEquals("10.0.2.15", provider.getNext().getHost());
+        assertEquals("10.0.2.15", provider.getCurrentAddress().getHost());
+        assertEquals("10.0.2.15", provider.getNextAddress().getHost());
+        assertEquals("10.0.2.15", provider.getNextAddress().getHost());
 
         List<TarantoolServerAddress> addressList = Arrays.asList(
                 new TarantoolServerAddress("127.0.0.1", 3301),
@@ -29,8 +29,8 @@ public class SingleAddressProviderTest {
         );
 
         provider.updateAddressList(addressList);
-        assertEquals("127.0.0.1", provider.getAddress().getHost());
-        assertEquals("127.0.0.1", provider.getNext().getHost());
+        assertEquals("127.0.0.1", provider.getCurrentAddress().getHost());
+        assertEquals("127.0.0.1", provider.getNextAddress().getHost());
 
         assertThrows(IllegalArgumentException.class, () -> provider.updateAddressList(null));
         assertThrows(IllegalArgumentException.class, () -> provider.updateAddressList(new ArrayList<>()));
