@@ -11,6 +11,7 @@ public enum TarantoolResponseBodyType {
 
     public static TarantoolResponseBodyType fromCode(int code) throws TarantoolProtocolException {
         switch (code) {
+            case 0x00: return EMPTY;
             case 0x30: return IPROTO_DATA;
             case 0x31: return IPROTO_ERROR;
             case 0x42: return IPROTO_SQL;

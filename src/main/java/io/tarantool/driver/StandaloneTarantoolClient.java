@@ -62,7 +62,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config) {
         this.config = config;
-        this.addressProvider = AddressProviderFactory.create(config.getSimpleAddressProvider(),
+        this.addressProvider = AddressProviderFactory.createClusterAddressProvider(config.getSimpleAddressProvider(),
                 config.getClusterDiscoveryConfig());
 
         this.eventLoopGroup = new NioEventLoopGroup();

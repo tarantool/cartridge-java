@@ -29,9 +29,9 @@ public class TarantoolClientConfig {
     private static final String DEFAULT_PASSWORD = "password";
 
     private TarantoolCredentials credentials;
-    private int connectTimeout = 1000;
-    private int readTimeout = 1000;
-    private int requestTimeout = 2000;
+    private int connectTimeout = 1000; // milliseconds
+    private int readTimeout = 1000; // milliseconds
+    private int requestTimeout = 2000; // milliseconds
     private ClusterDiscoveryConfig clusterDiscoveryConfig;
     private SimpleAddressProvider simpleAddressProvider;
     private List<TarantoolServerAddress> hosts;

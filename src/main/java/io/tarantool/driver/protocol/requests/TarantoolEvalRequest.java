@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author Sergey Volgin
  */
-public class TarantoolEvalRequest extends TarantoolRequest {
+public final class TarantoolEvalRequest extends TarantoolRequest {
 
     private TarantoolEvalRequest(TarantoolRequestBody body) {
         super(TarantoolRequestType.IPROTO_EVAL, body);

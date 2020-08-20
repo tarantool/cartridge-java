@@ -363,4 +363,13 @@ public class StandaloneTarantoolClientIT {
         assertEquals(25, result.get(0));
         assertEquals("abc", result.get(1));
     }
+
+    @Test
+    public void evalReturnNil() throws ExecutionException, InterruptedException {
+        List<Object> result =
+                connection.eval("return 2.2 + 2, nil").get();
+
+        assertEquals(2, result.size());
+        assertEquals(4.2f, result.get(0));
+    }
 }

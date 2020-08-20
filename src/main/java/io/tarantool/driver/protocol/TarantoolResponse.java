@@ -109,7 +109,11 @@ public final class TarantoolResponse {
                 if (!key.isIntegerValue()) {
                     throw new TarantoolProtocolException("Response body first key must be of MP_INT type");
                 }
-                responseBody = new NotEmptyTarantoolResponseBody(key.asIntegerValue().asInt(), values.map().get(key));
+                if (TarantoolResponseBodyType.fromCode(key.asIntegerValue().asInt()) == TarantoolResponseBodyType.EMPTY) {
+                    responseBody = new EmptyTarantoolResponseBody();
+                } else {
+                    responseBody = new NotEmptyTarantoolResponseBody(key.asIntegerValue().asInt(), values.map().get(key));
+                }
             } else {
                 responseBody = new EmptyTarantoolResponseBody();
             }

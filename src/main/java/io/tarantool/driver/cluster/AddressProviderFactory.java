@@ -7,9 +7,8 @@ package io.tarantool.driver.cluster;
  */
 public final class AddressProviderFactory {
 
-    public static AddressProvider create(SimpleAddressProvider simpleAddressProvider,
-                                                ClusterDiscoveryConfig config) {
-
+    public static AddressProvider createClusterAddressProvider(SimpleAddressProvider simpleAddressProvider,
+                                                               ClusterDiscoveryConfig config) {
         if (config == null) {
             return simpleAddressProvider;
         }

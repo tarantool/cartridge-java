@@ -12,9 +12,9 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 public final class ClusterDiscoveryConfig {
 
     private ClusterDiscoveryEndpoint endpoint;
-    private int serviceDiscoveryDelay = 60_000;
-    private int connectTimeout = 1000;
-    private int readTimeout = 1000;
+    private int serviceDiscoveryDelay = 60_000; // milliseconds
+    private int connectTimeout = 1000; // milliseconds
+    private int readTimeout = 1000; // milliseconds
 
     /**
      * Get config of service discovery endpoint
