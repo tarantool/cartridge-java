@@ -57,9 +57,9 @@ public class ClusterDiscoveryIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
-                .withConnectTimeout(5)
-                .withRequestTimeout(5)
-                .withReadTimeout(5)
+                .withConnectTimeout(5000)
+                .withRequestTimeout(5000)
+                .withReadTimeout(5000)
                 .withHost(ROUTER_HOST, ROUTER_PORT)
                 .build();
 
