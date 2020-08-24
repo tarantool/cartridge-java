@@ -57,9 +57,9 @@ public class ClusterDiscoveryIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
-                .withConnectTimeout(5000)
-                .withRequestTimeout(5000)
-                .withReadTimeout(5000)
+                .withConnectTimeout(1000 * 5)
+                .withRequestTimeout(1000 * 5)
+                .withReadTimeout(1000 * 5)
                 .withHost(ROUTER_HOST, ROUTER_PORT)
                 .build();
 
@@ -139,31 +139,31 @@ public class ClusterDiscoveryIT {
         assertTrue(nodes.size() > 1);
     }
 
-//    @Test
-//    public void connectWithHttpServiceDiscovery() throws TarantoolClientException {
-//        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-//        HTTPClusterDiscoveryEndpoint endpoint =
-//                  new HTTPClusterDiscoveryEndpoint(CartridgeHelper.getHttpDiscoveryURL());
-//
-//        ClusterDiscoveryConfig clusterDiscoveryConfig = new ClusterDiscoveryConfig.Builder()
-//                .withEndpoint(endpoint).build();
-//
-//        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-//                .withCredentials(credentials)
-//                .withConnectTimeout(1000 * 5)
-//                .withReadTimeout(1000 * 5)
-//                .withRequestTimeout(1000 * 5)
-//                .withHost(ROUTER_HOST, ROUTER_PORT)
-//                .withClusterDiscoveryConfig(clusterDiscoveryConfig)
-//                .build();
-//
-//        StandaloneTarantoolClient client = new StandaloneTarantoolClient(config);
-//
-//        TarantoolConnection connection = client.connect();
-//        assertEquals("localhost/127.0.0.1:3302", connection.getChannel().remoteAddress().toString());
-//        connection = client.connect();
-//        assertEquals("localhost/127.0.0.1:3304", connection.getChannel().remoteAddress().toString());
-//        connection = client.connect();
-//        assertEquals("localhost/127.0.0.1:3302", connection.getChannel().remoteAddress().toString());
-//    }
+    @Test
+    public void connectWithHttpClusterDiscovery() throws TarantoolClientException {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
+        HTTPClusterDiscoveryEndpoint endpoint =
+                  new HTTPClusterDiscoveryEndpoint(CartridgeHelper.getHttpDiscoveryURL());
+
+        ClusterDiscoveryConfig clusterDiscoveryConfig = new ClusterDiscoveryConfig.Builder()
+                .withEndpoint(endpoint).build();
+
+        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
+                .withCredentials(credentials)
+                .withConnectTimeout(1000 * 5)
+                .withReadTimeout(1000 * 5)
+                .withRequestTimeout(1000 * 5)
+                .withHost(ROUTER_HOST, ROUTER_PORT)
+                .withClusterDiscoveryConfig(clusterDiscoveryConfig)
+                .build();
+
+        StandaloneTarantoolClient client = new StandaloneTarantoolClient(config);
+
+        TarantoolConnection connection = client.connect();
+        assertEquals("/127.0.0.1:53301", connection.getChannel().remoteAddress().toString());
+        connection = client.connect();
+        assertEquals("/127.0.0.1:53310", connection.getChannel().remoteAddress().toString());
+        connection = client.connect();
+        assertEquals("/127.0.0.1:53301", connection.getChannel().remoteAddress().toString());
+    }
 }
