@@ -38,6 +38,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
 
     /**
      * Basic constructor.
+     *
      * @param config client configuration
      * @param connectionManager configured {@link TarantoolConnectionManager} instance
      */
@@ -61,27 +62,25 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = space(VSPACE_SPACE_ID)
                 .select(query, options, spaceMetadataMapper);
         spaces.thenApply(result -> {
-                        spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
-                        spaceMetadataById.clear();
-                        return result;
-                    })
-                .thenAccept(result -> result.stream()
-                    .forEach(meta -> {
-                        spaceMetadata.put(meta.getSpaceName(), meta);
-                        spaceMetadataById.put(meta.getSpaceId(), meta);
-                    }));
+            spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
+            spaceMetadataById.clear();
+            return result;
+        })
+                .thenAccept(result -> result.forEach(meta -> {
+                    spaceMetadata.put(meta.getSpaceName(), meta);
+                    spaceMetadataById.put(meta.getSpaceId(), meta);
+                }));
 
         CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = space(VINDEX_SPACE_ID)
                 .select(query, options, indexMetadataMapper);
         indexes.thenApply(result -> {
-                    indexMetadata.clear();
-                    return result;
-                })
-                .thenAccept(result -> result.stream()
-                    .forEach(meta -> {
-                        indexMetadata.putIfAbsent(meta.getSpaceId(), new HashMap<>());
-                        indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
-                    }));
+            indexMetadata.clear();
+            return result;
+        })
+                .thenAccept(result -> result.forEach(meta -> {
+                    indexMetadata.putIfAbsent(meta.getSpaceId(), new HashMap<>());
+                    indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
+                }));
 
         return CompletableFuture.allOf(spaces, indexes).whenComplete((v, ex) -> {
             if (initLatch.getCount() > 0) {
@@ -134,6 +133,41 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
             return Optional.empty();
         }
         return Optional.ofNullable(metaMap.get(indexName));
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexByName(String spaceName, String indexName) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+        Assert.hasText(indexName, "Index name must not be null or empty");
+
+        TarantoolSpaceMetadata spaceMeta = spaceMetadata.get(spaceName);
+        if (spaceMeta == null) {
+            return Optional.empty();
+        }
+
+        Map<String, TarantoolIndexMetadata> metaMap = indexMetadata.get(spaceMeta.getSpaceId());
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(metaMap.get(indexName));
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexById(String spaceName, int indexId) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
+
+        TarantoolSpaceMetadata spaceMeta = spaceMetadata.get(spaceName);
+        if (spaceMeta == null) {
+            return Optional.empty();
+        }
+
+        Map<String, TarantoolIndexMetadata> metaMap = indexMetadata.get(spaceMeta.getSpaceId());
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return metaMap.values().stream().filter(i -> i.getIndexId() == indexId).findFirst();
     }
 
     @Override

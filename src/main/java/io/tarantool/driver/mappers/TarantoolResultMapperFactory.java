@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TarantoolResultMapperFactory {
 
     private Map<Class<?>, TarantoolResultMapper<?>> mapperCache = new ConcurrentHashMap<>();
+    private Map<Class<?>, TarantoolSingleResultMapper<?>> singleResultMapperCache = new ConcurrentHashMap<>();
+    private Map<Class<?>, ClusterTarantoolResultMapper<?>> proxyMapperCache = new ConcurrentHashMap<>();
 
     /**
      * Basic constructor
@@ -25,7 +27,7 @@ public class TarantoolResultMapperFactory {
     /**
      * Get default {@link TarantoolTuple} converter
      * @param mapper configured {@link MessagePackMapper} instance
-     * @return default DefaultTarantoolTupleValueConverter instance
+     * @return {@link DefaultTarantoolTupleValueConverter} instance
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(MessagePackMapper mapper) {
         return new DefaultTarantoolTupleValueConverter(mapper);
@@ -74,5 +76,66 @@ public class TarantoolResultMapperFactory {
     private <T> TarantoolResultMapper<T> createMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
         return new TarantoolResultMapper<>(mapper, valueConverter);
+    }
+
+    /**
+     * Create TarantoolSingleResultMapper instance with the passed converter.
+     *
+     * @param valueClass target object type class. Necessary for resolving ambiguity when more than one suitable
+     * converters are present in the configured mapper
+     * @param valueConverter entity-to-object converter
+     * @param <T> target object type
+     * @return TarantoolSingleResultMapper instance
+     */
+    @SuppressWarnings("unchecked")
+    public <T> TarantoolSingleResultMapper<T> withSingleValueConverter(Class<T> valueClass,
+            ValueConverter<ArrayValue, T> valueConverter) {
+        TarantoolSingleResultMapper<T> mapper =
+                (TarantoolSingleResultMapper<T>) singleResultMapperCache.get(valueClass);
+        if (mapper == null) {
+            mapper = createSingleValueMapper(valueConverter);
+            singleResultMapperCache.put(valueClass, mapper);
+        }
+        return mapper;
+    }
+
+    private <T> TarantoolSingleResultMapper<T> createSingleValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
+        MessagePackValueMapper mapper = new DefaultMessagePackMapper();
+        return new TarantoolSingleResultMapper<T>(mapper, valueConverter);
+    }
+
+    /**
+     * Create TarantoolResultMapper instance with the passed converter.
+     * @param valueConverter entity-to-object converter
+     * @param <T> target object type
+     * @return TarantoolResultMapper instance
+     */
+    public <T> ClusterTarantoolResultMapper<T> withProxyConverter(ValueConverter<ArrayValue, T> valueConverter) {
+        return withProxyConverter(valueConverter, MapperReflectionUtils.getConverterTargetType(valueConverter));
+    }
+
+    /**
+     * Create ProxyTarantoolResultMapper instance with the passed converter.
+     *
+     * @param valueClass target object type class. Necessary for resolving ambiguity when more than one suitable
+     * converters are present in the configured mapper
+     * @param valueConverter entity-to-object converter
+     * @param <T> target object type
+     * @return ProxyTarantoolResultMapper instance
+     */
+    @SuppressWarnings("unchecked")
+    public <T> ClusterTarantoolResultMapper<T> withProxyConverter(
+            ValueConverter<ArrayValue, T> valueConverter, Class<T> valueClass) {
+        ClusterTarantoolResultMapper<T> mapper = (ClusterTarantoolResultMapper<T>) proxyMapperCache.get(valueClass);
+        if (mapper == null) {
+            mapper = createProxyValueMapper(valueConverter);
+            proxyMapperCache.put(valueClass, mapper);
+        }
+        return mapper;
+    }
+
+    private <T> ClusterTarantoolResultMapper<T> createProxyValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
+        MessagePackValueMapper mapper = new DefaultMessagePackMapper();
+        return new ClusterTarantoolResultMapper<T>(mapper, valueConverter);
     }
 }

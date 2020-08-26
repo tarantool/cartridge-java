@@ -6,23 +6,29 @@ package io.tarantool.driver.protocol;
  * @author Alexey Kuzin
  */
 public enum TarantoolIteratorType {
-    ITER_EQ(0x00),
-    ITER_REQ(0x01),
-    ITER_ALL(0x02),
-    ITER_LT(0x03),
-    ITER_LE(0x04),
-    ITER_GE(0x05),
-    ITER_GT(0x06);
+    ITER_EQ(0x00, "EQ"),
+    ITER_REQ(0x01, "REQ"),
+    ITER_ALL(0x02, "ALL"),
+    ITER_LT(0x03, "LT"),
+    ITER_LE(0x04, "LE"),
+    ITER_GE(0x05, "GE"),
+    ITER_GT(0x06, "GT");
     // TODO support bitset iterators
 
-    private int code;
+    private final int code;
+    private final String stringCode;
 
-    TarantoolIteratorType(int code) {
+    TarantoolIteratorType(int code, String stringCode) {
         this.code = code;
+        this.stringCode = stringCode;
     }
 
     public int getCode() {
         return code;
+    }
+
+    public String getStringCode() {
+        return stringCode;
     }
 
     /**

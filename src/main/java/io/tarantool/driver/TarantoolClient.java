@@ -1,10 +1,13 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import org.msgpack.value.ArrayValue;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -77,7 +80,7 @@ public interface TarantoolClient extends AutoCloseable {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
+    <T> CompletableFuture<List<T>> call(String functionName, MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
     /**
@@ -94,6 +97,24 @@ public interface TarantoolClient extends AutoCloseable {
     <T> CompletableFuture<List<T>> call(String functionName,
                                         List<Object> arguments,
                                         MessagePackValueMapper resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance
+     *
+     * @param functionName function name, must not be null or empty
+     * @param arguments the list of function arguments. The object mapper specified in the client configuration
+     *      *        will be used for arguments conversion to MessagePack entities
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                                an object of type {@code T}
+     * @param <T> result type
+     * @return some result
+     * @throws TarantoolClientException  if the client is not connected
+     */
+    <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<Object> arguments,
+                                                   MessagePackObjectMapper argumentsMapper,
+                                                   ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
     /**

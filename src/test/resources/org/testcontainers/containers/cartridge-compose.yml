@@ -1,7 +1,7 @@
 version: '2.4'
 services:
   tarantool.router:
-    image: savolgin/cartridge-testapp:0.1.2
+    image: savolgin/cartridge-testapp:0.2.0
     environment:
       TARANTOOL_INSTANCE_NAME: "myapp.router"
       TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
@@ -14,7 +14,7 @@ services:
       app_net:
         ipv4_address: 172.16.237.101
   tarantool.router2:
-    image: savolgin/cartridge-testapp:0.1.2
+    image: savolgin/cartridge-testapp:0.2.0
     environment:
       TARANTOOL_INSTANCE_NAME: "myapp.router2"
       TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
@@ -27,7 +27,7 @@ services:
       app_net:
         ipv4_address: 172.16.237.110
   tarantool.s1master:
-    image: savolgin/cartridge-testapp:0.1.2
+    image: savolgin/cartridge-testapp:0.2.0
     environment:
       TARANTOOL_INSTANCE_NAME: "myapp.s1-master"
       TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
@@ -40,7 +40,7 @@ services:
       app_net:
         ipv4_address: 172.16.237.102
   tarantool.s2master:
-    image: savolgin/cartridge-testapp:0.1.2
+    image: savolgin/cartridge-testapp:0.2.0
     environment:
       TARANTOOL_INSTANCE_NAME: "myapp.s2-master"
       TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"

@@ -55,15 +55,6 @@ public interface TarantoolSpaceOperations {
     CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple) throws TarantoolClientException;
 
     /**
-     * Insert a tuple into the space or replace an existing one.
-     *
-     * @param tuple new data
-     * @return a future that will contain all corresponding tuples once completed
-     * @throws TarantoolClientException in case if request failed
-     */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
-
-    /**
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
      *
      * @param tuple new data
@@ -75,6 +66,16 @@ public interface TarantoolSpaceOperations {
      */
     <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
+
+    /**
+     * Insert a tuple into the space or replace an existing one.
+     *
+     * @param tuple new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
+
     /**
      * Insert a tuple into the space or replace an existing one.
      *

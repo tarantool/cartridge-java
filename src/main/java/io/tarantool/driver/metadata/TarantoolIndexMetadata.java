@@ -2,6 +2,8 @@ package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.api.TarantoolIndexQuery;
 
+import java.util.List;
+
 /**
  * Represents Tarantool index metadata (index ID, name, etc.)
  *
@@ -14,7 +16,7 @@ public class TarantoolIndexMetadata {
     private String indexName;
     private TarantoolIndexType indexType;
     private TarantoolIndexOptions indexOptions;
-    //TODO index parts
+    private List<TarantoolIndexPartMetadata> indexParts;
 
     /**
      * Get ID of a space that this index is defined on
@@ -97,6 +99,22 @@ public class TarantoolIndexMetadata {
     }
 
     /**
+     * Set index parts
+     * @param indexParts a not-empty list of {@link TarantoolIndexPartMetadata}
+     */
+    public void setIndexParts(List<TarantoolIndexPartMetadata> indexParts) {
+        this.indexParts = indexParts;
+    }
+
+    /**
+     * Get index parts
+     * @return a not-empty list of {@link TarantoolIndexPartMetadata}
+     */
+    public List<TarantoolIndexPartMetadata> getIndexParts() {
+        return indexParts;
+    }
+
+    /**
      * Returns true if this is a primary index, false otherwise.
      * @return true if this is a primary index, false otherwise.
      */
@@ -111,9 +129,4 @@ public class TarantoolIndexMetadata {
     public boolean isUnique() {
         return isPrimary() || indexOptions.isUnique();
     }
-    /*
-    - [289, 1, '_vindex', 'sysview', 0, {}, [{'name': 'id', 'type': 'unsigned'}, {'name': 'iid',
-        'type': 'unsigned'}, {'name': 'name', 'type': 'string'}, {'name': 'type',
-        'type': 'string'}, {'name': 'opts', 'type': 'map'}, {'name': 'parts', 'type': 'array'}]]
-     */
 }
