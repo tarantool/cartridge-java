@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
@@ -13,12 +14,15 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
+import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
+import org.msgpack.value.ArrayValue;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
@@ -41,6 +45,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     private final Bootstrap bootstrap;
     private final TarantoolConnectionFactory connectionFactory;
     private final TarantoolConnectionListeners listeners;
+    private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
     private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
 
     /**
@@ -70,6 +75,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
         this.metadata = new TarantoolMetadata(config, this);
         this.connectionFactory = new TarantoolConnectionFactory(config, getBootstrap());
+        this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
         listeners.add(connection -> {
             try {
                 return metadata().refresh().thenApply(v -> connection);
@@ -137,9 +143,9 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
+    public <T> CompletableFuture<List<T>> call(String functionName, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
-        return call(functionName, Collections.emptyList(), config.getMessagePackMapper());
+        return call(functionName, Collections.emptyList(), resultMapper);
     }
 
     @Override
@@ -163,6 +169,24 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
             TarantoolCallRequest request = builder.build(argumentsMapper);
             return connectionManager().getConnection().sendRequest(request, resultMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<Object> arguments,
+                                                          MessagePackObjectMapper argumentsMapper,
+                                                          ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        try {
+            TarantoolCallRequest request = new TarantoolCallRequest.Builder()
+                    .withFunctionName(functionName)
+                    .withArguments(arguments)
+                    .build(argumentsMapper);
+
+            return connectionManager().getConnection()
+                    .sendRequest(request, tarantoolResultMapperFactory.withProxyConverter(tupleMapper));
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

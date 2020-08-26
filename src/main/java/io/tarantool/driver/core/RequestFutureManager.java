@@ -73,7 +73,6 @@ public class RequestFutureManager {
      * @param requestId ID of a request to Tarantool server (sync ID)
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    @SuppressWarnings("unchecked")
     public TarantoolRequestMetadata getRequest(Long requestId) {
         return requestFutures.get(requestId);
     }

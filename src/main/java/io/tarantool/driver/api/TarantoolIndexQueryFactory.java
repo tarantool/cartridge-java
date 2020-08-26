@@ -45,4 +45,22 @@ public class TarantoolIndexQueryFactory {
         }
         return new TarantoolIndexQuery(meta.get().getIndexId());
     }
+
+    /**
+     * Create a query for index by its name
+     *
+     * @param indexName the index name
+     * @param spaceName name of Tarantool space
+     * @param operations a {@link TarantoolMetadataOperations} instance
+     * @return new {@link TarantoolIndexQuery} instance
+     * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool cluster
+     */
+    public TarantoolIndexQuery byId(String indexName, String spaceName, TarantoolMetadataOperations operations)
+            throws TarantoolClientException {
+        Optional<TarantoolIndexMetadata> meta = operations.getIndexByName(spaceName, indexName);
+        if (!meta.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceName, indexName);
+        }
+        return new TarantoolIndexQuery(meta.get().getIndexId());
+    }
 }

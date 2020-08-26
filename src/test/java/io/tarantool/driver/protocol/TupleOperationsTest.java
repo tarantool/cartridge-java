@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleOperationsTest {
 
@@ -28,7 +27,7 @@ public class TupleOperationsTest {
 
     @Test
     public void createOperationsList() {
-        TupleOperations operations =  TupleOperations
+        TupleOperations operations = TupleOperations
                 .bitwiseXor(1, 5)
                 .andBitwiseXor("field_1", 44)
                 .andBitwiseAnd(2, 15)
@@ -69,5 +68,24 @@ public class TupleOperationsTest {
                 .map(TupleOperation::getOperationType).collect(Collectors.toList());
 
         assertEquals(expectedOperationTypes, actualOperationTypes);
+    }
+
+    @Test
+    public void convertIndexToPositionNumberOperationsList() {
+        TupleOperations operations = TupleOperations
+                .bitwiseXor(8, 5)
+                .andBitwiseAnd(2, 15);
+
+        assertEquals(2, operations.asList().size());
+
+        List<Integer> fieldIndexes = operations.asList().stream().map(TupleOperation::getFieldIndex)
+                .collect(Collectors.toList());
+
+        assertEquals(fieldIndexes, Arrays.asList(8, 2));
+
+        List<Integer> fieldNumbers = operations.asListByPositionNumber().stream().map(TupleOperation::getFieldIndex)
+                .collect(Collectors.toList());
+
+        assertEquals(fieldNumbers, Arrays.asList(9, 3));
     }
 }

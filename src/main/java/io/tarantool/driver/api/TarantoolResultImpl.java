@@ -1,9 +1,13 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.impl.ImmutableArrayValueImpl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -11,8 +15,8 @@ import java.util.stream.Collectors;
 
 /**
  * Basic TarantoolResult implementation
- * @param <T> target result tuple type
  *
+ * @param <T> target result tuple type
  * @author Alexey Kuzin
  */
 public class TarantoolResultImpl<T> implements TarantoolResult<T> {
@@ -20,9 +24,29 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
     private List<T> tuples;
 
     public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter) {
-        this.tuples = value.list().stream()
+        this(value, tupleConverter, false);
+    }
+
+    public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter,
+                               Boolean isProxyClientResult) {
+        ArrayValue tuplesValue = value;
+        if (isProxyClientResult) {
+            if (value.size() == 2 && (value.get(0).isNilValue() && !value.get(1).isNilValue())) {
+                throw new TarantoolSpaceOperationException("Space operation error: %s", value.get(1));
+            }
+
+            if (value.size() == 1 && value.get(0).isNilValue()) {
+                tuplesValue = ImmutableArrayValueImpl.empty();
+            }
+        }
+
+        this.tuples = tuplesValue.list().stream()
                 .map(v -> tupleConverter.fromValue(v.asArrayValue()))
                 .collect(Collectors.toList());
+    }
+
+    public TarantoolResultImpl(ValueConverter<ArrayValue, T> valueConverter, ArrayValue value) {
+        this.tuples = Collections.singletonList(valueConverter.fromValue(value.asArrayValue()));
     }
 
     @Override
@@ -82,7 +106,7 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return  this.tuples.removeAll(c);
+        return this.tuples.removeAll(c);
     }
 
     @Override

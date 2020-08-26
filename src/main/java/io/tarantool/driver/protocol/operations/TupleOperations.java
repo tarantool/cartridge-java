@@ -6,6 +6,7 @@ import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Create list of {@link TupleOperation} for update and upsert requests
@@ -55,6 +56,15 @@ public final class TupleOperations {
      */
     public List<TupleOperation> asList() {
         return operations;
+    }
+
+    /**
+     * Get a list of operations by converting field indexes starts with 0 to position numbers starts with 1
+     *
+     * @return list of operations
+     */
+    public List<TupleOperation> asListByPositionNumber() {
+        return operations.stream().peek(o -> o.setFieldIndex(o.getFieldIndex() + 1)).collect(Collectors.toList());
     }
 
     /**
