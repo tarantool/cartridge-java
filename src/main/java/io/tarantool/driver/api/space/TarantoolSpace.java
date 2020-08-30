@@ -8,12 +8,12 @@ import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
@@ -40,17 +40,26 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     private int spaceId;
     private TarantoolClientConfig config;
     private TarantoolConnection connection;
-    private RequestFutureManager requestManager;
     private TarantoolIndexQueryFactory indexQueryFactory;
+    private TarantoolMetadataOperations metadataOperations;
     private TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
-    public TarantoolSpace(int spaceId, TarantoolClientConfig config, TarantoolConnection connection,
-                          RequestFutureManager requestManager) {
+    /**
+     * Basic constructor.
+     * @param spaceId internal space ID on Tarantool server
+     * @param config client config
+     * @param connection Tarantool server connection
+     * @param metadataOperations metadata operations implementation
+     */
+    public TarantoolSpace(int spaceId,
+                          TarantoolClientConfig config,
+                          TarantoolConnection connection,
+                          TarantoolMetadataOperations metadataOperations) {
         this.spaceId = spaceId;
         this.config = config;
         this.connection = connection;
-        this.requestManager = requestManager;
-        this.indexQueryFactory = new TarantoolIndexQueryFactory(connection);
+        this.indexQueryFactory = new TarantoolIndexQueryFactory(metadataOperations);
+        this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
     }
 
@@ -72,13 +81,12 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     private TarantoolSpaceMetadata getMetadata() {
-        Optional<TarantoolSpaceMetadata> metadata = connection.metadata().getSpaceById(spaceId);
+        Optional<TarantoolSpaceMetadata> metadata = metadataOperations.getSpaceById(spaceId);
         if (!metadata.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
         return metadata.get();
     }
-
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery)
@@ -216,7 +224,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
             throws TarantoolClientException {
         try {
             TarantoolSpaceMetadata metadata = getMetadata();
-            Optional<TarantoolIndexMetadata> indexMetadata = connection.metadata()
+            Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations
                     .getIndexForId(spaceId, indexQuery.getIndexId());
 
             if (!indexMetadata.isPresent() || !indexMetadata.get().isUnique()) {
@@ -266,17 +274,11 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     private <T> CompletableFuture<TarantoolResult<T>> sendRequest(TarantoolRequest request,
                                                                   ValueConverter<ArrayValue, T> tupleMapper) {
-        CompletableFuture<TarantoolResult<T>> requestFuture = requestManager.submitRequest(
-                request, tarantoolResultMapperFactory.withConverter(tupleMapper));
-
-        connection.getChannel().writeAndFlush(request).addListener(f -> {
-            if (!f.isSuccess()) {
-                requestFuture.completeExceptionally(
-                        new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
-            }
-        });
-
-        return requestFuture;
+        try {
+            return connection.sendRequest(request, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     private ValueConverter<ArrayValue, TarantoolTuple> getDefaultTarantoolTupleValueConverter() {

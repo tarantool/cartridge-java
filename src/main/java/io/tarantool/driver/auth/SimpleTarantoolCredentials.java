@@ -7,6 +7,9 @@ import org.springframework.util.Assert;
  */
 public class SimpleTarantoolCredentials implements TarantoolCredentials {
 
+    private static final String DEFAULT_USER = "guest";
+    private static final String DEFAULT_PASSWORD = "";
+
     private final String user;
     private final String password;
 
@@ -21,6 +24,14 @@ public class SimpleTarantoolCredentials implements TarantoolCredentials {
 
         this.user = user;
         this.password = password;
+    }
+
+    /**
+     * Simple constructor which uses the default guest credentials
+     */
+    public SimpleTarantoolCredentials() {
+        this.user = DEFAULT_USER;
+        this.password = DEFAULT_PASSWORD;
     }
 
     @Override

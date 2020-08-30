@@ -2,9 +2,11 @@ package io.tarantool.driver.integration;
 
 
 import io.tarantool.driver.StandaloneTarantoolClient;
+import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.TarantoolSingleAddressProvider;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
@@ -48,20 +50,28 @@ public class StandaloneTarantoolClientIT {
     @Container
     private static final TarantoolContainer tarantoolContainer = new TarantoolContainer();
 
-    private static TarantoolConnection connection;
+    private static TarantoolClient client;
 
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
         assertTrue(tarantoolContainer.isRunning());
-        initConnection();
+        initClient();
     }
 
-    private static void initConnection() {
+    public static void tearDown() throws Exception {
+        client.close();
+        assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
+    }
+
+    private static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
                 //"guest", "");
                 tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
@@ -70,20 +80,21 @@ public class StandaloneTarantoolClientIT {
                 .withRequestTimeout(1000 * 5)
                 .build();
 
+        TarantoolSingleAddressProvider addressProvider = () -> serverAddress;
+
         log.info("Attempting connect to Tarantool");
-        connection = new StandaloneTarantoolClient(config)
-                .connect(tarantoolContainer.getHost(), tarantoolContainer.getPort());
-        log.info("Successfully connected to Tarantool, version = {}", connection.getVersion());
+        client = new StandaloneTarantoolClient(config, addressProvider);
+        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     @Test
     public void connectAndCheckMetadata() {
-        Optional<TarantoolSpaceMetadata> spaceHolder = connection.metadata().getSpaceByName("_space");
+        Optional<TarantoolSpaceMetadata> spaceHolder = client.metadata().getSpaceByName("_space");
         assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
         log.info("Retrieved ID from metadata for space '_space': {}",
                 spaceHolder.get().getSpaceId());
 
-        Optional<TarantoolSpaceMetadata> spaceMetadata = connection.metadata().getSpaceByName(TEST_SPACE_NAME);
+        Optional<TarantoolSpaceMetadata> spaceMetadata = client.metadata().getSpaceByName(TEST_SPACE_NAME);
         assertTrue(spaceMetadata.isPresent(), String.format("Failed to get '%s' metadata", TEST_SPACE_NAME));
         assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
         log.info("Retrieved ID from metadata for space '{}': {}",
@@ -93,7 +104,7 @@ public class StandaloneTarantoolClientIT {
     //TODO: reset space before each test
     @Test
     public void insertAndSelectRequests() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
         //make select request
         TarantoolIndexQuery query = new TarantoolIndexQuery();
         TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
@@ -139,7 +150,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void replaceRequest() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> arrayValue = Arrays.asList(200, "a200",
                 "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
@@ -178,7 +189,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void deleteRequest() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
         int deletedId = 2;
 
         //select request
@@ -207,7 +218,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateOperationsTest() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(123, "a123", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -251,7 +262,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateOperationByUniqueIndexTest() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(166, "a166", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -286,7 +297,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateByFieldName() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> newValues =
                 Arrays.asList(105534, "a120654", "The Jungle Book", "Sir Joseph Rudyard Kipling", 1893);
@@ -303,7 +314,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void upsertTest() throws Exception {
-        TarantoolSpaceOperations testSpace = connection.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(255, "q255", "Animal Farm: A Fairy Story", "George Orwell", 1945);
 
@@ -335,13 +346,13 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void callTest() throws Exception, TarantoolClientException {
-        List<Object> resultNoParam = connection.call("user_function_no_param").get();
+        List<Object> resultNoParam = client.call("user_function_no_param").get();
 
         assertEquals(1, resultNoParam.size());
         assertEquals(5, resultNoParam.get(0));
 
         List<Object> resultTwoParams =
-                connection.call("user_function_two_param", Arrays.asList(1, "abc")).get();
+                client.call("user_function_two_param", Arrays.asList(1, "abc")).get();
 
         assertEquals(3, resultTwoParams.size());
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));
@@ -350,12 +361,12 @@ public class StandaloneTarantoolClientIT {
     @Test
     public void evalTest() throws ExecutionException, InterruptedException {
         List<Object> result =
-                connection.eval("return 2+2").get();
+                client.eval("return 2+2").get();
 
         assertEquals(1, result.size());
         assertEquals(4, result.get(0));
 
-        result = connection.eval("return 5*5, 'abc'").get();
+        result = client.eval("return 5*5, 'abc'").get();
 
         assertEquals(2, result.size());
         assertEquals(25, result.get(0));

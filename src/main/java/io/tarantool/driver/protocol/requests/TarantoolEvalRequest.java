@@ -13,12 +13,12 @@ import java.util.Map;
 
 /**
  * Eval request.
- * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * See <a href="https://www.tarantool.io/latest/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
+ *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
-public class TarantoolEvalRequest extends TarantoolRequest {
+public final class TarantoolEvalRequest extends TarantoolRequest {
 
     private TarantoolEvalRequest(TarantoolRequestBody body) {
         super(TarantoolRequestType.IPROTO_EVAL, body);

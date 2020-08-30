@@ -10,6 +10,9 @@ import java.util.stream.Stream;
  */
 final class MapperReflectionUtils {
 
+    private MapperReflectionUtils() {
+    }
+
     /**
      * Get class for the runtime target type parameter of a converter
      * @param converter a converter, must have at least one generic interface with 2 type parameters

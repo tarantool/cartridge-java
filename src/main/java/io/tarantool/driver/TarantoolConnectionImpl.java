@@ -1,198 +1,94 @@
 package io.tarantool.driver;
 
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.tarantool.driver.core.RequestFutureManager;
+import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
-import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.metadata.TarantoolMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.TarantoolSpace;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.protocol.TarantoolProtocolException;
-import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
-import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
-import org.springframework.util.Assert;
+import io.tarantool.driver.protocol.TarantoolRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TarantoolConnectionImpl implements TarantoolConnection {
 
     private final TarantoolClientConfig config;
+    private final Bootstrap bootstrap;
+    private final InetSocketAddress serverAddress;
     private final TarantoolVersionHolder versionHolder;
     private final RequestFutureManager requestManager;
-    private final Channel channel;
-    private final TarantoolMetadataOperations metadata;
+    private Channel channel;
     private AtomicBoolean connected;
 
     public TarantoolConnectionImpl(TarantoolClientConfig config,
-                                   TarantoolVersionHolder versionHolder,
-                                   RequestFutureManager requestManager,
-                                   Channel channel) {
+                                   Bootstrap bootstrap,
+                                   InetSocketAddress serverAddress) {
 
         this.config = config;
-        this.versionHolder = versionHolder;
-        this.requestManager = requestManager;
-        this.channel = channel;
-        this.connected = new AtomicBoolean(true);
-        this.metadata = new TarantoolMetadata(config, this);
+        this.bootstrap = bootstrap;
+        this.serverAddress = serverAddress;
+        this.versionHolder = new TarantoolVersionHolder();
+        this.requestManager = new RequestFutureManager(config);
+        this.connected = new AtomicBoolean(false);
+    }
+
+    @Override
+    public CompletableFuture<TarantoolConnection> connect() throws TarantoolClientException {
+        if (connected.compareAndSet(false, true)) {
+            channel = null;
+            CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
+            ChannelFuture future = bootstrap
+                    .handler(new TarantoolChannelInitializer(config, requestManager, versionHolder, connectionFuture))
+                    .remoteAddress(serverAddress).connect();
+            try {
+                future.syncUninterruptibly();
+            } catch (Throwable e) {
+                connected.set(false);
+                throw new TarantoolClientException(e);
+            }
+            if (!future.isSuccess()) {
+                connected.set(false);
+                throw new TarantoolClientException(
+                        "Failed to connect to the Tarantool server in %d milliseconds", config.getConnectTimeout());
+            }
+            CompletableFuture<TarantoolConnection> conn = connectionFuture.thenApply(ch -> {
+                this.channel = ch;
+                return this;
+            });
+            return conn;
+        } else {
+            return CompletableFuture.completedFuture(this);
+        }
     }
 
     @Override
     public TarantoolVersion getVersion() throws TarantoolClientException {
-        if (isClosed()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
+        if (!isConnected()) {
+            throw new TarantoolClientException("Not connected to Tarantool server");
         }
         return versionHolder.getVersion();
     }
 
     @Override
-    public TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException {
-        Assert.hasText(spaceName, "Space name must not be null or empty");
-
-        if (isClosed()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        Optional<TarantoolSpaceMetadata> meta = this.metadata().getSpaceByName(spaceName);
-        if (!meta.isPresent()) {
-            throw new TarantoolSpaceNotFoundException(spaceName);
-        }
-        return new TarantoolSpace(meta.get().getSpaceId(), config, this, requestManager);
+    public boolean isConnected() {
+        return connected.get() && channel != null;
     }
 
     @Override
-    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
-        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+    public <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
+        CompletableFuture<T> requestFuture = requestManager.submitRequest(request, resultMapper);
 
-        if (isClosed()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        return new TarantoolSpace(spaceId, config, this, requestManager);
-    }
-
-    @Override
-    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        if (isClosed()) {
-            throw new TarantoolClientException("The client is not connected to Tarantool server");
-        }
-        return metadata;
-    }
-
-    @Override
-    public CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException {
-        return call(functionName, Collections.emptyList());
-    }
-
-    @Override
-    public CompletableFuture<List<Object>> call(String functionName, List<Object> arguments)
-            throws TarantoolClientException {
-        return call(functionName, arguments, config.getMessagePackMapper());
-    }
-
-    @Override
-    public CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
-        return call(functionName, Collections.emptyList(), config.getMessagePackMapper());
-    }
-
-    @Override
-    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
-                                                               MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
-        return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
-    }
-
-    @Override
-    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
-                                         MessagePackObjectMapper argumentsMapper,
-                                         MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        try {
-            TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
-                    .withFunctionName(functionName);
-
-            if (arguments.size() > 0) {
-                builder.withArguments(arguments);
+        channel.writeAndFlush(request).addListener(f -> {
+            if (!f.isSuccess()) {
+                requestFuture.completeExceptionally(
+                        new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
             }
+        });
 
-            TarantoolCallRequest request = builder.build(argumentsMapper);
-
-            CompletableFuture<List<T>> requestFuture = requestManager.submitRequest(request, resultMapper);
-
-            getChannel().writeAndFlush(request).addListener(f -> {
-                if (!f.isSuccess()) {
-                    requestFuture.completeExceptionally(
-                            new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
-                }
-            });
-
-            return requestFuture;
-        } catch (TarantoolProtocolException e) {
-            throw new TarantoolClientException(e);
-        }
-    }
-
-    @Override
-    public CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException {
-        return eval(expression, Collections.emptyList());
-    }
-
-    @Override
-    public CompletableFuture<List<Object>> eval(String expression, List<Object> arguments)
-            throws TarantoolClientException {
-        return eval(expression, arguments, config.getMessagePackMapper());
-    }
-
-    @Override
-    public <T> CompletableFuture<List<T>> eval(String expression, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
-        return eval(expression, Collections.emptyList(), resultMapper);
-    }
-
-    @Override
-    public <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
-        return eval(expression, arguments, config.getMessagePackMapper(), resultMapper);
-    }
-
-    @Override
-    public <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments,
-                                               MessagePackObjectMapper argumentsMapper,
-                                               MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        try {
-            TarantoolEvalRequest request = new TarantoolEvalRequest.Builder()
-                    .withExpression(expression)
-                    .withArguments(arguments)
-                    .build(argumentsMapper);
-
-            CompletableFuture<List<T>> requestFuture = requestManager.submitRequest(request, resultMapper);
-
-            getChannel().writeAndFlush(request).addListener(f -> {
-                if (!f.isSuccess()) {
-                    requestFuture.completeExceptionally(
-                            new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
-                }
-            });
-
-            return requestFuture;
-        } catch (TarantoolProtocolException e) {
-            throw new TarantoolClientException(e);
-        }
-    }
-
-    @Override
-    public boolean isClosed() {
-        return !connected.get();
-    }
-
-    @Override
-    public Channel getChannel() {
-        return channel;
+        return requestFuture;
     }
 
     @Override

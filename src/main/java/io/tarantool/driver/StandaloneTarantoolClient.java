@@ -1,22 +1,33 @@
 package io.tarantool.driver;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.tarantool.driver.api.space.TarantoolSpace;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.core.RequestFutureManager;
-import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.metadata.TarantoolMetadata;
+import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.protocol.TarantoolProtocolException;
+import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
+import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
+import org.springframework.util.Assert;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -29,50 +40,70 @@ import java.util.concurrent.TimeoutException;
  */
 public class StandaloneTarantoolClient implements TarantoolClient {
 
-    private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_PORT = 3301;
-    private static final String DEFAULT_USER = "admin";
-    private static final String DEFAULT_PASSWORD = "password";
-    private static final int DEFAULT_CONNECT_TIMEOUT = 1000; // milliseconds
-    private static final int DEFAULT_READ_TIMEOUT = 1000; // milliseconds
-    private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
-
     private EventLoopGroup eventLoopGroup;
     private TarantoolClientConfig config;
     private Bootstrap bootstrap;
-    private ConcurrentHashMap<InetSocketAddress, TarantoolConnection> connections;
+    private List<TarantoolConnection> connections;
+    private TarantoolSingleAddressProvider addressProvider;
+    private TarantoolMetadataOperations metadata;
 
     /**
-     * Create a client. Default credentials will be used.
-     * @see InetSocketAddress
+     * Create a client. Default guest credentials will be used. Connects to a Tarantool server on localhost using the
+     * default port (3301)
      */
     public StandaloneTarantoolClient() {
-        this(new SimpleTarantoolCredentials(DEFAULT_USER, DEFAULT_PASSWORD));
+        this(new SimpleTarantoolCredentials());
     }
 
     /**
-     * Create a client using provided credentials information.
+     * Create a client using provided credentials information. Connects to a Tarantool server on localhost using
+     * the default port (3301)
      * @param credentials Tarantool user credentials holder
      * @see TarantoolCredentials
      */
     public StandaloneTarantoolClient(TarantoolCredentials credentials) {
-       this(new TarantoolClientConfig.Builder()
-               .withCredentials(credentials)
-               .withReadTimeout(DEFAULT_READ_TIMEOUT)
-               .withConnectTimeout(DEFAULT_CONNECT_TIMEOUT)
-               .withRequestTimeout(DEFAULT_REQUEST_TIMEOUT)
-               .build());
+       this(credentials, new TarantoolServerAddress());
     }
 
     /**
-     * Create a client.
+     * Create a client using provided credentials information. Connects to a Tarantool server using the specified
+     * host and port.
+     * @param credentials Tarantool user credentials holder
+     * @param host valid host name or IP address
+     * @param port valid port number
+     * @see TarantoolCredentials
+     */
+    public StandaloneTarantoolClient(TarantoolCredentials credentials, String host, int port) {
+       this(credentials, new TarantoolServerAddress(host, port));
+    }
+
+    /**
+     * Create a client using provided credentials information. Connects to a Tarantool server using the specified
+     * server address.
+     * @param credentials Tarantool user credentials holder
+     * @param address Tarantool server address
+     * @see TarantoolCredentials
+     * @see TarantoolServerAddress
+     */
+    public StandaloneTarantoolClient(TarantoolCredentials credentials, TarantoolServerAddress address) {
+       this(new TarantoolClientConfig.Builder()
+               .withCredentials(credentials)
+               .build(),
+           () -> address);
+    }
+
+    /**
+     * Create a client. The server address for connecting to the server is specified by the passed address provider.
      * @param config the client configuration
+     * @param addressProvider provides Tarantool server address for connection
      * @see TarantoolClientConfig
      */
-    public StandaloneTarantoolClient(TarantoolClientConfig config) {
+    public StandaloneTarantoolClient(TarantoolClientConfig config,
+                                     TarantoolSingleAddressProvider addressProvider) {
         this.config = config;
+        this.connections = new ArrayList<>(config.getConnections());
+        this.addressProvider = addressProvider;
         this.eventLoopGroup = new NioEventLoopGroup();
-        this.connections = new ConcurrentHashMap<>();
         this.bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
@@ -80,77 +111,164 @@ public class StandaloneTarantoolClient implements TarantoolClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
+        this.metadata = new TarantoolMetadata(config, this);
+        connect();
+    }
+
+    //TODO invoke on reconnect
+    private void connect() throws TarantoolClientException {
+        try {
+            InetSocketAddress serverAddress = addressProvider.getAddress().getSocketAddress();
+            List<CompletableFuture<TarantoolConnection>> connectionFutures = new ArrayList<>(config.getConnections());
+            for (int i = 0; i < config.getConnections(); i++) {
+                connectionFutures.add(new TarantoolConnectionImpl(config, bootstrap.clone(), serverAddress).connect());
+            }
+            CompletableFuture.allOf(connectionFutures.toArray(new CompletableFuture[config.getConnections()]))
+                    .thenApply(f -> {
+                        connectionFutures.forEach(cf -> cf.thenApply(connections::add));
+                        return f;
+                    })
+                    .thenApplyAsync(c -> {
+                        try {
+                            metadata().refresh().get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+                            return c;
+                        } catch (Throwable e) {
+                            throw new CompletionException(e);
+                        }
+                    })
+                    .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     /**
-     * Connect to a Tarantool server on localhost using the default port (3301)
-     * @return connected client
-     * @throws TarantoolClientException when connection or request for metadata are failed
+     * Get the established connection for sending requests to the Tarantool server
+     * @return Tarantool server connection
      */
-    public TarantoolConnection connect() throws TarantoolClientException {
-        return connect(DEFAULT_HOST, DEFAULT_PORT);
-    }
-
-    /**
-     * Connect to a Tarantool server using the specified host and the default port (3301).
-     * @param host valid host name or IP address
-     * @return connected client
-     * @see InetSocketAddress
-     * @throws TarantoolClientException when connection or request for metadata are failed
-     */
-    public TarantoolConnection connect(String host) throws TarantoolClientException {
-        return connect(host, DEFAULT_PORT);
-    }
-
-    /**
-     * Connect to a Tarantool server using the specified host and port.
-     * @param host valid host name or IP address
-     * @param port valid port
-     * @return connected client
-     * @see InetSocketAddress
-     * @throws TarantoolClientException when connection or request for metadata are failed
-     */
-    public TarantoolConnection connect(String host, int port) throws TarantoolClientException {
-        return connect(new InetSocketAddress(host, port));
+    TarantoolConnection getConnection() {
+        //TODO connection select strategy
+        return connections.get(0);
     }
 
     @Override
-    public TarantoolConnection connect(InetSocketAddress address) throws TarantoolClientException {
-        TarantoolConnection conn = connections.get(address); // TODO pool of multiple connections
-        if (conn == null || conn.isClosed()) {
-            CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
-            RequestFutureManager futureManager = new RequestFutureManager(config);
-            TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
-            ChannelFuture future = bootstrap.clone()
-                    .handler(new TarantoolChannelInitializer(config, futureManager, versionHolder, connectionFuture))
-                    .remoteAddress(address).connect();
-            try {
-                future.syncUninterruptibly();
-            } catch (Throwable e) {
-                throw new TarantoolClientException(e);
-            }
-            if (!future.isSuccess()) {
-                throw new TarantoolClientException(
-                        "Failed to connect to the Tarantool server in %d milliseconds", config.getConnectTimeout());
-            }
-            try {
-                conn = connectionFuture
-                        .thenApply(ch -> new TarantoolConnectionImpl(config, versionHolder, futureManager, ch))
-                        .thenApplyAsync(c -> {
-                            try {
-                                c.metadata().refresh().get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
-                                return c;
-                            } catch (Throwable e) {
-                                throw new CompletionException(e);
-                            }
-                        })
-                        .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
-                connections.put(address, conn);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new TarantoolClientException(e);
-            }
+    public TarantoolVersion getVersion() throws TarantoolClientException {
+        return getConnection().getVersion();
+    }
+
+    @Override
+    public TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+
+        if (!getConnection().isConnected()) {
+            throw new TarantoolClientException("The client is not connected to Tarantool server");
         }
-        return conn;
+        Optional<TarantoolSpaceMetadata> meta = this.metadata().getSpaceByName(spaceName);
+        if (!meta.isPresent()) {
+            throw new TarantoolSpaceNotFoundException(spaceName);
+        }
+        return new TarantoolSpace(meta.get().getSpaceId(), config, getConnection(), metadata());
+    }
+
+    @Override
+    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+
+        if (!getConnection().isConnected()) {
+            throw new TarantoolClientException("The client is not connected to Tarantool server");
+        }
+        return new TarantoolSpace(spaceId, config, getConnection(), metadata());
+    }
+
+    @Override
+    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
+        if (!getConnection().isConnected()) {
+            throw new TarantoolClientException("The client is not connected to Tarantool server");
+        }
+        return metadata;
+    }
+
+    @Override
+    public CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException {
+        return call(functionName, Collections.emptyList());
+    }
+
+    @Override
+    public CompletableFuture<List<Object>> call(String functionName, List<Object> arguments)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper());
+    }
+
+    @Override
+    public CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        return call(functionName, Collections.emptyList(), config.getMessagePackMapper());
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
+                                               MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
+                                               MessagePackObjectMapper argumentsMapper,
+                                               MessagePackValueMapper resultMapper) throws TarantoolClientException {
+        try {
+            TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
+                    .withFunctionName(functionName);
+
+            if (arguments.size() > 0) {
+                builder.withArguments(arguments);
+            }
+
+            TarantoolCallRequest request = builder.build(argumentsMapper);
+            return getConnection().sendRequest(request, resultMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException {
+        return eval(expression, Collections.emptyList());
+    }
+
+    @Override
+    public CompletableFuture<List<Object>> eval(String expression, List<Object> arguments)
+            throws TarantoolClientException {
+        return eval(expression, arguments, config.getMessagePackMapper());
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> eval(String expression, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        return eval(expression, Collections.emptyList(), resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> eval(String expression,
+                                               List<Object> arguments,
+                                               MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        return eval(expression, arguments, config.getMessagePackMapper(), resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments,
+                                               MessagePackObjectMapper argumentsMapper,
+                                               MessagePackValueMapper resultMapper) throws TarantoolClientException {
+        try {
+            TarantoolEvalRequest request = new TarantoolEvalRequest.Builder()
+                    .withExpression(expression)
+                    .withArguments(arguments)
+                    .build(argumentsMapper);
+            return getConnection().sendRequest(request, resultMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     @Override
@@ -161,7 +279,7 @@ public class StandaloneTarantoolClient implements TarantoolClient {
     @Override
     public void close() throws Exception {
         try {
-            for (TarantoolConnection conn: connections.values()) {
+            for (TarantoolConnection conn: connections) {
                 conn.close();
             }
         } finally {
