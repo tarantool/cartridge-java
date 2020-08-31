@@ -105,7 +105,7 @@
                         <configuration>
                             <consoleOutput>true</consoleOutput>
                             <logViolationsToConsole>true</logViolationsToConsole>
-                            <failsOnError>false</failsOnError>
+                            <!--<failsOnError>false</failsOnError>-->
                             <failOnViolation>false</failOnViolation>
                             <configLocation>${checkstyle.config}</configLocation>
                             <suppressionsLocation>${checkstyle.suppressions}</suppressionsLocation>
