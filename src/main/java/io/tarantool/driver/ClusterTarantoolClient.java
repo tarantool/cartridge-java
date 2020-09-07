@@ -2,28 +2,32 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.core.TarantoolClusterConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
-import io.tarantool.driver.core.TarantoolSingleConnectionManager;
+import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
- * and manages connections.
+ * Main class for connecting to a cluster of Tarantool servers. Provides basic API for interacting with the database
+ * and manages connections. Connects to all configured Tarantool server addresses simultaneously.  The credentials
+ * for connecting to each server are expected to be the same.
  *
  * @author Alexey Kuzin
  */
-public class StandaloneTarantoolClient extends AbstractTarantoolClient {
+public class ClusterTarantoolClient extends AbstractTarantoolClient {
 
     private final ConnectionSelectionStrategyFactory selectStrategyFactory;
-    private final TarantoolSingleAddressProvider addressProvider;
+    private TarantoolClusterAddressProvider addressProvider;
 
     /**
      * Create a client. Default guest credentials will be used. Connects to a Tarantool server on localhost using the
      * default port (3301)
      */
-    public StandaloneTarantoolClient() {
+    public ClusterTarantoolClient() {
         this(new SimpleTarantoolCredentials());
     }
 
@@ -33,8 +37,8 @@ public class StandaloneTarantoolClient extends AbstractTarantoolClient {
      * @param credentials Tarantool user credentials holder
      * @see TarantoolCredentials
      */
-    public StandaloneTarantoolClient(TarantoolCredentials credentials) {
-       this(credentials, new TarantoolServerAddress());
+    public ClusterTarantoolClient(TarantoolCredentials credentials) {
+       this(credentials, Collections.singletonList(new TarantoolServerAddress()));
     }
 
     /**
@@ -45,51 +49,35 @@ public class StandaloneTarantoolClient extends AbstractTarantoolClient {
      * @param port valid port number
      * @see TarantoolCredentials
      */
-    public StandaloneTarantoolClient(TarantoolCredentials credentials, String host, int port) {
-       this(credentials, new TarantoolServerAddress(host, port));
+    public ClusterTarantoolClient(TarantoolCredentials credentials, String host, int port) {
+       this(credentials, Collections.singletonList(new TarantoolServerAddress(host, port)));
     }
 
     /**
      * Create a client using provided credentials information. Connects to a Tarantool server using the specified
      * server address.
      * @param credentials Tarantool user credentials holder
-     * @param address Tarantool server address
+     * @param addresses Tarantool server addresses
      * @see TarantoolCredentials
      * @see TarantoolServerAddress
      */
-    public StandaloneTarantoolClient(TarantoolCredentials credentials, TarantoolServerAddress address) {
+    public ClusterTarantoolClient(TarantoolCredentials credentials, Collection<TarantoolServerAddress> addresses) {
        this(TarantoolClientConfig.builder()
                .withCredentials(credentials)
                .build(),
-           address);
-    }
-
-    /**
-     * Create a client. Connects to a Tarantool server using the specified server address. The default connection
-     * selection strategy is used.
-     * @param config client configuration
-     * @param address Tarantool server address
-     * @see TarantoolCredentials
-     * @see RoundRobinStrategyFactory
-     * @see TarantoolServerAddress
-     */
-    public StandaloneTarantoolClient(TarantoolClientConfig config, TarantoolServerAddress address) {
-       this(config,
-           RoundRobinStrategyFactory.INSTANCE,
-           () -> address);
+           ParallelRoundRobinStrategyFactory.INSTANCE,
+           () -> addresses);
     }
 
     /**
      * Create a client. The server address for connecting to the server is specified by the passed address provider.
-     * @param config client configuration
-     * @param selectStrategyFactory connection selection strategy factory.
-     *                              The strategy selects the next connection in a pool for performing a request in.
+     * @param config the client configuration
      * @param addressProvider provides Tarantool server address for connection
      * @see TarantoolClientConfig
      */
-    public StandaloneTarantoolClient(TarantoolClientConfig config,
-                                     ConnectionSelectionStrategyFactory selectStrategyFactory,
-                                     TarantoolSingleAddressProvider addressProvider) {
+    public ClusterTarantoolClient(TarantoolClientConfig config,
+                                  ConnectionSelectionStrategyFactory selectStrategyFactory,
+                                  TarantoolClusterAddressProvider addressProvider) {
         super(config);
         this.selectStrategyFactory = selectStrategyFactory;
         this.addressProvider = addressProvider;
@@ -99,7 +87,7 @@ public class StandaloneTarantoolClient extends AbstractTarantoolClient {
     protected TarantoolConnectionManager connectionManager(TarantoolClientConfig config,
                                                            TarantoolConnectionFactory connectionFactory,
                                                            TarantoolConnectionListeners listeners) {
-        return new TarantoolSingleConnectionManager(
+        return new TarantoolClusterConnectionManager(
                 config, connectionFactory, selectStrategyFactory, listeners, addressProvider);
     }
 }

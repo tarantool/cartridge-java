@@ -1,0 +1,62 @@
+version: '2.4'
+services:
+  tarantool.router:
+    image: savolgin/cartridge-testapp:0.1.2
+    environment:
+      TARANTOOL_INSTANCE_NAME: "myapp.router"
+      TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
+      TARANTOOL_ADVERTISE_URI: 3301
+      TARANTOOL_HTTP_PORT: 8081
+    ports:
+      - "53301:3301"
+      - "58081:8081"
+    networks:
+      app_net:
+        ipv4_address: 172.16.237.101
+  tarantool.router2:
+    image: savolgin/cartridge-testapp:0.1.2
+    environment:
+      TARANTOOL_INSTANCE_NAME: "myapp.router2"
+      TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
+      TARANTOOL_ADVERTISE_URI: 3310
+      TARANTOOL_HTTP_PORT: 8090
+    ports:
+      - "53310:3310"
+      - "58090:8090"
+    networks:
+      app_net:
+        ipv4_address: 172.16.237.110
+  tarantool.s1master:
+    image: savolgin/cartridge-testapp:0.1.2
+    environment:
+      TARANTOOL_INSTANCE_NAME: "myapp.s1-master"
+      TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
+      TARANTOOL_ADVERTISE_URI: 3302
+      TARANTOOL_HTTP_PORT: 8082
+    ports:
+      - "53302:3302"
+      - "58082:8082"
+    networks:
+      app_net:
+        ipv4_address: 172.16.237.102
+  tarantool.s2master:
+    image: savolgin/cartridge-testapp:0.1.2
+    environment:
+      TARANTOOL_INSTANCE_NAME: "myapp.s2-master"
+      TARANTOOL_CLUSTER_COOKIE: "myapp-cluster-cookie"
+      TARANTOOL_ADVERTISE_URI: 3304
+      TARANTOOL_HTTP_PORT: 8084
+    ports:
+      - "53304:3304"
+      - "58084:8084"
+    networks:
+      app_net:
+        ipv4_address: 172.16.237.104
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.237.0/24
+          gateway: 172.16.237.1

@@ -58,8 +58,9 @@ public class MessagePackFrameCodec extends ByteToMessageCodec<TarantoolRequest> 
                 if (size > 0) {
                     byteBuf.readerIndex(MINIMAL_HEADER_SIZE);
                     if (byteBuf.readableBytes() >= size) {
-                        list.add(TarantoolResponse.fromMessagePack(unpacker));
-                        byteBuf.readerIndex(byteBuf.readerIndex() + size);
+                        int payloadSize = MINIMAL_HEADER_SIZE + size;
+                        list.add(TarantoolResponse.fromMessagePack(unpacker, payloadSize));
+                        byteBuf.readerIndex(payloadSize);
                         byteBuf.discardReadBytes();
                     } else {
                         byteBuf.resetReaderIndex();

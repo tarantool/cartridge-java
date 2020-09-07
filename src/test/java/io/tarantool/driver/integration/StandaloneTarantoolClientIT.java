@@ -5,7 +5,6 @@ import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.TarantoolSingleAddressProvider;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
@@ -43,15 +42,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 public class StandaloneTarantoolClientIT {
 
-    private static Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
-
     private static final String TEST_SPACE_NAME = "test_space";
+    private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
 
     @Container
     private static final TarantoolContainer tarantoolContainer = new TarantoolContainer();
 
     private static TarantoolClient client;
-
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
@@ -80,10 +77,8 @@ public class StandaloneTarantoolClientIT {
                 .withRequestTimeout(1000 * 5)
                 .build();
 
-        TarantoolSingleAddressProvider addressProvider = () -> serverAddress;
-
         log.info("Attempting connect to Tarantool");
-        client = new StandaloneTarantoolClient(config, addressProvider);
+        client = new StandaloneTarantoolClient(config, serverAddress);
         log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
@@ -355,6 +350,8 @@ public class StandaloneTarantoolClientIT {
                 client.call("user_function_two_param", Arrays.asList(1, "abc")).get();
 
         assertEquals(3, resultTwoParams.size());
+        assertEquals(1, resultTwoParams.get(0));
+        assertEquals("abc", resultTwoParams.get(1));
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));
     }
 
@@ -371,5 +368,13 @@ public class StandaloneTarantoolClientIT {
         assertEquals(2, result.size());
         assertEquals(25, result.get(0));
         assertEquals("abc", result.get(1));
+    }
+
+    @Test
+    public void evalReturnNil() throws ExecutionException, InterruptedException {
+        List<Object> result = client.eval("return 2.2 + 2, nil").get();
+
+        assertEquals(2, result.size());
+        assertEquals(4.2f, result.get(0));
     }
 }

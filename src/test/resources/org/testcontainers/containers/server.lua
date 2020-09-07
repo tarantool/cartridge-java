@@ -18,7 +18,8 @@ s:format({
     {name = 'author', type = 'string'},
     {name = 'year', type = 'unsigned',is_nullable=true},
     {name = 'test_delete', type = 'unsigned',is_nullable=true},
-    {name = 'test_delete_2', type = 'unsigned',is_nullable=true}
+    {name = 'test_delete_2', type = 'unsigned',is_nullable=true},
+	{name = 'number_field', type = 'number', is_nullable=true}
 })
 s:create_index('primary', {
     type = 'tree',

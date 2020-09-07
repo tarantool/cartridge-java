@@ -3,7 +3,6 @@ package io.tarantool.driver.metadata;
 import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;

@@ -1,9 +1,11 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSocketException;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -65,6 +67,15 @@ public class TarantoolServerAddress {
 
         this.host = addressParts[0];
         this.port = portNumber;
+    }
+
+    /**
+     * Auxiliary constructor for conversion between {@link InetSocketAddress} and {@link TarantoolServerAddress}
+     * @param socketAddress remote server address
+     */
+    public TarantoolServerAddress(InetSocketAddress socketAddress) {
+        this.host = socketAddress.getHostName();
+        this.port = socketAddress.getPort();
     }
 
     /**
