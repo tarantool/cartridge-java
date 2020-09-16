@@ -114,7 +114,7 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
     private final EventLoopGroup eventLoopGroup;
     private final Bootstrap bootstrap;
 
-    public HTTPDiscoveryClusterAddressProvider(ClusterDiscoveryConfig config) {
+    public HTTPDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig config) {
         super(config);
 
         HTTPClusterDiscoveryEndpoint endpoint = (HTTPClusterDiscoveryEndpoint) config.getEndpoint();
@@ -178,7 +178,7 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
     private CompletableFuture<Map<String, ServerNodeInfo>> sendRequest() throws InterruptedException {
         CompletableFuture<Map<String, ServerNodeInfo>> completableFuture = new CompletableFuture<>();
 
-        ClusterDiscoveryConfig config = getDiscoveryConfig();
+        TarantoolClusterDiscoveryConfig config = getDiscoveryConfig();
         getExecutorService().schedule(() -> {
             if (!completableFuture.isDone()) {
                 completableFuture.completeExceptionally(new TimeoutException(String.format(

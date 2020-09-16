@@ -8,7 +8,7 @@ import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.cluster.ClusterDiscoveryConfig;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.HTTPClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
@@ -112,7 +112,7 @@ public class ClusterDiscoveryIT {
     private HTTPDiscoveryClusterAddressProvider getHttpProvider() {
         HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint(CartridgeHelper.getHttpDiscoveryURL());
 
-        ClusterDiscoveryConfig config = new ClusterDiscoveryConfig.Builder()
+        TarantoolClusterDiscoveryConfig config = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
                 .withReadTimeout(1000 * 5)
                 .withConnectTimeout(1000 * 5)
@@ -142,7 +142,7 @@ public class ClusterDiscoveryIT {
                         CartridgeHelper.getRouterHost(), CartridgeHelper.getRouterPort()))
                 .build();
 
-        ClusterDiscoveryConfig clusterDiscoveryConfig = new ClusterDiscoveryConfig.Builder()
+        TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
                 .withReadTimeout(1000 * 5)
                 .withConnectTimeout(1000 * 5)

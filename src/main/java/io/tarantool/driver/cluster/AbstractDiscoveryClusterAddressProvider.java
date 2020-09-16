@@ -19,12 +19,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public abstract class AbstractDiscoveryClusterAddressProvider implements TarantoolClusterAddressProvider {
 
-    private final ClusterDiscoveryConfig discoveryConfig;
+    private final TarantoolClusterDiscoveryConfig discoveryConfig;
     private final ScheduledExecutorService scheduledExecutorService;
     private final CountDownLatch initLatch = new CountDownLatch(1);
     private final AtomicReference<Collection<TarantoolServerAddress>> addressesHolder = new AtomicReference<>();
 
-    public AbstractDiscoveryClusterAddressProvider(ClusterDiscoveryConfig discoveryConfig) {
+    public AbstractDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig discoveryConfig) {
         this.discoveryConfig = discoveryConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
                 new TarantoolDaemonThreadFactory("tarantool-discovery"));
@@ -47,7 +47,7 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
         );
     }
 
-    protected ClusterDiscoveryConfig getDiscoveryConfig() {
+    protected TarantoolClusterDiscoveryConfig getDiscoveryConfig() {
         return discoveryConfig;
     }
 

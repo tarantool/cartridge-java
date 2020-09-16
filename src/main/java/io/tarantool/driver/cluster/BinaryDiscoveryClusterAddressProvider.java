@@ -64,7 +64,7 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
     private final TarantoolClient client;
     private final ObjectMapper objectMapper;
 
-    public BinaryDiscoveryClusterAddressProvider(ClusterDiscoveryConfig discoveryConfig) {
+    public BinaryDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig discoveryConfig) {
         super(discoveryConfig);
         this.endpoint = (BinaryClusterDiscoveryEndpoint) discoveryConfig.getEndpoint();
 

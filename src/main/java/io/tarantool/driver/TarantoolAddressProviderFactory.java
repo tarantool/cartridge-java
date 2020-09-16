@@ -2,7 +2,7 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.cluster.ClusterDiscoveryConfig;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import org.springframework.util.Assert;
 
@@ -27,7 +27,7 @@ public final class TarantoolAddressProviderFactory {
     }
 
     public TarantoolClusterAddressProvider createClusterAddressProviderWithDiscovery(
-            Collection<TarantoolServerAddress> nodes, ClusterDiscoveryConfig config) {
+            Collection<TarantoolServerAddress> nodes, TarantoolClusterDiscoveryConfig config) {
         TarantoolClusterAddressProvider addressProvider;
 
         if (config != null) {

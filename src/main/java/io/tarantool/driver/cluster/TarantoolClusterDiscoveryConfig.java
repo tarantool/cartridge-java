@@ -6,11 +6,11 @@ import org.springframework.util.Assert;
 /**
  * Class-container for service discovery configuration.
  * <p>
- * It is recommended to use the {@link ClusterDiscoveryConfig.Builder} for constructing the configuration
+ * It is recommended to use the {@link TarantoolClusterDiscoveryConfig.Builder} for constructing the configuration
  *
  * @author Sergey Volgin
  */
-public final class ClusterDiscoveryConfig {
+public final class TarantoolClusterDiscoveryConfig {
 
     private TarantoolClusterDiscoveryEndpoint endpoint;
     private int serviceDiscoveryDelay = 60_000; // milliseconds
@@ -90,21 +90,21 @@ public final class ClusterDiscoveryConfig {
     }
 
     /**
-     * A builder for {@link ClusterDiscoveryConfig}
+     * A builder for {@link TarantoolClusterDiscoveryConfig}
      */
     public static class Builder {
 
-        private ClusterDiscoveryConfig config;
+        private TarantoolClusterDiscoveryConfig config;
 
         public Builder() {
-            this.config = new ClusterDiscoveryConfig();
+            this.config = new TarantoolClusterDiscoveryConfig();
         }
 
         /**
          * Specify scan period of receiving a new list of instances
          * @param delay period of receiving a new list of instances, in milliseconds
          * @return this builder instance
-         * @see ClusterDiscoveryConfig#setServiceDiscoveryDelay(int)
+         * @see TarantoolClusterDiscoveryConfig#setServiceDiscoveryDelay(int)
          */
         public Builder withDelay(int delay) {
             if (delay <= 0) {
@@ -118,7 +118,7 @@ public final class ClusterDiscoveryConfig {
          * Specify service discovery config and enable using service discovery
          * @param endpoint discovery endpoint config, should not be null
          * @return this builder instance
-         * @see ClusterDiscoveryConfig#setEndpoint(TarantoolClusterDiscoveryEndpoint)
+         * @see TarantoolClusterDiscoveryConfig#setEndpoint(TarantoolClusterDiscoveryEndpoint)
          */
         public Builder withEndpoint(TarantoolClusterDiscoveryEndpoint endpoint) {
             Assert.notNull(endpoint, "Cluster discovery endpoint config should not be null");
@@ -130,7 +130,7 @@ public final class ClusterDiscoveryConfig {
          * Specify the connection timeout for discovery endpoint
          * @param connectTimeout connection timeout, in milliseconds
          * @return this builder instance
-         * @see ClusterDiscoveryConfig#setConnectTimeout(int)
+         * @see TarantoolClusterDiscoveryConfig#setConnectTimeout(int)
          */
         public Builder withConnectTimeout(int connectTimeout) {
             if (connectTimeout <= 0) {
@@ -144,7 +144,7 @@ public final class ClusterDiscoveryConfig {
          * Specify the read timeout for discovery endpoint connection
          * @param readTimeout timeout of receiving response in the connection, in milliseconds
          * @return this builder instance
-         * @see ClusterDiscoveryConfig#setReadTimeout(int)
+         * @see TarantoolClusterDiscoveryConfig#setReadTimeout(int)
          */
         public Builder withReadTimeout(int readTimeout) {
             if (readTimeout <= 0) {
@@ -155,10 +155,10 @@ public final class ClusterDiscoveryConfig {
         }
 
         /**
-         * Build a {@link ClusterDiscoveryConfig} instance
+         * Build a {@link TarantoolClusterDiscoveryConfig} instance
          * @return configured instance
          */
-        public ClusterDiscoveryConfig build() {
+        public TarantoolClusterDiscoveryConfig build() {
             if (config.getEndpoint() == null) {
                 throw new TarantoolClientException("Cluster discovery endpoint must be not null");
             }
