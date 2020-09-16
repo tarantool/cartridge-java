@@ -93,27 +93,30 @@ public final class TarantoolResponse {
     /**
      * Create Tarantool response from the decoded binary data using {@link MessageUnpacker}
      * @param unpacker configured {@link MessageUnpacker}
+     * @param size payload size
      * @return Tarantool response populated from the decoded binary data
      * @throws TarantoolProtocolException if the unpacked data is invalid
      */
-    public static TarantoolResponse fromMessagePack(MessageUnpacker unpacker) throws TarantoolProtocolException {
+    public static TarantoolResponse fromMessagePack(MessageUnpacker unpacker, int size)
+            throws TarantoolProtocolException {
         try {
             TarantoolHeader header = TarantoolHeader.fromMessagePackValue(unpacker.unpackValue());
-            Value bodyMap = unpacker.unpackValue();
-            if (!bodyMap.isMapValue()) {
-                throw new TarantoolProtocolException("Response body must be of MP_MAP type");
-            }
-            MapValue values = bodyMap.asMapValue();
-            TarantoolResponseBody responseBody;
-            Iterator<Value> it = values.keySet().iterator();
-            if (it.hasNext()) {
-                Value key = it.next();
-                if (!key.isIntegerValue()) {
-                    throw new TarantoolProtocolException("Response body first key must be of MP_INT type");
+            TarantoolResponseBody responseBody = new EmptyTarantoolResponseBody();
+            if (unpacker.getTotalReadBytes() < size) {
+                Value bodyMap = unpacker.unpackValue();
+                if (!bodyMap.isMapValue()) {
+                    throw new TarantoolProtocolException("Response body must be of MP_MAP type");
                 }
-                responseBody = new NotEmptyTarantoolResponseBody(key.asIntegerValue().asInt(), values.map().get(key));
-            } else {
-                responseBody = new EmptyTarantoolResponseBody();
+                MapValue values = bodyMap.asMapValue();
+                Iterator<Value> it = values.keySet().iterator();
+                if (it.hasNext()) {
+                    Value key = it.next();
+                    if (!key.isIntegerValue()) {
+                        throw new TarantoolProtocolException("Response body first key must be of MP_INT type");
+                    }
+                    responseBody = new NotEmptyTarantoolResponseBody(
+                            key.asIntegerValue().asInt(), values.map().get(key));
+                }
             }
             return new TarantoolResponse(header.getSync(), header.getCode(), responseBody);
         } catch (IOException e) {

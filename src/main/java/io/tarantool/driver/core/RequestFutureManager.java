@@ -19,7 +19,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class RequestFutureManager {
     private Map<Long, TarantoolRequestMetadata> requestFutures;
-    private ScheduledExecutorService timeoutScheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService timeoutScheduler =
+            Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-timeout"));
     private TarantoolClientConfig config;
 
     /**

@@ -22,7 +22,7 @@ public class TarantoolVersionHolder {
      * Get Tarantool server version
      * @return an instance of {@link TarantoolVersion}
      */
-    TarantoolVersion getVersion() {
+    public TarantoolVersion getVersion() {
         return tarantoolVersion;
     }
 }

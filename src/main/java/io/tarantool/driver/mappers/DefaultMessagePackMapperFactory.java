@@ -6,6 +6,7 @@ import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.FloatValue;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.StringValue;
+import org.msgpack.value.impl.ImmutableDoubleValueImpl;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class DefaultMessagePackMapperFactory {
                 .withConverter(FloatValue.class, Double.class, new DefaultDoubleConverter())
                 .withConverter(ExtensionValue.class, UUID.class, new DefaultUUIDConverter())
                 .withConverter(ExtensionValue.class, BigDecimal.class, new DefaultBigDecimalConverter())
+                .withValueConverter(new DefaultNilConverter())
                 .build();
         defaultComplexTypesMapper = new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
                 .withDefaultListObjectConverter()

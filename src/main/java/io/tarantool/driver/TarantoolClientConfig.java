@@ -1,5 +1,6 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
@@ -13,6 +14,7 @@ import org.springframework.util.Assert;
  * @author Alexey Kuzin
  */
 public class TarantoolClientConfig {
+
     private static final int DEFAULT_CONNECT_TIMEOUT = 1000; // milliseconds
     private static final int DEFAULT_READ_TIMEOUT = 1000; // milliseconds
     private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
@@ -131,6 +133,15 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * Create a builder instance.
+     *
+     * @return a builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * A builder for {@link TarantoolClientConfig}
      */
     public static final class Builder {
@@ -221,6 +232,10 @@ public class TarantoolClientConfig {
          * @return configured instance
          */
         public TarantoolClientConfig build() {
+            if (config.getCredentials() == null) {
+                config.setCredentials(new SimpleTarantoolCredentials());
+            }
+
             return config;
         }
 
