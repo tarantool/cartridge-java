@@ -10,6 +10,7 @@
 
     <groupId>io.tarantool</groupId>
     <artifactId>driver</artifactId>
+    <packaging>jar</packaging>
     <version>1.0.0-SNAPSHOT</version>
 
     <licenses>
@@ -44,6 +45,8 @@
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
         <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml</checkstyle.suppressions>
         <logging.config>${project.basedir}/src/test/resources/logback-test.xml</logging.config>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <logging.logLevel>debug</logging.logLevel>
     </properties>
 
@@ -211,7 +214,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
+            <version>5.6.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
