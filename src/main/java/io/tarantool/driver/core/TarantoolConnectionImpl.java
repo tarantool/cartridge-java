@@ -30,7 +30,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
         this.versionHolder = versionHolder;
         this.channel = channel;
         channel.closeFuture().addListener(f -> {
-           if (!f.isSuccess() && f.cause() != null) {
+           if (connected.compareAndSet(true, false)) {
                for (TarantoolConnectionFailureListener listener : failureListeners) {
                    listener.onConnectionFailure(f.cause());
                }
@@ -75,9 +75,8 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
 
     @Override
     public void close() {
-        if (connected.compareAndSet(true, false)) {
-            channel.pipeline().close();
-            channel.closeFuture().syncUninterruptibly();
-        }
+        connected.set(false);
+        channel.pipeline().close();
+        channel.closeFuture().syncUninterruptibly();
     }
 }

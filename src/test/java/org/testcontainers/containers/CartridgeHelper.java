@@ -1,5 +1,11 @@
 package org.testcontainers.containers;
 
+import io.tarantool.driver.StandaloneTarantoolClient;
+import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.auth.TarantoolCredentials;
 import org.junit.ClassRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +13,8 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Sergey Volgin
@@ -79,6 +87,36 @@ public final class CartridgeHelper {
 
     public static String getAdminBootstrapVshardCmd() {
         return "return require('cartridge').admin_bootstrap_vshard()";
+    }
+
+    public static List<Object> startCluster() throws ExecutionException, InterruptedException {
+        CartridgeHelper.environment.start();
+        final String routerHost = CartridgeHelper.environment.getServiceHost(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT);
+        final int routerPort = CartridgeHelper.environment.getServicePort(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT);
+
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(routerHost, routerPort);
+
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
+        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
+                .withCredentials(credentials)
+                .withConnectTimeout(1000 * 5)
+                .withRequestTimeout(1000 * 5)
+                .withReadTimeout(1000 * 5)
+                .build();
+
+        TarantoolClient client = new StandaloneTarantoolClient(config, serverAddress);
+
+        String cmd = CartridgeHelper.getAdminEditTopologyCmd();
+
+        try {
+            client.eval(cmd).get();
+            //the connections will be closed after that command
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        // The client must reconnect automatically
+        return client.eval(CartridgeHelper.getAdminBootstrapVshardCmd()).get();
     }
 
     private CartridgeHelper() {

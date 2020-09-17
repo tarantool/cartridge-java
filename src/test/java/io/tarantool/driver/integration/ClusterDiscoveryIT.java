@@ -1,8 +1,6 @@
 package io.tarantool.driver.integration;
 
 import io.tarantool.driver.ClusterTarantoolClient;
-import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -18,8 +16,6 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.CartridgeHelper;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -33,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.containers.CartridgeHelper.PASSWORD;
 import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER;
-import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER_PORT_HTTP;
 import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
 
 
@@ -44,50 +39,13 @@ import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
 @Testcontainers
 public class ClusterDiscoveryIT {
 
-    private static final Logger log = LoggerFactory.getLogger(ClusterDiscoveryIT.class);
-
     private static final String TEST_ROUTER1_URI = "127.0.0.1:53301";
     private static final String TEST_ROUTER2_URI = "127.0.0.1:53310";
 
     @BeforeAll
     public static void setUp() throws ExecutionException, InterruptedException {
-        CartridgeHelper.environment.start();
-
-        int routerPortHTTP = CartridgeHelper.environment.getServicePort(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT_HTTP);
-        log.info("Admin interface available on http://127.0.0.1:{}", routerPortHTTP);
-
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                CartridgeHelper.getRouterHost(), CartridgeHelper.getRouterPort());
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .build();
-
-        TarantoolClient client = new StandaloneTarantoolClient(config, serverAddress);
-        String cmd = CartridgeHelper.getAdminEditTopologyCmd();
-        try {
-            client.eval(cmd).get();
-            //the connections will be closed after that command
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        try {
-            client.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        client = new StandaloneTarantoolClient(config, serverAddress);
-        List<Object> res = client.eval(CartridgeHelper.getAdminBootstrapVshardCmd()).get();
+        List<Object> res = CartridgeHelper.startCluster();
         assertTrue((Boolean) res.get(0));
-
-        try {
-            client.close();
-        } catch (Exception ignored) {
-        }
 
         CartridgeHelper.environment.waitingFor(TARANTOOL_ROUTER,
                 Wait.forLogMessage(".*The cluster is balanced ok.*", 1));
