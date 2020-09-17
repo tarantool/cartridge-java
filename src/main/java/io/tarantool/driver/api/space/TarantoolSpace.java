@@ -1,6 +1,8 @@
 package io.tarantool.driver.api.space;
 
+import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.api.TarantoolIndexQuery;
@@ -37,27 +39,27 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TarantoolSpace implements TarantoolSpaceOperations {
 
-    private int spaceId;
-    private TarantoolClientConfig config;
-    private TarantoolConnection connection;
-    private TarantoolIndexQueryFactory indexQueryFactory;
-    private TarantoolMetadataOperations metadataOperations;
-    private TarantoolResultMapperFactory tarantoolResultMapperFactory;
+    private final int spaceId;
+    private final TarantoolClientConfig config;
+    private final TarantoolConnectionManager connectionManager;
+    private final TarantoolIndexQueryFactory indexQueryFactory;
+    private final TarantoolMetadataOperations metadataOperations;
+    private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
     /**
      * Basic constructor.
      * @param spaceId internal space ID on Tarantool server
      * @param config client config
-     * @param connection Tarantool server connection
+     * @param connectionManager Tarantool server connection manager
      * @param metadataOperations metadata operations implementation
      */
     public TarantoolSpace(int spaceId,
                           TarantoolClientConfig config,
-                          TarantoolConnection connection,
+                          TarantoolConnectionManager connectionManager,
                           TarantoolMetadataOperations metadataOperations) {
         this.spaceId = spaceId;
         this.config = config;
-        this.connection = connection;
+        this.connectionManager = connectionManager;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(metadataOperations);
         this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
@@ -275,7 +277,8 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     private <T> CompletableFuture<TarantoolResult<T>> sendRequest(TarantoolRequest request,
                                                                   ValueConverter<ArrayValue, T> tupleMapper) {
         try {
-            return connection.sendRequest(request, tarantoolResultMapperFactory.withConverter(tupleMapper));
+            return connectionManager.getConnection()
+                    .sendRequest(request, tarantoolResultMapperFactory.withConverter(tupleMapper));
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

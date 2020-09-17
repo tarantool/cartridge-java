@@ -6,7 +6,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
@@ -27,9 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -101,26 +97,9 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         return connectionManagerHolder.get();
     }
 
-    /**
-     * Get the established connection for sending requests to the Tarantool server
-     * @return Tarantool server connection
-     */
-    protected TarantoolConnection getConnection() throws TarantoolClientException {
-        try {
-            TarantoolConnection connection = connectionManager().getConnection()
-                    .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
-            if (!connection.isConnected()) {
-                throw new TarantoolClientException("The client is not connected to Tarantool server");
-            }
-            return connection;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new TarantoolClientException(e);
-        }
-    }
-
     @Override
     public TarantoolVersion getVersion() throws TarantoolClientException {
-        return getConnection().getVersion();
+        return connectionManager().getConnection().getVersion();
     }
 
     @Override
@@ -131,14 +110,14 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         if (!meta.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceName);
         }
-        return new TarantoolSpace(meta.get().getSpaceId(), config, getConnection(), metadata());
+        return new TarantoolSpace(meta.get().getSpaceId(), config, connectionManager(), metadata());
     }
 
     @Override
     public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 
-        return new TarantoolSpace(spaceId, config, getConnection(), metadata());
+        return new TarantoolSpace(spaceId, config, connectionManager(), metadata());
     }
 
     @Override
@@ -183,7 +162,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
             }
 
             TarantoolCallRequest request = builder.build(argumentsMapper);
-            return getConnection().sendRequest(request, resultMapper);
+            return connectionManager().getConnection().sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -223,7 +202,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                     .withExpression(expression)
                     .withArguments(arguments)
                     .build(argumentsMapper);
-            return getConnection().sendRequest(request, resultMapper);
+            return connectionManager().getConnection().sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

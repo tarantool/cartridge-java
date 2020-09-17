@@ -5,6 +5,7 @@ import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolClientNotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -58,7 +62,20 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     protected abstract Collection<TarantoolServerAddress> getAddresses();
 
     @Override
-    public CompletableFuture<TarantoolConnection> getConnection() {
+    public TarantoolConnection getConnection() {
+        try {
+            TarantoolConnection connection = getConnectionInternal()
+                    .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+            if (!connection.isConnected()) {
+                throw new TarantoolClientNotConnectedException();
+            }
+            return connection;
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    private CompletableFuture<TarantoolConnection> getConnectionInternal() {
         CompletableFuture<TarantoolConnection> result;
         if (connectionMode.compareAndSet(true, false)) {
             result = establishConnections()
