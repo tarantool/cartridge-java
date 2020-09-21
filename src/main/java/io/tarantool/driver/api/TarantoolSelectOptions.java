@@ -2,15 +2,18 @@ package io.tarantool.driver.api;
 
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
  * Represents common tuple selection options not related to the index and filtration, e.g. limit and offset
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSelectOptions {
+public class TarantoolSelectOptions implements Serializable {
 
     private static final long MAX_OFFSET = 0xff_ff_ff_ffL;
     private static final long MAX_LIMIT = 0xff_ff_ff_ffL;
+    private static final long serialVersionUID = -8590112402282896332L;
 
     private long offset;
     private long limit = MAX_LIMIT;

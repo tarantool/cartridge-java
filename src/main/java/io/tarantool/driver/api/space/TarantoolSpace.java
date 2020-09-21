@@ -61,6 +61,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         this.indexQueryFactory = new TarantoolIndexQueryFactory(metadataOperations);
         this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
+        tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
     }
 
     /**
@@ -187,6 +188,17 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
             throws TarantoolClientException {
         ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return select(indexQuery, options, converter);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                            TarantoolSelectOptions options,
+                                                            Class<T> clazz) {
+        Optional<ValueConverter<ArrayValue, T>> tupleMapper = tarantoolResultMapperFactory.getValueConverter(clazz);
+        if (!tupleMapper.isPresent()) {
+            throw new TarantoolClientException("Converter for class %s not found", clazz);
+        }
+        return select(indexQuery, options, tupleMapper.get());
     }
 
     @Override

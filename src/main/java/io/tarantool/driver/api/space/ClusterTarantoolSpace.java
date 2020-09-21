@@ -47,6 +47,7 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
         this.client = client;
         this.config = client.getConfig();
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
+        tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
         this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
         this.mapping = config.getClusterOperationsMappingConfig();
@@ -146,6 +147,17 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
             throws TarantoolClientException {
         ValueConverter<ArrayValue, TarantoolTuple> converter = getDefaultTarantoolTupleValueConverter();
         return select(indexQuery, options, converter);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                     TarantoolSelectOptions options,
+                                                     Class<T> clazz) throws TarantoolClientException {
+        Optional<ValueConverter<ArrayValue, T>> tupleMapper = tarantoolResultMapperFactory.getValueConverter(clazz);
+        if (!tupleMapper.isPresent()) {
+            throw new TarantoolClientException("Converter for class %s not found", clazz);
+        }
+        return select(indexQuery, options, tupleMapper.get());
     }
 
     @Override

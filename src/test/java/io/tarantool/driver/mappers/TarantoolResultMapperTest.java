@@ -11,7 +11,9 @@ import org.msgpack.value.ValueFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TarantoolResultMapperTest {
@@ -60,5 +62,15 @@ class TarantoolResultMapperTest {
         assertEquals("abcd", result.get(0).getName());
         assertEquals(2, result.get(1).getId());
         assertEquals("efgh", result.get(1).getName());
+    }
+
+    @Test
+    void testGetValueConverterByTargetClass() {
+        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
+        MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        mapperFactory.withConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
+
+        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter = mapperFactory.getValueConverter(TarantoolTuple.class);
+        assertTrue(converter.isPresent());
     }
 }

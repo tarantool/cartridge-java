@@ -16,6 +16,8 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
 
     private MessagePackValueMapper valueMapper;
 
+    private ValueConverter<ArrayValue, T> tupleConverter;
+
     /**
      * Basic constructor
      * @param valueMapper value mapper to be used for tuple fields
@@ -24,8 +26,13 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
     public TarantoolResultMapper(MessagePackValueMapper valueMapper,
                                  ValueConverter<ArrayValue, T> tupleConverter) {
         this.valueMapper = valueMapper;
+        this.tupleConverter = tupleConverter;
         valueMapper.registerValueConverter(ArrayValue.class, TarantoolResultImpl.class,
                 v -> new TarantoolResultImpl<>(v, tupleConverter));
+    }
+
+    public ValueConverter<ArrayValue, T> getTupleConverter() {
+        return tupleConverter;
     }
 
     @Override

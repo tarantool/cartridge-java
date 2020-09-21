@@ -5,6 +5,7 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,6 +23,12 @@ public class TarantoolResultMapperFactory {
      * Basic constructor
      */
     public TarantoolResultMapperFactory() {
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Optional<ValueConverter<ArrayValue, T>> getValueConverter(Class<T> clazz) {
+        TarantoolResultMapper<T> resultMapper = (TarantoolResultMapper<T>) mapperCache.get(clazz);
+        return resultMapper == null ? Optional.empty() : Optional.of(resultMapper.getTupleConverter());
     }
 
     /**
@@ -101,7 +108,7 @@ public class TarantoolResultMapperFactory {
 
     private <T> TarantoolSingleResultMapper<T> createSingleValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
-        return new TarantoolSingleResultMapper<T>(mapper, valueConverter);
+        return new TarantoolSingleResultMapper<>(mapper, valueConverter);
     }
 
     /**
@@ -136,6 +143,6 @@ public class TarantoolResultMapperFactory {
 
     private <T> ClusterTarantoolResultMapper<T> createProxyValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
-        return new ClusterTarantoolResultMapper<T>(mapper, valueConverter);
+        return new ClusterTarantoolResultMapper<>(mapper, valueConverter);
     }
 }
