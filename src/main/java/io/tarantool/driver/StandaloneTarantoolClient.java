@@ -74,25 +74,23 @@ public class StandaloneTarantoolClient extends AbstractTarantoolClient {
      * @see TarantoolServerAddress
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config, TarantoolServerAddress address) {
-       this(config,
-           RoundRobinStrategyFactory.INSTANCE,
-           () -> address);
+       this(config, () -> address, RoundRobinStrategyFactory.INSTANCE);
     }
 
     /**
      * Create a client. The server address for connecting to the server is specified by the passed address provider.
      * @param config client configuration
-     * @param selectStrategyFactory connection selection strategy factory.
-     *                              The strategy selects the next connection in a pool for performing a request in.
      * @param addressProvider provides Tarantool server address for connection
+     * @param selectStrategyFactory instantiates strategies which provide the algorithm of selecting connections
+     *                              from the connection pool for performing the next request
      * @see TarantoolClientConfig
      */
     public StandaloneTarantoolClient(TarantoolClientConfig config,
-                                     ConnectionSelectionStrategyFactory selectStrategyFactory,
-                                     TarantoolSingleAddressProvider addressProvider) {
+                                     TarantoolSingleAddressProvider addressProvider,
+                                     ConnectionSelectionStrategyFactory selectStrategyFactory) {
         super(config);
-        this.selectStrategyFactory = selectStrategyFactory;
         this.addressProvider = addressProvider;
+        this.selectStrategyFactory = selectStrategyFactory;
     }
 
     @Override

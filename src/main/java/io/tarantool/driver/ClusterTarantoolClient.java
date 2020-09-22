@@ -65,22 +65,24 @@ public class ClusterTarantoolClient extends AbstractTarantoolClient {
        this(TarantoolClientConfig.builder()
                .withCredentials(credentials)
                .build(),
-           ParallelRoundRobinStrategyFactory.INSTANCE,
-           () -> addresses);
+           () -> addresses,
+           ParallelRoundRobinStrategyFactory.INSTANCE);
     }
 
     /**
      * Create a client. The server address for connecting to the server is specified by the passed address provider.
      * @param config the client configuration
      * @param addressProvider provides Tarantool server address for connection
+     * @param selectStrategyFactory instantiates strategies which provide the algorithm of selecting connections
+     *                              from the connection pool for performing the next request
      * @see TarantoolClientConfig
      */
     public ClusterTarantoolClient(TarantoolClientConfig config,
-                                  ConnectionSelectionStrategyFactory selectStrategyFactory,
-                                  TarantoolClusterAddressProvider addressProvider) {
+                                  TarantoolClusterAddressProvider addressProvider,
+                                  ConnectionSelectionStrategyFactory selectStrategyFactory) {
         super(config);
-        this.selectStrategyFactory = selectStrategyFactory;
         this.addressProvider = addressProvider;
+        this.selectStrategyFactory = selectStrategyFactory;
     }
 
     @Override

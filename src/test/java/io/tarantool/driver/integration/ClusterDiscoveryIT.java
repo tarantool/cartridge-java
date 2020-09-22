@@ -123,7 +123,7 @@ public class ClusterDiscoveryIT {
                 .build();
 
         ClusterTarantoolClient client = new ClusterTarantoolClient(
-                config, TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE, getBinaryProvider());
+                config, getBinaryProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");
@@ -139,7 +139,7 @@ public class ClusterDiscoveryIT {
                 .build();
 
         ClusterTarantoolClient client = new ClusterTarantoolClient(
-                config, TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE, getHttpProvider());
+                config, getHttpProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");
