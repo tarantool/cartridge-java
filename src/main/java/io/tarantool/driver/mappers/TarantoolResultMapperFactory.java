@@ -1,6 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Map;
@@ -28,6 +29,17 @@ public class TarantoolResultMapperFactory {
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(MessagePackMapper mapper) {
         return new DefaultTarantoolTupleValueConverter(mapper);
+    }
+
+    /**
+     * Get default {@link TarantoolTuple} converter
+     * @param mapper configured {@link MessagePackMapper} instance
+     * @param spaceMetadata configured {@link TarantoolSpaceMetadata} instance
+     * @return default DefaultTarantoolTupleValueConverter instance
+     */
+    public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(
+            MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
+        return new DefaultTarantoolTupleValueConverter(mapper, spaceMetadata);
     }
 
     /**

@@ -36,9 +36,21 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     /**
      * Constructor for empty tuple
+     *
+     * @param mapper provides conversion between MessagePack values and Java objects
      */
     public TarantoolTupleImpl(MessagePackMapper mapper) {
-        this(Collections.emptyList(), mapper, null);
+        this(mapper, null);
+    }
+
+    /**
+     * Constructor for empty tuple with metadata
+     *
+     * @param mapper provides conversion between MessagePack values and Java objects
+     * @param metadata provides information about the target space
+     */
+    public TarantoolTupleImpl(MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
+        this(Collections.emptyList(), mapper, metadata);
     }
 
     /**
@@ -57,6 +69,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      *
      * @param values list of tuple fields data
      * @param mapper provides conversion between MessagePack values and Java objects
+     * @param metadata provides information about the target space
      */
     public TarantoolTupleImpl(List<Object> values, MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
         Assert.notNull(mapper, "MessagePack mapper should not be null");

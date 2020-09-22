@@ -283,7 +283,10 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     private ValueConverter<ArrayValue, TarantoolTuple> getDefaultTarantoolTupleValueConverter() {
-        return tarantoolResultMapperFactory.getDefaultTupleValueConverter(config.getMessagePackMapper());
+        Optional<TarantoolSpaceMetadata> meta = metadataOperations.getSpaceById(spaceId);
+        return meta.isPresent() ?
+                tarantoolResultMapperFactory.getDefaultTupleValueConverter(config.getMessagePackMapper(), meta.get()) :
+                tarantoolResultMapperFactory.getDefaultTupleValueConverter(config.getMessagePackMapper());
     }
 
     @Override
