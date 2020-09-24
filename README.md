@@ -1,6 +1,6 @@
 # Tarantool Java driver
 
-[![Build Status](https://travis-ci.com/akudiyar/tarantool-java-driver.svg?branch=master)](https://travis-ci.com/akudiyar/tarantool-java-driver)
+[![java-driver:ubuntu/master Actions Status](https://github.com/akudiyar/tarantool-java-driver/workflows/ubuntu-master/badge.svg)](https://github.com/akudiyar/tarantool-java-driver/actions)
 
 Java driver for Tarantool 1.10+ based on the asynchronous
 [Netty](https://netty.io) framework and official
