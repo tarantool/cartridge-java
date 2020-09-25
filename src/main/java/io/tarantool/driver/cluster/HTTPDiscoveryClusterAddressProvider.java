@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
  * Tarantool server address provider with service discovery via HTTP.
  * Gets list of nodes from API endpoint in json format.
  *
- * <p>
  * Expected response format example:
  * <pre>
  * <code>
@@ -99,7 +98,6 @@ import java.util.stream.Collectors;
  *  ...
  * </code>
  * </pre>
- * </p>
  *
  * @author Sergey Volgin
  */

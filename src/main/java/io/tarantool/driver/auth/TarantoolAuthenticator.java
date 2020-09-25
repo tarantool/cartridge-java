@@ -30,8 +30,8 @@ public interface TarantoolAuthenticator<T extends TarantoolCredentials> {
      * @return the auth data in the form of byte array, ready to be transferred in an authentication request to
      * Tarantool server
      * @throws TarantoolAuthenticationException id authentication failed
-     * @see <a href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#
-     binary-protocol-authentication">
+     * @see <a
+     * href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication">
      *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
      */
     byte[] prepareUserAuthData(byte[] serverAuthData, T credentials) throws TarantoolAuthenticationException;

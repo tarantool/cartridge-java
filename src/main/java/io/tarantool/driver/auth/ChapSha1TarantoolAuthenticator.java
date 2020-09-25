@@ -42,9 +42,10 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
 
     /**
      * Take the salt from the server connect response, write the authentication data based on the provided
-     * {@link SimpleTarantoolCredentials}
-     * See <a href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#
-     binary-protocol-authentication">
+     * {@link SimpleTarantoolCredentials}.
+     *
+     * See <a
+     * href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication">
      *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
      * @param serverAuthData the auth data responded by server to the connect request
      * @param credentials Tarantool user credentials

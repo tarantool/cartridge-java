@@ -19,9 +19,10 @@ import java.util.stream.Collectors;
  * Service discovery client connecting to Tarantool via the binary protocol.
  * Gets list of cluster node addresses calling an exposed Lua function.
  *
- * <p>Expected response format:
+ * Expected response format:
+ * <pre>
  * <code>
- * 127.0.0.1:3301> get_replica_set()
+ * 127.0.0.1:3301&gt; get_replica_set()
  * ---
  * - 36a1a75e-60f0-4400-8bdc-d93e2c5ca54b:
  *     network_timeout: 0.5
@@ -35,8 +36,10 @@ import java.util.stream.Collectors;
  *     uuid: 898b4d01-4261-4006-85ea-a3500163cda0
  * ...
  * </code>
- * </p>
- * <p>Lua function example:
+ * </pre>
+ *
+ * Lua function example:
+ * <pre>
  * <code>
  * ...
  * local function get_replica_set()
@@ -54,7 +57,7 @@ import java.util.stream.Collectors;
  * end
  * ...
  * </code>
- * </p>
+ * </pre>
  *
  * @author Sergey Volgin
  */

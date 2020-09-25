@@ -9,10 +9,9 @@ import java.util.Iterator;
 
 /**
  * Base class for all kinds of responses received from Tarantool server.
- * See <a href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#
- binary-protocol-responses-if-no-error-and-no-sql">
- *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#
- binary-protocol-responses-if-no-error-and-no-sql</a>
+ *
+ * See <a href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql">
+ *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-responses-if-no-error-and-no-sql</a>
  *
  * @author Alexey Kuzin
  */

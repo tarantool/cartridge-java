@@ -82,6 +82,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     /**
      * Provides a connection manager for Tarantool server connections
+     * @param config contains Tarantool client configuration options
      * @param connectionFactory provides helper methods for connection instantiation
      * @param listeners listeners which will be invoked once all connections are established
      * @return connection manager

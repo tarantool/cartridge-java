@@ -102,7 +102,7 @@ public final class TupleOperations {
     }
 
     /**
-     * Bitwise AND(&) operation
+     * Bitwise AND(&amp;) operation
      *
      * @param fieldIndex field number starting with 0
      * @param value value
@@ -113,7 +113,7 @@ public final class TupleOperations {
     }
 
     /**
-     * Bitwise AND(&) operation
+     * Bitwise AND(&amp;) operation
      *
      * @param fieldIndex field number starting with 0
      * @param value value
@@ -124,7 +124,7 @@ public final class TupleOperations {
     }
 
     /**
-     * Bitwise AND(&) operation
+     * Bitwise AND(&amp;) operation
      *
      * @param fieldName field name
      * @param value value
@@ -135,7 +135,7 @@ public final class TupleOperations {
     }
 
     /**
-     * Bitwise AND(&) operation
+     * Bitwise AND(&amp;) operation
      *
      * @param fieldName field name
      * @param value value
@@ -236,7 +236,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldIndex start field number starting with 0
+     * @param fieldIndex start field number starting with 0 to start with
      * @param fieldsCount the number of fields to remove
      * @return new instance
      */
@@ -247,7 +247,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldIndex start field number starting with 0
+     * @param fieldIndex start field number starting with 0 to start with
      * @param fieldsCount the number of fields to remove
      * @return this
      */
@@ -258,7 +258,8 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldName field name
+     * @param fieldName field name to start with
+     * @param fieldsCount the number of fields to remove
      * @return new instance
      */
     public static TupleOperations delete(String fieldName, int fieldsCount) {
@@ -268,7 +269,8 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldName field name
+     * @param fieldName field name to start with
+     * @param fieldsCount the number of fields to remove
      * @return this
      */
     public TupleOperations andDelete(String fieldName, int fieldsCount) {
@@ -278,7 +280,8 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldIndex field number starting with 0
+     * @param fieldIndex field number starting with 0 to insert after
+     * @param value the value to insert
      * @return new instance
      */
     public static TupleOperations insert(int fieldIndex, Object value) {
@@ -288,7 +291,8 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldIndex field number starting with 0
+     * @param fieldIndex field number starting with 0 to insert after
+     * @param value the value to insert
      * @return this
      */
     public TupleOperations andInsert(int fieldIndex, Object value) {
@@ -298,7 +302,8 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldName field name
+     * @param fieldName field name to insert after
+     * @param value the value to insert
      * @return new instance
      */
     public static TupleOperations insert(String fieldName, Object value) {
@@ -308,7 +313,8 @@ public final class TupleOperations {
     /**
      * Insert field value
      *
-     * @param fieldName field name
+     * @param fieldName field name to insert after
+     * @param value the value to insert
      * @return this
      */
     public TupleOperations andInsert(String fieldName, Object value) {
@@ -319,6 +325,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldIndex field number starting with 0
+     * @param value the new value of a field
      * @return new instance
      */
     public static TupleOperations set(int fieldIndex, Object value) {
@@ -329,6 +336,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldIndex field number starting with 0
+     * @param value the new value of a field
      * @return this
      */
     public TupleOperations andSet(int fieldIndex, Object value) {
@@ -339,6 +347,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldName field name
+     * @param value the new value of a field
      * @return new instance
      */
     public static TupleOperations set(String fieldName, Object value) {
@@ -349,6 +358,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldName field name
+     * @param value the new value of a field
      * @return this
      */
     public TupleOperations andSet(String fieldName, Object value) {

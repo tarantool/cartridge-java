@@ -57,7 +57,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
         /**
          * Specify the cluster discovery endpoint URI
          * @param uri discovery endpoint URI, should not be null or empty
-         * @return
+         * @return this builder instance
          */
         public Builder withURI(String uri) {
             Assert.hasText(uri, "The discovery endpoint URI should not be null or empty");

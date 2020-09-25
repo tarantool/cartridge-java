@@ -68,7 +68,8 @@ public class TarantoolSpaceMetadata {
     /**
      * Get field position in space by name starts with 0, or -1 if this field not found in format metadata
      *
-     * @return field position by name starts with 0, or -1 if this field not found in format metadata
+     * @param fieldName field name
+     * @return field position by name starting with 0, or -1 if this field not found in format metadata
      */
     public int getFieldPositionByName(String fieldName) {
         int fieldPosition = -1;
