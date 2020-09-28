@@ -1,7 +1,9 @@
 package io.tarantool.driver.metadata;
 
-import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.space.TarantoolSpace;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Basic Tarantool spaces and indexes metadata implementation for standalone server
@@ -25,21 +28,29 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
 
     private final TarantoolSpaceMetadataConverter spaceMetadataMapper;
     private final TarantoolIndexMetadataConverter indexMetadataMapper;
-    private final TarantoolClient client;
+    private final TarantoolClientConfig config;
+    private final TarantoolConnectionManager connectionManager;
+    private final CountDownLatch initLatch = new CountDownLatch(1);
 
-    private Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
-    private Map<String, TarantoolSpaceMetadata> spaceMetadata = new ConcurrentHashMap<>();
-    private Map<Integer, Map<String, TarantoolIndexMetadata>> indexMetadata = new ConcurrentHashMap<>();
+    private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
+    private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<String, TarantoolIndexMetadata>> indexMetadata = new ConcurrentHashMap<>();
 
     /**
      * Basic constructor.
      * @param config client configuration
-     * @param client configured {@link TarantoolClient} instance
+     * @param connectionManager configured {@link TarantoolConnectionManager} instance
      */
-    public TarantoolMetadata(TarantoolClientConfig config, TarantoolClient client) {
+    public TarantoolMetadata(TarantoolClientConfig config, TarantoolConnectionManager connectionManager) {
         this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(config.getMessagePackMapper());
         this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getMessagePackMapper());
-        this.client = client;
+        this.config = config;
+        this.connectionManager = connectionManager;
+        refresh();
+    }
+
+    private TarantoolSpaceOperations space(int spaceId) {
+        return new TarantoolSpace(spaceId, config, connectionManager, this);
     }
 
     @Override
@@ -47,7 +58,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         TarantoolIndexQuery query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
                 .withIteratorType(TarantoolIteratorType.ITER_ALL);
         TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
-        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = client.space(VSPACE_SPACE_ID)
+        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = space(VSPACE_SPACE_ID)
                 .select(query, options, spaceMetadataMapper);
         spaces.thenApply(result -> {
                         spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
@@ -60,7 +71,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                         spaceMetadataById.put(meta.getSpaceId(), meta);
                     }));
 
-        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = client.space(VINDEX_SPACE_ID)
+        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = space(VINDEX_SPACE_ID)
                 .select(query, options, indexMetadataMapper);
         indexes.thenApply(result -> {
                     indexMetadata.clear();
@@ -72,14 +83,46 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                         indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
                     }));
 
-        return CompletableFuture.allOf(spaces, indexes);
+        return CompletableFuture.allOf(spaces, indexes).thenApply(v -> {
+            if (initLatch.getCount() > 0) {
+                initLatch.countDown();
+            }
+            return v;
+        });
+    }
+
+    private Map<Integer, TarantoolSpaceMetadata> getSpaceMetadataById() {
+        try {
+            initLatch.await();
+        } catch (InterruptedException e) {
+            throw new TarantoolClientException(e);
+        }
+        return spaceMetadataById;
+    }
+
+    private Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {
+        try {
+            initLatch.await();
+        } catch (InterruptedException e) {
+            throw new TarantoolClientException(e);
+        }
+        return spaceMetadata;
+    }
+
+    private Map<Integer, Map<String, TarantoolIndexMetadata>> getIndexMetadata() {
+        try {
+            initLatch.await();
+        } catch (InterruptedException e) {
+            throw new TarantoolClientException(e);
+        }
+        return indexMetadata;
     }
 
     @Override
     public Optional<TarantoolSpaceMetadata> getSpaceByName(String spaceName) {
         Assert.hasText(spaceName, "Space name must not be null or empty");
 
-        return Optional.ofNullable(spaceMetadata.get(spaceName));
+        return Optional.ofNullable(getSpaceMetadata().get(spaceName));
     }
 
     @Override
@@ -87,7 +130,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
         Assert.hasText(indexName, "Index name must not be null or empty");
 
-        Map<String, TarantoolIndexMetadata> metaMap = indexMetadata.get(spaceId);
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceId);
         if (metaMap == null) {
             return Optional.empty();
         }
@@ -99,7 +142,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
         Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
 
-        Map<String, TarantoolIndexMetadata> metaMap = indexMetadata.get(spaceId);
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceId);
         if (metaMap == null) {
             return Optional.empty();
         }
@@ -111,6 +154,6 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     public Optional<TarantoolSpaceMetadata> getSpaceById(int spaceId) {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 
-        return Optional.ofNullable(spaceMetadataById.get(spaceId));
+        return Optional.ofNullable(getSpaceMetadataById().get(spaceId));
     }
 }

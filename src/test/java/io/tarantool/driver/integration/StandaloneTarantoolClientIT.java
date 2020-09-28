@@ -27,11 +27,15 @@ import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,17 +87,31 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void connectAndCheckMetadata() {
-        Optional<TarantoolSpaceMetadata> spaceHolder = client.metadata().getSpaceByName("_space");
-        assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
-        log.info("Retrieved ID from metadata for space '_space': {}",
-                spaceHolder.get().getSpaceId());
+    public void connectAndCheckMetadata() throws Exception {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                //"guest", "");
+                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
-        Optional<TarantoolSpaceMetadata> spaceMetadata = client.metadata().getSpaceByName(TEST_SPACE_NAME);
-        assertTrue(spaceMetadata.isPresent(), String.format("Failed to get '%s' metadata", TEST_SPACE_NAME));
-        assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
-        log.info("Retrieved ID from metadata for space '{}': {}",
-                spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+
+        try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            List<CompletableFuture<?>> futures = new ArrayList<>(10);
+            for (int i = 0; i < 10; i++) {
+                futures.add(CompletableFuture.runAsync(() -> {
+                    Optional<TarantoolSpaceMetadata> spaceHolder = client.metadata().getSpaceByName("_space");
+                    assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
+                }, executor));
+            }
+            futures.forEach(CompletableFuture::join);
+
+            Optional<TarantoolSpaceMetadata> spaceMetadata = client.metadata().getSpaceByName(TEST_SPACE_NAME);
+            assertTrue(spaceMetadata.isPresent(), String.format("Failed to get '%s' metadata", TEST_SPACE_NAME));
+            assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
+            log.info("Retrieved ID from metadata for space '{}': {}",
+                    spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
+        }
     }
 
     //TODO: reset space before each test

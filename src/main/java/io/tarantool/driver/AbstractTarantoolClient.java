@@ -36,12 +36,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     private final NioEventLoopGroup eventLoopGroup;
-    private final TarantoolMetadata metadata;
     private final TarantoolClientConfig config;
     private final Bootstrap bootstrap;
     private final TarantoolConnectionFactory connectionFactory;
     private final TarantoolConnectionListeners listeners;
     private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
+    private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
 
     /**
      * Create a client.
@@ -68,7 +68,6 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
-        this.metadata = new TarantoolMetadata(config, this);
         this.connectionFactory = new TarantoolConnectionFactory(config, getBootstrap());
         listeners.add(connection -> {
             try {
@@ -107,11 +106,12 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     public TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException {
         Assert.hasText(spaceName, "Space name must not be null or empty");
 
-        Optional<TarantoolSpaceMetadata> meta = this.metadata().getSpaceByName(spaceName);
+        TarantoolMetadataOperations metadata = this.metadata();
+        Optional<TarantoolSpaceMetadata> meta = metadata.getSpaceByName(spaceName);
         if (!meta.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceName);
         }
-        return new TarantoolSpace(meta.get().getSpaceId(), config, connectionManager(), metadata());
+        return new TarantoolSpace(meta.get().getSpaceId(), config, connectionManager(), metadata);
     }
 
     @Override
@@ -123,7 +123,10 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     @Override
     public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        return metadata;
+        if (metadataHolder.get() == null) {
+            this.metadataHolder.compareAndSet(null, new TarantoolMetadata(config, connectionManager()));
+        }
+        return metadataHolder.get();
     }
 
     @Override
