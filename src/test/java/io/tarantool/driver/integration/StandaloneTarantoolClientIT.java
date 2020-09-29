@@ -36,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,6 +113,28 @@ public class StandaloneTarantoolClientIT {
             log.info("Retrieved ID from metadata for space '{}': {}",
                     spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
         }
+    }
+
+    private CompletableFuture<List<Object>> connectAndEval(String command) throws Exception {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+
+        try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
+            return client.eval(command);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @Test
+    public void connectAndCloseAfterFuture() throws Exception {
+        List<Object> result = connectAndEval("return 1, 2").get(1000, TimeUnit.MILLISECONDS);
+        assertEquals(2, result.size());
+        assertEquals(1, result.get(0));
+        assertEquals(2, result.get(1));
     }
 
     //TODO: reset space before each test

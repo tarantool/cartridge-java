@@ -76,6 +76,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     @Override
     public void close() {
         connected.set(false);
+        requestManager.close();
         channel.pipeline().close();
         channel.closeFuture().syncUninterruptibly();
     }

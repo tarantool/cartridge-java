@@ -32,7 +32,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
     protected void channelRead0(ChannelHandlerContext ctx, TarantoolResponse tarantoolResponse) throws Exception {
         TarantoolRequestMetadata requestMeta = futureManager.getRequest(tarantoolResponse.getSyncId());
         if (requestMeta != null) {
-            CompletableFuture<?> requestFuture = requestMeta.getFeature();
+            CompletableFuture<?> requestFuture = requestMeta.getFuture();
             if (!requestFuture.isDone()) {
                 switch (tarantoolResponse.getResponseType()) {
                     case IPROTO_NOT_OK:

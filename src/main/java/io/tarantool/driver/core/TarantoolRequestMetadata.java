@@ -18,7 +18,7 @@ public class TarantoolRequestMetadata {
         this.mapper = mapper;
     }
 
-    public CompletableFuture<?> getFeature() {
+    public CompletableFuture<?> getFuture() {
         return feature;
     }
 

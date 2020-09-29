@@ -17,7 +17,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Alexey Kuzin
  */
-public class RequestFutureManager {
+public class RequestFutureManager implements AutoCloseable {
     private Map<Long, TarantoolRequestMetadata> requestFutures;
     private ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-timeout"));
@@ -76,5 +76,10 @@ public class RequestFutureManager {
     @SuppressWarnings("unchecked")
     public TarantoolRequestMetadata getRequest(Long requestId) {
         return requestFutures.get(requestId);
+    }
+
+    @Override
+    public void close() {
+        requestFutures.values().forEach(f -> f.getFuture().join());
     }
 }

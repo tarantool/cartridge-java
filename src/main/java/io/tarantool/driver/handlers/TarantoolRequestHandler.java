@@ -25,7 +25,7 @@ public class TarantoolRequestHandler extends ChannelOutboundHandlerAdapter {
         TarantoolRequest request = (TarantoolRequest) msg;
         ctx.write(request).addListener((ChannelFutureListener) channelFuture -> {
             if (!channelFuture.isSuccess()) {
-                futureManager.getRequest(request.getHeader().getSync()).getFeature()
+                futureManager.getRequest(request.getHeader().getSync()).getFuture()
                         .completeExceptionally(new TarantoolClientException(channelFuture.cause()));
             }
         });
