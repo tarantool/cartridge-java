@@ -48,6 +48,7 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
 
         List<TarantoolIndexPartMetadata> indexParts = new ArrayList<>();
 
+        //ADD comments
         if (indexPartsValue.size() > 0) {
             if (indexPartsValue.get(0).isArrayValue()) {
                 indexParts = indexPartsValue.list().stream()

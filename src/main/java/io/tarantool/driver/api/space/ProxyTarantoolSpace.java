@@ -7,53 +7,51 @@ import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.cluster.ClusterOperationOptions;
-import io.tarantool.driver.cluster.ClusterOperationsMappingConfig;
+import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.proxy.DeleteProxyOperation;
+import io.tarantool.driver.proxy.InsertProxyOperation;
+import io.tarantool.driver.proxy.ProxyOperation;
+import io.tarantool.driver.proxy.ReplaceProxyOperation;
+import io.tarantool.driver.proxy.SelectProxyOperation;
+import io.tarantool.driver.proxy.UpdateProxyOperation;
+import io.tarantool.driver.proxy.UpsertProxyOperation;
 import org.msgpack.value.ArrayValue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * @author Sergey Volgin
  */
-public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
+public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
 
     private final String spaceName;
     private final TarantoolClient client;
     private final TarantoolClientConfig config;
     private final TarantoolIndexQueryFactory indexQueryFactory;
-    private final ClusterOperationsMappingConfig mapping;
+    private final CRUDOperationsMappingConfig operationsMappingConfig;
     private final TarantoolMetadataOperations operations;
 
     private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
-    public ClusterTarantoolSpace(TarantoolClient client,
-                                 String spaceName,
-                                 TarantoolMetadataOperations operations) {
+    public ProxyTarantoolSpace(TarantoolClient client,
+                               String spaceName,
+                               TarantoolMetadataOperations operations,
+                               CRUDOperationsMappingConfig operationsMappingConfig) {
         this.spaceName = spaceName;
         this.client = client;
         this.config = client.getConfig();
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
-        tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
+        this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
         this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
-        this.mapping = config.getClusterOperationsMappingConfig();
-        if (mapping == null) {
-            throw new TarantoolClientException("Not found proxy operation mapping for space %s", spaceName);
-        }
+        this.operationsMappingConfig = operationsMappingConfig;
     }
 
     @Override
@@ -66,14 +64,14 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery,
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
-        ClusterOperationOptions options = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
-                .build();
 
-        return sendRequest(mapping.getDeleteFunctionName(),
-                Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap()),
-                tupleMapper);
+        return executeOperation(new DeleteProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getDeleteFunctionName())
+                .withIndexQuery(indexQuery)
+                .withValueConverter(tupleMapper)
+                .build());
     }
 
     @Override
@@ -86,15 +84,15 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
-        ClusterOperationOptions options = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
+        InsertProxyOperation<T> operation = new InsertProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getInsertFunctionName())
+                .withTuple(tuple)
+                .withValueConverter(tupleMapper)
                 .build();
 
-        return sendRequest(mapping.getInsertFunctionName(),
-                Arrays.asList(spaceName, getIndexKeyParts(TarantoolIndexQuery.PRIMARY),
-                        tuple.getFields(), options.asMap()),
-                tupleMapper);
+        return executeOperation(operation);
     }
 
     @Override
@@ -107,15 +105,15 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
                                                              ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
-        ClusterOperationOptions options = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
+        ReplaceProxyOperation<T> operation = new ReplaceProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getReplaceFunctionName())
+                .withTuple(tuple)
+                .withValueConverter(tupleMapper)
                 .build();
 
-        return sendRequest(mapping.getReplaceFunctionName(),
-                Arrays.asList(spaceName, getIndexKeyParts(TarantoolIndexQuery.PRIMARY),
-                        tuple.getFields(), options.asMap()),
-                tupleMapper);
+        return executeOperation(operation);
     }
 
     @Override
@@ -151,8 +149,8 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
-                                                     TarantoolSelectOptions options,
-                                                     Class<T> clazz) throws TarantoolClientException {
+                                                            TarantoolSelectOptions options,
+                                                            Class<T> clazz) throws TarantoolClientException {
         Optional<ValueConverter<ArrayValue, T>> tupleMapper = tarantoolResultMapperFactory.getValueConverter(clazz);
         if (!tupleMapper.isPresent()) {
             throw new TarantoolClientException("Converter for class %s not found", clazz);
@@ -165,20 +163,16 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
                                                             TarantoolSelectOptions options,
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
-
-        ClusterOperationOptions requestOptions = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
-                .withSelectKey(indexQuery.getKeyValues())
-                .withSelectIterator(indexQuery.getIteratorType().getStringCode())
-                .withSelectOffset(options.getOffset())
-                .withSelectBatchSize(options.getLimit())
-                .withSelectLimit(options.getLimit())
+        SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getSelectFunctionName())
+                .withIndexQuery(indexQuery)
+                .withSelectOptions(options)
+                .withValueConverter(tupleMapper)
                 .build();
 
-        return sendRequest(mapping.getSelectFunctionName(),
-                Arrays.asList(spaceName, getIndexKeyParts(indexQuery.getIndexId()), requestOptions.asMap()),
-                tupleMapper);
+        return executeOperation(operation);
     }
 
     @Override
@@ -191,15 +185,16 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> update(TarantoolIndexQuery indexQuery,
                                                             TupleOperations operations,
                                                             ValueConverter<ArrayValue, T> tupleMapper) {
-        ClusterOperationOptions options = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
+        UpdateProxyOperation<T> operation = new UpdateProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getUpdateFunctionName())
+                .withIndexQuery(indexQuery)
+                .withTupleOperation(operations)
+                .withValueConverter(tupleMapper)
                 .build();
 
-        return sendRequest(mapping.getUpdateFunctionName(),
-                Arrays.asList(spaceName, indexQuery.getKeyValues(),
-                        operations.asListByPositionNumber(), options.asMap()),
-                tupleMapper);
+        return executeOperation(operation);
     }
 
     @Override
@@ -214,46 +209,27 @@ public class ClusterTarantoolSpace implements TarantoolSpaceOperations {
                                                             TarantoolTuple tuple,
                                                             TupleOperations operations,
                                                             ValueConverter<ArrayValue, T> tupleMapper) {
-        ClusterOperationOptions options = ClusterOperationOptions.builder()
-                .withTimeout(config.getRequestTimeout())
-                .withTuplesAsMap(false)
+        UpsertProxyOperation<T> operation = new UpsertProxyOperation.Builder<T>()
+                .withClient(this.client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMappingConfig.getUpsertFunctionName())
+                .withTuple(tuple)
+                .withTupleOperation(operations)
                 .build();
 
-        return sendRequest(mapping.getUpsertFunctionName(),
-                Arrays.asList(spaceName, getIndexKeyParts(TarantoolIndexQuery.PRIMARY),
-                        tuple, operations.asListByPositionNumber(), options.asMap()),
-                tupleMapper);
+        return executeOperation(operation);
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> sendRequest(String functionName,
-                                                                  List<Object> arguments,
-                                                                  ValueConverter<ArrayValue, T> tupleMapper) {
-        MessagePackMapper argumentMapper = config.getMessagePackMapper();
-        return client.call(functionName,
-                arguments,
-                argumentMapper,
-                tupleMapper
-        );
+    private <T> CompletableFuture<TarantoolResult<T>> executeOperation(ProxyOperation<T> operation) {
+        return operation.execute();
     }
 
     private ValueConverter<ArrayValue, TarantoolTuple> getDefaultTarantoolTupleValueConverter() {
         return tarantoolResultMapperFactory.getDefaultTupleValueConverter(config.getMessagePackMapper());
     }
 
-    private List<Integer> getIndexKeyParts(int indexId) {
-        Optional<TarantoolIndexMetadata> indexMetadata = operations.getIndexById(spaceName, indexId);
-        List<Integer> keyParts = new ArrayList<>();
-
-        if (indexMetadata.isPresent()) {
-            keyParts = indexMetadata.get().getIndexParts().stream()
-                    .map(p -> p.getFieldIndex() + 1).collect(Collectors.toList());
-        }
-
-        return keyParts;
-    }
-
     @Override
     public String toString() {
-        return String.format("TarantoolSpace [%s]", spaceName);
+        return String.format("ProxyTarantoolSpace [%s]", spaceName);
     }
 }

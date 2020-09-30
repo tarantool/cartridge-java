@@ -8,12 +8,12 @@ import java.util.Map;
  *
  * @author Sergey Volgin
  */
-public class ClusterTarantoolSpaceMetadataContainer {
+public class CRUDTarantoolSpaceMetadataContainer {
 
-    private Map<String, TarantoolSpaceMetadata> spaceMetadata = new HashMap<>();
-    private Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
+    private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new HashMap<>();
+    private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
 
-    public ClusterTarantoolSpaceMetadataContainer() {
+    public CRUDTarantoolSpaceMetadataContainer() {
     }
 
     public Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {

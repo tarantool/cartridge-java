@@ -1,6 +1,6 @@
 package io.tarantool.driver.config;
 
-import io.tarantool.driver.cluster.ClusterOperationsMappingConfig;
+import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Sergey Volgin
  */
-public class ClusterOperationsMappingConfigTest {
+public class CRUDOperationsMappingConfigTest {
 
     @Test
     public void createClusterProxySpaceConfigDefault() {
-        ClusterOperationsMappingConfig mapping = new ClusterOperationsMappingConfig("prefix", "get_cluster_schema");
+        CRUDOperationsMappingConfig mapping = new CRUDOperationsMappingConfig("prefix", "get_cluster_schema");
 
         assertEquals(mapping.getGetSchemaFunctionName(), "get_cluster_schema");
         assertEquals(mapping.getDeleteFunctionName(), "prefix_delete");
@@ -26,7 +26,7 @@ public class ClusterOperationsMappingConfigTest {
 
     @Test
     public void createClusterProxySpaceConfigBuilder() {
-        ClusterOperationsMappingConfig mapping = new ClusterOperationsMappingConfig.Builder()
+        CRUDOperationsMappingConfig mapping = new CRUDOperationsMappingConfig.Builder()
                 .withGetSchemaFunctionName("func")
                 .withDeleteFunctionName("func1")
                 .withInsertFunctionName("func2")
@@ -47,7 +47,7 @@ public class ClusterOperationsMappingConfigTest {
 
     @Test
     public void invalidConfig() {
-        assertThrows(IllegalArgumentException.class, () -> new ClusterOperationsMappingConfig.Builder()
+        assertThrows(IllegalArgumentException.class, () -> new CRUDOperationsMappingConfig.Builder()
                 .withGetSchemaFunctionName("func")
                 .withDeleteFunctionName("func1")
                 .withInsertFunctionName("func2")
@@ -57,6 +57,6 @@ public class ClusterOperationsMappingConfigTest {
                 .withUpsertFunctionName("")
                 .build());
 
-        assertThrows(IllegalArgumentException.class, () -> ClusterOperationsMappingConfig.builder().build());
+        assertThrows(IllegalArgumentException.class, () -> CRUDOperationsMappingConfig.builder().build());
     }
 }

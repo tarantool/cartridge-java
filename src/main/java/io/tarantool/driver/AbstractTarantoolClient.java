@@ -85,6 +85,10 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         this.listeners = listeners;
     }
 
+    public TarantoolConnectionListeners getListeners() {
+        return listeners;
+    }
+
     /**
      * Provides a connection manager for Tarantool server connections
      * @param config contains Tarantool client configuration options

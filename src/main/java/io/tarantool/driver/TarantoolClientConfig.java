@@ -2,7 +2,6 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.cluster.ClusterOperationsMappingConfig;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import org.springframework.util.Assert;
@@ -28,7 +27,6 @@ public class TarantoolClientConfig {
     private int connections = DEFAULT_CONNECTIONS;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-    private ClusterOperationsMappingConfig clusterOperationsMappingConfig;
 
     /**
      * Basic constructor.
@@ -135,22 +133,6 @@ public class TarantoolClientConfig {
     }
 
     /**
-     * Get config for proxy cluster space operations mapping
-     * @return a {@link ClusterOperationsMappingConfig}
-     */
-    public ClusterOperationsMappingConfig getClusterOperationsMappingConfig() {
-        return clusterOperationsMappingConfig;
-    }
-
-    /**
-     * Set config for proxy cluster space operations mapping
-     * @param clusterOperationsMappingConfig a {@link ClusterOperationsMappingConfig} instance
-     */
-    public void setClusterOperationsMappingConfig(ClusterOperationsMappingConfig clusterOperationsMappingConfig) {
-        this.clusterOperationsMappingConfig = clusterOperationsMappingConfig;
-    }
-
-    /**
      * Create a builder instance.
      *
      * @return a builder
@@ -242,17 +224,6 @@ public class TarantoolClientConfig {
         public Builder withConnections(int connections) {
             Assert.state(connections > 1, "The number of server connections must be greater than 0");
             config.connections = connections;
-            return this;
-        }
-
-        /**
-         * Specify config for proxy cluster space operations mapping
-         * @param mappingConfig a {@link ClusterOperationsMappingConfig} instance
-         * @return builder
-         * @see TarantoolClientConfig#setClusterOperationsMappingConfig(ClusterOperationsMappingConfig)
-         */
-        public Builder withClusterOperationsMapping(ClusterOperationsMappingConfig mappingConfig) {
-            config.setClusterOperationsMappingConfig(mappingConfig);
             return this;
         }
 

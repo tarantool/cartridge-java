@@ -5,6 +5,7 @@ import org.msgpack.value.Value;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * An operation specifies one value.
@@ -78,5 +79,25 @@ abstract class TupleUpdateOperation implements TupleOperation {
 
     public Object getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TupleUpdateOperation that = (TupleUpdateOperation) o;
+        return operationType == that.operationType &&
+                Objects.equals(fieldIndex, that.fieldIndex) &&
+                Objects.equals(fieldName, that.fieldName) &&
+                value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operationType, fieldIndex, fieldName, value);
     }
 }

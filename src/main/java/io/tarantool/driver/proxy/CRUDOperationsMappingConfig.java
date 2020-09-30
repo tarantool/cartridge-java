@@ -1,16 +1,15 @@
-package io.tarantool.driver.cluster;
+package io.tarantool.driver.proxy;
 
 import org.springframework.util.StringUtils;
 
 /**
- * Configuring function names in cartridge role for CRUD operations on the cluster via elect.rock API
+ * Configuring function names in cartridge role for CRUD operations on the cluster via crud.rock API
  * and name of function for get space metadata.
  *
- * //TODO: add link for elect.rock public repo
- *
  * @author Sergey Volgin
+ * @see <a href="https://github.com/tarantool/crud">https://github.com/tarantool/crud</a>
  */
-public final class ClusterOperationsMappingConfig {
+public final class CRUDOperationsMappingConfig {
 
     private final String getSchemaFunctionName;
     private final String deleteFunctionName;
@@ -21,12 +20,12 @@ public final class ClusterOperationsMappingConfig {
     private final String upsertFunctionName;
 
     /**
-     * Creates {@link ClusterOperationsMappingConfig} with default suffixes
+     * Creates {@link CRUDOperationsMappingConfig} with default suffixes
      *
-     * @param functionPrefix CRUD functions name prefix
+     * @param functionPrefix        CRUD functions name prefix
      * @param getSchemaFunctionName the function name for obtain cluster space schema
      */
-    public ClusterOperationsMappingConfig(String functionPrefix, String getSchemaFunctionName) {
+    public CRUDOperationsMappingConfig(String functionPrefix, String getSchemaFunctionName) {
         if (StringUtils.isEmpty(functionPrefix)) {
             throw new IllegalArgumentException("Function prefix must be not empty");
         }
@@ -45,7 +44,7 @@ public final class ClusterOperationsMappingConfig {
     /**
      * Get a builder for this class.
      *
-     * @return a new Builder for creating {@link ClusterOperationsMappingConfig}.
+     * @return a new Builder for creating {@link CRUDOperationsMappingConfig}.
      */
     public static Builder builder() {
         return new Builder();
@@ -98,8 +97,8 @@ public final class ClusterOperationsMappingConfig {
             return this;
         }
 
-        public ClusterOperationsMappingConfig build() {
-            return new ClusterOperationsMappingConfig(this);
+        public CRUDOperationsMappingConfig build() {
+            return new CRUDOperationsMappingConfig(this);
         }
     }
 
@@ -131,7 +130,7 @@ public final class ClusterOperationsMappingConfig {
         return upsertFunctionName;
     }
 
-    private ClusterOperationsMappingConfig(Builder builder) {
+    private CRUDOperationsMappingConfig(Builder builder) {
         if (StringUtils.isEmpty(builder.getSchemaFunctionName)) {
             throw new IllegalArgumentException("Get schema function name must be not empty");
         }

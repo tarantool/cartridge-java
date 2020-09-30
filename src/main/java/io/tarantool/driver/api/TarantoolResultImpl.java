@@ -1,6 +1,5 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;

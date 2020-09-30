@@ -1,6 +1,6 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolClient;
+import io.tarantool.driver.CRUDTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -14,7 +14,7 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.cluster.ClusterOperationsMappingConfig;
+import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -51,12 +51,12 @@ import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
  * @author Sergey Volgin
  */
 @Testcontainers
-public class ClusterClientIT {
+public class CRUDTarantoolClientIT {
 
     private static final Logger log = LoggerFactory.getLogger(ClusterDiscoveryIT.class);
 
-    private static ClusterTarantoolClient client;
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static CRUDTarantoolClient client;
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     public static String ROUTER_HOST;
     public static int ROUTER_PORT;
@@ -101,18 +101,18 @@ public class ClusterClientIT {
     public static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
 
-        ClusterOperationsMappingConfig mappingConfig =
-                new ClusterOperationsMappingConfig("elect_cluster_api", "elect_cluster_api_get_schema");
+        CRUDOperationsMappingConfig mappingConfig =
+                new CRUDOperationsMappingConfig("crud", "crud_get_schema");
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
                 .withConnectTimeout(DEFAULT_TIMEOUT)
                 .withReadTimeout(DEFAULT_TIMEOUT)
                 .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withClusterOperationsMapping(mappingConfig)
                 .build();
 
-        client = new ClusterTarantoolClient(config, RoundRobinStrategyFactory.INSTANCE, getBinaryProvider());
+        client = new CRUDTarantoolClient(mappingConfig, config, getBinaryProvider(),
+                RoundRobinStrategyFactory.INSTANCE);
     }
 
     @Test

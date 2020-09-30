@@ -70,7 +70,8 @@ class TarantoolResultMapperTest {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
         mapperFactory.withConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
 
-        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter = mapperFactory.getValueConverter(TarantoolTuple.class);
+        Optional<ValueConverter<ArrayValue, TarantoolTuple>> converter =
+                mapperFactory.getValueConverter(TarantoolTuple.class);
         assertTrue(converter.isPresent());
     }
 }

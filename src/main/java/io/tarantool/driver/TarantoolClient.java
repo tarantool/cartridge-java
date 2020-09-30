@@ -2,6 +2,7 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -30,6 +31,12 @@ public interface TarantoolClient extends AutoCloseable {
      * @throws TarantoolClientException if the client is not connected
      */
     TarantoolVersion getVersion() throws TarantoolClientException;
+
+    /**
+     * Get connection established event listeners collection
+     * @return {@link TarantoolConnectionListeners}
+     */
+    TarantoolConnectionListeners getListeners();
 
     /**
      * Provides CRUD and other operations for a Tarantool space

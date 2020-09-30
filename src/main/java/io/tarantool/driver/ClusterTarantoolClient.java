@@ -1,22 +1,15 @@
 package io.tarantool.driver;
 
-import io.tarantool.driver.api.space.ClusterTarantoolSpace;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.cluster.ClusterTarantoolMetadataOperations;
 import io.tarantool.driver.core.TarantoolClusterConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
-import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class for connecting to a cluster of Tarantool servers. Provides basic API for interacting with the database
@@ -29,8 +22,6 @@ public class ClusterTarantoolClient extends AbstractTarantoolClient {
 
     private final ConnectionSelectionStrategyFactory selectStrategyFactory;
     private TarantoolClusterAddressProvider addressProvider;
-    private ClusterTarantoolMetadataOperations metadataOperations;
-    private AtomicBoolean isMetadataInitialized = new AtomicBoolean(false);
 
     /**
      * Create a client. Default guest credentials will be used. Connects to a Tarantool server on localhost using the
@@ -92,11 +83,6 @@ public class ClusterTarantoolClient extends AbstractTarantoolClient {
         super(config);
         this.addressProvider = addressProvider;
         this.selectStrategyFactory = selectStrategyFactory;
-
-        this.metadataOperations = new ClusterTarantoolMetadataOperations(
-                config.getClusterOperationsMappingConfig().getGetSchemaFunctionName(),
-                this
-        );
     }
 
     @Override
@@ -105,37 +91,5 @@ public class ClusterTarantoolClient extends AbstractTarantoolClient {
                                                            TarantoolConnectionListeners listeners) {
         return new TarantoolClusterConnectionManager(
                 config, connectionFactory, selectStrategyFactory, listeners, addressProvider);
-    }
-
-    @Override
-    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
-        throw new TarantoolClientException("Proxy client doesn't support work with space by ID");
-    }
-
-    @Override
-    public TarantoolSpaceOperations space(String spaceName) {
-        return new ClusterTarantoolSpace(this, spaceName, this.metadata());
-    }
-
-    @Override
-    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        checkIsMetadataInitialized();
-        return metadataOperations;
-    }
-
-    @Override
-    public void close() throws Exception {
-        super.close();
-        isMetadataInitialized.compareAndSet(true, false);
-    }
-
-    private void checkIsMetadataInitialized() {
-        if (isMetadataInitialized.compareAndSet(false, true)) {
-            try {
-                metadataOperations.refresh().get();
-            } catch (ExecutionException | InterruptedException e) {
-                throw new TarantoolClientException("Error while getting space format metadata.", e);
-            }
-        }
     }
 }
