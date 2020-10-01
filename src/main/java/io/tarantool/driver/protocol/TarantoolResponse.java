@@ -1,5 +1,7 @@
 package io.tarantool.driver.protocol;
 
+import io.tarantool.driver.exceptions.TarantoolDecoderException;
+import org.msgpack.core.MessagePackException;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
@@ -117,8 +119,12 @@ public final class TarantoolResponse {
                             key.asIntegerValue().asInt(), values.map().get(key));
                 }
             }
+
             return new TarantoolResponse(header.getSync(), header.getCode(), responseBody);
-        } catch (IOException e) {
+        } catch (IOException | MessagePackException e) {
+            if (header != null) {
+                throw new TarantoolDecoderException(header, e);
+            }
             throw new TarantoolProtocolException(e);
         }
     }

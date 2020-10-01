@@ -1,8 +1,11 @@
 package io.tarantool.driver.protocol;
 
+import io.tarantool.driver.exceptions.TarantoolDecoderException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import org.msgpack.core.MessagePackException;
 import org.msgpack.core.MessagePacker;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -54,8 +57,13 @@ public class TarantoolRequest {
      * @param mapper object-to-entity mapper
      * @throws Exception if encoding failed
      */
-    public void toMessagePack(MessagePacker packer, MessagePackObjectMapper mapper) throws Exception {
-        packer.packValue(header.toMessagePackValue(mapper));
-        packer.packValue(body.toMessagePackValue(mapper));
+    public void toMessagePack(MessagePacker packer, MessagePackObjectMapper mapper)
+            throws TarantoolDecoderException {
+        try {
+            packer.packValue(header.toMessagePackValue(mapper));
+            packer.packValue(body.toMessagePackValue(mapper));
+        } catch (IOException | MessagePackException e) {
+            throw new TarantoolDecoderException(header, e);
+        }
     }
 }

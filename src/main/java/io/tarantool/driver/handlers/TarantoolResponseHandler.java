@@ -2,6 +2,8 @@ package io.tarantool.driver.handlers;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.DecoderException;
+import io.tarantool.driver.exceptions.TarantoolDecoderException;
 import io.tarantool.driver.exceptions.TarantoolServerException;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolRequestMetadata;
@@ -55,5 +57,21 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
         } else {
             log.info("Request {} is not registered in this client instance", tarantoolResponse.getSyncId());
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (cause instanceof DecoderException && cause.getCause() instanceof TarantoolDecoderException) {
+            TarantoolDecoderException ex = (TarantoolDecoderException) cause.getCause();
+            TarantoolRequestMetadata requestMeta = futureManager.getRequest(ex.getHeader().getSync());
+            if (requestMeta != null) {
+                CompletableFuture<?> requestFuture = requestMeta.getFuture();
+                if (!requestFuture.isDone()) {
+                    requestFuture.completeExceptionally(cause);
+                    return;
+                }
+            }
+        }
+        super.exceptionCaught(ctx, cause);
     }
 }
