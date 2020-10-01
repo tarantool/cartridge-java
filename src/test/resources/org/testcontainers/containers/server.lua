@@ -47,3 +47,11 @@ end
 function user_function_two_param(a, b)
     return a, b, 'Hello, '..a..' '..b;
 end
+
+function user_function_return_long_string()
+    local s = {}
+    for i = 1,2800*3 do
+        table.insert(s, 1)
+    end
+    return s
+end

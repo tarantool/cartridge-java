@@ -94,16 +94,17 @@ public final class TarantoolResponse {
     /**
      * Create Tarantool response from the decoded binary data using {@link MessageUnpacker}
      * @param unpacker configured {@link MessageUnpacker}
-     * @param size payload size
      * @return Tarantool response populated from the decoded binary data
      * @throws TarantoolProtocolException if the unpacked data is invalid
      */
-    public static TarantoolResponse fromMessagePack(MessageUnpacker unpacker, int size)
+    public static TarantoolResponse fromMessagePack(MessageUnpacker unpacker)
             throws TarantoolProtocolException {
+        TarantoolHeader header = null;
         try {
-            TarantoolHeader header = TarantoolHeader.fromMessagePackValue(unpacker.unpackValue());
+            header = TarantoolHeader.fromMessagePackValue(unpacker.unpackValue());
             TarantoolResponseBody responseBody = new EmptyTarantoolResponseBody();
-            if (unpacker.getTotalReadBytes() < size) {
+
+            if (unpacker.hasNext()) {
                 Value bodyMap = unpacker.unpackValue();
                 if (!bodyMap.isMapValue()) {
                     throw new TarantoolProtocolException("Response body must be of MP_MAP type");

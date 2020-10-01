@@ -459,4 +459,12 @@ public class StandaloneTarantoolClientIT {
             }
         });
     }
+
+    @Test
+    public void testCallReturnLongValue() throws Exception {
+        client.getVersion();
+        List<Object> result = client.call("user_function_return_long_string").get();
+
+        assertEquals(1, result.size());
+    }
 }

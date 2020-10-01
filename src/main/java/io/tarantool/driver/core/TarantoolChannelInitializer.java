@@ -7,7 +7,8 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.codecs.MessagePackFrameCodec;
+import io.tarantool.driver.codecs.MessagePackFrameEncoder;
+import io.tarantool.driver.codecs.MessagePackFrameDecoder;
 import io.tarantool.driver.handlers.TarantoolAuthenticationHandler;
 import io.tarantool.driver.handlers.TarantoolAuthenticationResponseHandler;
 import io.tarantool.driver.handlers.TarantoolRequestHandler;
@@ -51,8 +52,9 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
                         versionHolder,
                         (SimpleTarantoolCredentials) config.getCredentials(),
                         new ChapSha1TarantoolAuthenticator()))
-                // frame decoder
-                .addLast("MessagePackFrameCodec", new MessagePackFrameCodec(
+                // frame encoder and decoder
+                .addLast("MessagePackFrameDecoder", new MessagePackFrameDecoder())
+                .addLast("MessagePackFrameEncoder", new MessagePackFrameEncoder(
                         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper()))
                 // outbound
                 .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
