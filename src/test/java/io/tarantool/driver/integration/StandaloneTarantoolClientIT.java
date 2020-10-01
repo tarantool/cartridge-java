@@ -421,19 +421,6 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void testIncorrectIPAddress_shouldThrowException() {
-        assertThrows(TarantoolClientException.class, () -> {
-            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                    "127.0.0.111", tarantoolContainer.getPort());
-            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
-            // Connection is actually performed here
-            client.getVersion();
-        });
-    }
-
-    @Test
     public void testIncorrectHostname_shouldThrowException() {
         assertThrows(TarantoolSocketException.class, () -> {
             TarantoolCredentials credentials = new SimpleTarantoolCredentials(
