@@ -83,11 +83,10 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                         indexMetadata.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
                     }));
 
-        return CompletableFuture.allOf(spaces, indexes).thenApply(v -> {
+        return CompletableFuture.allOf(spaces, indexes).whenComplete((v, ex) -> {
             if (initLatch.getCount() > 0) {
                 initLatch.countDown();
             }
-            return v;
         });
     }
 

@@ -13,6 +13,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.exceptions.TarantoolSocketException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -417,5 +418,58 @@ public class StandaloneTarantoolClientIT {
 
         assertEquals(2, result.size());
         assertEquals(4.2f, result.get(0));
+    }
+
+    @Test
+    public void testIncorrectIPAddress_shouldThrowException() {
+        assertThrows(TarantoolClientException.class, () -> {
+            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                    "127.0.0.111", tarantoolContainer.getPort());
+            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
+            // Connection is actually performed here
+            client.getVersion();
+        });
+    }
+
+    @Test
+    public void testIncorrectHostname_shouldThrowException() {
+        assertThrows(TarantoolSocketException.class, () -> {
+            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                    "wronghost", tarantoolContainer.getPort());
+            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
+            // Connection is actually performed here
+            client.getVersion();
+        });
+    }
+
+    @Test
+    public void testIncorrectPort_shouldThrowException() {
+        assertThrows(TarantoolClientException.class, () -> {
+            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                    tarantoolContainer.getHost(), 9999);
+            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
+            // Connection is actually performed here
+            client.getVersion();
+        });
+    }
+
+    @Test
+    public void testCloseAfterIncorrectPort_shouldThrowException() {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), 9999);
+        assertThrows(TarantoolClientException.class, () -> {
+            try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
+                // Connection is actually performed here
+                client.getVersion();
+            }
+        });
     }
 }

@@ -6,6 +6,7 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolClientNotConnectedException;
+import io.tarantool.driver.exceptions.TarantoolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,12 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 throw new TarantoolClientNotConnectedException();
             }
             return connection;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | TimeoutException e) {
+            throw new TarantoolClientException(e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof TarantoolException) {
+                throw (TarantoolException) e.getCause();
+            }
             throw new TarantoolClientException(e);
         }
     }
@@ -86,11 +92,13 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                                     .flatMap(Collection::stream)
                                     .collect(Collectors.toList()));
                     connectionSelectStrategy.set(strategy);
+                })
+                .thenApply(v -> connectionSelectStrategy.get().next())
+                .whenComplete((v, ex) -> {
                     if (initLatch.getCount() > 0) {
                         initLatch.countDown();
                     }
-                })
-                .thenApply(v -> connectionSelectStrategy.get().next());
+                });
             for (TarantoolConnectionListener connectionListener : connectionListeners.all()) {
                 result = result.thenCompose(connectionListener::onConnection);
             }
