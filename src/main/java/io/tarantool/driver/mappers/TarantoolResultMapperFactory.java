@@ -34,10 +34,10 @@ public class TarantoolResultMapperFactory {
     /**
      * Get default {@link TarantoolTuple} converter
      * @param mapper configured {@link MessagePackMapper} instance
-     * @return {@link DefaultTarantoolTupleConverter} instance
+     * @return {@link DefaultTarantoolTupleValueConverter} instance
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(MessagePackMapper mapper) {
-        return new DefaultTarantoolTupleConverter(mapper);
+        return new DefaultTarantoolTupleValueConverter(mapper);
     }
 
     /**
@@ -48,7 +48,7 @@ public class TarantoolResultMapperFactory {
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(
             MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
-        return new DefaultTarantoolTupleConverter(mapper, spaceMetadata);
+        return new DefaultTarantoolTupleValueConverter(mapper, spaceMetadata);
     }
 
     /**

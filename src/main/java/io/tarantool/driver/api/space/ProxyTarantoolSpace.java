@@ -213,6 +213,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                 .withFunctionName(operationsMappingConfig.getUpsertFunctionName())
                 .withTuple(tuple)
                 .withTupleOperation(operations)
+                .withValueConverter(tupleMapper)
                 .build();
 
         return executeOperation(operation);

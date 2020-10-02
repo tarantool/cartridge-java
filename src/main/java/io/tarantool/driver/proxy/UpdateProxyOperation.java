@@ -79,8 +79,10 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTuplesToMap(false)
                     .build();
 
-            List<Object> arguments =
-                    Arrays.asList(spaceName, indexQuery.getKeyValues(), operations.asList(), options.asMap());
+            List<Object> arguments = Arrays.asList(spaceName,
+                    indexQuery.getKeyValues(),
+                    operations.asListByPositionNumber(),
+                    options.asMap());
 
             return new UpdateProxyOperation<T>(this.client, this.functionName, arguments, this.tupleMapper);
         }
