@@ -10,10 +10,9 @@ import java.io.Serializable;
  * @author Alexey Kuzin
  */
 public class TarantoolSelectOptions implements Serializable {
-
+    private static final long serialVersionUID = -8590112402282896332L;
     private static final long MAX_OFFSET = 0xff_ff_ff_ffL;
     private static final long MAX_LIMIT = 0xff_ff_ff_ffL;
-    private static final long serialVersionUID = -8590112402282896332L;
 
     private long offset;
     private long limit = MAX_LIMIT;

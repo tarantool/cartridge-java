@@ -15,9 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TarantoolResultMapperFactory {
 
-    private Map<Class<?>, TarantoolResultMapper<?>> mapperCache = new ConcurrentHashMap<>();
-    private Map<Class<?>, TarantoolSingleResultMapper<?>> singleResultMapperCache = new ConcurrentHashMap<>();
-    private Map<Class<?>, ClusterTarantoolResultMapper<?>> proxyMapperCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, TarantoolResultMapper<?>> mapperCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, TarantoolSingleResultMapper<?>> singleResultMapperCache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, ProxyTarantoolResultMapper<?>> proxyMapperCache = new ConcurrentHashMap<>();
 
     /**
      * Basic constructor
@@ -34,10 +34,10 @@ public class TarantoolResultMapperFactory {
     /**
      * Get default {@link TarantoolTuple} converter
      * @param mapper configured {@link MessagePackMapper} instance
-     * @return {@link DefaultTarantoolTupleValueConverter} instance
+     * @return {@link DefaultTarantoolTupleConverter} instance
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(MessagePackMapper mapper) {
-        return new DefaultTarantoolTupleValueConverter(mapper);
+        return new DefaultTarantoolTupleConverter(mapper);
     }
 
     /**
@@ -48,7 +48,7 @@ public class TarantoolResultMapperFactory {
      */
     public ValueConverter<ArrayValue, TarantoolTuple> getDefaultTupleValueConverter(
             MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
-        return new DefaultTarantoolTupleValueConverter(mapper, spaceMetadata);
+        return new DefaultTarantoolTupleConverter(mapper, spaceMetadata);
     }
 
     /**
@@ -117,7 +117,7 @@ public class TarantoolResultMapperFactory {
      * @param <T> target object type
      * @return TarantoolResultMapper instance
      */
-    public <T> ClusterTarantoolResultMapper<T> withProxyConverter(ValueConverter<ArrayValue, T> valueConverter) {
+    public <T> ProxyTarantoolResultMapper<T> withProxyConverter(ValueConverter<ArrayValue, T> valueConverter) {
         return withProxyConverter(valueConverter, MapperReflectionUtils.getConverterTargetType(valueConverter));
     }
 
@@ -131,9 +131,9 @@ public class TarantoolResultMapperFactory {
      * @return ProxyTarantoolResultMapper instance
      */
     @SuppressWarnings("unchecked")
-    public <T> ClusterTarantoolResultMapper<T> withProxyConverter(
+    public <T> ProxyTarantoolResultMapper<T> withProxyConverter(
             ValueConverter<ArrayValue, T> valueConverter, Class<T> valueClass) {
-        ClusterTarantoolResultMapper<T> mapper = (ClusterTarantoolResultMapper<T>) proxyMapperCache.get(valueClass);
+        ProxyTarantoolResultMapper<T> mapper = (ProxyTarantoolResultMapper<T>) proxyMapperCache.get(valueClass);
         if (mapper == null) {
             mapper = createProxyValueMapper(valueConverter);
             proxyMapperCache.put(valueClass, mapper);
@@ -141,8 +141,8 @@ public class TarantoolResultMapperFactory {
         return mapper;
     }
 
-    private <T> ClusterTarantoolResultMapper<T> createProxyValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
+    private <T> ProxyTarantoolResultMapper<T> createProxyValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
-        return new ClusterTarantoolResultMapper<>(mapper, valueConverter);
+        return new ProxyTarantoolResultMapper<>(mapper, valueConverter);
     }
 }

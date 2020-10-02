@@ -85,6 +85,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         this.listeners = listeners;
     }
 
+    @Override
     public TarantoolConnectionListeners getListeners() {
         return listeners;
     }

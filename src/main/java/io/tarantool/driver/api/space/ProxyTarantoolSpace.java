@@ -48,7 +48,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         this.client = client;
         this.config = client.getConfig();
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
-        this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
+        //this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
         this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
         this.operationsMappingConfig = operationsMappingConfig;

@@ -1,12 +1,9 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.impl.ImmutableArrayValueImpl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -23,29 +20,9 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
     private List<T> tuples;
 
     public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter) {
-        this(value, tupleConverter, false);
-    }
-
-    public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter,
-                               Boolean isProxyClientResult) {
-        ArrayValue tuplesValue = value;
-        if (isProxyClientResult) {
-            if (value.size() == 2 && (value.get(0).isNilValue() && !value.get(1).isNilValue())) {
-                throw new TarantoolSpaceOperationException("Space operation error: %s", value.get(1));
-            }
-
-            if (value.size() == 1 && value.get(0).isNilValue()) {
-                tuplesValue = ImmutableArrayValueImpl.empty();
-            }
-        }
-
-        this.tuples = tuplesValue.list().stream()
+        this.tuples = value.list().stream()
                 .map(v -> tupleConverter.fromValue(v.asArrayValue()))
                 .collect(Collectors.toList());
-    }
-
-    public TarantoolResultImpl(ValueConverter<ArrayValue, T> valueConverter, ArrayValue value) {
-        this.tuples = Collections.singletonList(valueConverter.fromValue(value.asArrayValue()));
     }
 
     @Override

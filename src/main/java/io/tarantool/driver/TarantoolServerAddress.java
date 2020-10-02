@@ -13,10 +13,9 @@ import java.net.UnknownHostException;
  * @author Sergey Volgin
  */
 public class TarantoolServerAddress implements Serializable {
-
+    private static final long serialVersionUID = 7327851568010264254L;
     private static final String DEFAULT_HOST = "127.0.0.1";
     private static final int DEFAULT_PORT = 3301;
-    private static final long serialVersionUID = 7327851568010264254L;
 
     private final String host;
     private final int port;

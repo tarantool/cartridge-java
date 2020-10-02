@@ -61,7 +61,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         this.indexQueryFactory = new TarantoolIndexQueryFactory(metadataOperations);
         this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
-        tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
+        //this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
     }
 
     /**

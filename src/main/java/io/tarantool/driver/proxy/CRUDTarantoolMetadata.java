@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
@@ -27,10 +26,11 @@ public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
 
     private final String getMetadataFunctionName;
     private final TarantoolClient client;
-    private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
+    private final TarantoolResultMapperFactory resultMapperFactory;
     private final CRUDTarantoolSpaceMetadataConverter metadataConverter;
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new ConcurrentHashMap<>();
+    private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
     private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new ConcurrentHashMap<>();
 
     private final CountDownLatch initLatch = new CountDownLatch(1);
@@ -39,17 +39,8 @@ public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
                                  TarantoolClient client) {
         this.getMetadataFunctionName = getMetadataFunctionName;
         this.client = client;
-
-        this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
+        this.resultMapperFactory = new TarantoolResultMapperFactory();
         this.metadataConverter = new CRUDTarantoolSpaceMetadataConverter(client.getConfig().getMessagePackMapper());
-
-        client.getListeners().add(connection -> {
-            try {
-                return refresh().thenApply(v -> connection);
-            } catch (Throwable e) {
-                throw new CompletionException(e);
-            }
-        });
     }
 
     @Override
@@ -57,26 +48,37 @@ public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
 
         CompletableFuture<List<CRUDTarantoolSpaceMetadataContainer>> callResult =
                 client.call(getMetadataFunctionName,
-                        tarantoolResultMapperFactory
-                                .withSingleValueConverter(CRUDTarantoolSpaceMetadataContainer.class,
-                                        metadataConverter));
+                        resultMapperFactory.withProxyConverter(metadataConverter,
+                                CRUDTarantoolSpaceMetadataContainer.class));
 
         return callResult.thenAccept(result -> {
-                    spaceMetadata.clear();
-                    indexMetadata.clear();
-                    spaceMetadata.putAll(result.get(0).getSpaceMetadata());
-                    indexMetadata.putAll(result.get(0).getIndexMetadata());
-                }).thenApply(v -> {
-                    if (initLatch.getCount() > 0) {
-                        initLatch.countDown();
-                    }
-                    return v;
-                });
+            spaceMetadata.clear();
+            spaceMetadataById.clear();
+            indexMetadata.clear();
+            result.forEach(sm -> {
+                spaceMetadata.putAll(sm.getSpaceMetadata());
+                sm.getSpaceMetadata().forEach((key, val) -> spaceMetadataById.put(val.getSpaceId(), val));
+            });
+            result.forEach(sm -> indexMetadata.putAll(sm.getIndexMetadata()));
+
+        }).whenComplete((v, ex) -> {
+            if (initLatch.getCount() > 0) {
+                initLatch.countDown();
+            }
+            if (ex != null) {
+                throw new TarantoolClientException("CRUD client space metadata refresh error.", ex);
+            }
+        });
     }
 
     public Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {
         awaitInitLatch();
         return spaceMetadata;
+    }
+
+    private Map<Integer, TarantoolSpaceMetadata> getSpaceMetadataById() {
+        awaitInitLatch();
+        return spaceMetadataById;
     }
 
     public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadata() {
@@ -127,20 +129,49 @@ public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
 
     @Override
     public Optional<TarantoolIndexMetadata> getIndexForName(int spaceId, String indexName) {
-        throw new TarantoolClientException("CRUD client do not support work with space by ID");
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        Assert.hasText(indexName, "Index name must not be null or empty");
+
+        TarantoolSpaceMetadata spaceMeta = getSpaceMetadataById().get(spaceId);
+        if (spaceMeta == null) {
+            return Optional.empty();
+        }
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceMeta.getSpaceName());
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(metaMap.get(indexName));
     }
 
     @Override
     public Optional<TarantoolIndexMetadata> getIndexForId(int spaceId, int indexId) {
-        throw new TarantoolClientException("CRUD client do not support work with space by ID");
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
+
+        TarantoolSpaceMetadata spaceMeta = getSpaceMetadataById().get(spaceId);
+        if (spaceMeta == null) {
+            return Optional.empty();
+        }
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceMeta.getSpaceName());
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return metaMap.values().stream().filter(i -> i.getIndexId() == indexId).findFirst();
     }
 
     @Override
     public Optional<TarantoolSpaceMetadata> getSpaceById(int spaceId) {
-        throw new TarantoolClientException("CRUD client do not support work with space by ID");
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        return Optional.ofNullable(getSpaceMetadataById().get(spaceId));
     }
 
     private void awaitInitLatch() {
+        if (initLatch.getCount() > 0) {
+            refresh();
+        }
         try {
             initLatch.await();
         } catch (InterruptedException e) {

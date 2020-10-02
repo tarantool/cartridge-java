@@ -24,19 +24,24 @@ public class CRUDTarantoolSpaceMetadataConverter
 
     private static final int ID_UNKNOWN = -1;
 
-    private static final ImmutableStringValue SPACES_KEY = new ImmutableStringValueImpl("spaces");
-    private static final ImmutableStringValue FORMAT_FIELD_KEY = new ImmutableStringValueImpl("format");
+    private static final ImmutableStringValue SPACE_ID_KEY = new ImmutableStringValueImpl("id");
+    private static final ImmutableStringValue SPACE_NAME_KEY = new ImmutableStringValueImpl("name");
+    private static final ImmutableStringValue SPACE_FORMAT_KEY = new ImmutableStringValueImpl("_format");
+    private static final ImmutableStringValue SPACE_INDEX_KEY = new ImmutableStringValueImpl("index");
+
     private static final ImmutableStringValue FORMAT_NAME_KEY = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue FORMAT_TYPE_KEY = new ImmutableStringValueImpl("type");
-    private static final ImmutableStringValue INDEXES_FIELD_KEY = new ImmutableStringValueImpl("indexes");
+
+    private static final ImmutableStringValue INDEX_ID_KEY = new ImmutableStringValueImpl("id");
     private static final ImmutableStringValue INDEX_NAME_KEY = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue INDEX_UNIQUE_KEY = new ImmutableStringValueImpl("unique");
     private static final ImmutableStringValue INDEX_TYPE_KEY = new ImmutableStringValueImpl("type");
     private static final ImmutableStringValue INDEX_PARTS_KEY = new ImmutableStringValueImpl("parts");
-    private static final ImmutableStringValue INDEX_PARTS_PATH_KEY = new ImmutableStringValueImpl("path");
+
+    private static final ImmutableStringValue INDEX_PARTS_FIELD_NO = new ImmutableStringValueImpl("fieldno");
     private static final ImmutableStringValue INDEX_PARTS_TYPE_KEY = new ImmutableStringValueImpl("type");
 
-    private MessagePackValueMapper mapper;
+    private final MessagePackValueMapper mapper;
 
     public CRUDTarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;
@@ -44,30 +49,28 @@ public class CRUDTarantoolSpaceMetadataConverter
 
     @Override
     public CRUDTarantoolSpaceMetadataContainer fromValue(ArrayValue value) {
-
         CRUDTarantoolSpaceMetadataContainer proxyMetadata = new CRUDTarantoolSpaceMetadataContainer();
 
-        Map<Value, Value> spacesMap = value.get(0).asMapValue().map().get(SPACES_KEY).asMapValue().map();
+        Map<Value, Value> spacesMap = value.get(0).asMapValue().map();
 
-        for (Map.Entry<Value, Value> spaceValue : spacesMap.entrySet()) {
-            String spaceName = mapper.fromValue(spaceValue.getKey().asStringValue());
+        String spaceName = mapper.fromValue(spacesMap.get(SPACE_NAME_KEY).asStringValue());
+        int spaceId = mapper.fromValue(spacesMap.get(SPACE_ID_KEY).asIntegerValue());
 
-            TarantoolSpaceMetadata metadata = new TarantoolSpaceMetadata();
-            metadata.setSpaceId(ID_UNKNOWN);
-            metadata.setOwnerId(ID_UNKNOWN);
-            metadata.setSpaceName(spaceName);
+        TarantoolSpaceMetadata metadata = new TarantoolSpaceMetadata();
+        metadata.setSpaceId(spaceId);
+        metadata.setOwnerId(ID_UNKNOWN);
+        metadata.setSpaceName(spaceName);
 
-            Map<Value, Value> spaceAttr = spaceValue.getValue().asMapValue().map();
+        List<Value> spaceFormat = spacesMap.get(SPACE_FORMAT_KEY).asArrayValue().list();
+        metadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
 
-            List<Value> spaceFormat = spaceAttr.get(FORMAT_FIELD_KEY).asArrayValue().list();
-
-            metadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
-
-            List<Value> indexes = spaceAttr.get(INDEXES_FIELD_KEY).asArrayValue().list();
-
-            proxyMetadata.addSpace(metadata);
-            proxyMetadata.addIndexes(metadata.getSpaceName(), parseIndexes(indexes, metadata));
+        Value indexesValue = spacesMap.get(SPACE_INDEX_KEY);
+        if (indexesValue.isMapValue() && indexesValue.asMapValue().size() > 0) {
+            Map<Value, Value> indexes = indexesValue.asMapValue().map();
+            proxyMetadata.addIndexes(metadata.getSpaceName(), parseIndexes(indexes));
         }
+
+        proxyMetadata.addSpace(metadata);
 
         return proxyMetadata;
     }
@@ -92,47 +95,43 @@ public class CRUDTarantoolSpaceMetadataConverter
         return spaceFormatMetadata;
     }
 
-    private Map<String, TarantoolIndexMetadata> parseIndexes(List<Value> indexes,
-                                                             TarantoolSpaceMetadata spaceMetadata) {
+    private Map<String, TarantoolIndexMetadata> parseIndexes(Map<Value, Value> indexes) {
 
         Map<String, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
 
-        int indexId = 0;
-        for (Value indexValueMetadata : indexes) {
-            Map<Value, Value> indexMap = indexValueMetadata.asMapValue().map();
+        for (Map.Entry<Value, Value> indexValueMetadata : indexes.entrySet()) {
+            Map<Value, Value> indexMap = indexValueMetadata.getValue().asMapValue().map();
 
+            int indexId = mapper.fromValue(indexMap.get(INDEX_ID_KEY).asIntegerValue());
             String indexName = mapper.fromValue(indexMap.get(INDEX_NAME_KEY).asStringValue());
+            String indexType = mapper.fromValue(indexMap.get(INDEX_TYPE_KEY).asStringValue());
+            boolean isUnique = mapper.fromValue(indexMap.get(INDEX_UNIQUE_KEY).asBooleanValue());
 
-            //TODO index parts
+            TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
+            indexOptions.setUnique(isUnique);
+
             TarantoolIndexMetadata indexMetadata = new TarantoolIndexMetadata();
             indexMetadata.setSpaceId(ID_UNKNOWN);
             indexMetadata.setIndexId(indexId);
-            indexMetadata.setIndexType(TarantoolIndexType.fromString(
-                    mapper.fromValue(indexMap.get(INDEX_TYPE_KEY).asStringValue())));
-            indexMetadata.setIndexName(mapper.fromValue(indexMap.get(INDEX_NAME_KEY).asStringValue()));
-
-            TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
-            indexOptions.setUnique(mapper.fromValue(indexMap.get(INDEX_UNIQUE_KEY).asBooleanValue()));
-
+            indexMetadata.setIndexType(TarantoolIndexType.fromString(indexType));
+            indexMetadata.setIndexName(indexName);
             indexMetadata.setIndexOptions(indexOptions);
 
             List<Value> indexParts = indexMap.get(INDEX_PARTS_KEY).asArrayValue().list();
             List<TarantoolIndexPartMetadata> indexPartMetadata = indexParts.stream()
                     .map(parts -> {
-                        String fieldName =
-                                parts.asMapValue().map().get(INDEX_PARTS_PATH_KEY).asStringValue().asString();
-                        return new TarantoolIndexPartMetadata(
-                                spaceMetadata.getFieldPositionByName(fieldName),
-                                parts.asMapValue().map().get(INDEX_PARTS_TYPE_KEY).asStringValue().asString()
-                        );
-                    }
-            ).collect(Collectors.toList());
+                                int fieldNumber = mapper.fromValue(
+                                        parts.asMapValue().map().get(INDEX_PARTS_FIELD_NO).asIntegerValue());
+                                String fieldType = mapper.fromValue(
+                                        parts.asMapValue().map().get(INDEX_PARTS_TYPE_KEY).asStringValue()
+                                );
+                                return new TarantoolIndexPartMetadata(fieldNumber - 1, fieldType);
+                            }
+                    ).collect(Collectors.toList());
 
             indexMetadata.setIndexParts(indexPartMetadata);
 
             indexMetadataMap.put(indexName, indexMetadata);
-
-            indexId++;
         }
 
         return indexMetadataMap;

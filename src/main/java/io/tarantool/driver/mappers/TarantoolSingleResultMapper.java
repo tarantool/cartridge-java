@@ -3,6 +3,7 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.api.TarantoolResultImpl;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+import org.msgpack.value.ValueFactory;
 
 import java.util.Optional;
 
@@ -14,19 +15,27 @@ import java.util.Optional;
  */
 public class TarantoolSingleResultMapper<T> implements MessagePackValueMapper {
 
-    private MessagePackValueMapper valueMapper;
+    private final MessagePackValueMapper valueMapper;
+    private final ValueConverter<ArrayValue, T> tupleConverter;
 
     /**
      * Basic constructor
      *
-     * @param valueMapper value mapper to be used for tuple fields
-     * @param valueConverter MessagePack entity to java object
+     * @param valueMapper    value mapper to be used for tuple fields
+     * @param tupleConverter MessagePack entity to java object
      */
     public TarantoolSingleResultMapper(MessagePackValueMapper valueMapper,
-                                       ValueConverter<ArrayValue, T> valueConverter) {
+                                       ValueConverter<ArrayValue, T> tupleConverter) {
         this.valueMapper = valueMapper;
+        this.tupleConverter = tupleConverter;
+
         valueMapper.registerValueConverter(ArrayValue.class, TarantoolResultImpl.class,
-                v -> new TarantoolResultImpl<>(valueConverter, v));
+                v -> new TarantoolResultImpl<>(ValueFactory.newArray(v), tupleConverter)
+        );
+    }
+
+    public ValueConverter<ArrayValue, T> getTupleConverter() {
+        return tupleConverter;
     }
 
     @Override

@@ -124,7 +124,7 @@ public class CRUDTarantoolClientIT {
         TarantoolSpaceMetadata spaceMetadata = spaceMeta.get();
         assertEquals(TEST_SPACE_NAME, spaceMetadata.getSpaceName());
         assertEquals(-1, spaceMetadata.getOwnerId());
-        assertEquals(-1, spaceMetadata.getSpaceId());
+        assertTrue(spaceMetadata.getSpaceId() > 0);
         assertEquals(5, spaceMetadata.getSpaceFormatMetadata().size());
         assertEquals(3, spaceMetadata.getFieldPositionByName("age"));
 
