@@ -124,7 +124,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     }
 
     @Override
-    public Optional<TarantoolIndexMetadata> getIndexForName(int spaceId, String indexName) {
+    public Optional<TarantoolIndexMetadata> getIndexByName(int spaceId, String indexName) {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
         Assert.hasText(indexName, "Index name must not be null or empty");
 
@@ -171,7 +171,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     }
 
     @Override
-    public Optional<TarantoolIndexMetadata> getIndexForId(int spaceId, int indexId) {
+    public Optional<TarantoolIndexMetadata> getIndexById(int spaceId, int indexId) {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
         Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
 

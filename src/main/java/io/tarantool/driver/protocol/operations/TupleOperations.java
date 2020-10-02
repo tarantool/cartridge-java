@@ -59,15 +59,6 @@ public final class TupleOperations {
     }
 
     /**
-     * Get a list of operations by converting field indexes starts with 0 to position numbers starts with 1
-     *
-     * @return list of operations
-     */
-    public List<TupleOperation> asListByPositionNumber() {
-        return operations.stream().peek(o -> o.setFieldIndex(o.getFieldIndex() + 1)).collect(Collectors.toList());
-    }
-
-    /**
      * Adds the specified value to the field value
      *
      * @param fieldIndex field number starting with 0

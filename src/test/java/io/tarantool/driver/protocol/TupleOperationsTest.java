@@ -82,10 +82,5 @@ public class TupleOperationsTest {
                 .collect(Collectors.toList());
 
         assertEquals(fieldIndexes, Arrays.asList(8, 2));
-
-        List<Integer> fieldNumbers = operations.asListByPositionNumber().stream().map(TupleOperation::getFieldIndex)
-                .collect(Collectors.toList());
-
-        assertEquals(fieldNumbers, Arrays.asList(9, 3));
     }
 }

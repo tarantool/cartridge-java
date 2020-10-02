@@ -237,7 +237,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         try {
             TarantoolSpaceMetadata metadata = getMetadata();
             Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations
-                    .getIndexForId(spaceId, indexQuery.getIndexId());
+                    .getIndexById(spaceId, indexQuery.getIndexId());
 
             if (!indexMetadata.isPresent() || !indexMetadata.get().isUnique()) {
                 throw new TarantoolSpaceOperationException("Index must be primary or unique for update operation");

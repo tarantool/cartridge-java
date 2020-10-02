@@ -36,7 +36,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     private final TarantoolClientConfig config;
     private final TarantoolIndexQueryFactory indexQueryFactory;
     private final CRUDOperationsMappingConfig operationsMappingConfig;
-    private final TarantoolMetadataOperations operations;
 
     private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
@@ -49,7 +48,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         this.config = client.getConfig();
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
         //this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
-        this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
         this.operationsMappingConfig = operationsMappingConfig;
     }
@@ -125,7 +123,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options)
             throws TarantoolClientException {
-        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName, operations);
+        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName);
         return select(indexQuery, options);
     }
 
@@ -134,7 +132,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                                      TarantoolIteratorType iteratorType,
                                                                      TarantoolSelectOptions options)
             throws TarantoolClientException {
-        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName, operations)
+        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName)
                 .withIteratorType(iteratorType);
         return select(indexQuery, options);
     }

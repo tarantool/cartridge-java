@@ -82,6 +82,8 @@ public interface TarantoolClient extends AutoCloseable {
 
     /**
      * Execute a function defined on Tarantool instance
+     * @param <T> the desired function call result type. The object mapper specified in the client configuration
+     * will be used for result value conversion
      * @param functionName function name, must not be null or empty
      * @param resultMapper mapper for result value MessagePack entity-to-object conversion
      * @return some result
