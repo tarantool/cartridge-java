@@ -2,7 +2,7 @@ package io.tarantool.driver.integration;
 
 
 import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -17,6 +17,9 @@ import io.tarantool.driver.exceptions.TarantoolSocketException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.protocol.operations.TupleOperations;
@@ -395,6 +398,23 @@ public class StandaloneTarantoolClientIT {
         assertEquals(1, resultTwoParams.get(0));
         assertEquals("abc", resultTwoParams.get(1));
         assertEquals("Hello, 1 abc", resultTwoParams.get(2));
+    }
+
+    @Test
+    public void callForTarantoolResultTest() throws Exception {
+        MessagePackMapper defaultMapper = client.getConfig().getMessagePackMapper();
+        TarantoolCallResultMapperFactory factory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolSpaceMetadata spaceMetadata = client.metadata().getSpaceByName("test_space").get();
+        TarantoolCallResultMapper<TarantoolTuple> mapper = factory.withDefaultTupleValueConverter(spaceMetadata);
+        TarantoolResult<TarantoolTuple> result = client.call(
+                "user_function_complex_query",
+                Arrays.asList(1000),
+                defaultMapper,
+                mapper
+        ).get();
+
+        assertTrue(result.size() >= 3);
+        assertEquals(1605, result.get(0).getInteger("year"));
     }
 
     @Test

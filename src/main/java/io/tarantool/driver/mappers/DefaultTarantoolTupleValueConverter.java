@@ -15,10 +15,6 @@ public class DefaultTarantoolTupleValueConverter implements ValueConverter<Array
     private MessagePackMapper mapper;
     private TarantoolSpaceMetadata spaceMetadata;
 
-    public DefaultTarantoolTupleValueConverter(MessagePackMapper mapper) {
-        this.mapper = mapper;
-    }
-
     public DefaultTarantoolTupleValueConverter(MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
         this.mapper = mapper;
         this.spaceMetadata = spaceMetadata;
