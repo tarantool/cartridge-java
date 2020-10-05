@@ -36,7 +36,7 @@ public class CRUDOperationOptionsTest {
                 .withTuplesToMap(true)
                 .withSelectLimit(50)
                 .withSelectBatchSize(10)
-                .withSelectAlter(tuple)
+                .withSelectAfter(tuple)
                 .build();
 
         assertEquals(5, options.asMap().size());

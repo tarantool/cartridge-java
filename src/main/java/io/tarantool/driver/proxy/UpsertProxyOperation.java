@@ -2,7 +2,6 @@ package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.protocol.operations.TupleOperations;

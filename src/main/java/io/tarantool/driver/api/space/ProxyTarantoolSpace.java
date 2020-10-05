@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.CRUDTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolIndexQueryFactory;
@@ -9,7 +9,6 @@ import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
@@ -37,18 +36,16 @@ import java.util.concurrent.CompletableFuture;
 public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
 
     private final String spaceName;
-    private final TarantoolClient client;
+    private final CRUDTarantoolClient client;
     private final TarantoolClientConfig config;
     private final TarantoolMetadataOperations operations;
     private final TarantoolIndexQueryFactory indexQueryFactory;
-    private final CRUDOperationsMappingConfig operationsMappingConfig;
 
     private final TarantoolResultMapperFactory tarantoolResultMapperFactory;
 
-    public ProxyTarantoolSpace(TarantoolClient client,
+    public ProxyTarantoolSpace(CRUDTarantoolClient client,
                                String spaceName,
-                               TarantoolMetadataOperations operations,
-                               CRUDOperationsMappingConfig operationsMappingConfig) {
+                               TarantoolMetadataOperations operations) {
         this.spaceName = spaceName;
         this.client = client;
         this.config = client.getConfig();
@@ -56,7 +53,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         //this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
         this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
-        this.operationsMappingConfig = operationsMappingConfig;
     }
 
     @Override
@@ -71,9 +67,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
             throws TarantoolClientException {
 
         return executeOperation(new DeleteProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getDeleteFunctionName())
+                .withFunctionName(client.getDeleteFunctionName())
                 .withIndexQuery(indexQuery)
                 .withValueConverter(tupleMapper)
                 .build());
@@ -90,9 +86,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         InsertProxyOperation<T> operation = new InsertProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getInsertFunctionName())
+                .withFunctionName(client.getInsertFunctionName())
                 .withTuple(tuple)
                 .withValueConverter(tupleMapper)
                 .build();
@@ -111,9 +107,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                              ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         ReplaceProxyOperation<T> operation = new ReplaceProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getReplaceFunctionName())
+                .withFunctionName(client.getReplaceFunctionName())
                 .withTuple(tuple)
                 .withValueConverter(tupleMapper)
                 .build();
@@ -187,9 +183,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         }
 
         SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getSelectFunctionName())
+                .withFunctionName(client.getSelectFunctionName())
                 .withSelectArguments(selectArguments)
                 .withSelectOptions(options)
                 .withValueConverter(tupleMapper)
@@ -209,9 +205,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                             TupleOperations operations,
                                                             ValueConverter<ArrayValue, T> tupleMapper) {
         UpdateProxyOperation<T> operation = new UpdateProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getUpdateFunctionName())
+                .withFunctionName(client.getUpdateFunctionName())
                 .withIndexQuery(indexQuery)
                 .withTupleOperation(operations)
                 .withValueConverter(tupleMapper)
@@ -233,9 +229,9 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                             TupleOperations operations,
                                                             ValueConverter<ArrayValue, T> tupleMapper) {
         UpsertProxyOperation<T> operation = new UpsertProxyOperation.Builder<T>()
-                .withClient(this.client)
+                .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(operationsMappingConfig.getUpsertFunctionName())
+                .withFunctionName(client.getUpsertFunctionName())
                 .withTuple(tuple)
                 .withTupleOperation(operations)
                 .withValueConverter(tupleMapper)

@@ -43,7 +43,7 @@ public final class CRUDOperationOptions {
     /**
      * Get a builder for this class.
      *
-     * @return a new Builder for creating {@link CRUDOperationsMappingConfig}.
+     * @return a new Builder for creating {@link CRUDOperationOptions}.
      */
     public static Builder builder() {
         return new Builder();
@@ -80,7 +80,7 @@ public final class CRUDOperationOptions {
             return this;
         }
 
-        public Builder withSelectAlter(TarantoolTuple tuple) {
+        public Builder withSelectAfter(TarantoolTuple tuple) {
             this.alter = tuple;
             return this;
         }

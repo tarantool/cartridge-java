@@ -2,13 +2,8 @@ package io.tarantool.driver.core;
 
 import io.tarantool.driver.ConnectionSelectionStrategy;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
-import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.protocol.TarantoolProtocolException;
-import io.tarantool.driver.protocol.TarantoolRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

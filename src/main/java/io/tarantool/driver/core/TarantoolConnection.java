@@ -1,6 +1,5 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;

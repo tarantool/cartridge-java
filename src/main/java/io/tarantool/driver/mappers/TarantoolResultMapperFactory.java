@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TarantoolResultMapperFactory {
 
     private final Map<Class<?>, TarantoolResultMapper<?>> mapperCache = new ConcurrentHashMap<>();
-    private final Map<Class<?>, TarantoolSingleResultMapper<?>> singleResultMapperCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, ProxyTarantoolResultMapper<?>> proxyMapperCache = new ConcurrentHashMap<>();
 
     /**
@@ -83,32 +82,6 @@ public class TarantoolResultMapperFactory {
     private <T> TarantoolResultMapper<T> createMapper(ValueConverter<ArrayValue, T> valueConverter) {
         MessagePackValueMapper mapper = new DefaultMessagePackMapper();
         return new TarantoolResultMapper<>(mapper, valueConverter);
-    }
-
-    /**
-     * Create TarantoolSingleResultMapper instance with the passed converter.
-     *
-     * @param valueClass target object type class. Necessary for resolving ambiguity when more than one suitable
-     * converters are present in the configured mapper
-     * @param valueConverter entity-to-object converter
-     * @param <T> target object type
-     * @return TarantoolSingleResultMapper instance
-     */
-    @SuppressWarnings("unchecked")
-    public <T> TarantoolSingleResultMapper<T> withSingleValueConverter(Class<T> valueClass,
-            ValueConverter<ArrayValue, T> valueConverter) {
-        TarantoolSingleResultMapper<T> mapper =
-                (TarantoolSingleResultMapper<T>) singleResultMapperCache.get(valueClass);
-        if (mapper == null) {
-            mapper = createSingleValueMapper(valueConverter);
-            singleResultMapperCache.put(valueClass, mapper);
-        }
-        return mapper;
-    }
-
-    private <T> TarantoolSingleResultMapper<T> createSingleValueMapper(ValueConverter<ArrayValue, T> valueConverter) {
-        MessagePackValueMapper mapper = new DefaultMessagePackMapper();
-        return new TarantoolSingleResultMapper<>(mapper, valueConverter);
     }
 
     /**

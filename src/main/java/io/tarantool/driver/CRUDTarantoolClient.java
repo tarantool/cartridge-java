@@ -3,7 +3,7 @@ package io.tarantool.driver;
 import io.tarantool.driver.api.space.ProxyTarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
-import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
+import io.tarantool.driver.proxy.CRUDOperationsMapping;
 import io.tarantool.driver.proxy.CRUDTarantoolMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
@@ -13,25 +13,21 @@ import java.util.Collection;
 /**
  * @author Sergey Volgin
  */
-public class CRUDTarantoolClient extends ProxyTarantoolClient {
+public class CRUDTarantoolClient extends ProxyTarantoolClient implements CRUDOperationsMapping {
 
-    private final CRUDOperationsMappingConfig operationsMappingConfig;
     private final CRUDTarantoolMetadata metadataOperations;
 
-    public CRUDTarantoolClient(CRUDOperationsMappingConfig operationsMappingConfig,
-                               TarantoolClientConfig config,
+    public CRUDTarantoolClient(TarantoolClientConfig config,
                                Collection<TarantoolServerAddress> addresses) {
-        this(operationsMappingConfig, config, () -> addresses, ParallelRoundRobinStrategyFactory.INSTANCE);
+        this(config, () -> addresses, ParallelRoundRobinStrategyFactory.INSTANCE);
     }
 
-    public CRUDTarantoolClient(CRUDOperationsMappingConfig operationsMappingConfig,
-                               TarantoolClientConfig config,
+    public CRUDTarantoolClient(TarantoolClientConfig config,
                                TarantoolClusterAddressProvider addressProvider,
                                ConnectionSelectionStrategyFactory selectStrategyFactory) {
         this.client = new ClusterTarantoolClient(config, addressProvider, selectStrategyFactory);
-        this.operationsMappingConfig = operationsMappingConfig;
         this.metadataOperations = new CRUDTarantoolMetadata(
-                operationsMappingConfig.getGetSchemaFunctionName(),
+                this.getGetSchemaFunctionName(),
                 this.client
         );
     }
@@ -43,7 +39,7 @@ public class CRUDTarantoolClient extends ProxyTarantoolClient {
 
     @Override
     public TarantoolSpaceOperations space(String spaceName) {
-        return new ProxyTarantoolSpace(this, spaceName, this.metadata(), this.operationsMappingConfig);
+        return new ProxyTarantoolSpace(this, spaceName, this.metadata());
     }
 
     @Override

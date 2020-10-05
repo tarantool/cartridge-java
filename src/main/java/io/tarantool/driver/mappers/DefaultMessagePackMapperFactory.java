@@ -6,7 +6,6 @@ import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.FloatValue;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.StringValue;
-import org.msgpack.value.impl.ImmutableDoubleValueImpl;
 
 import java.math.BigDecimal;
 import java.util.UUID;

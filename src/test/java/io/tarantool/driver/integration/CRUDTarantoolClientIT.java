@@ -14,7 +14,6 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -101,9 +100,6 @@ public class CRUDTarantoolClientIT {
     public static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
 
-        CRUDOperationsMappingConfig mappingConfig =
-                new CRUDOperationsMappingConfig("crud", "crud_get_schema");
-
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
                 .withConnectTimeout(DEFAULT_TIMEOUT)
@@ -111,8 +107,7 @@ public class CRUDTarantoolClientIT {
                 .withRequestTimeout(DEFAULT_TIMEOUT)
                 .build();
 
-        client = new CRUDTarantoolClient(mappingConfig, config, getBinaryProvider(),
-                RoundRobinStrategyFactory.INSTANCE);
+        client = new CRUDTarantoolClient(config, getBinaryProvider(), RoundRobinStrategyFactory.INSTANCE);
     }
 
     @Test
