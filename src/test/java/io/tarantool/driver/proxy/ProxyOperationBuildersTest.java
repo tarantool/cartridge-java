@@ -185,9 +185,12 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertEquals(4, operation.getArguments().size());
-        assertEquals(Arrays.asList("space1", Collections.singletonList(10),
-                TupleOperations.add(3, 90).andAdd(4, 5).asList(), options),
+
+        assertEquals(Arrays.asList("space1",
+                Collections.singletonList(10),
+                TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
                 operation.getArguments());
+
         assertEquals(valueConverter, operation.getTupleMapper());
     }
 
@@ -221,7 +224,8 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertEquals(Arrays.asList("space1", tarantoolTuple.getFields(),
-                TupleOperations.add(3, 90).andAdd(4, 5).asList(), options), operation.getArguments());
+                TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
+                operation.getArguments());
         assertEquals(valueConverter, operation.getTupleMapper());
     }
 }
