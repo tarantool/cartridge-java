@@ -1,18 +1,17 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.Test;
-import org.msgpack.value.ArrayValue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,17 +33,16 @@ public class ProxyOperationBuildersTest {
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(42L));
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
 
         DeleteProxyOperation<TarantoolTuple> deleteProxyOperation = new DeleteProxyOperation.Builder<TarantoolTuple>()
                 .withClient(client)
                 .withSpaceName("space1")
                 .withFunctionName("function1")
                 .withIndexQuery(indexQuery)
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -55,17 +53,17 @@ public class ProxyOperationBuildersTest {
         assertEquals("function1", deleteProxyOperation.getFunctionName());
         assertEquals(Arrays.asList("space1", Collections.singletonList(42L), options),
                 deleteProxyOperation.getArguments());
-        assertEquals(valueConverter, deleteProxyOperation.getTupleMapper());
+        assertEquals(resultMapper, deleteProxyOperation.getResultMapper());
     }
 
     @Test
     public void insertOperationBuilderTest() {
         assertThrows(IllegalArgumentException.class, () -> new InsertProxyOperation.Builder<>().build());
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
+
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
 
@@ -74,7 +72,7 @@ public class ProxyOperationBuildersTest {
                 .withSpaceName("space1")
                 .withFunctionName("function1")
                 .withTuple(tarantoolTuple)
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -84,17 +82,17 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, insertOperation.getClient());
         assertEquals("function1", insertOperation.getFunctionName());
         assertEquals(Arrays.asList("space1", tarantoolTuple.getFields(), options), insertOperation.getArguments());
-        assertEquals(valueConverter, insertOperation.getTupleMapper());
+        assertEquals(resultMapper, insertOperation.getResultMapper());
     }
 
     @Test
     public void replaceOperationBuilderTest() {
         assertThrows(IllegalArgumentException.class, () -> new ReplaceProxyOperation.Builder<>().build());
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
+
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
 
@@ -103,7 +101,7 @@ public class ProxyOperationBuildersTest {
                 .withSpaceName("space1")
                 .withFunctionName("function1")
                 .withTuple(tarantoolTuple)
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -113,7 +111,7 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertEquals(Arrays.asList("space1", tarantoolTuple.getFields(), options), operation.getArguments());
-        assertEquals(valueConverter, operation.getTupleMapper());
+        assertEquals(resultMapper, operation.getResultMapper());
     }
 
     @Test
@@ -124,10 +122,9 @@ public class ProxyOperationBuildersTest {
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(5L));
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
 
         List<?> selectArguments = Collections.singletonList(Arrays.asList("=", "id", 55));
 
@@ -139,7 +136,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withSelectArguments(selectArguments)
                 .withSelectOptions(selectOptions)
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -154,7 +151,7 @@ public class ProxyOperationBuildersTest {
         assertEquals("space1", op.getArguments().get(0));
         assertEquals(selectArguments, op.getArguments().get(1));
         assertEquals(options, op.getArguments().get(2));
-        assertEquals(valueConverter, op.getTupleMapper());
+        assertEquals(resultMapper, op.getResultMapper());
     }
 
     @Test
@@ -164,10 +161,9 @@ public class ProxyOperationBuildersTest {
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(10));
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
 
         UpdateProxyOperation<TarantoolTuple> operation = new UpdateProxyOperation.Builder<TarantoolTuple>()
                 .withClient(client)
@@ -175,7 +171,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withIndexQuery(indexQuery)
                 .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -191,7 +187,7 @@ public class ProxyOperationBuildersTest {
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
                 operation.getArguments());
 
-        assertEquals(valueConverter, operation.getTupleMapper());
+        assertEquals(resultMapper, operation.getResultMapper());
     }
 
     @Test
@@ -201,10 +197,10 @@ public class ProxyOperationBuildersTest {
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(10));
 
-        TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
-                mapperFactory.getDefaultTupleValueConverter(defaultMapper);
+        TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
+        TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
+
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
 
@@ -214,7 +210,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withTuple(tarantoolTuple)
                 .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
-                .withValueConverter(valueConverter)
+                .withResultMapper(resultMapper)
                 .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -226,6 +222,6 @@ public class ProxyOperationBuildersTest {
         assertEquals(Arrays.asList("space1", tarantoolTuple.getFields(),
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
                 operation.getArguments());
-        assertEquals(valueConverter, operation.getTupleMapper());
+        assertEquals(resultMapper, operation.getResultMapper());
     }
 }

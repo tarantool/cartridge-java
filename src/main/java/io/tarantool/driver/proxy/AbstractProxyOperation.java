@@ -1,9 +1,8 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.mappers.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -13,19 +12,20 @@ import java.util.concurrent.CompletableFuture;
  * @author Sergey Volgin
  */
 abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
+
     protected final TarantoolClient client;
     protected final String functionName;
-    protected List<Object> arguments;
-    protected final ValueConverter<ArrayValue, T> tupleMapper;
+    protected final List<Object> arguments;
+    protected final TarantoolCallResultMapper<T> resultMapper;
 
     AbstractProxyOperation(TarantoolClient client,
                            String functionName,
                            List<Object> arguments,
-                           ValueConverter<ArrayValue, T> tupleMapper) {
+                           TarantoolCallResultMapper<T> resultMapper) {
         this.client = client;
         this.arguments = arguments;
         this.functionName = functionName;
-        this.tupleMapper = tupleMapper;
+        this.resultMapper = resultMapper;
     }
 
     public TarantoolClient getClient() {
@@ -40,12 +40,12 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return arguments;
     }
 
-    public ValueConverter<ArrayValue, T> getTupleMapper() {
-        return tupleMapper;
+    public TarantoolCallResultMapper<T> getResultMapper() {
+        return resultMapper;
     }
 
     @Override
     public CompletableFuture<TarantoolResult<T>> execute() {
-        return client.call(functionName, arguments, client.getConfig().getMessagePackMapper(), tupleMapper);
+        return client.call(functionName, arguments, client.getConfig().getMessagePackMapper(), resultMapper);
     }
 }

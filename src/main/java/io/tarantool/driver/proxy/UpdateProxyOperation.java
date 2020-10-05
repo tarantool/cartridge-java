@@ -1,23 +1,28 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.protocol.operations.TupleOperations;
-import org.msgpack.value.ArrayValue;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Proxy operation for update
+ *
+ * @param <T> tuple result type
+ * @author Sergey Volgin
+ */
 public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
     UpdateProxyOperation(TarantoolClient client,
                          String functionName,
                          List<Object> arguments,
-                         ValueConverter<ArrayValue, T> tupleMapper) {
-        super(client, functionName, arguments, tupleMapper);
+                         TarantoolCallResultMapper<T> resultMapper) {
+        super(client, functionName, arguments, resultMapper);
     }
 
     /**
@@ -29,7 +34,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         private String functionName;
         private TarantoolIndexQuery indexQuery;
         private TupleOperations operations;
-        private ValueConverter<ArrayValue, T> tupleMapper;
+        private TarantoolCallResultMapper<T> resultMapper;
 
         public Builder() {
         }
@@ -59,8 +64,8 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withValueConverter(ValueConverter<ArrayValue, T> tupleMapper) {
-            this.tupleMapper = tupleMapper;
+        public Builder<T> withResultMapper(TarantoolCallResultMapper<T> resultMapper) {
+            this.resultMapper = resultMapper;
             return this;
         }
 
@@ -70,7 +75,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
             Assert.notNull(functionName, "Proxy delete function name should not be null");
             Assert.notNull(indexQuery, "Tarantool indexQuery should not be null");
             Assert.notNull(operations, "Tarantool tuple operations should not be null");
-            Assert.notNull(tupleMapper, "Tuple mapper should not be null");
+            Assert.notNull(resultMapper, "Result tuple mapper should not be null");
 
             TarantoolClientConfig config = client.getConfig();
             CRUDOperationOptions options = CRUDOperationOptions.builder()
@@ -83,7 +88,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
                     operations.asProxyOperationList(),
                     options.asMap());
 
-            return new UpdateProxyOperation<T>(this.client, this.functionName, arguments, this.tupleMapper);
+            return new UpdateProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
         }
     }
 }

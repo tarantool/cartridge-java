@@ -8,7 +8,6 @@ import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolSimpleResultMapperFactory;
@@ -41,52 +40,28 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     private final int spaceId;
     private final TarantoolClientConfig config;
     private final TarantoolConnectionManager connectionManager;
+    private final TarantoolSpaceMetadata spaceMetadata;
     private final TarantoolIndexQueryFactory indexQueryFactory;
     private final TarantoolMetadataOperations metadataOperations;
     private final TarantoolSimpleResultMapperFactory tarantoolResultMapperFactory;
 
     /**
      * Basic constructor.
-     * @param spaceId internal space ID on Tarantool server
      * @param config client config
      * @param connectionManager Tarantool server connection manager
      * @param metadataOperations metadata operations implementation
      */
-    public TarantoolSpace(int spaceId,
-                          TarantoolClientConfig config,
+    public TarantoolSpace(TarantoolClientConfig config,
                           TarantoolConnectionManager connectionManager,
+                          TarantoolSpaceMetadata spaceMetadata,
                           TarantoolMetadataOperations metadataOperations) {
-        this.spaceId = spaceId;
+        this.spaceId = spaceMetadata.getSpaceId();
         this.config = config;
         this.connectionManager = connectionManager;
+        this.spaceMetadata = spaceMetadata;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(metadataOperations);
         this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolSimpleResultMapperFactory(config.getMessagePackMapper());
-    }
-
-    /**
-     * Get space ID
-     * @return space ID on the Tarantool server
-     */
-    public int getSpaceId() {
-        return spaceId;
-    }
-
-    /**
-     * Get name of the space
-     * @return nullable name wrapped in {@code Optional}
-     * @throws TarantoolClientException if failed to retrieve the space information from Tarantool server
-     */
-    public String getName() throws TarantoolClientException {
-        return getMetadata().getSpaceName();
-    }
-
-    private TarantoolSpaceMetadata getMetadata() {
-        Optional<TarantoolSpaceMetadata> metadata = metadataOperations.getSpaceById(spaceId);
-        if (!metadata.isPresent()) {
-            throw new TarantoolSpaceNotFoundException(spaceId);
-        }
-        return metadata.get();
     }
 
     @Override
@@ -207,6 +182,15 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
                                                             TarantoolSelectOptions options,
+                                                            Class<T> tupleClass)
+            throws TarantoolClientException {
+        ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
+        return select(indexQuery, options, tarantoolResultMapperFactory.withConverter(tupleClass, converter));
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                            TarantoolSelectOptions options,
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         return select(indexQuery, options, tarantoolResultMapperFactory.withConverter(tupleMapper));
@@ -251,15 +235,14 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolSpaceMetadata metadata = getMetadata();
-            Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations
-                    .getIndexForId(spaceId, indexQuery.getIndexId());
+            Optional<TarantoolIndexMetadata> indexMetadata =
+                    metadataOperations.getIndexById(spaceId, indexQuery.getIndexId());
 
             if (!indexMetadata.isPresent() || !indexMetadata.get().isUnique()) {
                 throw new TarantoolSpaceOperationException("Index must be primary or unique for update operation");
             }
 
-            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(metadata)
+            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(spaceMetadata)
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
@@ -295,7 +278,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(getMetadata())
+            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(spaceMetadata)
                     .withSpaceId(spaceId)
                     .withKeyValues(indexQuery.getKeyValues())
                     .withTuple(tuple)
@@ -308,9 +291,17 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
     }
 
+    private <T> ValueConverter<ArrayValue, T> getConverter(Class<T> tupleClass) {
+        Optional<ValueConverter<ArrayValue, T>> converter =
+                config.getMessagePackMapper().getValueConverter(ArrayValue.class, tupleClass);
+        if (!converter.isPresent()) {
+            throw new TarantoolClientException("No ArrayValue converter for type " + tupleClass + " is present");
+        }
+        return converter.get();
+    }
+
     private MessagePackValueMapper defaultTupleResultMapper() {
-        TarantoolSpaceMetadata meta = metadataOperations.getSpaceById(spaceId).orElse(null);
-        return tarantoolResultMapperFactory.withDefaultTupleValueConverter(meta);
+        return tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> sendRequest(TarantoolRequest request,
@@ -324,6 +315,6 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public String toString() {
-        return String.format("TarantoolSpace [%d]", spaceId);
+        return String.format("TarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
     }
 }

@@ -143,13 +143,13 @@ public interface TarantoolSpaceOperations {
      * @param indexQuery the index query, containing information about the used index, iterator type and index key
      *                   values for matching
      * @param options query options such as offset and limit
-     * @param clazz result type
+     * @param tupleCLass target tuple class
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed or value converter not found
      */
     <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
                                                      TarantoolSelectOptions options,
-                                                     Class<T> clazz) throws TarantoolClientException;
+                                                     Class<T> tupleCLass) throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified index query.

@@ -3,6 +3,7 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,11 +16,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ProxyTarantoolResultMapperTest {
+public class TarantoolCallResultMapperTest {
 
     private static final MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance()
             .defaultComplexTypesMapper();
-    private static final TarantoolResultMapperFactory mapperFactory = new TarantoolResultMapperFactory();
+    private static final TarantoolCallResultMapperFactory mapperFactory =
+            new TarantoolCallResultMapperFactory(defaultMapper);
 
     private static List<Object> nestedList1;
     private static TarantoolTuple tupleOne;
@@ -36,8 +38,8 @@ public class ProxyTarantoolResultMapperTest {
 
     @Test
     void testDefaultTarantoolTupleResponse() {
-        ProxyTarantoolResultMapper<TarantoolTuple> proxyMapper = mapperFactory
-                .withProxyConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
+        TarantoolCallResultMapper<TarantoolTuple> proxyMapper = mapperFactory
+                .withDefaultTupleValueConverter(null);
 
         ArrayValue testTuples = ValueFactory.newArray(
                 tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
@@ -54,38 +56,22 @@ public class ProxyTarantoolResultMapperTest {
 
     @Test
     void testResponseWithError() {
-        ProxyTarantoolResultMapper<TarantoolTuple> proxyMapper = mapperFactory
-                .withProxyConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
-
-        ArrayValue testTuples = ValueFactory.newArray(
-                tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
-
-        ArrayValue resultWithNilError = ValueFactory.newArray(
-                testTuples, ValueFactory.newNil()
-        );
-
-        TarantoolResult<TarantoolTuple> result = proxyMapper.fromValue(resultWithNilError);
-        assertEquals(2, result.size());
-        assertEquals("abc", result.get(0).getString(0));
-        assertEquals(1234, result.get(0).getInteger(1));
-        assertEquals(nestedList1, result.get(0).getList(2));
-        assertEquals("def", result.get(1).getString(0));
-        assertEquals(5678, result.get(1).getInteger(1));
-        assertEquals(nestedList2, result.get(1).getList(2));
+        TarantoolCallResultMapper<TarantoolTuple> proxyMapper = mapperFactory
+                .withDefaultTupleValueConverter(null);
 
         ArrayValue resultWithError = ValueFactory.newArray(
                 ValueFactory.newNil(), ValueFactory.newString("Error message from server")
         );
 
-        TarantoolSpaceOperationException e = assertThrows(TarantoolSpaceOperationException.class,
+        TarantoolFunctionCallException e = assertThrows(TarantoolFunctionCallException.class,
                 () -> proxyMapper.fromValue(resultWithError));
-        assertEquals("Proxy operation error: Error message from server", e.getMessage());
+        assertEquals("Error message from server", e.getMessage());
     }
 
     @Test
     void testNilResponse() {
-        ProxyTarantoolResultMapper<TarantoolTuple> proxyMapper = mapperFactory
-                .withProxyConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
+        TarantoolCallResultMapper<TarantoolTuple> proxyMapper = mapperFactory
+                .withDefaultTupleValueConverter(null);
 
         ArrayValue nilResult = ValueFactory.newArray(ValueFactory.newNil());
 
@@ -96,8 +82,8 @@ public class ProxyTarantoolResultMapperTest {
 
     @Test
     void testNotUnpackedTable() {
-        ProxyTarantoolResultMapper<TarantoolTuple> proxyMapper = mapperFactory
-                .withProxyConverter(mapperFactory.getDefaultTupleValueConverter(defaultMapper));
+        TarantoolCallResultMapper<TarantoolTuple> proxyMapper = mapperFactory
+                .withDefaultTupleValueConverter(null);
 
         ArrayValue testTuples = ValueFactory.newArray(
                 tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));

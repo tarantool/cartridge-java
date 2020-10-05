@@ -14,13 +14,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Maps MessagePack {@link ArrayValue} form router proxy into {@link CRUDTarantoolSpaceMetadataContainer}
+ * Maps MessagePack {@link ArrayValue} form router proxy into {@link ProxyTarantoolSpaceMetadataContainer}
  * See <a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>
  *
  * @author Sergey Volgin
  */
-public class CRUDTarantoolSpaceMetadataConverter
-        implements ValueConverter<ArrayValue, CRUDTarantoolSpaceMetadataContainer> {
+public class ProxyTarantoolSpaceMetadataConverter
+        implements ValueConverter<ArrayValue, ProxyTarantoolSpaceMetadataContainer> {
 
     private static final int ID_UNKNOWN = -1;
 
@@ -43,13 +43,13 @@ public class CRUDTarantoolSpaceMetadataConverter
 
     private final MessagePackValueMapper mapper;
 
-    public CRUDTarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
+    public ProxyTarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;
     }
 
     @Override
-    public CRUDTarantoolSpaceMetadataContainer fromValue(ArrayValue value) {
-        CRUDTarantoolSpaceMetadataContainer proxyMetadata = new CRUDTarantoolSpaceMetadataContainer();
+    public ProxyTarantoolSpaceMetadataContainer fromValue(ArrayValue value) {
+        ProxyTarantoolSpaceMetadataContainer proxyMetadata = new ProxyTarantoolSpaceMetadataContainer();
 
         Map<Value, Value> spacesMap = value.get(0).asMapValue().map();
 

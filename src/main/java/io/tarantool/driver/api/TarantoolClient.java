@@ -3,6 +3,7 @@ package io.tarantool.driver.api;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 
@@ -48,4 +49,11 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
      */
     TarantoolMetadataOperations metadata() throws TarantoolClientException;
 
+    /**
+     * Get collection of connection listeners. Used for adding new listeners, removing listeners or examining
+     * the collection
+     *
+     * @return connection listeners
+     */
+    TarantoolConnectionListeners getListeners();
 }

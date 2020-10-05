@@ -8,7 +8,13 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.TarantoolSimpleResultMapperFactory;
+import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
+import io.tarantool.driver.protocol.TarantoolProtocolException;
+import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
+import org.msgpack.value.ArrayValue;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -30,6 +36,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     private final TarantoolIndexMetadataConverter indexMetadataMapper;
     private final TarantoolClientConfig config;
     private final TarantoolConnectionManager connectionManager;
+    private final TarantoolSimpleResultMapperFactory mapperFactory;
     private final CountDownLatch initLatch = new CountDownLatch(1);
 
     private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
@@ -47,20 +54,16 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getMessagePackMapper());
         this.config = config;
         this.connectionManager = connectionManager;
+        this.mapperFactory = new TarantoolSimpleResultMapperFactory(config.getMessagePackMapper());
         refresh();
-    }
-
-    private TarantoolSpaceOperations space(int spaceId) {
-        return new TarantoolSpace(spaceId, config, connectionManager, this);
     }
 
     @Override
     public CompletableFuture<Void> refresh() throws TarantoolClientException {
-        TarantoolIndexQuery query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
-                .withIteratorType(TarantoolIteratorType.ITER_ALL);
-        TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
-        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces = space(VSPACE_SPACE_ID)
-                .select(query, options, spaceMetadataMapper);
+
+        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces =
+                select(VSPACE_SPACE_ID, spaceMetadataMapper);
+
         spaces.thenApply(result -> {
             spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
             spaceMetadataById.clear();
@@ -71,8 +74,8 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                     spaceMetadataById.put(meta.getSpaceId(), meta);
                 }));
 
-        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes = space(VINDEX_SPACE_ID)
-                .select(query, options, indexMetadataMapper);
+        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes =
+                select(VINDEX_SPACE_ID, indexMetadataMapper);
         indexes.thenApply(result -> {
             indexMetadata.clear();
             return result;
@@ -87,6 +90,28 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                 initLatch.countDown();
             }
         });
+    }
+
+    private <T> CompletableFuture<TarantoolResult<T>> select(int spaceId,  ValueConverter<ArrayValue, T> resultMapper)
+            throws TarantoolClientException {
+        try {
+            TarantoolIndexQuery indexQuery = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
+                    .withIteratorType(TarantoolIteratorType.ITER_ALL);
+            TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
+
+            TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
+                    .withSpaceId(spaceId)
+                    .withIndexId(indexQuery.getIndexId())
+                    .withIteratorType(indexQuery.getIteratorType())
+                    .withKeyValues(indexQuery.getKeyValues())
+                    .withLimit(options.getLimit())
+                    .withOffset(options.getOffset())
+                    .build(config.getMessagePackMapper());
+
+            return connectionManager.getConnection().sendRequest(request, mapperFactory.withConverter(resultMapper));
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     private Map<Integer, TarantoolSpaceMetadata> getSpaceMetadataById() {

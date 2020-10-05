@@ -8,12 +8,12 @@ import java.util.Map;
  *
  * @author Sergey Volgin
  */
-public class CRUDTarantoolSpaceMetadataContainer {
+public class ProxyTarantoolSpaceMetadataContainer {
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new HashMap<>();
     private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
 
-    public CRUDTarantoolSpaceMetadataContainer() {
+    public ProxyTarantoolSpaceMetadataContainer() {
     }
 
     public Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {

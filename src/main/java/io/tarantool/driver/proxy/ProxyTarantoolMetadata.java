@@ -1,16 +1,15 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
-import io.tarantool.driver.metadata.CRUDTarantoolSpaceMetadataContainer;
-import io.tarantool.driver.metadata.CRUDTarantoolSpaceMetadataConverter;
+import io.tarantool.driver.metadata.ProxyTarantoolSpaceMetadataContainer;
+import io.tarantool.driver.metadata.ProxyTarantoolSpaceMetadataConverter;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -22,12 +21,11 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author Sergey Volgin
  */
-public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
+public class ProxyTarantoolMetadata implements TarantoolMetadataOperations {
 
     private final String getMetadataFunctionName;
     private final TarantoolClient client;
-    private final TarantoolResultMapperFactory resultMapperFactory;
-    private final CRUDTarantoolSpaceMetadataConverter metadataConverter;
+    private final ProxyTarantoolSpaceMetadataConverter metadataConverter;
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new ConcurrentHashMap<>();
     private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
@@ -35,21 +33,19 @@ public class CRUDTarantoolMetadata implements TarantoolMetadataOperations {
 
     private final CountDownLatch initLatch = new CountDownLatch(1);
 
-    public CRUDTarantoolMetadata(String getMetadataFunctionName,
-                                 TarantoolClient client) {
+    public ProxyTarantoolMetadata(String getMetadataFunctionName,
+                                  TarantoolClient client) {
         this.getMetadataFunctionName = getMetadataFunctionName;
         this.client = client;
-        this.resultMapperFactory = new TarantoolResultMapperFactory();
-        this.metadataConverter = new CRUDTarantoolSpaceMetadataConverter(client.getConfig().getMessagePackMapper());
+        this.metadataConverter = new ProxyTarantoolSpaceMetadataConverter(client.getConfig().getMessagePackMapper());
     }
 
     @Override
     public CompletableFuture<Void> refresh() throws TarantoolClientException {
 
-        CompletableFuture<List<CRUDTarantoolSpaceMetadataContainer>> callResult =
-                client.call(getMetadataFunctionName,
-                        resultMapperFactory.withProxyConverter(metadataConverter,
-                                CRUDTarantoolSpaceMetadataContainer.class));
+        CompletableFuture<TarantoolResult<ProxyTarantoolSpaceMetadataContainer>> callResult = client.call(
+                getMetadataFunctionName,
+                metadataConverter);
 
         return callResult.thenAccept(result -> {
             spaceMetadata.clear();

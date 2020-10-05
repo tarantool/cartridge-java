@@ -120,14 +120,21 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         if (!meta.isPresent()) {
             throw new TarantoolSpaceNotFoundException(spaceName);
         }
-        return new TarantoolSpace(meta.get().getSpaceId(), config, connectionManager(), metadata);
+
+        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata);
     }
 
     @Override
     public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 
-        return new TarantoolSpace(spaceId, config, connectionManager(), metadata());
+        TarantoolMetadataOperations metadata = this.metadata();
+        Optional<TarantoolSpaceMetadata> meta = metadata.getSpaceById(spaceId);
+        if (!meta.isPresent()) {
+            throw new TarantoolSpaceNotFoundException(spaceId);
+        }
+
+        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata());
     }
 
     @Override
@@ -306,5 +313,10 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public TarantoolConnectionListeners getListeners() {
+        return listeners;
     }
 }

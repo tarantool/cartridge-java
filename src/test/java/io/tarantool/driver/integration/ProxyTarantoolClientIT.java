@@ -1,6 +1,7 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.CRUDTarantoolClient;
+import io.tarantool.driver.ClusterTarantoolClient;
+import io.tarantool.driver.ProxyTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -50,11 +51,11 @@ import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
  * @author Sergey Volgin
  */
 @Testcontainers
-public class CRUDTarantoolClientIT {
+public class ProxyTarantoolClientIT {
 
     private static final Logger log = LoggerFactory.getLogger(ClusterDiscoveryIT.class);
 
-    private static CRUDTarantoolClient client;
+    private static ProxyTarantoolClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     public static String ROUTER_HOST;
@@ -107,7 +108,9 @@ public class CRUDTarantoolClientIT {
                 .withRequestTimeout(DEFAULT_TIMEOUT)
                 .build();
 
-        client = new CRUDTarantoolClient(config, getBinaryProvider(), RoundRobinStrategyFactory.INSTANCE);
+        ClusterTarantoolClient clusterClient =
+                new ClusterTarantoolClient(config, getBinaryProvider(), RoundRobinStrategyFactory.INSTANCE);
+        client = new ProxyTarantoolClient(clusterClient);
     }
 
     @Test
