@@ -1,5 +1,6 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;

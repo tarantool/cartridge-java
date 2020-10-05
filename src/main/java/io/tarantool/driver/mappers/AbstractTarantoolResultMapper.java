@@ -7,25 +7,19 @@ import org.msgpack.value.Value;
 import java.util.Optional;
 
 /**
- * Mapper from array of MessagePack tuples to TarantoolResult
- * @param <T> tuple target type
+ * Base class for TarantoolResult tuple mappers
  *
+ * @param <T> target tuple type
  * @author Alexey Kuzin
  */
-public class TarantoolResultMapper<T> implements MessagePackValueMapper {
+public abstract class AbstractTarantoolResultMapper<T> implements MessagePackValueMapper {
 
-    private MessagePackValueMapper valueMapper;
+    protected final MessagePackValueMapper valueMapper;
 
-    /**
-     * Basic constructor
-     * @param valueMapper value mapper to be used for tuple fields
-     * @param tupleConverter MessagePack entity to tuple converter
-     */
-    public TarantoolResultMapper(MessagePackValueMapper valueMapper,
-                                 ValueConverter<ArrayValue, T> tupleConverter) {
+    public AbstractTarantoolResultMapper(MessagePackValueMapper valueMapper,
+                                         ValueConverter<ArrayValue, TarantoolResultImpl> tarantoolResultConverter) {
         this.valueMapper = valueMapper;
-        valueMapper.registerValueConverter(ArrayValue.class, TarantoolResultImpl.class,
-                v -> new TarantoolResultImpl<>(v, tupleConverter));
+        valueMapper.registerValueConverter(ArrayValue.class, TarantoolResultImpl.class, tarantoolResultConverter);
     }
 
     @Override
@@ -39,7 +33,8 @@ public class TarantoolResultMapper<T> implements MessagePackValueMapper {
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass,
+    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+                                                            Class<O> objectClass,
                                                             ValueConverter<V, O> converter) {
         valueMapper.registerValueConverter(valueClass, objectClass, converter);
     }

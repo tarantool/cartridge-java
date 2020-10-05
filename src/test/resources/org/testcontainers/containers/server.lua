@@ -55,3 +55,7 @@ function user_function_return_long_string()
     end
     return s
 end
+
+function user_function_complex_query(year)
+    return s:pairs():filter(function(b) return b.year > year end):totable()
+end

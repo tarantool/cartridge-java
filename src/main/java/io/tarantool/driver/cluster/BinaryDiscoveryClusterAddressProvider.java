@@ -3,7 +3,7 @@ package io.tarantool.driver.cluster;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;

@@ -4,6 +4,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
@@ -11,14 +13,19 @@ import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
+import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
+import org.msgpack.value.ArrayValue;
 import org.springframework.util.Assert;
 
 import java.util.Collections;
@@ -42,6 +49,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     private final TarantoolConnectionListeners listeners;
     private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
+    private final TarantoolCallResultMapperFactory mapperFactory;
 
     /**
      * Create a client.
@@ -60,6 +68,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
      */
     protected AbstractTarantoolClient(TarantoolClientConfig config, TarantoolConnectionListeners listeners) {
         this.config = config;
+        this.mapperFactory = new TarantoolCallResultMapperFactory(config.getMessagePackMapper());
         this.eventLoopGroup = new NioEventLoopGroup();
         this.bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
@@ -141,22 +150,77 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public CompletableFuture<List<Object>> call(String functionName, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<Object>> call(String functionName,
+                                                List<Object> arguments,
+                                                MessagePackMapper mapper)
             throws TarantoolClientException {
-        return call(functionName, Collections.emptyList(), config.getMessagePackMapper());
+        try {
+            TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
+                    .withFunctionName(functionName);
+
+            if (arguments.size() > 0) {
+                builder.withArguments(arguments);
+            }
+
+            TarantoolCallRequest request = builder.build(mapper);
+            return connectionManager().getConnection().sendRequest(request, mapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
     }
 
     @Override
-    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
-                                               MessagePackValueMapper resultMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, Class<T> tupleClass)
             throws TarantoolClientException {
-        return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
+        return call(functionName, getConverter(tupleClass));
     }
 
     @Override
-    public <T> CompletableFuture<List<T>> call(String functionName, List<Object> arguments,
-                                               MessagePackObjectMapper argumentsMapper,
-                                               MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        return call(functionName, Collections.emptyList(), tupleMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          List<Object> arguments,
+                                                          Class<T> tupleClass)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper(), getConverter(tupleClass));
+    }
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          List<Object> arguments,
+                                                          ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        return call(functionName, arguments, config.getMessagePackMapper(), tupleMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          List<Object> arguments,
+                                                          MessagePackObjectMapper argumentsMapper,
+                                                          Class<T> tupleClass)
+            throws TarantoolClientException {
+        ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
+        return call(functionName, arguments, argumentsMapper, mapperFactory.withConverter(tupleClass, converter));
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          List<Object> arguments,
+                                                          MessagePackObjectMapper argumentsMapper,
+                                                          ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        return call(functionName, arguments, argumentsMapper, mapperFactory.withConverter(tupleMapper));
+    }
+
+    @Override
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
+                                                          List<Object> arguments,
+                                                          MessagePackObjectMapper argumentsMapper,
+                                                          TarantoolCallResultMapper<T> resultMapper) {
         try {
             TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
                     .withFunctionName(functionName);
@@ -172,6 +236,15 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
         }
     }
 
+    private <T> ValueConverter<ArrayValue, T> getConverter(Class<T> tupleClass) {
+        Optional<ValueConverter<ArrayValue, T>> converter =
+                config.getMessagePackMapper().getValueConverter(ArrayValue.class, tupleClass);
+        if (!converter.isPresent()) {
+            throw new TarantoolClientException("No ArrayValue converter for type " + tupleClass + " is present");
+        }
+        return converter.get();
+    }
+
     @Override
     public CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException {
         return eval(expression, Collections.emptyList());
@@ -184,23 +257,24 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public <T> CompletableFuture<List<T>> eval(String expression, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<Object>> eval(String expression, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         return eval(expression, Collections.emptyList(), resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<List<T>> eval(String expression,
-                                               List<Object> arguments,
-                                               MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<Object>> eval(String expression,
+                                                List<Object> arguments,
+                                                MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         return eval(expression, arguments, config.getMessagePackMapper(), resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<List<T>> eval(String expression, List<Object> arguments,
-                                               MessagePackObjectMapper argumentsMapper,
-                                               MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public CompletableFuture<List<Object>> eval(String expression,
+                                                List<Object> arguments,
+                                                MessagePackObjectMapper argumentsMapper,
+                                                MessagePackValueMapper resultMapper) throws TarantoolClientException {
         try {
             TarantoolEvalRequest request = new TarantoolEvalRequest.Builder()
                     .withExpression(expression)
