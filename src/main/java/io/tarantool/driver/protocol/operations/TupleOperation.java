@@ -17,5 +17,11 @@ public interface TupleOperation extends Packable {
 
     String getFieldName();
 
+    Object getValue();
+
     void setFieldIndex(Integer fieldIndex);
+
+    Boolean isProxyOperation();
+
+    TupleOperation toProxyTupleOperation();
 }

@@ -13,7 +13,8 @@ import java.util.Optional;
  * @author Alexey Kuzin
  */
 public class TarantoolIndexQueryFactory {
-    private TarantoolMetadataOperations metadataOperations;
+
+    private final TarantoolMetadataOperations metadataOperations;
 
     /**
      * Basic constructor.
@@ -39,9 +40,26 @@ public class TarantoolIndexQueryFactory {
      * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool server
      */
     public TarantoolIndexQuery byName(int spaceId, String indexName) throws TarantoolClientException {
-        Optional<TarantoolIndexMetadata> meta = metadataOperations.getIndexForName(spaceId, indexName);
+        Optional<TarantoolIndexMetadata> meta = metadataOperations.getIndexByName(spaceId, indexName);
         if (!meta.isPresent()) {
             throw new TarantoolIndexNotFoundException(spaceId, indexName);
+        }
+        return new TarantoolIndexQuery(meta.get().getIndexId());
+    }
+
+    /**
+     * Create a query for index by its name
+     *
+     * @param spaceName name of Tarantool space
+     * @param indexName the index name
+     * @return new {@link TarantoolIndexQuery} instance
+     * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool cluster
+     */
+    public TarantoolIndexQuery byId(String spaceName, String indexName)
+            throws TarantoolClientException {
+        Optional<TarantoolIndexMetadata> meta = metadataOperations.getIndexByName(spaceName, indexName);
+        if (!meta.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceName, indexName);
         }
         return new TarantoolIndexQuery(meta.get().getIndexId());
     }

@@ -18,6 +18,22 @@ public class TupleOperationDelete extends TupleUpdateOperation {
         checkValue(value);
     }
 
+    private TupleOperationDelete(TarantoolUpdateOperationType operationType, Integer fieldIndex,
+                                 String fieldName, Object value, boolean isProxyOperation) {
+        super(operationType, fieldIndex, fieldName, value, isProxyOperation);
+    }
+
+    @Override
+    public TupleOperation toProxyTupleOperation() {
+        return new TupleOperationDelete(
+                this.getOperationType(),
+                this.getFieldNumber(),
+                this.getFieldName(),
+                this.getValue(),
+                true
+        );
+    }
+
     private void checkValue(int value) {
         if (value <= 0) {
             throw new IllegalArgumentException("The number of fields to remove must be greater than zero");

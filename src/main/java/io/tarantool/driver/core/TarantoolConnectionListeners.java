@@ -21,6 +21,7 @@ public class TarantoolConnectionListeners {
 
     /**
      * Allows to add several listeners right on instantiation.
+     *
      * @param tarantoolConnectionListeners connection listeners
      */
     public TarantoolConnectionListeners(List<TarantoolConnectionListener> tarantoolConnectionListeners) {
@@ -30,6 +31,7 @@ public class TarantoolConnectionListeners {
 
     /**
      * Add a single {@link TarantoolConnectionListener} to collection
+     *
      * @param listener connection listener
      * @return this instance
      */
@@ -40,6 +42,7 @@ public class TarantoolConnectionListeners {
 
     /**
      * Returns all listeners previously added to the collection
+     *
      * @return a copy of the listeners collection
      */
     public List<TarantoolConnectionListener> all() {
@@ -47,7 +50,18 @@ public class TarantoolConnectionListeners {
     }
 
     /**
+     * Remove all previously added listeners, leaving the collection empty
+     *
+     * @return this instance
+     */
+    public TarantoolConnectionListeners clear() {
+        listeners.clear();
+        return this;
+    }
+
+    /**
      * Construct a collection from an enumeration of {@link TarantoolConnectionListener}
+     *
      * @param listeners connection listeners
      * @return new {@link TarantoolConnectionListeners} instance
      */

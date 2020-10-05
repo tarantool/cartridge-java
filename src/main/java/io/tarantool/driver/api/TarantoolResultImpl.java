@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 /**
  * Basic TarantoolResult implementation
- * @param <T> target result tuple type
  *
+ * @param <T> target result tuple type
  * @author Alexey Kuzin
  */
 public class TarantoolResultImpl<T> implements TarantoolResult<T> {
@@ -82,7 +82,7 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return  this.tuples.removeAll(c);
+        return this.tuples.removeAll(c);
     }
 
     @Override

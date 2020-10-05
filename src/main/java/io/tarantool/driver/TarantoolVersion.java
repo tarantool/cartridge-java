@@ -9,6 +9,7 @@ import java.util.Objects;
  * @author Alexey Kuzin
  */
 public class TarantoolVersion implements Serializable {
+    private static final long serialVersionUID = 87703595811996764L;
     private final String fullVersion;
 
     /**

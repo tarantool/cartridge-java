@@ -1,5 +1,6 @@
 package io.tarantool.driver.protocol.requests;
 
+import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
@@ -79,6 +80,10 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
             }
             if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode())) {
                 throw new TarantoolProtocolException("Index ID must be specified in the delete request");
+            }
+            if ((Integer) bodyMap.get(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode())
+                    != TarantoolIndexQuery.PRIMARY) {
+                throw new TarantoolProtocolException("A delete request can only be executed for the primary key");
             }
             if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_KEY.getCode())) {
                 throw new TarantoolProtocolException("Key values must be specified in the delete request");

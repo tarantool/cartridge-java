@@ -55,15 +55,6 @@ public interface TarantoolSpaceOperations {
     CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple) throws TarantoolClientException;
 
     /**
-     * Insert a tuple into the space or replace an existing one.
-     *
-     * @param tuple new data
-     * @return a future that will contain all corresponding tuples once completed
-     * @throws TarantoolClientException in case if request failed
-     */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
-
-    /**
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
      *
      * @param tuple new data
@@ -75,6 +66,16 @@ public interface TarantoolSpaceOperations {
      */
     <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
+
+    /**
+     * Insert a tuple into the space or replace an existing one.
+     *
+     * @param tuple new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
+
     /**
      * Insert a tuple into the space or replace an existing one.
      *
@@ -136,6 +137,19 @@ public interface TarantoolSpaceOperations {
     CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
                                                               TarantoolSelectOptions options)
             throws TarantoolClientException;
+
+    /**
+     * Select tuples matching the specified index query.
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @param options query options such as offset and limit
+     * @param tupleCLass target tuple class
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed or value converter not found
+     */
+    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                     TarantoolSelectOptions options,
+                                                     Class<T> tupleCLass) throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified index query.

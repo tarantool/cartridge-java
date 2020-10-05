@@ -14,12 +14,16 @@ import java.util.Optional;
  */
 public final class TupleOperations {
 
-    private List<TupleOperation> operations;
+    private final List<TupleOperation> operations = new ArrayList<>();
+    private final List<TupleOperation> proxyOperations = new ArrayList<>();;
 
     private TupleOperations(TupleOperation operation) {
-        this.operations = new ArrayList<TupleOperation>() {{
-            add(operation);
-        }};
+        addOperationToList(operation);
+    }
+
+    private void addOperationToList(TupleOperation operation) {
+        this.operations.add(operation);
+        this.proxyOperations.add(operation.toProxyTupleOperation());
     }
 
     /**
@@ -44,7 +48,7 @@ public final class TupleOperations {
                     filedIndex != null ? filedIndex : fieldName);
         }
 
-        this.operations.add(operation);
+        addOperationToList(operation);
         return this;
     }
 
@@ -58,10 +62,20 @@ public final class TupleOperations {
     }
 
     /**
+     * Get a list of operations by converting field indexes starts with 0
+     * to position numbers starts with 1 for working with lua box.space API
+     *
+     * @return list of operations
+     */
+    public List<TupleOperation> asProxyOperationList() {
+        return proxyOperations;
+    }
+
+    /**
      * Adds the specified value to the field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value increment
+     * @param value      increment
      * @return new instance
      */
     public static TupleOperations add(int fieldIndex, Number value) {
@@ -72,7 +86,7 @@ public final class TupleOperations {
      * Adds the specified value to the field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value increment
+     * @param value      increment
      * @return this
      */
     public TupleOperations andAdd(int fieldIndex, Number value) {
@@ -83,7 +97,7 @@ public final class TupleOperations {
      * Adds the specified value to the field value
      *
      * @param fieldName field name
-     * @param value increment
+     * @param value     increment
      * @return new instance
      */
     public static TupleOperations add(String fieldName, Number value) {
@@ -94,7 +108,7 @@ public final class TupleOperations {
      * Adds the specified value to the field value
      *
      * @param fieldName field name
-     * @param value increment
+     * @param value     increment
      * @return this
      */
     public TupleOperations andAdd(String fieldName, Number value) {
@@ -105,7 +119,7 @@ public final class TupleOperations {
      * Bitwise AND(&amp;) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return new instance
      */
     public static TupleOperations bitwiseAnd(int fieldIndex, long value) {
@@ -116,7 +130,7 @@ public final class TupleOperations {
      * Bitwise AND(&amp;) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return this
      */
     public TupleOperations andBitwiseAnd(int fieldIndex, long value) {
@@ -127,7 +141,7 @@ public final class TupleOperations {
      * Bitwise AND(&amp;) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return new instance
      */
     public static TupleOperations bitwiseAnd(String fieldName, long value) {
@@ -138,7 +152,7 @@ public final class TupleOperations {
      * Bitwise AND(&amp;) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return this
      */
     public TupleOperations andBitwiseAnd(String fieldName, long value) {
@@ -149,7 +163,7 @@ public final class TupleOperations {
      * Bitwise OR(|) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return new instance
      */
     public static TupleOperations bitwiseOr(int fieldIndex, long value) {
@@ -160,7 +174,7 @@ public final class TupleOperations {
      * Bitwise OR(|) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return this
      */
     public TupleOperations andBitwiseOr(int fieldIndex, long value) {
@@ -171,7 +185,7 @@ public final class TupleOperations {
      * Bitwise OR(|) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return new instance
      */
     public static TupleOperations bitwiseOr(String fieldName, long value) {
@@ -182,7 +196,7 @@ public final class TupleOperations {
      * Bitwise OR(|) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return this
      */
     public TupleOperations andBitwiseOr(String fieldName, long value) {
@@ -193,7 +207,7 @@ public final class TupleOperations {
      * Bitwise XOR(^) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return new instance
      */
     public static TupleOperations bitwiseXor(int fieldIndex, long value) {
@@ -204,7 +218,7 @@ public final class TupleOperations {
      * Bitwise XOR(^) operation
      *
      * @param fieldIndex field number starting with 0
-     * @param value value
+     * @param value      value
      * @return this
      */
     public TupleOperations andBitwiseXor(int fieldIndex, long value) {
@@ -215,7 +229,7 @@ public final class TupleOperations {
      * Bitwise XOR(^) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return new instance
      */
     public static TupleOperations bitwiseXor(String fieldName, long value) {
@@ -226,7 +240,7 @@ public final class TupleOperations {
      * Bitwise XOR(^) operation
      *
      * @param fieldName field name
-     * @param value value
+     * @param value     value
      * @return this
      */
     public TupleOperations andBitwiseXor(String fieldName, long value) {
@@ -236,7 +250,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldIndex start field number starting with 0 to start with
+     * @param fieldIndex  start field number starting with 0 to start with
      * @param fieldsCount the number of fields to remove
      * @return new instance
      */
@@ -247,7 +261,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldIndex start field number starting with 0 to start with
+     * @param fieldIndex  start field number starting with 0 to start with
      * @param fieldsCount the number of fields to remove
      * @return this
      */
@@ -258,7 +272,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldName field name to start with
+     * @param fieldName   field name to start with
      * @param fieldsCount the number of fields to remove
      * @return new instance
      */
@@ -269,7 +283,7 @@ public final class TupleOperations {
     /**
      * Remove field value
      *
-     * @param fieldName field name to start with
+     * @param fieldName   field name to start with
      * @param fieldsCount the number of fields to remove
      * @return this
      */
@@ -281,7 +295,7 @@ public final class TupleOperations {
      * Insert field value
      *
      * @param fieldIndex field number starting with 0 to insert after
-     * @param value the value to insert
+     * @param value      the value to insert
      * @return new instance
      */
     public static TupleOperations insert(int fieldIndex, Object value) {
@@ -292,7 +306,7 @@ public final class TupleOperations {
      * Insert field value
      *
      * @param fieldIndex field number starting with 0 to insert after
-     * @param value the value to insert
+     * @param value      the value to insert
      * @return this
      */
     public TupleOperations andInsert(int fieldIndex, Object value) {
@@ -303,7 +317,7 @@ public final class TupleOperations {
      * Insert field value
      *
      * @param fieldName field name to insert after
-     * @param value the value to insert
+     * @param value     the value to insert
      * @return new instance
      */
     public static TupleOperations insert(String fieldName, Object value) {
@@ -314,7 +328,7 @@ public final class TupleOperations {
      * Insert field value
      *
      * @param fieldName field name to insert after
-     * @param value the value to insert
+     * @param value     the value to insert
      * @return this
      */
     public TupleOperations andInsert(String fieldName, Object value) {
@@ -325,7 +339,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value the new value of a field
+     * @param value      the new value of a field
      * @return new instance
      */
     public static TupleOperations set(int fieldIndex, Object value) {
@@ -336,7 +350,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value the new value of a field
+     * @param value      the new value of a field
      * @return this
      */
     public TupleOperations andSet(int fieldIndex, Object value) {
@@ -347,7 +361,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldName field name
-     * @param value the new value of a field
+     * @param value     the new value of a field
      * @return new instance
      */
     public static TupleOperations set(String fieldName, Object value) {
@@ -358,7 +372,7 @@ public final class TupleOperations {
      * Set field value
      *
      * @param fieldName field name
-     * @param value the new value of a field
+     * @param value     the new value of a field
      * @return this
      */
     public TupleOperations andSet(String fieldName, Object value) {
@@ -368,9 +382,9 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldIndex field number starting with 0
-     * @param position the start'th position
-     * @param offset length of substring
+     * @param fieldIndex  field number starting with 0
+     * @param position    the start'th position
+     * @param offset      length of substring
      * @param replacement new value
      * @return new instance
      */
@@ -381,9 +395,9 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldIndex field number starting with 0
-     * @param position the start'th position
-     * @param offset length of substring
+     * @param fieldIndex  field number starting with 0
+     * @param position    the start'th position
+     * @param offset      length of substring
      * @param replacement new value
      * @return this
      */
@@ -394,9 +408,9 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldName field name
-     * @param position the start'th position
-     * @param offset length of substring
+     * @param fieldName   field name
+     * @param position    the start'th position
+     * @param offset      length of substring
      * @param replacement new value
      * @return new instance
      */
@@ -407,9 +421,9 @@ public final class TupleOperations {
     /**
      * Replace substring
      *
-     * @param fieldName field name
-     * @param position the start'th position
-     * @param offset length of substring
+     * @param fieldName   field name
+     * @param position    the start'th position
+     * @param offset      length of substring
      * @param replacement new value
      * @return this
      */
@@ -421,7 +435,7 @@ public final class TupleOperations {
      * Subtracts the specified value to the field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value increment
+     * @param value      increment
      * @return this
      */
     public static TupleOperations subtract(int fieldIndex, Number value) {
@@ -432,7 +446,7 @@ public final class TupleOperations {
      * Subtracts the specified value to the field value
      *
      * @param fieldIndex field number starting with 0
-     * @param value increment
+     * @param value      increment
      * @return this
      */
     public TupleOperations andSubtract(int fieldIndex, Number value) {
@@ -443,7 +457,7 @@ public final class TupleOperations {
      * Subtracts the specified value to the field value
      *
      * @param fieldName field name
-     * @param value increment
+     * @param value     increment
      * @return this
      */
     public static TupleOperations subtract(String fieldName, Number value) {
@@ -454,7 +468,7 @@ public final class TupleOperations {
      * Subtracts the specified value to the field value
      *
      * @param fieldName field name
-     * @param value increment
+     * @param value     increment
      * @return this
      */
     public TupleOperations andSubtract(String fieldName, Number value) {

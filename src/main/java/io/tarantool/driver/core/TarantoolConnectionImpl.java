@@ -1,15 +1,12 @@
 package io.tarantool.driver.core;
 
 import io.netty.channel.Channel;
-import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

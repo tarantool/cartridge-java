@@ -15,4 +15,20 @@ public class TupleOperationAdd extends TupleUpdateOperation {
     public TupleOperationAdd(String fieldName, Number value) {
         super(TarantoolUpdateOperationType.ADD, fieldName, value);
     }
+
+    private TupleOperationAdd(TarantoolUpdateOperationType operationType, Integer fieldIndex,
+                             String fieldName, Object value, boolean isProxyOperation) {
+        super(operationType, fieldIndex, fieldName, value, isProxyOperation);
+    }
+
+    @Override
+    public TupleOperation toProxyTupleOperation() {
+        return new TupleOperationAdd(
+                this.getOperationType(),
+                this.getFieldNumber(),
+                this.getFieldName(),
+                this.getValue(),
+                true
+        );
+    }
 }

@@ -18,6 +18,22 @@ public class TupleOperationBitwiseOr extends TupleUpdateOperation {
         checkValue(value);
     }
 
+    private TupleOperationBitwiseOr(TarantoolUpdateOperationType operationType, Integer fieldIndex,
+                                    String fieldName, Object value, boolean isProxyOperation) {
+        super(operationType, fieldIndex, fieldName, value, isProxyOperation);
+    }
+
+    @Override
+    public TupleOperation toProxyTupleOperation() {
+        return new TupleOperationBitwiseOr(
+                this.getOperationType(),
+                this.getFieldNumber(),
+                this.getFieldName(),
+                this.getValue(),
+                true
+        );
+    }
+
     private void checkValue(long value) {
         if (value < 0) {
             throw new IllegalArgumentException("Bitwise operations can be performed only with values >= 0");

@@ -21,6 +21,7 @@ public class TarantoolFunctionCallException extends TarantoolException {
     private String stacktrace;
 
     public TarantoolFunctionCallException(String errorMessage) {
+        super(errorMessage);
         this.errorMessage = errorMessage;
     }
 

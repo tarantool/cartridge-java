@@ -36,7 +36,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private final TarantoolClientConfig config;
     private final TarantoolConnectionFactory connectionFactory;
-    private ConnectionSelectionStrategyFactory selectStrategyFactory;
+    private final ConnectionSelectionStrategyFactory selectStrategyFactory;
     private final TarantoolConnectionListeners connectionListeners;
     private final AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> connectionRegistry =
             new AtomicReference<>(new HashMap<>());

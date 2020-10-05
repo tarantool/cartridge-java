@@ -55,7 +55,7 @@ public class TarantoolRequest {
      * Encode incapsulated data using {@link MessagePacker}
      * @param packer configured {@link MessagePacker}
      * @param mapper object-to-entity mapper
-     * @throws Exception if encoding failed
+     * @throws TarantoolDecoderException if encoding failed
      */
     public void toMessagePack(MessagePacker packer, MessagePackObjectMapper mapper)
             throws TarantoolDecoderException {
