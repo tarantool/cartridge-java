@@ -3,7 +3,6 @@ package io.tarantool.driver.proxy;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,18 +18,17 @@ public final class CRUDOperationOptions {
     public static final String TUPLES_TO_MAP = "tuples_tomap";
 
     public static final String SELECT_LIMIT = "limit";
-    public static final String SELECT_ALTER = "alter";
+    public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
 
-    private Integer timeout;
-    private Boolean tuplesAsMap;
+    private final Integer timeout;
+    private final Boolean tuplesAsMap;
 
-    private Long selectLimit;
-    private Long selectBatchSize;
-    private TarantoolTuple alter;
+    private final Long selectLimit;
+    private final Long selectBatchSize;
+    private final TarantoolTuple alter;
 
-    private CRUDOperationOptions() {
-    }
+    private final Map<String, Object> resultMap = new HashMap<>(5, 1);
 
     private CRUDOperationOptions(Builder builder) {
         this.timeout = builder.timeout;
@@ -39,6 +37,7 @@ public final class CRUDOperationOptions {
         this.selectLimit = builder.selectLimit;
         this.alter = builder.alter;
         this.selectBatchSize = builder.selectBatchSize;
+        initResultMap();
     }
 
     /**
@@ -91,29 +90,29 @@ public final class CRUDOperationOptions {
         }
     }
 
-    public Map<String, Object> asMap() {
-        Map<String, Object> result = new HashMap<>();
-
+    private void initResultMap() {
         if (timeout != null) {
-            result.put(TIME_OUT, timeout);
+            resultMap.put(TIME_OUT, timeout);
         }
 
         if (tuplesAsMap != null) {
-            result.put(TUPLES_TO_MAP, tuplesAsMap);
+            resultMap.put(TUPLES_TO_MAP, tuplesAsMap);
         }
 
         if (selectLimit != null) {
-            result.put(SELECT_LIMIT, selectLimit);
+            resultMap.put(SELECT_LIMIT, selectLimit);
         }
 
         if (alter != null) {
-            result.put(SELECT_ALTER, alter);
+            resultMap.put(SELECT_AFTER, alter);
         }
 
         if (selectBatchSize != null) {
-            result.put(SELECT_BATCH_SIZE, selectBatchSize);
+            resultMap.put(SELECT_BATCH_SIZE, selectBatchSize);
         }
+    }
 
-        return result;
+    public Map<String, Object> asMap() {
+        return resultMap;
     }
 }

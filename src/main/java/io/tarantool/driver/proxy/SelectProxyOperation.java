@@ -2,18 +2,12 @@ package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.protocol.operations.TupleOperation;
-import io.tarantool.driver.protocol.operations.TupleOperationAdd;
-import io.tarantool.driver.protocol.operations.TupleOperationSet;
 import org.msgpack.value.ArrayValue;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
@@ -32,7 +26,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         private TarantoolClient client;
         private String spaceName;
         private String functionName;
-        private TarantoolIndexQuery indexQuery;
+        private List<?> selectArguments;
         private ValueConverter<ArrayValue, T> tupleMapper;
         private TarantoolSelectOptions options;
 
@@ -54,8 +48,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withIndexQuery(TarantoolIndexQuery indexQuery) {
-            this.indexQuery = indexQuery;
+        public Builder<T> withSelectArguments(List<?> selectArguments) {
+            this.selectArguments = selectArguments;
             return this;
         }
 
@@ -73,7 +67,6 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             Assert.notNull(client, "Tarantool client should not be null");
             Assert.notNull(spaceName, "Tarantool spaceName should not be null");
             Assert.notNull(functionName, "Proxy delete function name should not be null");
-            Assert.notNull(indexQuery, "Tarantool indexQuery should not be null");
             Assert.notNull(tupleMapper, "Tuple mapper should not be null");
 
             TarantoolClientConfig config = client.getConfig();
@@ -85,16 +78,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withSelectLimit(options.getLimit())
                     .build();
 
-            //options.getOffset() getIterator() TODO: warning / exception
-            //indexQuery.getKeyValues()  TODO:
-
-//            List<TupleOperation> operations = new ArrayList<>();
-//
-//            switch (indexQuery.getIteratorType()) {
-//                case ITER_EQ: operations.add(new TupleOperationSet(fieldIndex, value));
-//            }
-
-            List<Object> arguments = Arrays.asList(spaceName, Collections.emptyList(), requestOptions.asMap());
+            List<Object> arguments = Arrays.asList(spaceName, selectArguments, requestOptions.asMap());
 
             return new SelectProxyOperation<T>(this.client, this.functionName, arguments, this.tupleMapper);
         }

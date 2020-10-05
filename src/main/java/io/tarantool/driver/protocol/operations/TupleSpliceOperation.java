@@ -27,6 +27,27 @@ public class TupleSpliceOperation extends TupleUpdateOperation {
         this.offset = offset;
     }
 
+    private TupleSpliceOperation(TarantoolUpdateOperationType operationType, Integer fieldIndex,
+                                 String fieldName, Object value, int position, int offset,
+                                 boolean isProxyOperation) {
+        super(operationType, fieldIndex, fieldName, value, isProxyOperation);
+        this.position = position;
+        this.offset = offset;
+    }
+
+    @Override
+    public TupleOperation toProxyTupleOperation() {
+        return new TupleSpliceOperation(
+                this.getOperationType(),
+                this.getFieldNumber(),
+                this.getFieldName(),
+                this.getValue(),
+                this.getPosition(),
+                this.getOffset(),
+                true
+        );
+    }
+
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(Arrays.asList(

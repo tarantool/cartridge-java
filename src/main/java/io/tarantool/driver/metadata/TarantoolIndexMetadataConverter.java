@@ -23,7 +23,7 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
     private static final ImmutableStringValue INDEX_FIELD_KEY = new ImmutableStringValueImpl("field");
     private static final ImmutableStringValue INDEX_TYPE_KEY = new ImmutableStringValueImpl("type");
 
-    private MessagePackValueMapper mapper;
+    private final MessagePackValueMapper mapper;
 
     public TarantoolIndexMetadataConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;
@@ -48,7 +48,9 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
 
         List<TarantoolIndexPartMetadata> indexParts = new ArrayList<>();
 
-        //ADD comments
+        //There are two index formats:
+        // as array: [[0, 'unsigned'], [3, 'string'],...]
+        // as map: [{'field' : 0, 'type' : 'unsigned'}, {'field' : 3, 'type' : 'string'}, ...]
         if (indexPartsValue.size() > 0) {
             if (indexPartsValue.get(0).isArrayValue()) {
                 indexParts = indexPartsValue.list().stream()

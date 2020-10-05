@@ -4,11 +4,8 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
-import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.proxy.CRUDOperationOptions;
 import org.junit.jupiter.api.Test;
-import org.msgpack.value.ArrayValue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +45,6 @@ public class CRUDOperationOptionsTest {
         assertTrue((Boolean) options.asMap().get(CRUDOperationOptions.TUPLES_TO_MAP));
         assertEquals(50L, options.asMap().get(CRUDOperationOptions.SELECT_LIMIT));
         assertEquals(10L, options.asMap().get(CRUDOperationOptions.SELECT_BATCH_SIZE));
-        assertEquals(tuple, options.asMap().get(CRUDOperationOptions.SELECT_ALTER));
+        assertEquals(tuple, options.asMap().get(CRUDOperationOptions.SELECT_AFTER));
     }
 }

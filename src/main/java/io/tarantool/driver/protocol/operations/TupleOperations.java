@@ -6,7 +6,6 @@ import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Create list of {@link TupleOperation} for update and upsert requests
@@ -15,12 +14,16 @@ import java.util.stream.Collectors;
  */
 public final class TupleOperations {
 
-    private List<TupleOperation> operations;
+    private final List<TupleOperation> operations = new ArrayList<>();
+    private final List<TupleOperation> proxyOperations = new ArrayList<>();;
 
     private TupleOperations(TupleOperation operation) {
-        this.operations = new ArrayList<TupleOperation>() {{
-            add(operation);
-        }};
+        addOperationToList(operation);
+    }
+
+    private void addOperationToList(TupleOperation operation) {
+        this.operations.add(operation);
+        this.proxyOperations.add(operation.toProxyTupleOperation());
     }
 
     /**
@@ -45,7 +48,7 @@ public final class TupleOperations {
                     filedIndex != null ? filedIndex : fieldName);
         }
 
-        this.operations.add(operation);
+        addOperationToList(operation);
         return this;
     }
 
@@ -59,16 +62,13 @@ public final class TupleOperations {
     }
 
     /**
-     * Get a list of operations by converting field indexes starts with 0 to position numbers starts with 1
+     * Get a list of operations by converting field indexes starts with 0
+     * to position numbers starts with 1 for working with lua box.space API
      *
      * @return list of operations
      */
-    public List<TupleOperation> asListByPositionNumber() {
-        return operations.stream().peek(o -> {
-            if (o.getFieldIndex() != null) {
-                o.setFieldIndex(o.getFieldIndex() + 1);
-            }
-        }).collect(Collectors.toList());
+    public List<TupleOperation> asProxyOperationList() {
+        return proxyOperations;
     }
 
     /**

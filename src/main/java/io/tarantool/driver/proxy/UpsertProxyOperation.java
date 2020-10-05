@@ -81,7 +81,7 @@ public final class UpsertProxyOperation<T> extends AbstractProxyOperation<T> {
 
             List<Object> arguments = Arrays.asList(spaceName,
                     tuple.getFields(),
-                    operations.asListByPositionNumber(),
+                    operations.asProxyOperationList(),
                     options.asMap());
 
             return new UpsertProxyOperation<T>(this.client, this.functionName, arguments, this.tupleMapper);

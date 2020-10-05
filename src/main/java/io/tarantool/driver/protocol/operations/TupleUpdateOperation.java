@@ -17,6 +17,7 @@ import java.util.Objects;
  */
 abstract class TupleUpdateOperation implements TupleOperation {
 
+    protected final boolean isProxyOperation;
     protected final TarantoolUpdateOperationType operationType;
     protected Integer fieldIndex;
     protected String fieldName;
@@ -26,13 +27,11 @@ abstract class TupleUpdateOperation implements TupleOperation {
      * Create instance
      *
      * @param operationType operation type
-     * @param fieldIndex field number starting with 0
+     * @param fieldIndex field index starting with 0
      * @param value operation value
      */
     TupleUpdateOperation(TarantoolUpdateOperationType operationType, int fieldIndex, Object value) {
-        this.operationType = operationType;
-        this.fieldIndex = fieldIndex;
-        this.value = value;
+        this(operationType, fieldIndex, null, value, false);
     }
 
     /**
@@ -43,10 +42,20 @@ abstract class TupleUpdateOperation implements TupleOperation {
      * @param value operation value
      */
     TupleUpdateOperation(TarantoolUpdateOperationType operationType, String fieldName, Object value) {
-        if (StringUtils.isEmpty(fieldName)) {
+        this(operationType, null, fieldName, value, false);
+    }
+
+    TupleUpdateOperation(TarantoolUpdateOperationType operationType,
+                                   Integer fieldIndex,
+                                   String fieldName,
+                                   Object value,
+                                   boolean isProxyOperation) {
+        if (fieldIndex == null && StringUtils.isEmpty(fieldName)) {
             throw new IllegalArgumentException("Field name must be not empty");
         }
+        this.isProxyOperation = isProxyOperation;
         this.operationType = operationType;
+        this.fieldIndex = fieldIndex;
         this.fieldName = fieldName;
         this.value = value;
     }
@@ -77,8 +86,26 @@ abstract class TupleUpdateOperation implements TupleOperation {
         return fieldName;
     }
 
+    @Override
     public Object getValue() {
         return value;
+    }
+
+    @Override
+    public Boolean isProxyOperation() {
+        return isProxyOperation;
+    }
+
+    /**
+     * Convert field index to field number
+     *
+     * @return field number started from 1
+     */
+    protected Integer getFieldNumber() {
+        if (this.getFieldIndex() == null) {
+            return null;
+        }
+        return this.isProxyOperation() ? this.getFieldIndex() : this.getFieldIndex() + 1;
     }
 
     @Override

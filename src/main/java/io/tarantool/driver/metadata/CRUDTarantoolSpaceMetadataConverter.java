@@ -56,21 +56,21 @@ public class CRUDTarantoolSpaceMetadataConverter
         String spaceName = mapper.fromValue(spacesMap.get(SPACE_NAME_KEY).asStringValue());
         int spaceId = mapper.fromValue(spacesMap.get(SPACE_ID_KEY).asIntegerValue());
 
-        TarantoolSpaceMetadata metadata = new TarantoolSpaceMetadata();
-        metadata.setSpaceId(spaceId);
-        metadata.setOwnerId(ID_UNKNOWN);
-        metadata.setSpaceName(spaceName);
+        TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
+        spaceMetadata.setSpaceId(spaceId);
+        spaceMetadata.setOwnerId(ID_UNKNOWN);
+        spaceMetadata.setSpaceName(spaceName);
 
         List<Value> spaceFormat = spacesMap.get(SPACE_FORMAT_KEY).asArrayValue().list();
-        metadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
+        spaceMetadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
 
         Value indexesValue = spacesMap.get(SPACE_INDEX_KEY);
         if (indexesValue.isMapValue() && indexesValue.asMapValue().size() > 0) {
             Map<Value, Value> indexes = indexesValue.asMapValue().map();
-            proxyMetadata.addIndexes(metadata.getSpaceName(), parseIndexes(indexes));
+            proxyMetadata.addIndexes(spaceMetadata.getSpaceName(), parseIndexes(indexes));
         }
 
-        proxyMetadata.addSpace(metadata);
+        proxyMetadata.addSpace(spaceMetadata);
 
         return proxyMetadata;
     }
@@ -96,7 +96,6 @@ public class CRUDTarantoolSpaceMetadataConverter
     }
 
     private Map<String, TarantoolIndexMetadata> parseIndexes(Map<Value, Value> indexes) {
-
         Map<String, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
 
         for (Map.Entry<Value, Value> indexValueMetadata : indexes.entrySet()) {

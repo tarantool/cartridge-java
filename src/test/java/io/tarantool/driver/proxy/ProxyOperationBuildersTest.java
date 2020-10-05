@@ -129,13 +129,15 @@ public class ProxyOperationBuildersTest {
         ValueConverter<ArrayValue, TarantoolTuple> valueConverter =
                 mapperFactory.getDefaultTupleValueConverter(defaultMapper);
 
+        List<?> selectArguments = Collections.singletonList(Arrays.asList("=", "id", 55));
+
         TarantoolSelectOptions selectOptions = new TarantoolSelectOptions.Builder().withLimit(100).build();
 
         SelectProxyOperation<TarantoolTuple> op = new SelectProxyOperation.Builder<TarantoolTuple>()
                 .withClient(client)
                 .withSpaceName("space1")
                 .withFunctionName("function1")
-                .withIndexQuery(indexQuery)
+                .withSelectArguments(selectArguments)
                 .withSelectOptions(selectOptions)
                 .withValueConverter(valueConverter)
                 .build();
@@ -150,7 +152,7 @@ public class ProxyOperationBuildersTest {
         assertEquals("function1", op.getFunctionName());
         assertEquals(3, op.getArguments().size());
         assertEquals("space1", op.getArguments().get(0));
-        assertEquals(Collections.emptyList(), op.getArguments().get(1));
+        assertEquals(selectArguments, op.getArguments().get(1));
         assertEquals(options, op.getArguments().get(2));
         assertEquals(valueConverter, op.getTupleMapper());
     }

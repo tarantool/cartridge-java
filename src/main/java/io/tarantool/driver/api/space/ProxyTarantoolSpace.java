@@ -7,6 +7,8 @@ import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.proxy.CRUDOperationsMappingConfig;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.TarantoolResultMapperFactory;
@@ -17,12 +19,15 @@ import io.tarantool.driver.protocol.operations.TupleOperations;
 import io.tarantool.driver.proxy.DeleteProxyOperation;
 import io.tarantool.driver.proxy.InsertProxyOperation;
 import io.tarantool.driver.proxy.ProxyOperation;
+import io.tarantool.driver.proxy.ProxySelectArgumentsConverter;
 import io.tarantool.driver.proxy.ReplaceProxyOperation;
 import io.tarantool.driver.proxy.SelectProxyOperation;
 import io.tarantool.driver.proxy.UpdateProxyOperation;
 import io.tarantool.driver.proxy.UpsertProxyOperation;
 import org.msgpack.value.ArrayValue;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,6 +39,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     private final String spaceName;
     private final TarantoolClient client;
     private final TarantoolClientConfig config;
+    private final TarantoolMetadataOperations operations;
     private final TarantoolIndexQueryFactory indexQueryFactory;
     private final CRUDOperationsMappingConfig operationsMappingConfig;
 
@@ -48,6 +54,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         this.config = client.getConfig();
         this.tarantoolResultMapperFactory = new TarantoolResultMapperFactory();
         //this.tarantoolResultMapperFactory.withConverter(getDefaultTarantoolTupleValueConverter());
+        this.operations = operations;
         this.indexQueryFactory = new TarantoolIndexQueryFactory(operations);
         this.operationsMappingConfig = operationsMappingConfig;
     }
@@ -161,11 +168,29 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                             TarantoolSelectOptions options,
                                                             ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
+
+        List<?> selectArguments = Collections.EMPTY_LIST;
+        if (!indexQuery.getKeyValues().isEmpty()) {
+            Optional<TarantoolSpaceMetadata> spaceMetadata = operations.getSpaceByName(spaceName);
+            Optional<TarantoolIndexMetadata> indexMetadata =
+                    operations.getIndexById(spaceName, indexQuery.getIndexId());
+
+            if (!indexMetadata.isPresent() || !spaceMetadata.isPresent()) {
+                throw new TarantoolClientException("Index metadata not found for index id: {}",
+                        indexQuery.getIndexId());
+            }
+
+            selectArguments =
+                    ProxySelectArgumentsConverter.fromIndexQuery(indexQuery,
+                            indexMetadata.get().getIndexParts(),
+                            spaceMetadata.get());
+        }
+
         SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>()
                 .withClient(this.client)
                 .withSpaceName(spaceName)
                 .withFunctionName(operationsMappingConfig.getSelectFunctionName())
-                .withIndexQuery(indexQuery)
+                .withSelectArguments(selectArguments)
                 .withSelectOptions(options)
                 .withValueConverter(tupleMapper)
                 .build();
