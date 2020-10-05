@@ -10,7 +10,7 @@ package io.tarantool.driver.proxy;
 public interface CRUDOperationsMapping {
 
     String FUNCTION_PREFIX = "crud";
-    String SCHEMA_FUNCTION = FUNCTION_PREFIX + "_cluster_schema";
+    String SCHEMA_FUNCTION = FUNCTION_PREFIX + "_get_schema";
     String DELETE_FUNCTION = FUNCTION_PREFIX + "_delete";
     String INSERT_FUNCTION = FUNCTION_PREFIX + "_insert";
     String REPLACE_FUNCTION = FUNCTION_PREFIX + "_replace";
