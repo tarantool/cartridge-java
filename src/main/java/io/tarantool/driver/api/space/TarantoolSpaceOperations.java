@@ -1,5 +1,8 @@
 package io.tarantool.driver.api.space;
 
+import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -118,6 +121,45 @@ public interface TarantoolSpaceOperations {
      */
     <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Select tuples matching the specified index query using cursor with default batch options
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @return a {@link TarantoolCursor} instance
+     * @throws TarantoolClientException in case if the request failed
+     */
+    TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery) throws TarantoolClientException;
+
+    /**
+     * Select tuples matching the specified index query using cursor
+     *
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @param options    cursor options such as batch size
+     * @return a {@link TarantoolCursor} instance
+     * @throws TarantoolClientException in case if the request failed
+     */
+    TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery, TarantoolBatchCursorOptions options)
+            throws TarantoolClientException;
+
+    /**
+     * Select tuples matching the specified index query using cursor
+     *
+     * @param indexQuery  the index query, containing information about the used index, iterator type and index key
+     *                    values for matching
+     * @param options     cursor options such as batch size
+     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
+     *                    an object of type {@code T}
+     * @param <T>         result tuple type
+     * @return a {@link TarantoolCursor} instance
+     * @throws TarantoolClientException in case if the request failed
+     */
+    <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
+                                  TarantoolBatchCursorOptions options,
+                                  ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
     /**

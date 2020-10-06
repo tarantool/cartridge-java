@@ -1,6 +1,9 @@
 package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.cursor.SingleTarantoolBatchCursor;
+import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
@@ -170,7 +173,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                             MessagePackValueMapper resultMapper)
+                                                            MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -187,6 +190,27 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
+    }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery)
+            throws TarantoolClientException {
+        return cursor(indexQuery, new TarantoolBatchCursorOptions());
+    }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery,
+                                                  TarantoolBatchCursorOptions options)
+            throws TarantoolClientException {
+        return cursor(indexQuery, options, (ValueConverter<ArrayValue, TarantoolTuple>) defaultTupleResultMapper());
+    }
+
+    @Override
+    public <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
+                                         TarantoolBatchCursorOptions options,
+                                         ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        return new SingleTarantoolBatchCursor<>(this, indexQuery, options, tupleMapper);
     }
 
     @Override
