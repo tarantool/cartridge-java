@@ -35,6 +35,11 @@
         </developer>
     </developers>
 
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/akudiyar/tarantool-java-driver/issues/</url>
+    </issueManagement>
+
     <scm>
         <connection>scm:git:git://github.com/akudiyar/tarantool-java-driver.git</connection>
         <developerConnection>scm:git:ssh://github.com:akudiyar/tarantool-java-driver.git</developerConnection>
@@ -308,6 +313,19 @@
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>test-jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
                                 </goals>
                             </execution>
                         </executions>
