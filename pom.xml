@@ -41,9 +41,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:git:git://github.com/akudiyar/tarantool-java-driver.git</connection>
-        <developerConnection>scm:git:ssh://github.com/akudiyar/tarantool-java-driver.git</developerConnection>
-        <url>http://github.com/akudiyar/tarantool-java-driver/tree/master</url>
+        <connection>scm:git:git@github.com:akudiyar/tarantool-java-driver.git</connection>
+        <developerConnection>scm:git:git@github.com:akudiyar/tarantool-java-driver.git</developerConnection>
+        <url>https://github.com/akudiyar/tarantool-java-driver/tree/master</url>
     </scm>
 
     <properties>
