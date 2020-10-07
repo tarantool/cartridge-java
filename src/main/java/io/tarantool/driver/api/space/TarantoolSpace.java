@@ -49,6 +49,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
      * Basic constructor.
      * @param config client config
      * @param connectionManager Tarantool server connection manager
+     * @param spaceMetadata metadata for this space
      * @param metadataOperations metadata operations implementation
      */
     public TarantoolSpace(TarantoolClientConfig config,

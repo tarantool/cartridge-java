@@ -93,6 +93,7 @@ public interface TarantoolSpaceOperations {
      * Select all tuples using the default (primary) index.
      * Warning: this operation can result in significant amount of data transferred over network and saved in
      * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
+     *
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
@@ -104,6 +105,7 @@ public interface TarantoolSpaceOperations {
      * Select all tuples using the index specified by name.
      * Warning: this operation can result in significant amount of data transferred over network and saved in
      * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
+     *
      * @param indexName the index name, must not be empty or null
      * @param options query options such as offset and limit
      * @return a future that will contain all corresponding tuples once completed
@@ -116,6 +118,7 @@ public interface TarantoolSpaceOperations {
      * Select all tuples using the index specified by name with the specified iterator type.
      * Warning: this operation can result in significant amount of data transferred over network and saved in
      * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
+     *
      * @param indexName the index name, must not be empty or null
      * @param iteratorType iterator type (EQ, REQ, etc.)
      * @param options query options such as offset and limit
@@ -128,6 +131,7 @@ public interface TarantoolSpaceOperations {
 
     /**
      * Select tuples matching the specified index query.
+     *
      * @param indexQuery the index query, containing information about the used index, iterator type and index key
      *                   values for matching
      * @param options query options such as offset and limit
@@ -140,10 +144,12 @@ public interface TarantoolSpaceOperations {
 
     /**
      * Select tuples matching the specified index query.
+     *
      * @param indexQuery the index query, containing information about the used index, iterator type and index key
      *                   values for matching
      * @param options query options such as offset and limit
      * @param tupleCLass target tuple class
+     * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed or value converter not found
      */
@@ -153,12 +159,13 @@ public interface TarantoolSpaceOperations {
 
     /**
      * Select tuples matching the specified index query.
+     *
      * @param indexQuery the index query, containing information about the used index, iterator type and index key
      *                   values for matching
      * @param options query options such as offset and limit
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
      *                    an object of type {@code T}
-     * @param <T> result tuple type
+     * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */

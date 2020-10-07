@@ -20,6 +20,8 @@ public abstract class AbstractTarantoolResultMapperFactory {
 
     /**
      * Basic constructor
+     *
+     * @param messagePackMapper mapper for MessagePack entities into Java objects and vice versa
      */
     public AbstractTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         this.messagePackMapper = messagePackMapper;
