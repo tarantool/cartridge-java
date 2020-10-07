@@ -5,8 +5,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.TarantoolSimpleResultMapper;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
@@ -22,22 +21,23 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
     private final TarantoolSpace space;
     private final TarantoolIndexQuery indexQuery;
     private final TarantoolBatchCursorOptions options;
-    private final ValueConverter<ArrayValue, T> tupleMapper;
+    private final TarantoolSimpleResultMapper<T> resultMapper;
 
     public SingleTarantoolBatchCursorIterator(TarantoolSpace space,
                                               TarantoolIndexQuery indexQuery,
                                               TarantoolBatchCursorOptions options,
-                                              ValueConverter<ArrayValue, T> tupleMapper) {
+                                              TarantoolSimpleResultMapper<T> resultMapper) {
         this.space = space;
         this.indexQuery = indexQuery;
         this.options = options;
-        this.tupleMapper = tupleMapper;
+        this.resultMapper = resultMapper;
         this.resultPos = 0;
         this.totalPos = 0;
 
         getNextResult();
     }
 
+    @SuppressWarnings("unchecked")
     protected void getNextResult() {
         TarantoolSelectOptions.Builder selectOptions = new TarantoolSelectOptions.Builder();
         selectOptions.withLimit(options.getBatchSize() + 1);
@@ -48,7 +48,7 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
         }
 
         try {
-            result = space.select(indexQuery, selectOptions.build(), tupleMapper).get();
+            result = (TarantoolResult<T>) space.select(indexQuery, selectOptions.build(), resultMapper).get();
             resultPos = 0;
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);

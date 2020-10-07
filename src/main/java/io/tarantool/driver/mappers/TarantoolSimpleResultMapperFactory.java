@@ -47,4 +47,9 @@ public class TarantoolSimpleResultMapperFactory extends AbstractTarantoolResultM
                                                             ValueConverter<ArrayValue, T> valueConverter) {
         return (TarantoolSimpleResultMapper<T>) super.withConverter(tupleClass, valueConverter);
     }
+
+    @Override
+    public <T> TarantoolSimpleResultMapper<T> getByClass(Class<T> tupleClass) {
+        return (TarantoolSimpleResultMapper<T>) super.getByClass(tupleClass);
+    }
 }

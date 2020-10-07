@@ -4,8 +4,12 @@ import io.tarantool.driver.ProxyTarantoolClient;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.cursor.ProxyTarantoolBatchCursor;
+import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
@@ -153,8 +157,11 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return select(conditions, tarantoolResultMapperFactory.withConverter(tupleMapper));
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                             TarantoolCallResultMapper<T> resultMapper)
+    @Override
+    @SuppressWarnings("unchecked")
+    public  <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
+                                                             TarantoolSelectOptions options,
+                                                             MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
 
         SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>(metadataOperations, spaceMetadata)
@@ -162,10 +169,35 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                 .withSpaceName(spaceName)
                 .withFunctionName(client.getSelectFunctionName())
                 .withConditions(conditions)
-                .withResultMapper(resultMapper)
+                .withResultMapper((TarantoolCallResultMapper<T>) resultMapper)
                 .build();
 
         return executeOperation(operation);
+    }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery) throws TarantoolClientException {
+        return cursor(indexQuery, new TarantoolBatchCursorOptions());
+    }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery, TarantoolBatchCursorOptions options)
+            throws TarantoolClientException {
+        return cursor(indexQuery, options, getConverter(TarantoolTuple.class));
+    }
+
+    @Override
+    public <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
+                                  TarantoolBatchCursorOptions options,
+                                  ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException {
+        return cursor(indexQuery, options, tarantoolResultMapperFactory.withConverter(tupleMapper));
+    }
+
+    private <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
+                                          TarantoolBatchCursorOptions options,
+                                          TarantoolCallResultMapper<T> resultMapper) throws TarantoolClientException {
+        return new ProxyTarantoolBatchCursor<T>(this, indexQuery, options, resultMapper);
     }
 
     @Override

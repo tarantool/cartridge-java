@@ -1,11 +1,13 @@
 package io.tarantool.driver.api.space;
 
+import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.protocol.operations.TupleOperations;
@@ -121,6 +123,21 @@ public interface TarantoolSpaceOperations {
      */
     <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Select tuples matching the specified index query.
+     * @param indexQuery the index query, containing information about the used index, iterator type and index key
+     *                   values for matching
+     * @param options query options such as offset and limit
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param <T> result tuple type
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
+                                                     TarantoolSelectOptions options,
+                                                     MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
     /**

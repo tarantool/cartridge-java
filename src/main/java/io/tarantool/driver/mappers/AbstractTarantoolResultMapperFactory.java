@@ -2,6 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 
@@ -75,4 +76,20 @@ public abstract class AbstractTarantoolResultMapperFactory {
                 tupleClass, c -> createMapper(valueConverter));
     }
 
+    /**
+     * Return converter from cache
+     *
+     * @param tupleClass target object type class
+     * @param <T> target object type
+     * @return a optional of mapper instance
+     * @throws TarantoolClientException if converter not exist
+     */
+    @SuppressWarnings("unchecked")
+    public <T> AbstractTarantoolResultMapper<T> getByClass(Class<T> tupleClass) {
+        AbstractTarantoolResultMapper<T> resultMapper = (AbstractTarantoolResultMapper<T>) mapperCache.get(tupleClass);
+        if (resultMapper == null) {
+            throw new TarantoolClientException("No ArrayValue converter for type " + tupleClass + " is present");
+        }
+        return resultMapper;
+    }
 }

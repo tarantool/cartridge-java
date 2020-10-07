@@ -1,7 +1,7 @@
 package io.tarantool.driver.integration;
 
 import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolIndexQuery;
@@ -71,9 +71,9 @@ public class StandaloneTarantoolCursorIT {
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
                 .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5000)
-                .withReadTimeout(1000 * 5000)
-                .withRequestTimeout(1000 * 5000)
+                .withConnectTimeout(1000 * 5)
+                .withReadTimeout(1000 * 5)
+                .withRequestTimeout(1000 * 5)
                 .build();
 
         log.info("Attempting connect to Tarantool");

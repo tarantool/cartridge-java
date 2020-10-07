@@ -1,5 +1,6 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
@@ -16,6 +17,7 @@ public class TarantoolSelectOptions implements Serializable {
 
     private long offset;
     private long limit = MAX_LIMIT;
+    private TarantoolTuple after;
     //TODO query timeouts
 
     public TarantoolSelectOptions() {
@@ -37,12 +39,20 @@ public class TarantoolSelectOptions implements Serializable {
         this.limit = limit;
     }
 
+    public TarantoolTuple getAfter() {
+        return after;
+    }
+
+    private void setAfter(TarantoolTuple after) {
+        this.after = after;
+    }
+
     /**
      * Builder for Tarantool select options
      */
     public static class Builder {
 
-        private TarantoolSelectOptions options;
+        private final TarantoolSelectOptions options;
 
         /**
          * Basic constructor
@@ -72,6 +82,13 @@ public class TarantoolSelectOptions implements Serializable {
             Assert.state(limit >= 0 && limit <= MAX_LIMIT, "Limit mast be a value between 0 and 0xffffffff");
 
             options.setLimit(limit);
+            return this;
+        }
+
+        public Builder withAfter(TarantoolTuple tuple) {
+            Assert.notNull(tuple, "Tarantool tuple should not be null");
+
+            options.setAfter(tuple);
             return this;
         }
 
