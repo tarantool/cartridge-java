@@ -15,8 +15,8 @@ public class TarantoolSpaceMetadata {
     private int spaceId;
     private int ownerId;
     private String spaceName;
-    private LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata;
-    private List<TarantoolFieldFormatMetadata> spaceFormatMetadataAsList;
+    private LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata;
+    private List<TarantoolFieldMetadata> spaceFormatMetadataAsList;
     //TODO private TarantoolEngine engine;
 
     /**
@@ -61,13 +61,41 @@ public class TarantoolSpaceMetadata {
         this.spaceName = spaceName;
     }
 
-    public LinkedHashMap<String, TarantoolFieldFormatMetadata> getSpaceFormatMetadata() {
+    public LinkedHashMap<String, TarantoolFieldMetadata> getSpaceFormatMetadata() {
         return spaceFormatMetadata;
     }
 
-    void setSpaceFormatMetadata(LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata) {
+    void setSpaceFormatMetadata(LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata) {
         this.spaceFormatMetadata = spaceFormatMetadata;
         this.spaceFormatMetadataAsList = new ArrayList<>(spaceFormatMetadata.values());
+    }
+
+    /**
+     * Get field metadata by name
+     *
+     * @param fieldName field name
+     * @return field position by name starting with 0, or -1 if this field not found in format metadata
+     */
+    public Optional<TarantoolFieldMetadata> getFieldByName(String fieldName) {
+        TarantoolFieldMetadata fieldMetadata = spaceFormatMetadata.get(fieldName);
+        if (fieldMetadata == null) {
+            return Optional.empty();
+        }
+        return Optional.of(fieldMetadata);
+    }
+
+    /**
+     * Get field metadata by position
+     *
+     * @param fieldPosition field position starting with 0
+     * @return field name or null if this field not found in format metadata
+     */
+    public Optional<TarantoolFieldMetadata> getFieldByPosition(int fieldPosition) {
+        TarantoolFieldMetadata fieldMetadata = spaceFormatMetadataAsList.get(fieldPosition);
+        if (fieldMetadata == null) {
+            return Optional.empty();
+        }
+        return Optional.of(fieldMetadata);
     }
 
     /**
@@ -77,26 +105,17 @@ public class TarantoolSpaceMetadata {
      * @return field position by name starting with 0, or -1 if this field not found in format metadata
      */
     public int getFieldPositionByName(String fieldName) {
-        int fieldPosition = -1;
-        if (spaceFormatMetadata.containsKey(fieldName)) {
-            fieldPosition = spaceFormatMetadata.get(fieldName).getFieldPosition();
-        }
-
-        return  fieldPosition;
+        return getFieldByName(fieldName).map(TarantoolFieldMetadata::getFieldPosition).orElse(-1);
     }
 
     /**
-     * Get field name in space by positions starting with 0
+     * Get field name by position
      *
      * @param fieldPosition field position starting with 0
      * @return field name or null if this field not found in format metadata
      */
     public Optional<String> getFieldNameByPosition(int fieldPosition) {
-        TarantoolFieldFormatMetadata fieldFormatMetadata = spaceFormatMetadataAsList.get(fieldPosition);
-        if (fieldFormatMetadata == null) {
-            return Optional.empty();
-        }
-        return Optional.of(fieldFormatMetadata.getFieldName());
+        return getFieldByPosition(fieldPosition).map(TarantoolFieldMetadata::getFieldName);
     }
 
     /*

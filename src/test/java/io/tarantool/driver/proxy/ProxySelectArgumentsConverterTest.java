@@ -1,7 +1,7 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.metadata.TarantoolFieldFormatMetadata;
+import io.tarantool.driver.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
@@ -26,10 +26,10 @@ public class ProxySelectArgumentsConverterTest {
         setFormatMethod.setAccessible(true);
 
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
-        LinkedHashMap<String, TarantoolFieldFormatMetadata> formatMetadata = new LinkedHashMap<>();
-        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned", 0));
+        LinkedHashMap<String, TarantoolFieldMetadata> formatMetadata = new LinkedHashMap<>();
+        formatMetadata.put("id", new TarantoolFieldMetadata("id", "unsigned", 0));
         formatMetadata.put("book_name",
-                new TarantoolFieldFormatMetadata("book_name", "string", 1));
+                new TarantoolFieldMetadata("book_name", "string", 1));
         setFormatMethod.invoke(spaceMetadata, formatMetadata);
 
         List<TarantoolIndexPartMetadata> indexPartMetadata = new ArrayList<>();
@@ -55,10 +55,10 @@ public class ProxySelectArgumentsConverterTest {
         setFormatMethod.setAccessible(true);
 
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
-        LinkedHashMap<String, TarantoolFieldFormatMetadata> formatMetadata = new LinkedHashMap<>();
-        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned", 0));
+        LinkedHashMap<String, TarantoolFieldMetadata> formatMetadata = new LinkedHashMap<>();
+        formatMetadata.put("id", new TarantoolFieldMetadata("id", "unsigned", 0));
         formatMetadata.put("book_name",
-                new TarantoolFieldFormatMetadata("book_name", "string", 1));
+                new TarantoolFieldMetadata("book_name", "string", 1));
         setFormatMethod.invoke(spaceMetadata, formatMetadata);
 
         List<TarantoolIndexPartMetadata> indexPartMetadata = new ArrayList<>();

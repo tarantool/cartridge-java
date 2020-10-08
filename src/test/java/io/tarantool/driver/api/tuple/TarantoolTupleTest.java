@@ -4,7 +4,7 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
-import io.tarantool.driver.metadata.TarantoolFieldFormatMetadata;
+import io.tarantool.driver.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;
@@ -96,12 +96,12 @@ public class TarantoolTupleTest {
 
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
 
-        LinkedHashMap<String, TarantoolFieldFormatMetadata> formatMetadata = new LinkedHashMap<>();
-        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned", 0));
+        LinkedHashMap<String, TarantoolFieldMetadata> formatMetadata = new LinkedHashMap<>();
+        formatMetadata.put("id", new TarantoolFieldMetadata("id", "unsigned", 0));
         formatMetadata.put("book_name",
-                new TarantoolFieldFormatMetadata("book_name", "string", 1));
+                new TarantoolFieldMetadata("book_name", "string", 1));
         formatMetadata.put("author",
-                new TarantoolFieldFormatMetadata("author", "string", 2));
+                new TarantoolFieldMetadata("author", "string", 2));
 
         setFormatMethod.invoke(spaceMetadata, formatMetadata);
 

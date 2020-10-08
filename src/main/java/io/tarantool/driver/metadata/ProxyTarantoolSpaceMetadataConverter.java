@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Maps MessagePack {@link ArrayValue} form router proxy into {@link ProxyTarantoolSpaceMetadataContainer}
+ * Maps MessagePack {@link ArrayValue} from proxy schema API function call result into
+ * {@link ProxyTarantoolSpaceMetadataContainer}.
  * See <a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>
  *
  * @author Sergey Volgin
@@ -75,15 +76,15 @@ public class ProxyTarantoolSpaceMetadataConverter
         return proxyMetadata;
     }
 
-    private LinkedHashMap<String, TarantoolFieldFormatMetadata> parseFormat(List<Value> spaceFormat) {
-        LinkedHashMap<String, TarantoolFieldFormatMetadata> spaceFormatMetadata = new LinkedHashMap<>();
+    private LinkedHashMap<String, TarantoolFieldMetadata> parseFormat(List<Value> spaceFormat) {
+        LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata = new LinkedHashMap<>();
 
         int fieldPosition = 0;
         for (Value fieldValueMetadata : spaceFormat) {
             Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
             spaceFormatMetadata.put(
                     mapper.fromValue(fieldMap.get(FORMAT_NAME_KEY).asStringValue()),
-                    new TarantoolFieldFormatMetadata(
+                    new TarantoolFieldMetadata(
                             mapper.fromValue(fieldMap.get(FORMAT_NAME_KEY).asStringValue()),
                             mapper.fromValue(fieldMap.get(FORMAT_TYPE_KEY).asStringValue()),
                             fieldPosition
