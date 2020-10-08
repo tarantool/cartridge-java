@@ -12,7 +12,6 @@ import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

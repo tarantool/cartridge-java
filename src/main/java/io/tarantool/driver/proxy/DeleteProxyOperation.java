@@ -72,7 +72,6 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
             TarantoolClientConfig config = client.getConfig();
             CRUDOperationOptions options = CRUDOperationOptions.builder()
                     .withTimeout(config.getRequestTimeout())
-                    .withTuplesToMap(false)
                     .build();
 
             List<Object> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());

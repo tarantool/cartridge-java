@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Sergey Volgin
@@ -33,16 +32,14 @@ public class CRUDOperationOptionsTest {
 
         CRUDOperationOptions options = CRUDOperationOptions.builder()
                 .withTimeout(1000)
-                .withTuplesToMap(true)
                 .withSelectLimit(50)
                 .withSelectBatchSize(10)
                 .withSelectAfter(tuple)
                 .build();
 
-        assertEquals(5, options.asMap().size());
+        assertEquals(4, options.asMap().size());
 
-        assertEquals(1000, options.asMap().get(CRUDOperationOptions.TIME_OUT));
-        assertTrue((Boolean) options.asMap().get(CRUDOperationOptions.TUPLES_TO_MAP));
+        assertEquals(1000, options.asMap().get(CRUDOperationOptions.TIMEOUT));
         assertEquals(50L, options.asMap().get(CRUDOperationOptions.SELECT_LIMIT));
         assertEquals(10L, options.asMap().get(CRUDOperationOptions.SELECT_BATCH_SIZE));
         assertEquals(tuple, options.asMap().get(CRUDOperationOptions.SELECT_AFTER));

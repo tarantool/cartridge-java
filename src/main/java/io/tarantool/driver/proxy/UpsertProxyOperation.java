@@ -80,7 +80,6 @@ public final class UpsertProxyOperation<T> extends AbstractProxyOperation<T> {
             TarantoolClientConfig config = client.getConfig();
             CRUDOperationOptions options = CRUDOperationOptions.builder()
                     .withTimeout(config.getRequestTimeout())
-                    .withTuplesToMap(false)
                     .build();
 
             List<Object> arguments = Arrays.asList(spaceName,

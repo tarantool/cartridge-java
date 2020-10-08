@@ -46,8 +46,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
 
         assertEquals(client, deleteProxyOperation.getClient());
         assertEquals("function1", deleteProxyOperation.getFunctionName());
@@ -76,8 +75,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
 
         assertEquals(client, insertOperation.getClient());
         assertEquals("function1", insertOperation.getFunctionName());
@@ -105,8 +103,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -115,7 +112,6 @@ public class ProxyOperationBuildersTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void selectOperationBuilderTest() {
         assertThrows(IllegalArgumentException.class, () -> new SelectProxyOperation.Builder<>().build());
 
@@ -140,8 +136,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
         options.put(CRUDOperationOptions.SELECT_BATCH_SIZE, 100L);
         options.put(CRUDOperationOptions.SELECT_LIMIT, 100L);
 
@@ -175,8 +170,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -214,8 +208,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDOperationOptions.TUPLES_TO_MAP, false);
-        options.put(CRUDOperationOptions.TIME_OUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());

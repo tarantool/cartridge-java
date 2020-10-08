@@ -136,6 +136,7 @@ public class TarantoolTupleTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void convertStructures() {
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         MessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
