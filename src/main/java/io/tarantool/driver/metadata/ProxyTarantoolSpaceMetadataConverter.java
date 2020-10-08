@@ -1,5 +1,6 @@
 package io.tarantool.driver.metadata;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
@@ -50,28 +51,56 @@ public class ProxyTarantoolSpaceMetadataConverter
 
     @Override
     public ProxyTarantoolSpaceMetadataContainer fromValue(ArrayValue value) {
-        ProxyTarantoolSpaceMetadataContainer proxyMetadata = new ProxyTarantoolSpaceMetadataContainer();
+
+        if (value.size() == 0) {
+            throw new TarantoolClientException("Empty tuple returned for space metadata");
+        }
+
+        if (!value.get(0).isMapValue()) {
+            throw new TarantoolClientException("Unsupported space metadata format: expected map");
+        }
 
         Map<Value, Value> spacesMap = value.get(0).asMapValue().map();
 
-        String spaceName = mapper.fromValue(spacesMap.get(SPACE_NAME_KEY).asStringValue());
-        int spaceId = mapper.fromValue(spacesMap.get(SPACE_ID_KEY).asIntegerValue());
+        Value nameValue = spacesMap.get(SPACE_NAME_KEY);
+        if (nameValue == null) {
+            throw new TarantoolClientException(
+                    "Unsupported space metadata format: key '" + SPACE_NAME_KEY + "' not found");
+        }
+
+        Value idValue = spacesMap.get(SPACE_ID_KEY);
+        if (idValue == null) {
+            throw new TarantoolClientException(
+                    "Unsupported space metadata format: key '" + SPACE_ID_KEY + "' not found");
+        }
+
+        ProxyTarantoolSpaceMetadataContainer proxyMetadata = new ProxyTarantoolSpaceMetadataContainer();
 
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
-        spaceMetadata.setSpaceId(spaceId);
+        spaceMetadata.setSpaceId(idValue.asIntegerValue().asInt());
         spaceMetadata.setOwnerId(ID_UNKNOWN);
-        spaceMetadata.setSpaceName(spaceName);
+        spaceMetadata.setSpaceName(nameValue.asStringValue().asString());
 
-        List<Value> spaceFormat = spacesMap.get(SPACE_FORMAT_KEY).asArrayValue().list();
+        Value formatValue = spacesMap.get(SPACE_FORMAT_KEY);
+        if (formatValue == null) {
+            throw new TarantoolClientException(
+                    "Unsupported space metadata format: key '" + SPACE_FORMAT_KEY + "' not found");
+        }
+        if (!formatValue.isArrayValue()) {
+            throw new TarantoolClientException(
+                    "Unsupported space metadata format: key '" + SPACE_FORMAT_KEY + "' value is not a list");
+        }
+
+        List<Value> spaceFormat = formatValue.asArrayValue().list();
         spaceMetadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
 
+        proxyMetadata.addSpace(spaceMetadata);
+
         Value indexesValue = spacesMap.get(SPACE_INDEX_KEY);
-        if (indexesValue.isArrayValue() && indexesValue.asArrayValue().size() > 0) {
+        if (indexesValue != null && indexesValue.isArrayValue() && indexesValue.asArrayValue().size() > 0) {
             List<Value> indexes = indexesValue.asArrayValue().list();
             proxyMetadata.addIndexes(spaceMetadata.getSpaceName(), parseIndexes(indexes));
         }
-
-        proxyMetadata.addSpace(spaceMetadata);
 
         return proxyMetadata;
     }
@@ -81,16 +110,27 @@ public class ProxyTarantoolSpaceMetadataConverter
 
         int fieldPosition = 0;
         for (Value fieldValueMetadata : spaceFormat) {
+
+            if (!fieldValueMetadata.isMapValue()) {
+                throw new TarantoolClientException("Unsupported space metadata format: field metadata is not a map");
+            }
+
             Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
-            spaceFormatMetadata.put(
-                    mapper.fromValue(fieldMap.get(FORMAT_NAME_KEY).asStringValue()),
-                    new TarantoolFieldMetadata(
-                            mapper.fromValue(fieldMap.get(FORMAT_NAME_KEY).asStringValue()),
-                            mapper.fromValue(fieldMap.get(FORMAT_TYPE_KEY).asStringValue()),
-                            fieldPosition
-                    )
-            );
-            fieldPosition++;
+            Value fieldNameValue = fieldMap.get(FORMAT_NAME_KEY);
+            if (fieldNameValue == null || !fieldNameValue.isStringValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported space metadata format: key '" + FORMAT_NAME_KEY + "' must have string value");
+            }
+            String fieldName = fieldNameValue.asStringValue().asString();
+
+            Value fieldTypeValue = fieldMap.get(FORMAT_NAME_KEY);
+            if (fieldTypeValue == null || !fieldTypeValue.isStringValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported space metadata format: key '" + FORMAT_TYPE_KEY + "' must have string value");
+            }
+            String fieldType = fieldTypeValue.asStringValue().asString();
+
+            spaceFormatMetadata.put(fieldName, new TarantoolFieldMetadata(fieldName, fieldType, fieldPosition++));
         }
 
         return spaceFormatMetadata;
@@ -100,12 +140,39 @@ public class ProxyTarantoolSpaceMetadataConverter
         Map<String, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
 
         for (Value indexValueMetadata : indexes) {
-            Map<Value, Value> indexMap = indexValueMetadata.asMapValue().map();
 
-            int indexId = mapper.fromValue(indexMap.get(INDEX_ID_KEY).asIntegerValue());
-            String indexName = mapper.fromValue(indexMap.get(INDEX_NAME_KEY).asStringValue());
-            String indexType = mapper.fromValue(indexMap.get(INDEX_TYPE_KEY).asStringValue());
-            boolean isUnique = mapper.fromValue(indexMap.get(INDEX_UNIQUE_KEY).asBooleanValue());
+            if (!indexValueMetadata.isMapValue()) {
+                throw new TarantoolClientException("Unsupported index metadata format: index metadata is not a map");
+            }
+
+            Map<Value, Value> indexMap = indexValueMetadata.asMapValue().map();
+            Value indexIdValue = indexMap.get(INDEX_ID_KEY);
+            if (indexIdValue == null || !indexIdValue.isIntegerValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_ID_KEY + "' must have int value");
+            }
+            int indexId = indexIdValue.asIntegerValue().asInt();
+
+            Value indexNameValue = indexMap.get(INDEX_NAME_KEY);
+            if (indexNameValue == null || !indexNameValue.isStringValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_NAME_KEY + "' must have string value");
+            }
+            String indexName = indexNameValue.asStringValue().asString();
+
+            Value indexTypeValue = indexMap.get(INDEX_TYPE_KEY);
+            if (indexTypeValue == null || !indexTypeValue.isStringValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_TYPE_KEY + "' must have string value");
+            }
+            String indexType = indexTypeValue.asStringValue().asString();
+
+            Value indexUniqueValue = indexMap.get(INDEX_UNIQUE_KEY);
+            if (indexUniqueValue == null || !indexUniqueValue.isBooleanValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_UNIQUE_KEY + "' must have boolean value");
+            }
+            boolean isUnique = indexUniqueValue.asBooleanValue().getBoolean();
 
             TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
             indexOptions.setUnique(isUnique);
@@ -117,17 +184,42 @@ public class ProxyTarantoolSpaceMetadataConverter
             indexMetadata.setIndexName(indexName);
             indexMetadata.setIndexOptions(indexOptions);
 
-            List<Value> indexParts = indexMap.get(INDEX_PARTS_KEY).asArrayValue().list();
+            Value indexPartsValue = indexMap.get(INDEX_PARTS_KEY);
+            if (indexPartsValue == null) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_PARTS_KEY + "' not found");
+            }
+            if (!indexPartsValue.isArrayValue()) {
+                throw new TarantoolClientException(
+                        "Unsupported index metadata format: key '" + INDEX_PARTS_KEY + "' value is not a list");
+            }
+
+            List<Value> indexParts = indexPartsValue.asArrayValue().list();
             List<TarantoolIndexPartMetadata> indexPartMetadata = indexParts.stream()
                     .map(parts -> {
-                                int fieldNumber = mapper.fromValue(
-                                        parts.asMapValue().map().get(INDEX_PARTS_FIELD_NO).asIntegerValue());
-                                String fieldType = mapper.fromValue(
-                                        parts.asMapValue().map().get(INDEX_PARTS_TYPE_KEY).asStringValue()
-                                );
-                                return new TarantoolIndexPartMetadata(fieldNumber - 1, fieldType);
-                            }
-                    ).collect(Collectors.toList());
+                        if (!parts.isMapValue()) {
+                            throw new TarantoolClientException(
+                                "Unsupported index metadata format: index part metadata is not a map");
+                        }
+
+                        Map<Value, Value> partsMap = parts.asMapValue().map();
+                        Value fieldPositionValue = partsMap.get(INDEX_PARTS_FIELD_NO);
+                        if (fieldPositionValue == null || !fieldPositionValue.isIntegerValue()) {
+                            throw new TarantoolClientException("Unsupported index metadata format: key '" +
+                                    INDEX_PARTS_FIELD_NO + "' must have int value");
+                        }
+                        int fieldNumber = fieldPositionValue.asIntegerValue().asInt();
+
+                        Value fieldTypeValue = partsMap.get(INDEX_PARTS_TYPE_KEY);
+                        if (fieldTypeValue == null || !fieldTypeValue.isStringValue()) {
+                            throw new TarantoolClientException("Unsupported index metadata format: key '" +
+                                    INDEX_PARTS_TYPE_KEY + "' must have string value");
+                        }
+                        String fieldType = fieldTypeValue.asStringValue().asString();
+
+                        return new TarantoolIndexPartMetadata(fieldNumber - 1, fieldType);
+                    })
+                    .collect(Collectors.toList());
 
             indexMetadata.setIndexParts(indexPartMetadata);
 
