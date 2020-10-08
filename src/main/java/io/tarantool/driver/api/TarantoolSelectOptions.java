@@ -1,9 +1,9 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Represents common tuple selection options not related to the index and filtration, e.g. limit and offset
@@ -17,7 +17,7 @@ public class TarantoolSelectOptions implements Serializable {
 
     private long offset;
     private long limit = MAX_LIMIT;
-    private TarantoolTuple after;
+    private Map<String, Object> after;
     //TODO query timeouts
 
     public TarantoolSelectOptions() {
@@ -39,11 +39,11 @@ public class TarantoolSelectOptions implements Serializable {
         this.limit = limit;
     }
 
-    public TarantoolTuple getAfter() {
+    public Map<String, Object> getAfter() {
         return after;
     }
 
-    private void setAfter(TarantoolTuple after) {
+    private void setAfter(Map<String, Object> after) {
         this.after = after;
     }
 
@@ -85,7 +85,7 @@ public class TarantoolSelectOptions implements Serializable {
             return this;
         }
 
-        public Builder withAfter(TarantoolTuple tuple) {
+        public Builder withAfter(Map<String, Object> tuple) {
             Assert.notNull(tuple, "Tarantool tuple should not be null");
 
             options.setAfter(tuple);

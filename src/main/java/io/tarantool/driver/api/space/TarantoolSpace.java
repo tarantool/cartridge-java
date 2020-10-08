@@ -65,14 +65,12 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         this.spaceMetadata = spaceMetadata;
         this.metadataOperations = metadataOperations;
         this.tarantoolResultMapperFactory = new TarantoolSimpleResultMapperFactory(config.getMessagePackMapper());
-        //register default TarantoolTuple converter
-        tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
     }
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
             throws TarantoolClientException {
-        return delete(conditions, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return delete(conditions, defaultTupleResultMapper());
     }
 
     @Override
@@ -103,7 +101,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple)
             throws TarantoolClientException {
-        return insert(tuple, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return insert(tuple, defaultTupleResultMapper());
     }
 
     @Override
@@ -131,7 +129,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple)
             throws TarantoolClientException {
-        return replace(tuple, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return replace(tuple, defaultTupleResultMapper());
     }
 
     @Override
@@ -183,7 +181,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
                                                                      TarantoolSelectOptions options)
             throws TarantoolClientException {
-        return select(indexQuery, options, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return select(indexQuery, options, defaultTupleResultMapper());
     }
 
     @Override
@@ -191,7 +189,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                             TarantoolSelectOptions options,
                                                             Class<T> tupleClass)
             throws TarantoolClientException {
-        return select(conditions, options, tarantoolResultMapperFactory.getByClass(tupleClass));
+        return select(conditions, options, defaultTupleResultMapper());
     }
 
     @Override
@@ -337,6 +335,10 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
     }
 
+    private TarantoolSimpleResultMapper<TarantoolTuple> defaultTupleResultMapper() {
+        this.tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
+        return tarantoolResultMapperFactory.getByClass(TarantoolTuple.class);
+    }
     @Override
     public String toString() {
         return String.format("TarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());

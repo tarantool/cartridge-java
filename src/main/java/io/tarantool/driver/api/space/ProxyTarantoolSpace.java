@@ -56,7 +56,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
             throws TarantoolClientException {
-        return delete(conditions, defaultTupleResultMapper());
+        return delete(conditions, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
     }
 
     @Override
@@ -146,8 +146,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                             Class<T> tupleClass) throws TarantoolClientException {
-        ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
-        return select(conditions, tarantoolResultMapperFactory.withConverter(tupleClass, converter));
+        return select(conditions, options, tarantoolResultMapperFactory.getByClass(tupleClass));
     }
 
     @Override
@@ -183,7 +182,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery, TarantoolBatchCursorOptions options)
             throws TarantoolClientException {
-        return cursor(indexQuery, options, getConverter(TarantoolTuple.class));
+        return cursor(indexQuery, options, defaultTupleResultMapper());
     }
 
     @Override
@@ -197,7 +196,12 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     private <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
                                           TarantoolBatchCursorOptions options,
                                           TarantoolCallResultMapper<T> resultMapper) throws TarantoolClientException {
-        return new ProxyTarantoolBatchCursor<T>(this, indexQuery, options, resultMapper);
+        Optional<TarantoolSpaceMetadata> spaceMetadata = metadataOperations.getSpaceByName(spaceName);
+        if (!spaceMetadata.isPresent()) {
+            throw new TarantoolClientException("Space metadata not found for : {}", spaceName);
+        }
+
+        return new ProxyTarantoolBatchCursor<T>(this, indexQuery, options, resultMapper, spaceMetadata.get());
     }
 
     @Override
@@ -262,16 +266,8 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     }
 
     private TarantoolCallResultMapper<TarantoolTuple> defaultTupleResultMapper() {
-        return tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
-    }
-
-    private <T> ValueConverter<ArrayValue, T> getConverter(Class<T> tupleClass) {
-        Optional<ValueConverter<ArrayValue, T>> converter =
-                client.getConfig().getMessagePackMapper().getValueConverter(ArrayValue.class, tupleClass);
-        if (!converter.isPresent()) {
-            throw new TarantoolClientException("No ArrayValue converter for type " + tupleClass + " is present");
-        }
-        return converter.get();
+        this.tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
+        return tarantoolResultMapperFactory.getByClass(TarantoolTuple.class);
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> executeOperation(ProxyOperation<T> operation) {

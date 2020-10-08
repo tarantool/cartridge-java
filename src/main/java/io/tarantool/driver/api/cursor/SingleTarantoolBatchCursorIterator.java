@@ -20,31 +20,34 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
     private TarantoolResult<T> result;
     private final TarantoolSpace space;
     private final TarantoolIndexQuery indexQuery;
-    private final TarantoolBatchCursorOptions options;
+    private final TarantoolBatchCursorOptions cursorOptions;
     private final TarantoolSimpleResultMapper<T> resultMapper;
 
     public SingleTarantoolBatchCursorIterator(TarantoolSpace space,
                                               TarantoolIndexQuery indexQuery,
-                                              TarantoolBatchCursorOptions options,
+                                              TarantoolBatchCursorOptions cursorOptions,
                                               TarantoolSimpleResultMapper<T> resultMapper) {
         this.space = space;
         this.indexQuery = indexQuery;
-        this.options = options;
+        this.cursorOptions = cursorOptions;
         this.resultMapper = resultMapper;
         this.resultPos = 0;
         this.totalPos = 0;
 
-        getNextResult();
+        getNextBatch();
     }
 
     @SuppressWarnings("unchecked")
-    protected void getNextResult() {
+    protected void getNextBatch() {
         TarantoolSelectOptions.Builder selectOptions = new TarantoolSelectOptions.Builder();
-        selectOptions.withLimit(options.getBatchSize() + 1);
+        selectOptions.withLimit(cursorOptions.getBatchSize());
 
-        int batchStep = (int) ((totalPos + 1) / options.getBatchSize());
+        int batchStep = (int) ((totalPos + 1) / cursorOptions.getBatchSize());
+        if (cursorOptions.getBatchSize() == 1) {
+            batchStep = totalPos;
+        }
         if (batchStep > 0) {
-            selectOptions.withOffset(batchStep * options.getBatchSize());
+            selectOptions.withOffset(batchStep * cursorOptions.getBatchSize());
         }
 
         try {
@@ -57,18 +60,17 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
 
     @Override
     public boolean hasNext() {
-        return (resultPos < options.getBatchSize() && resultPos < result.size())
-                || options.getBatchSize() < result.size();
+        if (result.size() == cursorOptions.getBatchSize() && resultPos + 1 > cursorOptions.getBatchSize()) {
+            getNextBatch();
+        }
+
+        return result.size() > 0 && resultPos < cursorOptions.getBatchSize() && resultPos < result.size();
     }
 
     @Override
     public T next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
-        }
-
-        if (resultPos >= options.getBatchSize()) {
-            getNextResult();
         }
 
         resultPos++;

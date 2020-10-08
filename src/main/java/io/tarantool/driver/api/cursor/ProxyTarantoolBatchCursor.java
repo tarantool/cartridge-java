@@ -3,6 +3,7 @@ package io.tarantool.driver.api.cursor;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.space.ProxyTarantoolSpace;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 
 /**
  * @author Sergey Volgin
@@ -15,9 +16,11 @@ public class ProxyTarantoolBatchCursor<T> implements TarantoolCursor<T> {
             ProxyTarantoolSpace space,
             TarantoolIndexQuery indexQuery,
             TarantoolBatchCursorOptions options,
-            TarantoolCallResultMapper<T> resultMapper
+            TarantoolCallResultMapper<T> resultMapper,
+            TarantoolSpaceMetadata spaceMetadata
     ) {
-        this.iterator = new ProxyTarantoolBatchCursorIterator<>(space, indexQuery, options, resultMapper);
+        this.iterator = new ProxyTarantoolBatchCursorIterator<>(
+                space, indexQuery, options, resultMapper, spaceMetadata);
     }
 
     @Override

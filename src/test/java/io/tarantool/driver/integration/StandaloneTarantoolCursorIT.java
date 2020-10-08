@@ -119,10 +119,24 @@ public class StandaloneTarantoolCursorIT {
 
         assertTrue(cursor.hasNext());
         int countTotal = 0;
+        boolean hasNext;
         do {
             countTotal++;
             TarantoolTuple t = cursor.next();
-        } while (cursor.hasNext());
+            hasNext = cursor.hasNext();
+        } while (hasNext);
+
+        assertEquals(100, countTotal);
+
+        cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(1));
+
+        assertTrue(cursor.hasNext());
+        countTotal = 0;
+        do {
+            countTotal++;
+            TarantoolTuple t = cursor.next();
+            hasNext = cursor.hasNext();
+        } while (hasNext);
 
         assertEquals(100, countTotal);
     }
