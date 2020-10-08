@@ -14,28 +14,24 @@ import java.util.Map;
  */
 public final class CRUDOperationOptions {
 
-    public static final String TIME_OUT = "timeout";
-    public static final String TUPLES_TO_MAP = "tuples_tomap";
+    public static final String TIMEOUT = "timeout";
 
-    public static final String SELECT_LIMIT = "limit";
+    public static final String SELECT_LIMIT = "first";
     public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
 
     private final Integer timeout;
-    private final Boolean tuplesAsMap;
 
     private final Long selectLimit;
     private final Long selectBatchSize;
-    private final TarantoolTuple alter;
+    private final TarantoolTuple after;
 
-    private final Map<String, Object> resultMap = new HashMap<>(5, 1);
+    private final Map<String, Object> resultMap = new HashMap<>(4, 1);
 
     private CRUDOperationOptions(Builder builder) {
         this.timeout = builder.timeout;
-        this.tuplesAsMap = builder.tuplesToMap;
-
         this.selectLimit = builder.selectLimit;
-        this.alter = builder.alter;
+        this.after = builder.after;
         this.selectBatchSize = builder.selectBatchSize;
         initResultMap();
     }
@@ -51,10 +47,8 @@ public final class CRUDOperationOptions {
 
     public static final class Builder {
         private Integer timeout;
-        private Boolean tuplesToMap;
-
         private Long selectLimit;
-        private TarantoolTuple alter;
+        private TarantoolTuple after;
         private Long selectBatchSize;
 
         public Builder() {
@@ -62,11 +56,6 @@ public final class CRUDOperationOptions {
 
         public Builder withTimeout(int timeout) {
             this.timeout = timeout;
-            return this;
-        }
-
-        public Builder withTuplesToMap(boolean tuplesToMap) {
-            this.tuplesToMap = tuplesToMap;
             return this;
         }
 
@@ -81,7 +70,7 @@ public final class CRUDOperationOptions {
         }
 
         public Builder withSelectAfter(TarantoolTuple tuple) {
-            this.alter = tuple;
+            this.after = tuple;
             return this;
         }
 
@@ -92,19 +81,15 @@ public final class CRUDOperationOptions {
 
     private void initResultMap() {
         if (timeout != null) {
-            resultMap.put(TIME_OUT, timeout);
-        }
-
-        if (tuplesAsMap != null) {
-            resultMap.put(TUPLES_TO_MAP, tuplesAsMap);
+            resultMap.put(TIMEOUT, timeout);
         }
 
         if (selectLimit != null) {
             resultMap.put(SELECT_LIMIT, selectLimit);
         }
 
-        if (alter != null) {
-            resultMap.put(SELECT_AFTER, alter);
+        if (after != null) {
+            resultMap.put(SELECT_AFTER, after);
         }
 
         if (selectBatchSize != null) {

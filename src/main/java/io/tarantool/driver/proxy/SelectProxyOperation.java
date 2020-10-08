@@ -33,7 +33,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         private String functionName;
         private List<?> selectArguments;
         private TarantoolCallResultMapper<T> resultMapper;
-        private TarantoolSelectOptions options;
+        private TarantoolSelectOptions selectOptions;
 
         public Builder() {
         }
@@ -58,8 +58,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withSelectOptions(TarantoolSelectOptions options) {
-            this.options = options;
+        public Builder<T> withSelectOptions(TarantoolSelectOptions selectOptions) {
+            this.selectOptions = selectOptions;
             return this;
         }
 
@@ -73,17 +73,16 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             Assert.notNull(spaceName, "Tarantool spaceName should not be null");
             Assert.notNull(functionName, "Proxy delete function name should not be null");
             Assert.notNull(resultMapper, "Result tuple mapper should not be null");
+            Assert.notNull(selectOptions, "Tarantool select options should not be null");
 
             TarantoolClientConfig config = client.getConfig();
 
-            CRUDOperationOptions requestOptions = CRUDOperationOptions.builder()
+            CRUDOperationOptions.Builder requestOptions = CRUDOperationOptions.builder()
                     .withTimeout(config.getRequestTimeout())
-                    .withTuplesToMap(false)
-                    .withSelectBatchSize(options.getLimit())
-                    .withSelectLimit(options.getLimit())
-                    .build();
+                    .withSelectBatchSize(selectOptions.getLimit())
+                    .withSelectLimit(selectOptions.getLimit());
 
-            List<Object> arguments = Arrays.asList(spaceName, selectArguments, requestOptions.asMap());
+            List<Object> arguments = Arrays.asList(spaceName, selectArguments, requestOptions.build().asMap());
 
             return new SelectProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
         }

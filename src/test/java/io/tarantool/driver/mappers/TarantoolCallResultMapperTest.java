@@ -4,7 +4,6 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
-import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;

@@ -65,8 +65,8 @@ public class ProxyTarantoolSpaceMetadataConverter
         spaceMetadata.setSpaceFormatMetadata(parseFormat(spaceFormat));
 
         Value indexesValue = spacesMap.get(SPACE_INDEX_KEY);
-        if (indexesValue.isMapValue() && indexesValue.asMapValue().size() > 0) {
-            Map<Value, Value> indexes = indexesValue.asMapValue().map();
+        if (indexesValue.isArrayValue() && indexesValue.asArrayValue().size() > 0) {
+            List<Value> indexes = indexesValue.asArrayValue().list();
             proxyMetadata.addIndexes(spaceMetadata.getSpaceName(), parseIndexes(indexes));
         }
 
@@ -95,11 +95,11 @@ public class ProxyTarantoolSpaceMetadataConverter
         return spaceFormatMetadata;
     }
 
-    private Map<String, TarantoolIndexMetadata> parseIndexes(Map<Value, Value> indexes) {
+    private Map<String, TarantoolIndexMetadata> parseIndexes(List<Value> indexes) {
         Map<String, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
 
-        for (Map.Entry<Value, Value> indexValueMetadata : indexes.entrySet()) {
-            Map<Value, Value> indexMap = indexValueMetadata.getValue().asMapValue().map();
+        for (Value indexValueMetadata : indexes) {
+            Map<Value, Value> indexMap = indexValueMetadata.asMapValue().map();
 
             int indexId = mapper.fromValue(indexMap.get(INDEX_ID_KEY).asIntegerValue());
             String indexName = mapper.fromValue(indexMap.get(INDEX_NAME_KEY).asStringValue());

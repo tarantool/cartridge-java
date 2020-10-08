@@ -3,7 +3,12 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.api.TarantoolResultImpl;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.ImmutableStringValue;
+import org.msgpack.value.Value;
 import org.msgpack.value.impl.ImmutableArrayValueImpl;
+import org.msgpack.value.impl.ImmutableStringValueImpl;
+
+import java.util.Map;
 
 /**
  * Special tuple mapper for API function call results.
@@ -16,6 +21,9 @@ import org.msgpack.value.impl.ImmutableArrayValueImpl;
  * @author Sergey Volgin
  */
 public class TarantoolCallResultMapper<T> extends AbstractTarantoolResultMapper<T> {
+
+    private static final ImmutableStringValue RESULT_META = new ImmutableStringValueImpl("metadata");
+    private static final ImmutableStringValue RESULT_ROWS = new ImmutableStringValueImpl("rows");
 
     public TarantoolCallResultMapper(MessagePackValueMapper valueMapper,
                                      ValueConverter<ArrayValue, T> tupleConverter) {
@@ -32,9 +40,12 @@ public class TarantoolCallResultMapper<T> extends AbstractTarantoolResultMapper<
             }
 
             // [nil] or [[[],...]]
+            // [{"metadata" : [...], "rows": [...]}]
             if (v.size() == 1) {
                 if (v.get(0).isNilValue()) {
                     tuples = ImmutableArrayValueImpl.empty();
+                } else if (v.get(0).isMapValue() && hasRowsAndMetadata(v.get(0).asMapValue().map())) {
+                    tuples = v.get(0).asMapValue().map().get(RESULT_ROWS).asArrayValue();
                 } else if (v.get(0).isArrayValue()) {
                     tuples = v.get(0).asArrayValue();
                 }
@@ -45,4 +56,7 @@ public class TarantoolCallResultMapper<T> extends AbstractTarantoolResultMapper<
         });
     }
 
+    private static boolean hasRowsAndMetadata(Map<Value, Value> valueMap) {
+        return valueMap.containsKey(RESULT_META) && valueMap.containsKey(RESULT_ROWS);
+    }
 }

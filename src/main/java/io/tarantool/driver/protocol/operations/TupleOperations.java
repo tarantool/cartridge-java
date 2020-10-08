@@ -15,7 +15,7 @@ import java.util.Optional;
 public final class TupleOperations {
 
     private final List<TupleOperation> operations = new ArrayList<>();
-    private final List<TupleOperation> proxyOperations = new ArrayList<>();;
+    private final List<TupleOperation> proxyOperations = new ArrayList<>();
 
     private TupleOperations(TupleOperation operation) {
         addOperationToList(operation);
