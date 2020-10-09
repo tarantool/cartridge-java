@@ -9,7 +9,7 @@
     <groupId>io.tarantool</groupId>
     <artifactId>cartridge-driver</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.2.0</version>
 
     <licenses>
         <license>
@@ -42,7 +42,8 @@
         <connection>scm:git:git@github.com:akudiyar/tarantool-cartridge-java-driver.git</connection>
         <developerConnection>scm:git:git@github.com:akudiyar/tarantool-cartridge-java-driver.git</developerConnection>
         <url>https://github.com/akudiyar/tarantool-cartridge-java-driver/tree/master</url>
-    </scm>
+      <tag>v0.2.0</tag>
+  </scm>
 
     <properties>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
