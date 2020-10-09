@@ -5,6 +5,7 @@ import org.springframework.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents index-related query options including index ID or name, matching keys and iterator type.
@@ -79,5 +80,33 @@ public class TarantoolIndexQuery {
 
         this.keyValues = keyValues;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TarantoolIndexQuery that = (TarantoolIndexQuery) o;
+        return getIndexId() == that.getIndexId() &&
+                getIteratorType() == that.getIteratorType() &&
+                getKeyValues().equals(that.getKeyValues());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getIndexId(), getIteratorType(), getKeyValues());
+    }
+
+    @Override
+    public String toString() {
+        return "TarantoolIndexQuery{" +
+                "indexId=" + indexId +
+                ", iteratorType=" + iteratorType +
+                ", keyValues=" + keyValues +
+                '}';
     }
 }

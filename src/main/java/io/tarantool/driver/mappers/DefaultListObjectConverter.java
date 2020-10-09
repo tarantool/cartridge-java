@@ -23,7 +23,7 @@ public class DefaultListObjectConverter implements ObjectConverter<List<?>, Arra
 
     @Override
     public ArrayValue toValue(List<?> object) {
-        Stream<Value> values = object.stream().map(mapper::toValue);
+        Stream<Value> values = object.stream().map(v -> v == null ? ValueFactory.newNil() : mapper.toValue(v));
         return ValueFactory.newArray(values.collect(Collectors.toList()));
     }
 }

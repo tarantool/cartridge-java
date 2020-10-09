@@ -7,7 +7,7 @@ import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
@@ -132,11 +132,12 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             profileSpace.insert(tarantoolTuple).get();
         }
 
+        Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
         TarantoolIndexQuery query = new TarantoolIndexQuery();
         query.withKeyValues(Collections.singletonList(1_000_000))
                 .withIteratorType(TarantoolIteratorType.ITER_GE);
 
-        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
 
         TarantoolTuple tuple;
@@ -176,9 +177,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals("John Doe", tuple.getString(2));
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(2));
-        TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(query).get();
+        Conditions conditions = Conditions.equals(0 , 2);
+        TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(conditions).get();
 
         assertEquals(1, deleteResult.size());
         tuple = deleteResult.get(0);
@@ -232,12 +232,11 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(tuple.getInteger(0), 223);
         assertNotNull(tuple.getInteger(1)); //bucket_id
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(223));
+        Conditions conditions = Conditions.indexEquals("profile_id", Collections.singletonList(223));
 
         TarantoolResult<TarantoolTuple> updateResult;
 
-        updateResult = profileSpace.update(query, TupleOperations.add(3, 90).andAdd(4, 5)).get();
+        updateResult = profileSpace.update(conditions, TupleOperations.add(3, 90).andAdd(4, 5)).get();
         assertEquals(223, updateResult.get(0).getInteger(0));
         assertEquals(100, updateResult.get(0).getInteger(3));
         assertEquals(15, updateResult.get(0).getInteger(4));
@@ -250,15 +249,15 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(301));
+        Conditions conditions = Conditions.equals("profile_id", 301);
 
         TarantoolResult<TarantoolTuple> upsertResult;
 
         //first time tuple not exist
-        profileSpace.upsert(query, tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
+        profileSpace.upsert(conditions,
+                tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
 
-        upsertResult = profileSpace.select(query, new TarantoolSelectOptions()).get();
+        upsertResult = profileSpace.select(conditions).get();
         assertEquals(1, upsertResult.size());
         TarantoolTuple tuple = upsertResult.get(0);
         assertEquals(5, tuple.size());
@@ -268,9 +267,10 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(0, upsertResult.get(0).getInteger(4));
 
         //second time tuple exist
-        profileSpace.upsert(query, tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
+        profileSpace.upsert(conditions,
+                tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
 
-        upsertResult = profileSpace.select(query, new TarantoolSelectOptions()).get();
+        upsertResult = profileSpace.select(conditions).get();
         tuple = upsertResult.get(0);
         assertEquals(tuple.getInteger(0), 301);
         assertNotNull(tuple.getInteger(1)); //bucket_id

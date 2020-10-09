@@ -1,12 +1,10 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.msgpack.value.ArrayValue;
 
@@ -22,26 +20,24 @@ public interface TarantoolSpaceOperations {
     /**
      * Delete a tuple
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                         values for matching
+     * @param conditions query with options
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(TarantoolIndexQuery indexQuery)
+    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
             throws TarantoolClientException;
 
     /**
      * Delete a tuple
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                         values for matching
+     * @param conditions query with options
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
      *                          an object of type {@code T}
      * @param <T> result type
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> delete(TarantoolIndexQuery indexQuery,
+    <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
@@ -90,106 +86,55 @@ public interface TarantoolSpaceOperations {
             throws TarantoolClientException;
 
     /**
-     * Select all tuples using the default (primary) index.
-     * Warning: this operation can result in significant amount of data transferred over network and saved in
-     * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
+     * Select tuples matching the specified query with options.
      *
-     * @param options query options such as offset and limit
+     * @param conditions query with options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolSelectOptions options)
-            throws TarantoolClientException;
+    CompletableFuture<TarantoolResult<TarantoolTuple>> select(Conditions conditions) throws TarantoolClientException;
 
     /**
-     * Select all tuples using the index specified by name.
-     * Warning: this operation can result in significant amount of data transferred over network and saved in
-     * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
+     * Select tuples matching the specified index query with options.
      *
-     * @param indexName the index name, must not be empty or null
-     * @param options query options such as offset and limit
-     * @return a future that will contain all corresponding tuples once completed
-     * @throws TarantoolClientException in case if the request failed
-     */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options)
-            throws TarantoolClientException;
-
-    /**
-     * Select all tuples using the index specified by name with the specified iterator type.
-     * Warning: this operation can result in significant amount of data transferred over network and saved in
-     * the client host memory. Do not forget setting the limit of retrieved tuples on large spaces!
-     *
-     * @param indexName the index name, must not be empty or null
-     * @param iteratorType iterator type (EQ, REQ, etc.)
-     * @param options query options such as offset and limit
-     * @return a future that will contain all corresponding tuples once completed
-     * @throws TarantoolClientException in case if the request failed
-     */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolIteratorType iteratorType,
-                                                              TarantoolSelectOptions options)
-            throws TarantoolClientException;
-
-    /**
-     * Select tuples matching the specified index query.
-     *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                   values for matching
-     * @param options query options such as offset and limit
-     * @return a future that will contain all corresponding tuples once completed
-     * @throws TarantoolClientException in case if the request failed
-     */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(TarantoolIndexQuery indexQuery,
-                                                              TarantoolSelectOptions options)
-            throws TarantoolClientException;
-
-    /**
-     * Select tuples matching the specified index query.
-     *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                   values for matching
-     * @param options query options such as offset and limit
+     * @param conditions query with options
      * @param tupleCLass target tuple class
      * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed or value converter not found
      */
-    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery,
-                                                     TarantoolSelectOptions options,
+    <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                      Class<T> tupleCLass) throws TarantoolClientException;
 
     /**
-     * Select tuples matching the specified index query.
+     * Select tuples matching the specified query with options.
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                   values for matching
-     * @param options query options such as offset and limit
+     * @param conditions query with options
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
      *                    an object of type {@code T}
      * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> select(TarantoolIndexQuery indexQuery, TarantoolSelectOptions options,
+    <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                      ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
     /**
      * Update a tuple
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                   values for matching
+     * @param conditions query with options
      * @param operations the list update operations
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> update(TarantoolIndexQuery indexQuery,
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
                                                               TupleOperations operations);
 
     /**
      * Update a tuple
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                   values for matching
+     * @param conditions query with options
      * @param operations the list update operations
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
      *                    an object of type {@code T}
@@ -197,29 +142,27 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> update(TarantoolIndexQuery indexQuery,
+    <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
                                                      TupleOperations operations,
                                                      ValueConverter<ArrayValue, T> tupleMapper);
 
     /**
      * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                         values for matching
+     * @param conditions query with options
      * @param tuple new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(TarantoolIndexQuery indexQuery,
+    CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(Conditions conditions,
                                                               TarantoolTuple tuple,
                                                               TupleOperations operations);
 
     /**
      * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
      *
-     * @param indexQuery the index query, containing information about the used index, iterator type and index key
-     *                         values for matching
+     * @param conditions query with options
      * @param tuple new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
      * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
@@ -228,7 +171,7 @@ public interface TarantoolSpaceOperations {
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> upsert(TarantoolIndexQuery indexQuery,
+    <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
                                                      TarantoolTuple tuple,
                                                      TupleOperations operations,
                                                      ValueConverter<ArrayValue, T> tupleMapper);

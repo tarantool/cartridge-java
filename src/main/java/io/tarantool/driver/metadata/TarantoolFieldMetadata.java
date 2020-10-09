@@ -5,7 +5,7 @@ package io.tarantool.driver.metadata;
  *
  * @author Sergey Volgin
  */
-public class TarantoolFieldFormatMetadata {
+public class TarantoolFieldMetadata {
 
     private final String fieldName;
     private final String fieldType;
@@ -18,7 +18,7 @@ public class TarantoolFieldFormatMetadata {
      * @param fieldType field type (from the set of field types supported by the server)
      * @param fieldPosition field position in tuple starting from 0
      */
-    public TarantoolFieldFormatMetadata(String fieldName, String fieldType, int fieldPosition) {
+    public TarantoolFieldMetadata(String fieldName, String fieldType, int fieldPosition) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldPosition = fieldPosition;

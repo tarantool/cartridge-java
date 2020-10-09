@@ -14,4 +14,8 @@ public class TarantoolIndexNotFoundException extends TarantoolException {
     public TarantoolIndexNotFoundException(String spaceName, String indexName) {
         super(String.format("Index '%s' is not found in space %s", indexName, spaceName));
     }
+
+    public TarantoolIndexNotFoundException(String spaceName, int indexId) {
+        super(String.format("Index with id %d is not found in space %s", indexId, spaceName));
+    }
 }

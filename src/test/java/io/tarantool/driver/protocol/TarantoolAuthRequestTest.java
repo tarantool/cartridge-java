@@ -40,7 +40,7 @@ class TarantoolAuthRequestTest {
         // check header
         TarantoolHeader authHeader = TarantoolHeader.fromMessagePackValue(unpacker.unpackValue());
         assertEquals(TarantoolRequestType.IPROTO_AUTH.getCode(), authHeader.getCode());
-        assertEquals(1, authHeader.getSync());
+        assertTrue(authHeader.getSync() >= 1);
         // check body
         Value value = unpacker.unpackValue();
         assertTrue(value.isMapValue());

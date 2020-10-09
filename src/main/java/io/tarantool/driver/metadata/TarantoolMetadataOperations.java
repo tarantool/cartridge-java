@@ -2,6 +2,7 @@ package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -42,7 +43,7 @@ public interface TarantoolMetadataOperations {
     Optional<TarantoolIndexMetadata> getIndexByName(String spaceName, String indexName);
 
     /**
-     * Get metadata for index from the specified space by name
+     * Get metadata for index from the specified space by index ID
      * @param spaceName the space name, must not be null or empty
      * @param indexId index ID, must not be  must be greater or equal than 0
      * @return nullable index metadata wrapped in {@link Optional}
@@ -63,4 +64,18 @@ public interface TarantoolMetadataOperations {
      * @return nullable space metadata wrapped in {@link Optional}
      */
     Optional<TarantoolSpaceMetadata> getSpaceById(int spaceId);
+
+    /**
+     * Get metadata for all indexes for space specified by id
+     * @param spaceId the space ID, must be greater than 0
+     * @return nullable map of index names to index metadata wrapped in {@link Optional}
+     */
+    Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(int spaceId);
+
+    /**
+     * Get metadata for all indexes for space specified by name
+     * @param spaceName the space name, must not be null or empty
+     * @return nullable map of index names to index metadata wrapped in {@link Optional}
+     */
+    Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(String spaceName);
 }

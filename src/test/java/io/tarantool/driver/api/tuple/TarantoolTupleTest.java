@@ -4,8 +4,9 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
-import io.tarantool.driver.metadata.TarantoolFieldFormatMetadata;
+import io.tarantool.driver.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TestMetadata;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;
 import org.msgpack.value.Value;
@@ -90,20 +91,8 @@ public class TarantoolTupleTest {
 
     @Test
     void setTupleValueByName() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method setFormatMethod =
-                TarantoolSpaceMetadata.class.getDeclaredMethod("setSpaceFormatMetadata", LinkedHashMap.class);
-        setFormatMethod.setAccessible(true);
-
-        TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
-
-        LinkedHashMap<String, TarantoolFieldFormatMetadata> formatMetadata = new LinkedHashMap<>();
-        formatMetadata.put("id", new TarantoolFieldFormatMetadata("id", "unsigned", 0));
-        formatMetadata.put("book_name",
-                new TarantoolFieldFormatMetadata("book_name", "string", 1));
-        formatMetadata.put("author",
-                new TarantoolFieldFormatMetadata("author", "string", 2));
-
-        setFormatMethod.invoke(spaceMetadata, formatMetadata);
+        TestMetadata testMetadata = new TestMetadata();
+        TarantoolSpaceMetadata spaceMetadata = testMetadata.getTestSpaceMetadata();
 
         ImmutableArrayValue values = ValueFactory.newArray();
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -117,22 +106,22 @@ public class TarantoolTupleTest {
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
                 () -> tupleWithoutSpaceMetadata.putObject("book_name", "Book 1"));
 
-        assertDoesNotThrow(() -> tupleWithSpaceMetadata.setField("book_name",
+        assertDoesNotThrow(() -> tupleWithSpaceMetadata.setField("first",
                 new TarantoolFieldImpl(ValueFactory.newString("Book 2"))));
-        assertDoesNotThrow(() -> tupleWithSpaceMetadata.putObject("author", "Book 2 author"));
+        assertDoesNotThrow(() -> tupleWithSpaceMetadata.putObject("second", 222));
 
-        assertTrue(tupleWithSpaceMetadata.getField("book_name").isPresent());
-        assertEquals("Book 2", tupleWithSpaceMetadata.getString("book_name"));
+        assertTrue(tupleWithSpaceMetadata.getField("first").isPresent());
+        assertEquals("Book 2", tupleWithSpaceMetadata.getString("first"));
 
-        assertTrue(tupleWithSpaceMetadata.getField("author").isPresent());
-        assertEquals("Book 2 author", tupleWithSpaceMetadata.getString("author"));
+        assertTrue(tupleWithSpaceMetadata.getField("second").isPresent());
+        assertEquals(222, tupleWithSpaceMetadata.getInteger("second"));
 
-        assertTrue(tupleWithSpaceMetadata.getField(2).isPresent());
-        assertEquals("Book 2 author", tupleWithSpaceMetadata.getString(2));
+        assertTrue(tupleWithSpaceMetadata.getField(1).isPresent());
+        assertEquals(222, tupleWithSpaceMetadata.getInteger(1));
 
         //try to set field with index more than formatMetadata fields count
         assertThrows(IndexOutOfBoundsException.class, () -> tupleWithSpaceMetadata.putObject(10, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> tupleWithSpaceMetadata.putObject(3, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> tupleWithSpaceMetadata.putObject(5, 1));
     }
 
     @Test

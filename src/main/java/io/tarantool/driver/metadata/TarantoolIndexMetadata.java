@@ -2,7 +2,12 @@ package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.api.TarantoolIndexQuery;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Represents Tarantool index metadata (index ID, name, etc.)
@@ -17,6 +22,8 @@ public class TarantoolIndexMetadata {
     private TarantoolIndexType indexType;
     private TarantoolIndexOptions indexOptions;
     private List<TarantoolIndexPartMetadata> indexParts;
+    private Map<Integer, TarantoolIndexPartMetadata> indexPartsByPosition;
+    private Map<Integer, Integer> fieldPositionToKeyPosition;
 
     /**
      * Get ID of a space that this index is defined on
@@ -104,6 +111,13 @@ public class TarantoolIndexMetadata {
      */
     public void setIndexParts(List<TarantoolIndexPartMetadata> indexParts) {
         this.indexParts = indexParts;
+        this.indexPartsByPosition = indexParts.stream()
+                .collect(Collectors.toMap(TarantoolIndexPartMetadata::getFieldIndex, Function.identity()));
+        this.fieldPositionToKeyPosition = new HashMap<>();
+        int index = 0;
+        for (TarantoolIndexPartMetadata meta : indexParts) {
+            fieldPositionToKeyPosition.put(meta.getFieldIndex(), index++);
+        }
     }
 
     /**
@@ -112,6 +126,22 @@ public class TarantoolIndexMetadata {
      */
     public List<TarantoolIndexPartMetadata> getIndexParts() {
         return indexParts;
+    }
+
+    /**
+     * Get index parts by field indexes
+     * @return a not-empty map of index positions to {@link TarantoolIndexPartMetadata}
+     */
+    public Map<Integer, TarantoolIndexPartMetadata> getIndexPartsByPosition() {
+        return indexPartsByPosition;
+    }
+
+    /**
+     * Get map of field positions to index parts positions
+     * @return field position
+     */
+    public Optional<Integer> getIndexPartPositionByFieldPosition(int fieldPosition) {
+        return Optional.ofNullable(fieldPositionToKeyPosition.get(fieldPosition));
     }
 
     /**
