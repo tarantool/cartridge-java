@@ -1,8 +1,8 @@
 package io.tarantool.driver.metadata;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -15,7 +15,7 @@ public class TarantoolSpaceMetadata {
     private int spaceId;
     private int ownerId;
     private String spaceName;
-    private LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata;
+    private Map<String, TarantoolFieldMetadata> spaceFormatMetadata;
     private List<TarantoolFieldMetadata> spaceFormatMetadataAsList;
     //TODO private TarantoolEngine engine;
 
@@ -61,11 +61,11 @@ public class TarantoolSpaceMetadata {
         this.spaceName = spaceName;
     }
 
-    public LinkedHashMap<String, TarantoolFieldMetadata> getSpaceFormatMetadata() {
+    public Map<String, TarantoolFieldMetadata> getSpaceFormatMetadata() {
         return spaceFormatMetadata;
     }
 
-    void setSpaceFormatMetadata(LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata) {
+    void setSpaceFormatMetadata(Map<String, TarantoolFieldMetadata> spaceFormatMetadata) {
         this.spaceFormatMetadata = spaceFormatMetadata;
         this.spaceFormatMetadataAsList = new ArrayList<>(spaceFormatMetadata.values());
     }
@@ -78,10 +78,7 @@ public class TarantoolSpaceMetadata {
      */
     public Optional<TarantoolFieldMetadata> getFieldByName(String fieldName) {
         TarantoolFieldMetadata fieldMetadata = spaceFormatMetadata.get(fieldName);
-        if (fieldMetadata == null) {
-            return Optional.empty();
-        }
-        return Optional.of(fieldMetadata);
+        return Optional.ofNullable(fieldMetadata);
     }
 
     /**
@@ -91,10 +88,10 @@ public class TarantoolSpaceMetadata {
      * @return field name or null if this field not found in format metadata
      */
     public Optional<TarantoolFieldMetadata> getFieldByPosition(int fieldPosition) {
-        TarantoolFieldMetadata fieldMetadata = spaceFormatMetadataAsList.get(fieldPosition);
-        if (fieldMetadata == null) {
+        if (fieldPosition >= spaceFormatMetadataAsList.size() || fieldPosition < 0) {
             return Optional.empty();
         }
+        TarantoolFieldMetadata fieldMetadata = spaceFormatMetadataAsList.get(fieldPosition);
         return Optional.of(fieldMetadata);
     }
 

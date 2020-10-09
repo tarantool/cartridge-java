@@ -31,6 +31,7 @@ public abstract class BaseCondition implements Condition {
         return field;
     }
 
+    @Override
     public List<Object> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata) {
         return Arrays.asList(operator.getCode(), field.toIdentifier(), value());
     }

@@ -10,13 +10,18 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.springframework.util.Assert;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * A collection and a builder for tuple filtering conditions.
@@ -665,7 +670,7 @@ public final class Conditions {
                 List<IndexValueCondition> current = indexConditions.computeIfAbsent(
                         indexMetadata.getIndexName(), name -> new LinkedList<>());
 
-                current.add((IndexValueCondition) condition);
+                current.add(convertIndexIfNecessary((IndexValueCondition) condition, indexMetadata.getIndexName()));
             } else {
                 TarantoolFieldMetadata fieldMetadata =
                         (TarantoolFieldMetadata) condition.field().metadata(operations, spaceMetadata);
@@ -678,30 +683,49 @@ public final class Conditions {
         }
 
         if (indexConditions.size() > 1) {
-            throw new TarantoolClientException("Filtering by more than one index condition is not supported");
+            throw new TarantoolClientException("Filtering by more than one index is not supported");
         }
 
-        List<Condition> allConditions = new ArrayList<>();
+        List<List<Object>> allConditions = new ArrayList<>();
         if (indexConditions.size() > 0) {
-            allConditions.addAll(indexConditions.values().iterator().next());
+            allConditions.addAll(
+                    conditionsListToLists(indexConditions.values().iterator().next(), operations, spaceMetadata));
             for (List<FieldValueCondition> conditionList : fieldConditions.values()) {
-                allConditions.addAll(conditionList);
+                allConditions.addAll(conditionsListToLists(conditionList, operations, spaceMetadata));
             }
         } else {
-            TarantoolIndexMetadata suitableIndex = findSuitableIndex(
+            Optional<TarantoolIndexMetadata> suitableIndex = findCoveringIndex(
                     operations, spaceMetadata, selectedFields.values());
 
-            suitableIndex.getIndexParts().forEach(part -> {
-                allConditions.addAll(fieldConditions.get(part.getFieldIndex()));
-                fieldConditions.remove(part.getFieldIndex());
-            });
+            if (suitableIndex.isPresent()) {
+                for (TarantoolIndexPartMetadata part : suitableIndex.get().getIndexParts()) {
+                    List<FieldValueCondition> conditions = fieldConditions.get(part.getFieldIndex());
+                    if (conditions != null) {
+                        allConditions.addAll(conditionsListToLists(conditions, operations, spaceMetadata));
+                        fieldConditions.remove(part.getFieldIndex());
+                    }
+                }
+            }
 
             for (List<FieldValueCondition> conditionList : fieldConditions.values()) {
-                allConditions.addAll(conditionList);
+                allConditions.addAll(
+                        conditionsListToLists(conditionList, operations, spaceMetadata));
             }
         }
 
         return allConditions;
+    }
+
+    private IndexValueCondition convertIndexIfNecessary(IndexValueCondition condition,
+                                                        String indexName) {
+        if (!(condition.field() instanceof IdIndex)) return condition;
+        return new IndexValueCondition(condition.operator(), new NamedIndex(indexName), condition.value());
+    }
+
+    private List<List<Object>> conditionsListToLists(List<? extends Condition> conditionsList,
+                                                     TarantoolMetadataOperations operations,
+                                                     TarantoolSpaceMetadata spaceMetadata) {
+        return conditionsList.stream().map(c -> c.toList(operations, spaceMetadata)).collect(Collectors.toList());
     }
 
     public TarantoolIndexQuery toIndexQuery(TarantoolMetadataOperations operations,
@@ -744,7 +768,7 @@ public final class Conditions {
         }
 
         if (indexConditions.size() > 1) {
-            throw new TarantoolClientException("Filtering by more than one index condition is not supported");
+            throw new TarantoolClientException("Filtering by more than one index is not supported");
         }
 
         TarantoolIndexQuery query;
@@ -766,7 +790,7 @@ public final class Conditions {
                     operations, spaceMetadata, selectedFields.values());
 
             Operator selectedOperator = null;
-            List<Object> fieldValues = new ArrayList<>();
+            List<Object> fieldValues = Arrays.asList(new Object[suitableIndex.getIndexParts().size()]);
             for (Map.Entry<String, List<FieldValueCondition>> conditions : fieldConditions.entrySet()) {
                 FieldValueCondition condition = conditions.getValue().iterator().next();
                 if (selectedOperator == null) {
@@ -776,18 +800,56 @@ public final class Conditions {
                         throw new TarantoolClientException("Different conditions for index parts are not supported");
                     }
                 }
-                int partPosition = suitableIndex.getIndexPartPositionByFieldPosition(
-                        selectedFields.get(conditions.getKey()).getFieldPosition());
+                TarantoolFieldMetadata field = selectedFields.get(conditions.getKey());
+                int partPosition = suitableIndex
+                        .getIndexPartPositionByFieldPosition(field.getFieldPosition())
+                        .orElseThrow(() -> new TarantoolClientException(
+                                "Field %s not found in index %s", field.getFieldName(), suitableIndex.getIndexName()));
                 fieldValues.set(partPosition, condition.value());
             }
 
-            TarantoolIteratorType iteratorType = selectedOperator.toIteratorType();
+            TarantoolIteratorType iteratorType = selectedOperator != null ?
+                    selectedOperator.toIteratorType() :
+                    TarantoolIteratorType.ITER_EQ;
             query = new TarantoolIndexQuery(suitableIndex.getIndexId())
                     .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
                     .withKeyValues(fieldValues);
         }
 
         return query;
+    }
+
+    private static Optional<TarantoolIndexMetadata> findCoveringIndex(TarantoolMetadataOperations operations,
+                                                                  TarantoolSpaceMetadata spaceMetadata,
+                                                                  Collection<TarantoolFieldMetadata> selectedFields) {
+        Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
+                .orElseThrow(() -> new TarantoolClientException(
+                        "Metadata for space %s not found", spaceMetadata.getSpaceName()));
+
+        Optional<TarantoolIndexMetadata> coveringIndex = allIndexes.values().stream()
+                .map(metadata -> new AbstractMap.SimpleEntry<Long, TarantoolIndexMetadata>(
+                                calculateCoverage(metadata, selectedFields), metadata))
+                .filter(entry -> entry.getKey() > 0)
+                .max(Comparator.comparingLong(AbstractMap.SimpleEntry::getKey))
+                .map(AbstractMap.SimpleEntry::getValue);
+
+        return coveringIndex;
+    }
+
+    private static long calculateCoverage(TarantoolIndexMetadata metadata,
+                                         Collection<TarantoolFieldMetadata> selectedFields) {
+        AtomicBoolean firstFieldIsSet = new AtomicBoolean(false);
+        long count = selectedFields.stream()
+                .map(f -> metadata.getIndexPartPositionByFieldPosition(f.getFieldPosition()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .peek(indexPosition -> {
+                    if (indexPosition == 0) {
+                        firstFieldIsSet.set(true);
+                    }
+                })
+                .count();
+        return firstFieldIsSet.get() ? count : 0;
     }
 
     private static TarantoolIndexMetadata findSuitableIndex(TarantoolMetadataOperations operations,

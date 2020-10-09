@@ -1,5 +1,10 @@
 package io.tarantool.driver.api.conditions;
 
+import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+
+import java.util.List;
+
 /**
  * Represents a condition which is evaluated against the tuple fields
  *
@@ -26,4 +31,13 @@ public interface Condition {
      * @return operand value
      */
     Object value();
+
+    /**
+     * Serializes the condition into a form of Java list
+     *
+     * @param metadataOperations metadata operations
+     * @param spaceMetadata space metadata
+     * @return list of serialized conditions
+     */
+    List<Object> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);
 }

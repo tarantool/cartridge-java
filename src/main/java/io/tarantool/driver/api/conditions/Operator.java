@@ -13,7 +13,7 @@ public enum Operator {
     LT("<"),
     LE("<="),
     GT(">"),
-    GE(">");
+    GE(">=");
 
     private final String code;
 

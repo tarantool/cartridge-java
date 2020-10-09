@@ -55,7 +55,7 @@ public class TarantoolIndexQueryFactory {
      * @return new {@link TarantoolIndexQuery} instance
      * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool cluster
      */
-    public TarantoolIndexQuery byId(String spaceName, String indexName)
+    public TarantoolIndexQuery byName(String spaceName, String indexName)
             throws TarantoolClientException {
         Optional<TarantoolIndexMetadata> meta = metadataOperations.getIndexByName(spaceName, indexName);
         if (!meta.isPresent()) {

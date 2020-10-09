@@ -6,7 +6,6 @@ import io.tarantool.driver.api.TarantoolIndexQueryFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
@@ -150,7 +149,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(String indexName, TarantoolSelectOptions options)
             throws TarantoolClientException {
-        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName);
+        TarantoolIndexQuery indexQuery = indexQueryFactory.byName(indexName, spaceName);
         return select(indexQuery, options);
     }
 
@@ -159,7 +158,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                                      TarantoolIteratorType iteratorType,
                                                                      TarantoolSelectOptions options)
             throws TarantoolClientException {
-        TarantoolIndexQuery indexQuery = indexQueryFactory.byId(indexName, spaceName)
+        TarantoolIndexQuery indexQuery = indexQueryFactory.byName(indexName, spaceName)
                 .withIteratorType(iteratorType);
         return select(indexQuery, options);
     }

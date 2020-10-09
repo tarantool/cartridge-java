@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolIndexQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -115,7 +116,7 @@ public class TarantoolIndexMetadata {
         this.fieldPositionToKeyPosition = new HashMap<>();
         int index = 0;
         for (TarantoolIndexPartMetadata meta : indexParts) {
-            fieldPositionToKeyPosition.put(index++, meta.getFieldIndex());
+            fieldPositionToKeyPosition.put(meta.getFieldIndex(), index++);
         }
     }
 
@@ -139,8 +140,8 @@ public class TarantoolIndexMetadata {
      * Get map of field positions to index parts positions
      * @return field position
      */
-    public Integer getIndexPartPositionByFieldPosition(int fieldPosition) {
-        return fieldPositionToKeyPosition.get(fieldPosition);
+    public Optional<Integer> getIndexPartPositionByFieldPosition(int fieldPosition) {
+        return Optional.ofNullable(fieldPositionToKeyPosition.get(fieldPosition));
     }
 
     /**

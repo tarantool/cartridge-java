@@ -10,10 +10,10 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 public class TarantoolFieldNotFoundException extends TarantoolClientException {
 
     public TarantoolFieldNotFoundException(int position, TarantoolSpaceMetadata spaceMetadata) {
-        super("Field %d not found in space %s", position, spaceMetadata.getSpaceName());
+        super("Field with id %d not found in space %s", position, spaceMetadata.getSpaceName());
     }
 
     public TarantoolFieldNotFoundException(String name, TarantoolSpaceMetadata spaceMetadata) {
-        super("Field %d not found in space %s", name, spaceMetadata.getSpaceName());
+        super("Field '%s' not found in space %s", name, spaceMetadata.getSpaceName());
     }
 }
