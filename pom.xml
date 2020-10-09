@@ -246,6 +246,11 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.tarantool</groupId>
+            <artifactId>testcontainers-java-tarantool</artifactId>
+            <version>0.1.0</version>
+        </dependency>
     </dependencies>
 
     <profiles>

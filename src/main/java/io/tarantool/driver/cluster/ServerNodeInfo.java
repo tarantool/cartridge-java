@@ -1,7 +1,5 @@
 package io.tarantool.driver.cluster;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 /**
@@ -10,11 +8,14 @@ import java.util.Objects;
  * @author Sergey Volgin
  */
 final class ServerNodeInfo {
+
+    private static final String STATUS_AVAILABLE = "available";
+    private static final String STATUS_HEALTHY = "healthy";
+
     private String uuid;
     private String uri;
     private String status;
-    @JsonProperty("network_timeout")
-    private Double networkTimeout;
+    private Integer priority;
 
     ServerNodeInfo() {
     }
@@ -43,12 +44,16 @@ final class ServerNodeInfo {
         this.status = status;
     }
 
-    public Double getNetworkTimeout() {
-        return networkTimeout;
+    public Integer getPriority() {
+        return priority;
     }
 
-    public void setNetworkTimeout(Double networkTimeout) {
-        this.networkTimeout = networkTimeout;
+    public void setPriority(Integer priority) {
+        this.priority = priority;
+    }
+
+    public boolean isAvailable() {
+        return this.status.equals(STATUS_AVAILABLE) || this.status.equals(STATUS_HEALTHY);
     }
 
     @Override
@@ -63,11 +68,11 @@ final class ServerNodeInfo {
         return Objects.equals(uuid, that.uuid) &&
                 Objects.equals(uri, that.uri) &&
                 Objects.equals(status, that.status) &&
-                Objects.equals(networkTimeout, that.networkTimeout);
+                Objects.equals(priority, that.priority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, uri, status, networkTimeout);
+        return Objects.hash(uuid, uri, status, priority);
     }
 }

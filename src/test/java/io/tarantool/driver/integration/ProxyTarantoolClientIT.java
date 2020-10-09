@@ -16,6 +16,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
+import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
@@ -26,10 +27,6 @@ import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.CartridgeHelper;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,51 +38,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.testcontainers.containers.CartridgeHelper.PASSWORD;
-import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER;
-import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER_PORT;
-import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER_PORT_HTTP;
-import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
 
 /**
  * @author Sergey Volgin
  */
-@Testcontainers
-public class ProxyTarantoolClientIT {
-
-    private static final Logger log = LoggerFactory.getLogger(ClusterDiscoveryIT.class);
+public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     private static ProxyTarantoolClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
-    public static String ROUTER_HOST;
-    public static int ROUTER_PORT;
+    public static String USER_NAME;
+    public static String PASSWORD;
 
     private static final String TEST_SPACE_NAME = "test__profile";
-
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
 
     @BeforeAll
-    public static void setUp() throws ExecutionException, InterruptedException {
-        List<Object> res = CartridgeHelper.startCluster();
-        assertTrue((Boolean) res.get(0));
-
-        ROUTER_HOST = CartridgeHelper.environment.getServiceHost(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT);
-        ROUTER_PORT = CartridgeHelper.environment.getServicePort(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT);
-
-        int routerPortHTTP = CartridgeHelper.environment.getServicePort(TARANTOOL_ROUTER, TARANTOOL_ROUTER_PORT_HTTP);
-        log.info("Admin interface available on http://127.0.0.1:{}", routerPortHTTP);
-
+    public static void setUp() {
+        startCluster();
+        USER_NAME = container.getUsername();
+        PASSWORD = container.getPassword();
         initClient();
     }
 
-    private static TarantoolClusterAddressProvider getBinaryProvider() {
+    private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
                 .withCredentials(credentials)
                 .withEntryFunction("get_routers")
-                .withServerAddress(new TarantoolServerAddress(
-                        CartridgeHelper.getRouterHost(), CartridgeHelper.getRouterPort()))
+                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
                 .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
@@ -95,7 +76,9 @@ public class ProxyTarantoolClientIT {
                 .withDelay(1)
                 .build();
 
-        return new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
+        return new TestWrappedClusterAddressProvider(
+                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
+                container);
     }
 
     public static void initClient() {
@@ -109,7 +92,7 @@ public class ProxyTarantoolClientIT {
                 .build();
 
         ClusterTarantoolClient clusterClient =
-                new ClusterTarantoolClient(config, getBinaryProvider(), RoundRobinStrategyFactory.INSTANCE);
+                new ClusterTarantoolClient(config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
         client = new ProxyTarantoolClient(clusterClient);
     }
 
