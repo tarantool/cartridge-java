@@ -23,12 +23,13 @@ import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.protocol.operations.TupleOperations;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,20 +48,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Testcontainers
 public class StandaloneTarantoolClientIT {
 
     private static final String TEST_SPACE_NAME = "test_space";
     private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
 
-    @ClassRule
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer();
+    @Container
+    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
+            .withScriptFileName("org/testcontainers/containers/server.lua");
 
     private static TarantoolClient client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
-        tarantoolContainer.start();
         assertTrue(tarantoolContainer.isRunning());
         initClient();
     }
