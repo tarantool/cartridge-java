@@ -138,6 +138,7 @@ public class TarantoolIndexMetadata {
 
     /**
      * Get map of field positions to index parts positions
+     * @param fieldPosition field position in tuple, starting from 0
      * @return field position
      */
     public Optional<Integer> getIndexPartPositionByFieldPosition(int fieldPosition) {
