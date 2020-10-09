@@ -43,7 +43,7 @@ public class TarantoolSelectRequestTest {
                 .build(mapper);
 
         List<Value> expected = Arrays.asList(ValueFactory.newNil(), ValueFactory.newInteger(123));
-        assertArrayEquals(buildSelectRequest(expected), selectRequestToBytes(request));
+        assertArrayEquals(buildSelectRequest(expected, request.getHeader().getSync()), selectRequestToBytes(request));
     }
 
     private byte[] selectRequestToBytes(TarantoolSelectRequest request) throws TarantoolDecoderException {
@@ -55,7 +55,7 @@ public class TarantoolSelectRequestTest {
         }
     }
 
-    private byte[] buildSelectRequest(List<Value> keyValues) throws IOException {
+    private byte[] buildSelectRequest(List<Value> keyValues, long sync) throws IOException {
         Map<IntegerValue, Value> bodyMap = new HashMap<>();
         bodyMap.put(
                 ValueFactory.newInteger(TarantoolRequestFieldType.IPROTO_SPACE_ID.getCode()),
@@ -79,7 +79,7 @@ public class TarantoolSelectRequestTest {
 
         Map<IntegerValue, IntegerValue> headerMap = new HashMap<>();
         headerMap.put(ValueFactory.newInteger(0x00), ValueFactory.newInteger(1));
-        headerMap.put(ValueFactory.newInteger(0x01), ValueFactory.newInteger(1));
+        headerMap.put(ValueFactory.newInteger(0x01), ValueFactory.newInteger(sync));
         MapValue header =  ValueFactory.newMap(headerMap);
 
         packer.packValue(header);
