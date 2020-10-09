@@ -1,0 +1,3 @@
+---
+run_dir: 'tmp'
+cfg: instances.yml

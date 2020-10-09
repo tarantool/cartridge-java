@@ -23,13 +23,12 @@ import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.protocol.operations.TupleOperations;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,20 +47,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Testcontainers
 public class StandaloneTarantoolClientIT {
 
     private static final String TEST_SPACE_NAME = "test_space";
     private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
 
-    @Container
-    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer();
+    @ClassRule
+    private static TarantoolContainer tarantoolContainer = new TarantoolContainer();
 
     private static TarantoolClient client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
+        tarantoolContainer.start();
         assertTrue(tarantoolContainer.isRunning());
         initClient();
     }
@@ -73,7 +72,6 @@ public class StandaloneTarantoolClientIT {
 
     private static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                //"guest", "");
                 tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
@@ -94,7 +92,6 @@ public class StandaloneTarantoolClientIT {
     @Test
     public void connectAndCheckMetadata() throws Exception {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                //"guest", "");
                 tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
@@ -376,7 +373,7 @@ public class StandaloneTarantoolClientIT {
         assertEquals("Animal Farm: A Fairy Story", selectResult.get(0).getString(2));
 
         //run upsert second time
-        upsertResult = testSpace.upsert(query, tarantoolTuple, ops).get();
+        testSpace.upsert(query, tarantoolTuple, ops).get();
 
         selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
         assertEquals(1, selectResult.size());
@@ -385,7 +382,7 @@ public class StandaloneTarantoolClientIT {
     }
 
     @Test
-    public void callTest() throws Exception, TarantoolClientException {
+    public void callTest() throws Exception {
         List<Object> resultNoParam = client.call("user_function_no_param").get();
 
         assertEquals(1, resultNoParam.size());
@@ -408,7 +405,7 @@ public class StandaloneTarantoolClientIT {
         TarantoolCallResultMapper<TarantoolTuple> mapper = factory.withDefaultTupleValueConverter(spaceMetadata);
         TarantoolResult<TarantoolTuple> result = client.call(
                 "user_function_complex_query",
-                Arrays.asList(1000),
+                Collections.singletonList(1000),
                 defaultMapper,
                 mapper
         ).get();

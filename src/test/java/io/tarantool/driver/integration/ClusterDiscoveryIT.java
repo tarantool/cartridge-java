@@ -11,49 +11,31 @@ import io.tarantool.driver.cluster.HTTPClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.CartridgeHelper;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.testcontainers.containers.CartridgeHelper.PASSWORD;
-import static org.testcontainers.containers.CartridgeHelper.TARANTOOL_ROUTER;
-import static org.testcontainers.containers.CartridgeHelper.USER_NAME;
 
 
 /**
  * @author Sergey Volgin
  * @author Alexey Kuzin
  */
-@Testcontainers
-public class ClusterDiscoveryIT {
+public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
-    private static final String TEST_ROUTER1_URI = "127.0.0.1:53301";
-    private static final String TEST_ROUTER2_URI = "127.0.0.1:53310";
+    private static final String TEST_ROUTER1_URI = "localhost:3301";
+    private static final String TEST_ROUTER2_URI = "localhost:3311";
 
     @BeforeAll
-    public static void setUp() throws ExecutionException, InterruptedException {
-        List<Object> res = CartridgeHelper.startCluster();
-        assertTrue((Boolean) res.get(0));
-
-        CartridgeHelper.environment.waitingFor(TARANTOOL_ROUTER,
-                Wait.forLogMessage(".*The cluster is balanced ok.*", 1));
-    }
-
-    @AfterAll
-    static void destroyDocker() {
-        CartridgeHelper.environment.stop();
+    public static void setUp() {
+        startCluster();
     }
 
     @Test
@@ -68,7 +50,8 @@ public class ClusterDiscoveryIT {
     }
 
     private HTTPDiscoveryClusterAddressProvider getHttpProvider() {
-        HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint(CartridgeHelper.getHttpDiscoveryURL());
+        String discoveryAddress = "http://" + container.getAPIHost() + ":" + container.getAPIPort() + "/routers";
+        HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint(discoveryAddress);
 
         TarantoolClusterDiscoveryConfig config = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
@@ -76,8 +59,7 @@ public class ClusterDiscoveryIT {
                 .withConnectTimeout(1000 * 5)
                 .build();
 
-        HTTPDiscoveryClusterAddressProvider addressProvider = new HTTPDiscoveryClusterAddressProvider(config);
-        return addressProvider;
+        return new HTTPDiscoveryClusterAddressProvider(config);
     }
 
     @Test
@@ -92,12 +74,12 @@ public class ClusterDiscoveryIT {
     }
 
     private TarantoolClusterAddressProvider getBinaryProvider() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                container.getUsername(), container.getPassword());
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
                 .withCredentials(credentials)
                 .withEntryFunction("get_routers")
-                .withServerAddress(new TarantoolServerAddress(
-                        CartridgeHelper.getRouterHost(), CartridgeHelper.getRouterPort()))
+                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
                 .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
@@ -107,23 +89,22 @@ public class ClusterDiscoveryIT {
                 .withDelay(1)
                 .build();
 
-        BinaryDiscoveryClusterAddressProvider addressProvider =
-                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
-
-        return addressProvider;
+        return new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
     }
 
     @Test
     public void connectWithBinaryClusterDiscovery() throws TarantoolClientException {
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+                .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
                 .withConnectTimeout(1000 * 5)
                 .withReadTimeout(1000 * 5)
                 .withRequestTimeout(1000 * 5)
                 .build();
 
         ClusterTarantoolClient client = new ClusterTarantoolClient(
-                config, getBinaryProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+                config,
+                new TestWrappedClusterAddressProvider(getBinaryProvider(), container),
+                TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");
@@ -132,14 +113,16 @@ public class ClusterDiscoveryIT {
     @Test
     public void connectWithHttpClusterDiscovery() throws TarantoolClientException {
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+                .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
                 .withConnectTimeout(1000 * 5)
                 .withReadTimeout(1000 * 5)
                 .withRequestTimeout(1000 * 5)
                 .build();
 
         ClusterTarantoolClient client = new ClusterTarantoolClient(
-                config, getHttpProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+                config,
+                new TestWrappedClusterAddressProvider(getHttpProvider(), container),
+                TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");

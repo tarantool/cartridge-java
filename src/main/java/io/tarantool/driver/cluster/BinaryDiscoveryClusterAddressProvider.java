@@ -18,44 +18,60 @@ import java.util.stream.Collectors;
 /**
  * Service discovery client connecting to Tarantool via the binary protocol.
  * Gets list of cluster node addresses calling an exposed Lua function.
- *
+ * <p>
  * Expected response format:
  * <pre>
  * <code>
- * 127.0.0.1:3301&gt; get_replica_set()
+ * 127.0.0.1:3301&gt; get_routers()
  * ---
  * - 36a1a75e-60f0-4400-8bdc-d93e2c5ca54b:
- *     network_timeout: 0.5
- *     status: available
- *     uri: admin@localhost:3302
+ *     priority: 1
+ *     status: healthy
+ *     uri: localhost:3301
  *     uuid: 9a3426db-f8f6-4e9f-ac80-e263527a59bc
  *   4141912c-34b8-4e40-a17e-7a6d80345954:
- *     network_timeout: 0.5
- *     status: available
- *     uri: admin@localhost:3304
+ *     priority: 1
+ *     status: healthy
+ *     uri: localhost:3311
  *     uuid: 898b4d01-4261-4006-85ea-a3500163cda0
  * ...
  * </code>
  * </pre>
- *
+ * <p>
  * Lua function example:
  * <pre>
  * <code>
- * ...
- * local function get_replica_set()
- *   local vshard = require('vshard')
- *   local router_info, err = vshard.router.info()
- *   if err ~= nil then
- *     error(err)
- *   end
+ *  ...
+ *  local function get_routers()
+ *    local cartridge = require('cartridge')
+ *    local function table_contains(table, element)
+ *      for _, value in pairs(table) do
+ *        if value == element then
+ *          return true
+ *        end
+ *      end
+ *      return false
+ *    end
  *
- *   local result = {}
- *   for i, v in pairs(router_info['replicasets']) do
- *     result[i] = v['master']
- *   end
- *   return result
- * end
- * ...
+ *    local servers, err = cartridge.admin_get_servers()
+ *    local routers = {}
+ *
+ *    for _, server in pairs(servers) do
+ *      if server.replicaset ~= nil then
+ *        if table_contains(server.replicaset.roles, 'app.roles.custom') then
+ *          routers[server.uuid] = {
+ *              status = server.healthy,
+ *              uuid = server.uuid,
+ *              uri = server.uri,
+ *              priority = server.priority
+ *          }
+ *        end
+ *      end
+ *    end
+ *
+ *    return routers
+ *  end
+ *  ...
  * </code>
  * </pre>
  *
@@ -98,7 +114,7 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
             }
 
             return responseMap.values().stream()
-                    .filter(v -> v.getStatus().equals("available"))
+                    .filter(ServerNodeInfo::isAvailable)
                     .map(v -> new TarantoolServerAddress(v.getUri()))
                     .collect(Collectors.toList());
         } catch (Exception e) {
