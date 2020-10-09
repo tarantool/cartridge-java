@@ -1,8 +1,8 @@
-# Tarantool Java driver
+# Java driver for Tarantool Cartridge
 
-[![java-driver:ubuntu/master Actions Status](https://github.com/akudiyar/tarantool-java-driver/workflows/ubuntu-master/badge.svg)](https://github.com/akudiyar/tarantool-java-driver/actions)
+[![java-driver:ubuntu/master Actions Status](https://github.com/akudiyar/tarantool-cartridge-java-driver/workflows/ubuntu-master/badge.svg)](https://github.com/akudiyar/tarantool-cartridge-java-driver/actions)
 
-Java driver for Tarantool 1.10+ based on the asynchronous
+Java driver for Tarantool Cartridge for Tarantool versions 1.10+ based on the asynchronous
 [Netty](https://netty.io) framework and official
 [MessagePack](https://github.com/msgpack/msgpack-java) serializer.
 Provides CRUD APIs for seamlessly working with standalone Tarantool
@@ -11,18 +11,19 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 
 ## Quickstart
 
-Clone this project and execute `mvn install` (this is a temporary measure until
-the project will be released on Maven Central soon).
-
 Add the following dependency into your project:
 
 ```
 <dependency>
   <groupId>io.tarantool</groupId>
-  <artifactId>driver</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <artifactId>cartridge-driver</artifactId>
+  <version>0.2.0</version>
 </dependency>
 ```
+
+### Standalone Tarantool client
+
+Connects to a single Tarantool instance. Supports multiple connections.
 
 See the following example of simple `StandaloneTarantoolClient` usage:
 
@@ -41,9 +42,7 @@ class Scratch {
 
             TarantoolResult<TarantoolTuple> tuples = client.space("test")
                 // using index named "secondary"
-                .select("secondary",
-                        TarantoolIteratorType.ITER_ALL,
-                        new TarantoolSelectOptions.Builder().withLimit(10).build())
+                .select(Conditions.indexGreaterThan("secondary", Collections.singletonList(0)).withLimit(10))
                 .get(); // using CompletableFuture in synchronous way
 
             // tuples can be iterated over
@@ -58,13 +57,10 @@ class Scratch {
 
             // user-defined tuple type
 
-            // using primary index
-            TarantoolIndexQuery query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY);
+            // using primary index by default
+            Conditions query = Conditions.any();
             TarantoolResult<CustomTuple> customTuples = client.space("test")
                 .select(query,
-                        // specifying select options is mandatory to avoid unwanted loading of too much data
-                        // the default parameters are set to unlimited, though
-                        new TarantoolSelectOptions(),
                         // convert raw MessagePack array to object by hand
                         (v) -> new CustomTuple(v.get(0).asIntegerValue().asInt(), v.get(1).asStringValue().asString()))
                 .get();
@@ -99,7 +95,11 @@ class Scratch {
 
 ```
 
-The next example is showing the instatiation of the `ClusterTarantoolClient`
+### Cluster Tarantool client
+
+Connects to multiple Tarantool nodes, usually Tarantool Cartridge routers. Supports multiple connections.
+
+The next example is showing the instantiation of the `ClusterTarantoolClient`
 with binary discovery endpoint:
 
 ```java
@@ -140,6 +140,33 @@ class Scratch {
 
         ClusterTarantoolClient client = new ClusterTarantoolClient(
                 config, getBinaryProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+
+        ...
+
+        client.close();
+    }
+}
+```
+
+### Proxy Tarantool client
+
+A decorator for any of the basic client types. Allows connecting to instances with CRUD interfaces defined as user API
+functions or as exposed [CRUD](https://github.com/tarantool/crud) functions. Works with tarantool/crud 0.2.0+.
+
+See an example how to use the `ProxyTarantoolClient`:
+
+```java
+
+class Scratch {
+    public static void main(String[] args) {
+
+        // Cluster client is set up as described above
+        ClusterTarantoolClient clusterClient = ...
+        TarantoolClient client = new ProxyTarantoolClient(clusterClient);
+
+        Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
+        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
+        assertEquals(20, selectResult.size());
 
         ...
 
