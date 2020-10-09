@@ -14,6 +14,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,12 +33,15 @@ import java.util.stream.Collectors;
  */
 public final class Conditions {
 
+    private static final long MAX_LIMIT = 0xff_ff_ff_ffL;
+    private static final long MAX_OFFSET = 0xff_ff_ff_ffL;
+
     private final List<Condition> conditions = new LinkedList<>();
 
     private boolean descending;
-    private long limit; // 0 is unlimited
+    private long limit = MAX_LIMIT; // 0 is unlimited
     private long offset; // 0 is no offset
-    private List<Object> startIndexValues;
+    private List<Object> startIndexValues = Collections.emptyList();
 
     private Conditions(boolean descending) {
         this.descending = descending;
@@ -118,7 +122,7 @@ public final class Conditions {
      * @return new {@link Conditions} instance
      */
     public static Conditions limit(long limit) {
-        Assert.state(limit > 0, "Limit should be greater than 0");
+        Assert.state(limit >= 0 && limit <= MAX_LIMIT, "Limit mast be a value between 0 and 0xffffffff");
 
         return new Conditions(limit, 0);
     }
@@ -130,10 +134,19 @@ public final class Conditions {
      * @return this {@link Conditions} instance
      */
     public Conditions withLimit(long limit) {
-        Assert.state(limit > 0, "Limit should be greater than 0");
+        Assert.state(limit >= 0 && limit <= MAX_LIMIT, "Limit mast be a value between 0 and 0xffffffff");
 
         this.limit = limit;
         return this;
+    }
+
+    /**
+     * Get the specified limit
+     *
+     * @return number of tuples
+     */
+    public long getLimit() {
+        return limit;
     }
 
     /**
@@ -143,7 +156,7 @@ public final class Conditions {
      * @return new {@link Conditions} instance
      */
     public static Conditions offset(long offset) {
-        Assert.state(offset > 0, "Offset should be greater than 0");
+        Assert.state(offset >= 0 && offset <= MAX_OFFSET, "Offset mast be a value between 0 and 0xffffffff");
 
         return new Conditions(0, offset);
     }
@@ -155,10 +168,19 @@ public final class Conditions {
      * @return this {@link Conditions} instance
      */
     public Conditions withOffset(long offset) {
-        Assert.state(offset > 0, "Offset should be greater than 0");
+        Assert.state(offset >= 0 && offset <= MAX_OFFSET, "Offset mast be a value between 0 and 0xffffffff");
 
         this.offset = offset;
         return this;
+    }
+
+    /**
+     * Get the specified offset
+     *
+     * @return number of tuples
+     */
+    public long getOffset() {
+        return offset;
     }
 
     /**
@@ -186,6 +208,15 @@ public final class Conditions {
 
         this.startIndexValues = startIndexValues;
         return this;
+    }
+
+    /**
+     * Get the specified index values to start from
+     *
+     * @return list of index parts values
+     */
+    public List<Object> getStartIndexValues() {
+        return startIndexValues;
     }
 
     /**
@@ -718,7 +749,9 @@ public final class Conditions {
 
     private IndexValueCondition convertIndexIfNecessary(IndexValueCondition condition,
                                                         String indexName) {
-        if (!(condition.field() instanceof IdIndex)) return condition;
+        if (!(condition.field() instanceof IdIndex)) {
+            return condition;
+        }
         return new IndexValueCondition(condition.operator(), new NamedIndex(indexName), condition.value());
     }
 
@@ -730,7 +763,7 @@ public final class Conditions {
 
     public TarantoolIndexQuery toIndexQuery(TarantoolMetadataOperations operations,
                                             TarantoolSpaceMetadata spaceMetadata) {
-        if (startIndexValues != null) {
+        if (startIndexValues != null && !startIndexValues.isEmpty()) {
             throw new TarantoolClientException("'startAfter' is not supported");
         }
 
@@ -779,44 +812,60 @@ public final class Conditions {
                 throw new TarantoolClientException("Filtering simultaneously by index and fields is not supported");
             }
 
-            IndexValueCondition condition = indexConditions.values().iterator().next().get(0);
-            TarantoolIndexMetadata indexMetadata = selectedIndexes.values().iterator().next();
-            TarantoolIteratorType iteratorType = condition.operator().toIteratorType();
-            query = new TarantoolIndexQuery(indexMetadata.getIndexId())
-                    .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
-                    .withKeyValues(condition.value());
+            query = indexQueryFromIndexValues(indexConditions, selectedIndexes);
         } else {
-            TarantoolIndexMetadata suitableIndex = findSuitableIndex(
-                    operations, spaceMetadata, selectedFields.values());
+            if (selectedFields.size() > 0) {
+                TarantoolIndexMetadata suitableIndex = findSuitableIndex(
+                        operations, spaceMetadata, selectedFields.values());
 
-            Operator selectedOperator = null;
-            List<Object> fieldValues = Arrays.asList(new Object[suitableIndex.getIndexParts().size()]);
-            for (Map.Entry<String, List<FieldValueCondition>> conditions : fieldConditions.entrySet()) {
-                FieldValueCondition condition = conditions.getValue().iterator().next();
-                if (selectedOperator == null) {
-                    selectedOperator = condition.operator();
-                } else {
-                    if (!condition.operator().equals(selectedOperator)) {
-                        throw new TarantoolClientException("Different conditions for index parts are not supported");
-                    }
-                }
-                TarantoolFieldMetadata field = selectedFields.get(conditions.getKey());
-                int partPosition = suitableIndex
-                        .getIndexPartPositionByFieldPosition(field.getFieldPosition())
-                        .orElseThrow(() -> new TarantoolClientException(
-                                "Field %s not found in index %s", field.getFieldName(), suitableIndex.getIndexName()));
-                fieldValues.set(partPosition, condition.value());
+                query = indexQueryFromFieldValues(suitableIndex, fieldConditions, selectedFields);
+            } else {
+                query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
+                        .withIteratorType(descending ? TarantoolIteratorType.ITER_REQ : TarantoolIteratorType.ITER_EQ);
             }
-
-            TarantoolIteratorType iteratorType = selectedOperator != null ?
-                    selectedOperator.toIteratorType() :
-                    TarantoolIteratorType.ITER_EQ;
-            query = new TarantoolIndexQuery(suitableIndex.getIndexId())
-                    .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
-                    .withKeyValues(fieldValues);
         }
 
         return query;
+    }
+
+    private TarantoolIndexQuery indexQueryFromIndexValues(Map<String, List<IndexValueCondition>> indexConditions,
+                                                          Map<String, TarantoolIndexMetadata> selectedIndexes) {
+        IndexValueCondition condition = indexConditions.values().iterator().next().get(0);
+        TarantoolIndexMetadata indexMetadata = selectedIndexes.values().iterator().next();
+        TarantoolIteratorType iteratorType = condition.operator().toIteratorType();
+        return new TarantoolIndexQuery(indexMetadata.getIndexId())
+                .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
+                .withKeyValues(condition.value());
+    }
+
+    private TarantoolIndexQuery indexQueryFromFieldValues(TarantoolIndexMetadata suitableIndex,
+                                                          Map<String, List<FieldValueCondition>> fieldConditions,
+                                                          Map<String, TarantoolFieldMetadata> selectedFields) {
+        Operator selectedOperator = null;
+        List<Object> fieldValues = Arrays.asList(new Object[suitableIndex.getIndexParts().size()]);
+        for (Map.Entry<String, List<FieldValueCondition>> conditions : fieldConditions.entrySet()) {
+            FieldValueCondition condition = conditions.getValue().iterator().next();
+            if (selectedOperator == null) {
+                selectedOperator = condition.operator();
+            } else {
+                if (!condition.operator().equals(selectedOperator)) {
+                    throw new TarantoolClientException(
+                            "Different conditions for index parts are not supported");
+                }
+            }
+            TarantoolFieldMetadata field = selectedFields.get(conditions.getKey());
+            int partPosition = suitableIndex
+                    .getIndexPartPositionByFieldPosition(field.getFieldPosition())
+                    .orElseThrow(() -> new TarantoolClientException(
+                            "Field %s not found in index %s", field.getFieldName(), suitableIndex.getIndexName()));
+            fieldValues.set(partPosition, condition.value());
+        }
+        TarantoolIteratorType iteratorType = selectedOperator != null ?
+                selectedOperator.toIteratorType() :
+                TarantoolIteratorType.ITER_EQ;
+        return new TarantoolIndexQuery(suitableIndex.getIndexId())
+                .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
+                .withKeyValues(fieldValues);
     }
 
     private static Optional<TarantoolIndexMetadata> findCoveringIndex(TarantoolMetadataOperations operations,

@@ -4,12 +4,14 @@ import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
+import io.tarantool.driver.metadata.TestMetadata;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.Test;
 
@@ -113,7 +115,9 @@ public class ProxyOperationBuildersTest {
 
     @Test
     public void selectOperationBuilderTest() {
-        assertThrows(IllegalArgumentException.class, () -> new SelectProxyOperation.Builder<>().build());
+        TestMetadata operations = new TestMetadata();
+        assertThrows(IllegalArgumentException.class, () ->
+                new SelectProxyOperation.Builder<>(operations, operations.getTestSpaceMetadata()).build());
 
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(5L));
@@ -122,16 +126,15 @@ public class ProxyOperationBuildersTest {
         TarantoolCallResultMapperFactory mapperFactory = new TarantoolCallResultMapperFactory(defaultMapper);
         TarantoolCallResultMapper<TarantoolTuple> resultMapper = mapperFactory.withDefaultTupleValueConverter(null);
 
-        List<?> selectArguments = Collections.singletonList(Arrays.asList("=", "id", 55));
+        List<?> selectArguments = Collections.singletonList(Arrays.asList("=", "second", 55));
+        Conditions conditions = Conditions.equals("second", 55).withLimit(100);
 
-        TarantoolSelectOptions selectOptions = new TarantoolSelectOptions.Builder().withLimit(100).build();
-
-        SelectProxyOperation<TarantoolTuple> op = new SelectProxyOperation.Builder<TarantoolTuple>()
+        SelectProxyOperation<TarantoolTuple> op =
+                new SelectProxyOperation.Builder<TarantoolTuple>(operations, operations.getTestSpaceMetadata())
                 .withClient(client)
                 .withSpaceName("space1")
                 .withFunctionName("function1")
-                .withSelectArguments(selectArguments)
-                .withSelectOptions(selectOptions)
+                .withConditions(conditions)
                 .withResultMapper(resultMapper)
                 .build();
 

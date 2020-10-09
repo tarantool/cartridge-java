@@ -26,6 +26,9 @@ else
     package.cpath = app_dir .. '/.rocks/lib/tarantool/?.dylib;' .. package.cpath
 end
 
+-- For faster set up, discovery all buckets at once
+require('vshard.consts').BUCKET_CHUNK_SIZE = 30000
+
 local cartridge = require('cartridge')
 local ok, err = cartridge.cfg({
     workdir = 'tmp/db',

@@ -2,6 +2,7 @@ package io.tarantool.driver.integration;
 
 import org.junit.ClassRule;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
+import org.testcontainers.containers.TarantoolContainer;
 
 abstract class SharedCartridgeContainer {
 
@@ -9,7 +10,9 @@ abstract class SharedCartridgeContainer {
     protected static final TarantoolCartridgeContainer container = new TarantoolCartridgeContainer(
             "cartridge/instances.yml",
             "cartridge/topology.lua")
-            .withDirectoryBinding("cartridge");
+            .withDirectoryBinding("cartridge")
+            .cleanUpDirectory("cartridge/tmp")
+            .withReuse(true);
 
     protected static void startCluster() {
         if (!container.isRunning()) {

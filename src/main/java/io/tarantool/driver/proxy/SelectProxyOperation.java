@@ -2,8 +2,10 @@ package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -28,14 +30,17 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T> {
+        private final TarantoolMetadataOperations operations;
+        private final TarantoolSpaceMetadata metadata;
         private TarantoolClient client;
         private String spaceName;
         private String functionName;
-        private List<?> selectArguments;
         private TarantoolCallResultMapper<T> resultMapper;
-        private TarantoolSelectOptions selectOptions;
+        private Conditions conditions;
 
-        public Builder() {
+        public Builder(TarantoolMetadataOperations operations, TarantoolSpaceMetadata metadata) {
+            this.operations = operations;
+            this.metadata = metadata;
         }
 
         public Builder<T> withClient(TarantoolClient client) {
@@ -53,13 +58,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withSelectArguments(List<?> selectArguments) {
-            this.selectArguments = selectArguments;
-            return this;
-        }
-
-        public Builder<T> withSelectOptions(TarantoolSelectOptions selectOptions) {
-            this.selectOptions = selectOptions;
+        public Builder<T> withConditions(Conditions conditions) {
+            this.conditions = conditions;
             return this;
         }
 
@@ -73,16 +73,20 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             Assert.notNull(spaceName, "Tarantool spaceName should not be null");
             Assert.notNull(functionName, "Proxy delete function name should not be null");
             Assert.notNull(resultMapper, "Result tuple mapper should not be null");
-            Assert.notNull(selectOptions, "Tarantool select options should not be null");
+            Assert.notNull(conditions, "Select conditions should not be null");
 
             TarantoolClientConfig config = client.getConfig();
 
             CRUDOperationOptions.Builder requestOptions = CRUDOperationOptions.builder()
                     .withTimeout(config.getRequestTimeout())
-                    .withSelectBatchSize(selectOptions.getLimit())
-                    .withSelectLimit(selectOptions.getLimit());
+                    .withSelectBatchSize(conditions.getLimit())
+                    .withSelectLimit(conditions.getLimit());
 
-            List<Object> arguments = Arrays.asList(spaceName, selectArguments, requestOptions.build().asMap());
+            List<Object> arguments = Arrays.asList(
+                    spaceName,
+                    conditions.toProxyQuery(operations, metadata),
+                    requestOptions.build().asMap()
+            );
 
             return new SelectProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
         }

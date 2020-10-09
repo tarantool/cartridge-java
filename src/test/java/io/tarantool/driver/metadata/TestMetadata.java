@@ -14,6 +14,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
 
     private final TarantoolSpaceMetadata testSpaceMetadata;
     private final TarantoolIndexMetadata testPrimaryIndexMetadata;
+    private final TarantoolIndexMetadata testIndexMetadata1;
     private final TarantoolIndexMetadata testIndexMetadata2;
     private final TarantoolIndexMetadata testIndexMetadata3;
     private final TarantoolIndexMetadata testIndexMetadata4;
@@ -41,7 +42,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
 
         testIndexMetadata2 = new TarantoolIndexMetadata();
         testIndexMetadata2.setIndexId(1);
-        testIndexMetadata2.setIndexName("secondary1");
+        testIndexMetadata2.setIndexName("asecondary1");
         testIndexMetadata2.setSpaceId(512);
         List<TarantoolIndexPartMetadata> parts = new ArrayList<>();
         parts.add(new TarantoolIndexPartMetadata(1, "number"));
@@ -59,13 +60,19 @@ public class TestMetadata extends AbstractTarantoolMetadata {
 
         testIndexMetadata4 = new TarantoolIndexMetadata();
         testIndexMetadata4.setIndexId(3);
-        testIndexMetadata4.setIndexName("secondary3");
+        testIndexMetadata4.setIndexName("asecondary3");
         testIndexMetadata4.setSpaceId(512);
         parts = new ArrayList<>();
         parts.add(new TarantoolIndexPartMetadata(1, "number"));
         parts.add(new TarantoolIndexPartMetadata(2, "number"));
         parts.add(new TarantoolIndexPartMetadata(3, "number"));
         testIndexMetadata4.setIndexParts(parts);
+
+        testIndexMetadata1 = new TarantoolIndexMetadata();
+        testIndexMetadata1.setIndexId(4);
+        testIndexMetadata1.setIndexName("asecondary");
+        testIndexMetadata1.setSpaceId(512);
+        testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadata(1, "number")));
     }
 
     public TarantoolSpaceMetadata getTestSpaceMetadata() {
@@ -76,6 +83,9 @@ public class TestMetadata extends AbstractTarantoolMetadata {
         return testPrimaryIndexMetadata;
     }
 
+    public TarantoolIndexMetadata getTestIndexMetadata1() {
+        return testIndexMetadata1;
+    }
     public TarantoolIndexMetadata getTestIndexMetadata2() {
         return testIndexMetadata2;
     }
@@ -96,9 +106,10 @@ public class TestMetadata extends AbstractTarantoolMetadata {
 
         Map<String, TarantoolIndexMetadata> indexes = new HashMap<>();
         indexes.put("primary", testPrimaryIndexMetadata);
-        indexes.put("secondary1", testIndexMetadata2);
+        indexes.put("asecondary", testIndexMetadata1);
+        indexes.put("asecondary1", testIndexMetadata2);
         indexes.put("secondary2", testIndexMetadata3);
-        indexes.put("secondary3", testIndexMetadata4);
+        indexes.put("asecondary3", testIndexMetadata4);
 
         indexMetadata.put("test", indexes);
         indexMetadataBySpaceId.put(512, indexes);

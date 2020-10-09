@@ -84,8 +84,12 @@ public class TarantoolIndexQuery {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TarantoolIndexQuery that = (TarantoolIndexQuery) o;
         return getIndexId() == that.getIndexId() &&
                 getIteratorType() == that.getIteratorType() &&

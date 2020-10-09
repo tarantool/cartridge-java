@@ -46,7 +46,8 @@ public class ProxyTarantoolMetadata extends AbstractTarantoolMetadata {
                 indexMetadata.putAll(container.getIndexMetadata());
                 container.getSpaceMetadata().forEach((spaceName, spaceMetadata) -> {
                     spaceMetadataById.put(spaceMetadata.getSpaceId(), spaceMetadata);
-                    Map<String, TarantoolIndexMetadata> indexesForSpace = indexMetadata.get(spaceMetadata.getSpaceName());
+                    Map<String, TarantoolIndexMetadata> indexesForSpace =
+                            indexMetadata.get(spaceMetadata.getSpaceName());
                     if (indexesForSpace != null) {
                         indexMetadataBySpaceId.put(spaceMetadata.getSpaceId(), indexesForSpace);
                     }

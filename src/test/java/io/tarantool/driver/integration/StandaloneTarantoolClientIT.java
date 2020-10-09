@@ -5,6 +5,7 @@ import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
@@ -145,8 +146,8 @@ public class StandaloneTarantoolClientIT {
     public void insertAndSelectRequests() throws Exception {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
         //make select request
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        Conditions conditions = Conditions.any();
+        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
 
         int countBeforeInsert = selectResult.size();
         assertTrue(countBeforeInsert >= 2);
@@ -174,7 +175,7 @@ public class StandaloneTarantoolClientIT {
 
         //repeat select request
         TarantoolResult<TarantoolTuple> selectAfterInsertResult =
-                testSpace.select(query, new TarantoolSelectOptions()).get();
+                testSpace.select(conditions).get();
 
         assertEquals(countBeforeInsert + 1, selectAfterInsertResult.size());
 
@@ -210,10 +211,8 @@ public class StandaloneTarantoolClientIT {
         testSpace.replace(newTupleWithSameId);
 
         //select request
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(200));
-        TarantoolResult<TarantoolTuple> selectAfterReplaceResult =
-                testSpace.select(query, new TarantoolSelectOptions()).get();
+        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(200));
+        TarantoolResult<TarantoolTuple> selectAfterReplaceResult = testSpace.select(conditions).get();
 
         assertEquals(1, selectAfterReplaceResult.size());
 
@@ -232,22 +231,20 @@ public class StandaloneTarantoolClientIT {
         int deletedId = 2;
 
         //select request
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(deletedId));
-        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        Conditions conditions = Conditions.equals("id", deletedId);
+        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
 
         Optional<TarantoolTuple> value = selectResult.stream().findFirst();
         assertEquals(1, selectResult.size());
         assertTrue(value.isPresent());
 
         //delete tuple by id
-        TarantoolResult<TarantoolTuple> deleteRequestResult = testSpace.delete(query).get();
+        TarantoolResult<TarantoolTuple> deleteRequestResult = testSpace.delete(conditions).get();
         assertEquals(1, deleteRequestResult.size());
         assertEquals(deletedId, deleteRequestResult.get(0).getInteger(0));
 
         //select after delete request
-        TarantoolResult<TarantoolTuple> selectAfterDeleteResult =
-                testSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectAfterDeleteResult = testSpace.select(conditions).get();
 
         Optional<TarantoolTuple> deletedValue = selectAfterDeleteResult.stream()
                 .filter(v -> v.getInteger(0) == deletedId).findFirst();
@@ -263,39 +260,38 @@ public class StandaloneTarantoolClientIT {
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
         testSpace.insert(tarantoolTuple);
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(123));
+        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(123));
 
         TarantoolResult<TarantoolTuple> updateResult;
 
-        updateResult = testSpace.update(query, TupleOperations.add(4, 100000)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.add(4, 100000)).get();
         assertEquals(101968, updateResult.get(0).getInteger(4));
 
-        updateResult = testSpace.update(query, TupleOperations.subtract(4, 50000)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.subtract(4, 50000)).get();
         assertEquals(51968, updateResult.get(0).getInteger(4));
 
-        updateResult = testSpace.update(query, TupleOperations.set(4, 10)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.set(4, 10)).get();
         assertEquals(10, updateResult.get(0).getInteger(4));
 
-        updateResult = testSpace.update(query, TupleOperations.bitwiseXor(4, 10)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.bitwiseXor(4, 10)).get();
         assertEquals(0, updateResult.get(0).getInteger(4));
 
-        updateResult = testSpace.update(query, TupleOperations.bitwiseOr(4, 5)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.bitwiseOr(4, 5)).get();
         assertEquals(5, updateResult.get(0).getInteger(4));
 
-        updateResult = testSpace.update(query, TupleOperations.bitwiseAnd(4, 6)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.bitwiseAnd(4, 6)).get();
         assertEquals(4, updateResult.get(0).getInteger(4));
 
         // set multiple fields
-        updateResult = testSpace.update(query, TupleOperations.set(3, "new string").andSet(4, 999)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.set(3, "new string").andSet(4, 999)).get();
         assertEquals("new string", updateResult.get(0).getString(3));
         assertEquals(999, updateResult.get(0).getInteger(4));
         assertEquals(5, updateResult.get(0).size());
 
-        updateResult = testSpace.update(query, TupleOperations.delete(4, 1)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.delete(4, 1)).get();
         assertEquals(4, updateResult.get(0).size());
 
-        updateResult = testSpace.update(query, TupleOperations.insert(4, 1888)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.insert(4, 1888)).get();
         assertEquals(5, updateResult.get(0).size());
     }
 
@@ -307,28 +303,25 @@ public class StandaloneTarantoolClientIT {
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
         testSpace.insert(tarantoolTuple);
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(166));
+        Conditions conditions = Conditions.equals("id", 166);
 
         TarantoolResult<TarantoolTuple> updateResult;
 
-        updateResult = testSpace.update(query, TupleOperations.add(4, 10)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.add(4, 10)).get();
         assertEquals(1978, updateResult.get(0).getInteger(4));
 
         //First from the end
-        updateResult = testSpace.update(query, TupleOperations.add(-1, 10)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.add(-1, 10)).get();
         assertEquals(1988, updateResult.get(0).getInteger(4));
 
         //Update by unique index
-        TarantoolIndexQuery queryByUniqIndex = new TarantoolIndexQuery(2);
-        queryByUniqIndex.withKeyValues(Collections.singletonList("a166"));
+        Conditions queryByUniqIndex = Conditions.indexEquals(2, Collections.singletonList("a166"));
 
         updateResult = testSpace.update(queryByUniqIndex, TupleOperations.add(4, 12)).get();
         assertEquals(2000, updateResult.get(0).getInteger(4));
 
         //Update by not unique index
-        TarantoolIndexQuery queryByNotUniqIndex = new TarantoolIndexQuery(1);
-        queryByNotUniqIndex.withKeyValues(Collections.singletonList("J. R. R. Tolkien"));
+        Conditions queryByNotUniqIndex = Conditions.indexEquals(1, Collections.singletonList("J. R. R. Tolkien"));
 
         assertThrows(TarantoolSpaceOperationException.class, () -> testSpace.update(queryByNotUniqIndex,
             TupleOperations.add(4, 12)));
@@ -343,11 +336,10 @@ public class StandaloneTarantoolClientIT {
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
         testSpace.insert(tarantoolTuple);
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(105534));
+        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(105534));
 
         TarantoolResult<TarantoolTuple> updateResult;
-        updateResult = testSpace.update(query, TupleOperations.add("year", 7)).get();
+        updateResult = testSpace.update(conditions, TupleOperations.add("year", 7)).get();
         assertEquals(1900, updateResult.get(0).getInteger(4));
     }
 
@@ -359,25 +351,24 @@ public class StandaloneTarantoolClientIT {
 
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
 
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(255));
+        Conditions conditions = Conditions.equals("id", 255);
 
         TupleOperations ops = TupleOperations.set(4, 2020)
                 .andSplice(2, 5, 1, "aaa");
 
         //run upsert first time tuple
-        TarantoolResult<TarantoolTuple> upsertResult = testSpace.upsert(query, tarantoolTuple, ops).get();
+        testSpace.upsert(conditions, tarantoolTuple, ops).get();
 
-        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
 
         assertEquals(1, selectResult.size());
         assertEquals(1945, selectResult.get(0).getInteger(4));
         assertEquals("Animal Farm: A Fairy Story", selectResult.get(0).getString(2));
 
         //run upsert second time
-        testSpace.upsert(query, tarantoolTuple, ops).get();
+        testSpace.upsert(conditions, tarantoolTuple, ops).get();
 
-        selectResult = testSpace.select(query, new TarantoolSelectOptions()).get();
+        selectResult = testSpace.select(conditions).get();
         assertEquals(1, selectResult.size());
         assertEquals(2020, selectResult.get(0).getInteger(4));
         assertEquals("Animaaaa Farm: A Fairy Story", selectResult.get(0).getString(2));

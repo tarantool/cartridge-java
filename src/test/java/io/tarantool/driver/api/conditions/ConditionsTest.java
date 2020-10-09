@@ -81,7 +81,7 @@ class ConditionsTest {
 
     @Test
     public void testIndexQuery_AfterNotSupported() {
-        Conditions conditions = Conditions.after(Collections.emptyList());
+        Conditions conditions = Conditions.after(Collections.singletonList(1));
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
                 () -> conditions.toIndexQuery(testOperations, testOperations.getTestSpaceMetadata()));
@@ -164,7 +164,7 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongFieldName() {
         Conditions conditions = Conditions
-                .indexEquals("secondary1", Collections.singletonList(123))
+                .indexEquals("asecondary1", Collections.singletonList(123))
                 .andEquals("wrong", 123);
 
         TarantoolFieldNotFoundException ex = assertThrows(TarantoolFieldNotFoundException.class,
@@ -176,7 +176,7 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongFieldId() {
         Conditions conditions = Conditions
-                .indexEquals("secondary1", Collections.singletonList(123))
+                .indexEquals("asecondary1", Collections.singletonList(123))
                 .andEquals(5, 123);
 
         TarantoolFieldNotFoundException ex = assertThrows(TarantoolFieldNotFoundException.class,
@@ -201,8 +201,7 @@ class ConditionsTest {
     public void testIndexQuery_defaultQuery() {
         Conditions conditions = Conditions.any();
 
-        TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).primary()
-                .withKeyValues(Collections.singletonList(null));
+        TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).primary();
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getTestSpaceMetadata()));
     }
@@ -232,6 +231,17 @@ class ConditionsTest {
 
     @Test
     public void testIndexQuery_autoselectSmallestIndex() {
+        Conditions conditions = Conditions.lessOrEquals("second", 456);
+
+        TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).byName(512, "asecondary")
+                .withIteratorType(TarantoolIteratorType.ITER_LE)
+                .withKeyValues(Collections.singletonList(456));
+
+        assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getTestSpaceMetadata()));
+    }
+
+    @Test
+    public void testIndexQuery_autoselectSmallestIndex2() {
         Conditions conditions = Conditions
                 .lessThan("fourth", 456)
                 .andLessThan("second", 123);
