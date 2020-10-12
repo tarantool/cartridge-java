@@ -4,8 +4,8 @@ import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.cursor.TarantoolCursorOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -40,7 +40,8 @@ public class StandaloneTarantoolCursorIT {
     private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolCursorIT.class);
 
     @Container
-    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer();
+    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
+            .withScriptFileName("org/testcontainers/containers/server.lua");
 
     private static TarantoolClient client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -95,10 +96,9 @@ public class StandaloneTarantoolCursorIT {
     @Test
     public void getOneTuple() {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(1));
 
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions());
+        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(1));
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions());
 
         assertTrue(cursor.hasNext());
         TarantoolTuple tuple = cursor.next();
@@ -114,8 +114,8 @@ public class StandaloneTarantoolCursorIT {
     @Test
     public void countAllSmallBatch() {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(3));
+        Conditions conditions = Conditions.any();
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(3));
 
         assertTrue(cursor.hasNext());
         int countTotal = 0;
@@ -128,7 +128,7 @@ public class StandaloneTarantoolCursorIT {
 
         assertEquals(100, countTotal);
 
-        cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(1));
+        cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(1));
 
         assertTrue(cursor.hasNext());
         countTotal = 0;
@@ -144,8 +144,8 @@ public class StandaloneTarantoolCursorIT {
     @Test
     public void countAllSmallBatch2() {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(10));
+        Conditions conditions = Conditions.any();
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(10));
 
         assertTrue(cursor.hasNext());
 
@@ -161,8 +161,8 @@ public class StandaloneTarantoolCursorIT {
     @Test
     public void countAllBatch100() {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(100));
+        Conditions conditions = Conditions.any();
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(100));
 
         assertTrue(cursor.hasNext());
 
@@ -178,8 +178,8 @@ public class StandaloneTarantoolCursorIT {
     @Test
     public void countAllLargeBatch() {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(query, new TarantoolBatchCursorOptions(1000));
+        Conditions conditions = Conditions.any();
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(1000));
 
         assertTrue(cursor.hasNext());
 

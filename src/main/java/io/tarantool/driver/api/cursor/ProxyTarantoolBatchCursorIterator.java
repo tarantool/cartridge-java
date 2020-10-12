@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.cursor;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.ProxyTarantoolSpace;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -27,18 +27,18 @@ public class ProxyTarantoolBatchCursorIterator<T> implements TarantoolIterator<T
 
     private final ProxyTarantoolSpace space;
     private final TarantoolSpaceMetadata spaceMetadata;
-    private final TarantoolIndexQuery indexQuery;
-    private final TarantoolBatchCursorOptions cursorOptions;
+    private final Conditions conditions;
+    private final TarantoolCursorOptions cursorOptions;
     private final TarantoolCallResultMapper<T> resultMapper;
 
     public ProxyTarantoolBatchCursorIterator(ProxyTarantoolSpace space,
-                                             TarantoolIndexQuery indexQuery,
-                                             TarantoolBatchCursorOptions cursorOptions,
+                                             Conditions conditions,
+                                             TarantoolCursorOptions cursorOptions,
                                              TarantoolCallResultMapper<T> resultMapper,
                                              TarantoolSpaceMetadata spaceMetadata) {
         this.space = space;
         this.spaceMetadata = spaceMetadata;
-        this.indexQuery = indexQuery;
+        this.conditions = conditions;
         this.cursorOptions = cursorOptions;
         this.resultMapper = resultMapper;
 
@@ -69,29 +69,21 @@ public class ProxyTarantoolBatchCursorIterator<T> implements TarantoolIterator<T
         return lastTuple;
     }
 
-    @SuppressWarnings("unchecked")
     protected void getNextBatch() {
         TarantoolSelectOptions.Builder selectOptions = new TarantoolSelectOptions.Builder();
         selectOptions.withLimit(cursorOptions.getBatchSize());
 
-        if (lastTuple != null) {
-            selectOptions.withAfter(tupleToMap((TarantoolTuple) lastTuple));
-        }
+        conditions.withLimit(cursorOptions.getBatchSize());
+
+//        if (lastTuple != null) {
+//            selectOptions.withAfter(tupleToMap((TarantoolTuple) lastTuple));
+//        }
 
         try {
-            result = (TarantoolResult<T>) space.select(indexQuery, selectOptions.build(), resultMapper).get();
+            result = space.select(conditions, resultMapper).get();
             resultPos = 0;
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);
         }
-    }
-
-    private Map<String, Object> tupleToMap(TarantoolTuple tuple) {
-        Map<String, Object> map = new LinkedHashMap<>(tuple.size(), 1);
-
-        for (TarantoolFieldFormatMetadata fieldFormatMetadata : spaceMetadata.getSpaceFormatMetadata().values()) {
-            map.put(fieldFormatMetadata.getFieldName(), tuple.getFields().get(fieldFormatMetadata.getFieldPosition()));
-        }
-        return map;
     }
 }

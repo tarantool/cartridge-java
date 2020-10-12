@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.cursor;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpace;
-import io.tarantool.driver.mappers.TarantoolSimpleResultMapper;
+import io.tarantool.driver.mappers.AbstractTarantoolResultMapper;
 
 /**
  * @author Sergey Volgin
@@ -12,10 +12,10 @@ public class SingleTarantoolBatchCursor<T> implements TarantoolCursor<T> {
     private final TarantoolIterator<T> iterator;
 
     public SingleTarantoolBatchCursor(TarantoolSpace space,
-                                      TarantoolIndexQuery indexQuery,
-                                      TarantoolBatchCursorOptions options,
-                                      TarantoolSimpleResultMapper<T> resultMapper) {
-        this.iterator = new SingleTarantoolBatchCursorIterator<T>(space, indexQuery, options, resultMapper);
+                                      Conditions conditions,
+                                      TarantoolCursorOptions options,
+                                      AbstractTarantoolResultMapper<T> resultMapper) {
+        this.iterator = new SingleTarantoolBatchCursorIterator<T>(space, conditions, options, resultMapper);
     }
 
     @Override

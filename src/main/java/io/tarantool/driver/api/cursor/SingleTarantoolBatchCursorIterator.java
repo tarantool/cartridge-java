@@ -1,11 +1,11 @@
 package io.tarantool.driver.api.cursor;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.TarantoolSimpleResultMapper;
+import io.tarantool.driver.mappers.AbstractTarantoolResultMapper;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
@@ -19,16 +19,16 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
     private int resultPos;
     private TarantoolResult<T> result;
     private final TarantoolSpace space;
-    private final TarantoolIndexQuery indexQuery;
-    private final TarantoolBatchCursorOptions cursorOptions;
-    private final TarantoolSimpleResultMapper<T> resultMapper;
+    private final Conditions conditions;
+    private final TarantoolCursorOptions cursorOptions;
+    private final AbstractTarantoolResultMapper<T> resultMapper;
 
     public SingleTarantoolBatchCursorIterator(TarantoolSpace space,
-                                              TarantoolIndexQuery indexQuery,
-                                              TarantoolBatchCursorOptions cursorOptions,
-                                              TarantoolSimpleResultMapper<T> resultMapper) {
+                                              Conditions conditions,
+                                              TarantoolCursorOptions cursorOptions,
+                                              AbstractTarantoolResultMapper<T> resultMapper) {
         this.space = space;
-        this.indexQuery = indexQuery;
+        this.conditions = conditions;
         this.cursorOptions = cursorOptions;
         this.resultMapper = resultMapper;
         this.resultPos = 0;
@@ -37,7 +37,6 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
         getNextBatch();
     }
 
-    @SuppressWarnings("unchecked")
     protected void getNextBatch() {
         TarantoolSelectOptions.Builder selectOptions = new TarantoolSelectOptions.Builder();
         selectOptions.withLimit(cursorOptions.getBatchSize());
@@ -51,7 +50,7 @@ public class SingleTarantoolBatchCursorIterator<T> implements TarantoolIterator<
         }
 
         try {
-            result = (TarantoolResult<T>) space.select(indexQuery, selectOptions.build(), resultMapper).get();
+            result = space.select(conditions, resultMapper).get();
             resultPos = 0;
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);

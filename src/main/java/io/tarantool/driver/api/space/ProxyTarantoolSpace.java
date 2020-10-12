@@ -5,10 +5,11 @@ import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.ProxyTarantoolBatchCursor;
-import io.tarantool.driver.api.cursor.TarantoolBatchCursorOptions;
+import io.tarantool.driver.api.cursor.TarantoolCursorOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.AbstractTarantoolResultMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
@@ -146,7 +147,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                             Class<T> tupleClass) throws TarantoolClientException {
-        return select(conditions, options, tarantoolResultMapperFactory.getByClass(tupleClass));
+        return select(conditions, tarantoolResultMapperFactory.getByClass(tupleClass));
     }
 
     @Override
@@ -157,10 +158,8 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public  <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                             TarantoolSelectOptions options,
-                                                             MessagePackValueMapper resultMapper)
+                                                             AbstractTarantoolResultMapper<T> resultMapper)
             throws TarantoolClientException {
 
         SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>(metadataOperations, spaceMetadata)
@@ -175,33 +174,33 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery) throws TarantoolClientException {
-        return cursor(indexQuery, new TarantoolBatchCursorOptions());
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions) throws TarantoolClientException {
+        return cursor(conditions, new TarantoolCursorOptions());
     }
 
     @Override
-    public TarantoolCursor<TarantoolTuple> cursor(TarantoolIndexQuery indexQuery, TarantoolBatchCursorOptions options)
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions, TarantoolCursorOptions options)
             throws TarantoolClientException {
-        return cursor(indexQuery, options, defaultTupleResultMapper());
+        return cursor(conditions, options, defaultTupleResultMapper());
     }
 
     @Override
-    public <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
-                                  TarantoolBatchCursorOptions options,
-                                  ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> TarantoolCursor<T> cursor(Conditions conditions,
+                                         TarantoolCursorOptions options,
+                                         ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
-        return cursor(indexQuery, options, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return cursor(conditions, options, tarantoolResultMapperFactory.withConverter(tupleMapper));
     }
 
-    private <T> TarantoolCursor<T> cursor(TarantoolIndexQuery indexQuery,
-                                          TarantoolBatchCursorOptions options,
+    private <T> TarantoolCursor<T> cursor(Conditions conditions,
+                                          TarantoolCursorOptions options,
                                           TarantoolCallResultMapper<T> resultMapper) throws TarantoolClientException {
         Optional<TarantoolSpaceMetadata> spaceMetadata = metadataOperations.getSpaceByName(spaceName);
         if (!spaceMetadata.isPresent()) {
             throw new TarantoolClientException("Space metadata not found for : {}", spaceName);
         }
 
-        return new ProxyTarantoolBatchCursor<T>(this, indexQuery, options, resultMapper, spaceMetadata.get());
+        return new ProxyTarantoolBatchCursor<T>(this, conditions, options, resultMapper, spaceMetadata.get());
     }
 
     @Override
