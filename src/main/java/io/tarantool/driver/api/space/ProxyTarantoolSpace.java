@@ -199,11 +199,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations, TarantoolS
     private <T> TarantoolCursor<T> cursor(Conditions conditions,
                                           TarantoolCursorOptions options,
                                           TarantoolCallResultMapper<T> resultMapper) throws TarantoolClientException {
-        Optional<TarantoolSpaceMetadata> spaceMetadata = metadataOperations.getSpaceByName(spaceName);
-        if (!spaceMetadata.isPresent()) {
-            throw new TarantoolClientException("Space metadata not found for : {}", spaceName);
-        }
-
         return new ProxyTarantoolBatchCursor<>(this, conditions, options, resultMapper);
     }
 
