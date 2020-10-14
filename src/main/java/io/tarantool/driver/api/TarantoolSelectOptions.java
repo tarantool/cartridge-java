@@ -3,7 +3,6 @@ package io.tarantool.driver.api;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Represents common tuple selection options not related to the index and filtration, e.g. limit and offset
@@ -17,7 +16,6 @@ public class TarantoolSelectOptions implements Serializable {
 
     private long offset;
     private long limit = MAX_LIMIT;
-    private Map<String, Object> after;
     //TODO query timeouts
 
     public TarantoolSelectOptions() {
@@ -37,14 +35,6 @@ public class TarantoolSelectOptions implements Serializable {
 
     private void setLimit(long limit) {
         this.limit = limit;
-    }
-
-    public Map<String, Object> getAfter() {
-        return after;
-    }
-
-    private void setAfter(Map<String, Object> after) {
-        this.after = after;
     }
 
     /**
@@ -82,13 +72,6 @@ public class TarantoolSelectOptions implements Serializable {
             Assert.state(limit >= 0 && limit <= MAX_LIMIT, "Limit mast be a value between 0 and 0xffffffff");
 
             options.setLimit(limit);
-            return this;
-        }
-
-        public Builder withAfter(Map<String, Object> tuple) {
-            Assert.notNull(tuple, "Tarantool tuple should not be null");
-
-            options.setAfter(tuple);
             return this;
         }
 

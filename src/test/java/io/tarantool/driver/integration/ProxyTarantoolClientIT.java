@@ -1,106 +1,46 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolClient;
 import io.tarantool.driver.ProxyTarantoolClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClusterAddressProvider;
-import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.cursor.TarantoolCursorOptions;
-import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
-import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
-import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Sergey Volgin
  */
+@Testcontainers
 public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
+
+    private static final String TEST_SPACE_NAME = "test__profile";
 
     private static ProxyTarantoolClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
-    public static String USER_NAME;
-    public static String PASSWORD;
-
-    private static final String TEST_SPACE_NAME = "test__profile";
-    private static final String CURSOR_SPACE_NAME = "cursor_test_space";
-
-    private static final int DEFAULT_TIMEOUT = 5 * 1000;
-
     @BeforeAll
-    public static void setUp() throws ExecutionException, InterruptedException {
-        startCluster();
-        USER_NAME = container.getUsername();
-        PASSWORD = container.getPassword();
-        initClient();
-        insertCursorTestData();
-    }
-
-    private static TarantoolClusterAddressProvider getClusterAddressProvider() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withCredentials(credentials)
-                .withEntryFunction("get_routers")
-                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
-                .build();
-
-        TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withDelay(1)
-                .build();
-
-        return new TestWrappedClusterAddressProvider(
-                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
-                container);
-    }
-
-    public static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .build();
-
-        ClusterTarantoolClient clusterClient =
-                new ClusterTarantoolClient(config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
-        client = new ProxyTarantoolClient(clusterClient);
+    public static void setUp() {
+        client = createClusterClient();
     }
 
     @Test
@@ -140,10 +80,6 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         }
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(1_000_000))
-                .withIteratorType(TarantoolIteratorType.ITER_GE);
-
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
 
@@ -157,6 +93,11 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             assertEquals(50 + i, tuple.getInteger(3));
             assertEquals(100 + i, tuple.getInteger(4));
         }
+
+        //insert by index
+        conditions = Conditions.indexGreaterOrEquals("primary", Collections.singletonList(1_000_010));
+        selectResult = profileSpace.select(conditions).get();
+        assertEquals(10, selectResult.size());
     }
 
     @Test
@@ -184,7 +125,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals("John Doe", tuple.getString(2));
 
-        Conditions conditions = Conditions.equals(0 , 2);
+        Conditions conditions = Conditions.equals(0, 2);
         TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(conditions).get();
 
         assertEquals(1, deleteResult.size());
@@ -283,113 +224,5 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals(35, upsertResult.get(0).getInteger(3));
         assertEquals(7, upsertResult.get(0).getInteger(4));
-    }
-
-    private static void insertCursorTestData() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-
-        for (int i = 1; i <= 100; i++) {
-            //insert new data
-            List<Object> values = Arrays.asList(i, i + "abc", i * 10);
-            TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
-            testSpace.insert(tarantoolTuple).get();
-        }
-    }
-
-    @Test
-    public void getOneTuple() {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(1));
-
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions());
-
-        assertTrue(cursor.hasNext());
-        TarantoolTuple tuple = cursor.next();
-        assertFalse(cursor.hasNext());
-
-        assertEquals(1, tuple.getInteger(0));
-        assertEquals("1abc", tuple.getString(1));
-        assertEquals(10, tuple.getInteger(2));
-        assertTrue(tuple.getInteger(3) > 0); //bucket_id
-
-        assertThrows(NoSuchElementException.class, cursor::next);
-    }
-
-    @Test
-    public void countAllSmallBatch() {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-        Conditions conditions = Conditions.any();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(3));
-
-        assertTrue(cursor.hasNext());
-        int countTotal = 0;
-        do {
-            countTotal++;
-            TarantoolTuple t = cursor.next();
-        } while (cursor.hasNext());
-
-        assertEquals(100, countTotal);
-
-        cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(1));
-        assertTrue(cursor.hasNext());
-
-        countTotal = 0;
-        do {
-            countTotal++;
-            TarantoolTuple t = cursor.next();
-        } while (cursor.hasNext());
-
-        assertEquals(100, countTotal);
-    }
-
-    @Test
-    public void countAllSmallBatch2() {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-        Conditions conditions = Conditions.any();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(10));
-
-        assertTrue(cursor.hasNext());
-
-        int countTotal = 0;
-        do {
-            countTotal++;
-            cursor.next();
-        } while (cursor.hasNext());
-
-        assertEquals(100, countTotal);
-    }
-
-    @Test
-    public void countAllBatch100() {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-        Conditions conditions = Conditions.any();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(100));
-
-        assertTrue(cursor.hasNext());
-
-        int countTotal = 0;
-        do {
-            countTotal++;
-            cursor.next();
-        } while (cursor.hasNext());
-
-        assertEquals(100, countTotal);
-    }
-
-    @Test
-    public void countAllLargeBatch() {
-        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
-        Conditions conditions = Conditions.any();
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(1000));
-
-        assertTrue(cursor.hasNext());
-
-        int countTotal = 0;
-        do {
-            countTotal++;
-            cursor.next();
-        } while (cursor.hasNext());
-
-        assertEquals(100, countTotal);
     }
 }

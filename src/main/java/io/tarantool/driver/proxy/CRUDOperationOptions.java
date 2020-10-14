@@ -1,5 +1,7 @@
 package io.tarantool.driver.proxy;
 
+import io.tarantool.driver.api.tuple.TarantoolTuple;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public final class CRUDOperationOptions {
 
     private final Long selectLimit;
     private final Long selectBatchSize;
-    private final Map<String, Object> after;
+    private final TarantoolTuple after;
 
     private final Map<String, Object> resultMap = new HashMap<>(4, 1);
 
@@ -46,7 +48,7 @@ public final class CRUDOperationOptions {
     public static final class Builder {
         private Integer timeout;
         private Long selectLimit;
-        private Map<String, Object> after;
+        private TarantoolTuple after;
         private Long selectBatchSize;
 
         public Builder() {
@@ -67,7 +69,7 @@ public final class CRUDOperationOptions {
             return this;
         }
 
-        public Builder withSelectAfter(Map<String, Object> tuple) {
+        public Builder withSelectAfter(TarantoolTuple tuple) {
             this.after = tuple;
             return this;
         }

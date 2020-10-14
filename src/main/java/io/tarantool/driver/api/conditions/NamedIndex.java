@@ -1,12 +1,8 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 import org.springframework.util.Assert;
-
-import java.util.Optional;
 
 /**
  * Represents an index defined by name
@@ -29,15 +25,8 @@ public class NamedIndex implements FieldIdentifier<TarantoolIndexMetadata, Strin
     }
 
     @Override
-    public TarantoolIndexMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
-        Optional<TarantoolIndexMetadata> indexMetadata =
-                metadataOperations.getIndexByName(spaceMetadata.getSpaceName(), name);
-        if (!indexMetadata.isPresent()) {
-            throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), name);
-        }
-
-        return indexMetadata.get();
+    public TarantoolIndexMetadata metadata(TarantoolSpaceMetadataOperations spaceMetadataOperations) {
+        return spaceMetadataOperations.getIndexByName(name);
     }
 
     @Override

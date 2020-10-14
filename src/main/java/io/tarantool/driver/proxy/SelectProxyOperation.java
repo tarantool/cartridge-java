@@ -4,8 +4,7 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -30,17 +29,15 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T> {
-        private final TarantoolMetadataOperations operations;
-        private final TarantoolSpaceMetadata metadata;
+        private final TarantoolSpaceMetadataOperations spaceMetadataOperations;
         private TarantoolClient client;
         private String spaceName;
         private String functionName;
         private TarantoolCallResultMapper<T> resultMapper;
         private Conditions conditions;
 
-        public Builder(TarantoolMetadataOperations operations, TarantoolSpaceMetadata metadata) {
-            this.operations = operations;
-            this.metadata = metadata;
+        public Builder(TarantoolSpaceMetadataOperations spaceMetadataOperations) {
+            this.spaceMetadataOperations = spaceMetadataOperations;
         }
 
         public Builder<T> withClient(TarantoolClient client) {
@@ -82,13 +79,13 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withSelectBatchSize(conditions.getLimit())
                     .withSelectLimit(conditions.getLimit());
 
-//            if (selectOptions.getAfter() != null) {
-//                requestOptions.withSelectAfter(selectOptions.getAfter());
-//            }
+            if (conditions.getAfterTuple() != null) {
+                requestOptions.withSelectAfter(conditions.getAfterTuple());
+            }
 
             List<Object> arguments = Arrays.asList(
                     spaceName,
-                    conditions.toProxyQuery(operations, metadata),
+                    conditions.toProxyQuery(spaceMetadataOperations),
                     requestOptions.build().asMap()
             );
 

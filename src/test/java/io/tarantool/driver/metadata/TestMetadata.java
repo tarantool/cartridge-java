@@ -12,6 +12,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TestMetadata extends AbstractTarantoolMetadata {
 
+    public static final String SPACE_NAME = "test";
+
     private final TarantoolSpaceMetadata testSpaceMetadata;
     private final TarantoolIndexMetadata testPrimaryIndexMetadata;
     private final TarantoolIndexMetadata testIndexMetadata1;
@@ -22,7 +24,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
     public TestMetadata() {
         testSpaceMetadata = new TarantoolSpaceMetadata();
         testSpaceMetadata.setSpaceId(512);
-        testSpaceMetadata.setSpaceName("test");
+        testSpaceMetadata.setSpaceName(SPACE_NAME);
         TarantoolFieldMetadata firstFieldMetadata = new TarantoolFieldMetadata("first", "string", 0);
         TarantoolFieldMetadata secondFieldMetadata = new TarantoolFieldMetadata("second", "number", 1);
         TarantoolFieldMetadata thirdFieldMetadata = new TarantoolFieldMetadata("third", "number", 2);
@@ -101,7 +103,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
     @Override
     protected CompletableFuture<Void> populateMetadata() {
 
-        spaceMetadata.put("test", testSpaceMetadata);
+        spaceMetadata.put(SPACE_NAME, testSpaceMetadata);
         spaceMetadataById.put(512, testSpaceMetadata);
 
         Map<String, TarantoolIndexMetadata> indexes = new HashMap<>();
@@ -111,7 +113,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
         indexes.put("secondary2", testIndexMetadata3);
         indexes.put("asecondary3", testIndexMetadata4);
 
-        indexMetadata.put("test", indexes);
+        indexMetadata.put(SPACE_NAME, indexes);
         indexMetadataBySpaceId.put(512, indexes);
 
         return CompletableFuture.completedFuture(null);

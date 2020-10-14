@@ -2,8 +2,7 @@ package io.tarantool.driver.api.conditions;
 
 import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.metadata.TarantoolFieldMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 import org.springframework.util.Assert;
 
 import java.util.Optional;
@@ -29,12 +28,12 @@ public class PositionField implements FieldIdentifier<TarantoolFieldMetadata, In
     }
 
     @Override
-    public TarantoolFieldMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolFieldMetadata metadata(TarantoolSpaceMetadataOperations spaceMetadataOperations) {
 
-        Optional<TarantoolFieldMetadata> fieldMetadata = spaceMetadata.getFieldByPosition(position);
+        Optional<TarantoolFieldMetadata> fieldMetadata =
+                spaceMetadataOperations.getSpaceMetadata().getFieldByPosition(position);
         if (!fieldMetadata.isPresent()) {
-            throw new TarantoolFieldNotFoundException(position, spaceMetadata);
+            throw new TarantoolFieldNotFoundException(position, spaceMetadataOperations.getSpaceMetadata());
         }
 
         return fieldMetadata.get();

@@ -3,7 +3,6 @@ package io.tarantool.driver.proxy;
 import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
@@ -12,6 +11,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TestMetadata;
+import io.tarantool.driver.metadata.TestSpaceMetadata;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.Test;
 
@@ -116,8 +116,10 @@ public class ProxyOperationBuildersTest {
     @Test
     public void selectOperationBuilderTest() {
         TestMetadata operations = new TestMetadata();
+        TestSpaceMetadata spaceMetadata = new TestSpaceMetadata(operations);
+
         assertThrows(IllegalArgumentException.class, () ->
-                new SelectProxyOperation.Builder<>(operations, operations.getTestSpaceMetadata()).build());
+                new SelectProxyOperation.Builder<>(spaceMetadata).build());
 
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(5L));
@@ -130,7 +132,7 @@ public class ProxyOperationBuildersTest {
         Conditions conditions = Conditions.equals("second", 55).withLimit(100);
 
         SelectProxyOperation<TarantoolTuple> op =
-                new SelectProxyOperation.Builder<TarantoolTuple>(operations, operations.getTestSpaceMetadata())
+                new SelectProxyOperation.Builder<TarantoolTuple>(spaceMetadata)
                 .withClient(client)
                 .withSpaceName("space1")
                 .withFunctionName("function1")

@@ -10,15 +10,14 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.AbstractTarantoolResultMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolSimpleResultMapper;
 import io.tarantool.driver.mappers.TarantoolSimpleResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.*;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.operations.TupleOperations;
@@ -30,6 +29,7 @@ import io.tarantool.driver.protocol.requests.TarantoolUpdateRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
 import org.msgpack.value.ArrayValue;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpace implements TarantoolSpaceOperations {
+public class TarantoolSpace implements TarantoolSpaceOperations, TarantoolSpaceMetadataOperations {
 
     private final int spaceId;
     private final TarantoolClientConfig config;
@@ -84,7 +84,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
 
             TarantoolDeleteRequest request = new TarantoolDeleteRequest.Builder()
                     .withSpaceId(spaceId)
@@ -178,7 +178,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                             AbstractTarantoolResultMapper<T> resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
             TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
@@ -219,13 +219,13 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                           TarantoolCursorOptions options,
                                           AbstractTarantoolResultMapper<T> resultMapper)
             throws TarantoolClientException {
-        return new SingleTarantoolBatchCursor<T>(this, conditions, options, resultMapper);
+        return new SingleTarantoolBatchCursor<>(this, conditions, options, resultMapper);
     }
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
                                                                      TupleOperations operations) {
-        return update(conditions, operations, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return update(conditions, operations, defaultTupleResultMapper());
     }
 
     @Override
@@ -241,7 +241,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
 
             Optional<TarantoolIndexMetadata> indexMetadata =
                     metadataOperations.getIndexById(spaceId, indexQuery.getIndexId());
@@ -267,7 +267,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(Conditions conditions,
                                                                      TarantoolTuple tuple,
                                                                      TupleOperations operations) {
-        return upsert(conditions, tuple, operations, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return upsert(conditions, tuple, operations, defaultTupleResultMapper());
     }
 
     @Override
@@ -279,13 +279,46 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         return upsert(conditions, tuple, operations, tarantoolResultMapperFactory.withConverter(tupleMapper));
     }
 
+    @Override
+    public TarantoolIndexMetadata getIndexById(int indexId) {
+        Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations.getIndexById(spaceId, indexId);
+        if (!indexMetadata.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), indexId);
+        }
+
+        return indexMetadata.get();
+    }
+
+    @Override
+    public TarantoolIndexMetadata getIndexByName(String indexName) {
+        Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations.getIndexByName(spaceId, indexName);
+        if (!indexMetadata.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), indexName);
+        }
+        return indexMetadata.get();
+    }
+
+    @Override
+    public Map<String, TarantoolIndexMetadata> getSpaceIndexes() {
+        Optional<Map<String, TarantoolIndexMetadata>> indexMetadataMap = metadataOperations.getSpaceIndexes(spaceId);
+        if (!indexMetadataMap.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName());
+        }
+        return indexMetadataMap.get();
+    }
+
+    @Override
+    public TarantoolSpaceMetadata getSpaceMetadata() {
+        return spaceMetadata;
+    }
+
     private <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
                                                              TarantoolTuple tuple,
                                                              TupleOperations operations,
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
-            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+            TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
 
             TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(spaceMetadata)
                     .withSpaceId(spaceId)
@@ -310,8 +343,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     private TarantoolSimpleResultMapper<TarantoolTuple> defaultTupleResultMapper() {
-        this.tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
-        return tarantoolResultMapperFactory.getByClass(TarantoolTuple.class);
+        return tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
     }
 
     @Override

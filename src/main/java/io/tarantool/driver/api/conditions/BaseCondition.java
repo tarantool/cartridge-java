@@ -1,7 +1,6 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +12,8 @@ import java.util.List;
  */
 public abstract class BaseCondition implements Condition {
 
-    private final Operator operator;
-    private final FieldIdentifier<?, ?> field;
+    protected final Operator operator;
+    protected final FieldIdentifier<?, ?> field;
 
     public BaseCondition(Operator operator, FieldIdentifier<?, ?> field) {
         this.operator = operator;
@@ -32,7 +31,7 @@ public abstract class BaseCondition implements Condition {
     }
 
     @Override
-    public List<Object> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata) {
+    public List<Object> toList(TarantoolSpaceMetadataOperations spaceMetadataOperations) {
         return Arrays.asList(operator.getCode(), field.toIdentifier(), value());
     }
 }

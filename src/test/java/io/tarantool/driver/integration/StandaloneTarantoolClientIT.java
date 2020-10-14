@@ -3,7 +3,6 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -26,8 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.TarantoolContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
@@ -48,46 +45,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class StandaloneTarantoolClientIT {
+public class StandaloneTarantoolClientIT extends SharedTarantoolContainer {
 
-    private static final String TEST_SPACE_NAME = "test_space";
     private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
 
-    @Container
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
-
     private static TarantoolClient client;
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
         assertTrue(tarantoolContainer.isRunning());
-        initClient();
+
+        log.info("Attempting connect to Tarantool");
+        client = createClient();
+        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     public static void tearDown() throws Exception {
         client.close();
         assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
-    }
-
-    private static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
-
-        log.info("Attempting connect to Tarantool");
-        client = new StandaloneTarantoolClient(config, serverAddress);
-        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     @Test

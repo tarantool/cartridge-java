@@ -48,17 +48,15 @@ local function crud_get_schema()
                 _format = space._format,
             }
 
-            for i, space_index in pairs(space.index) do
-                if type(i) == 'number' then
-                    local index_copy = {
-                        id = space_index.id,
-                        name = space_index.name,
-                        unique = space_index.unique,
-                        type = space_index.type,
-                        parts = space_index.parts,
-                    }
-                    table.insert(space_copy.index, index_copy)
-                end
+            for i, space_index in ipairs(space.index) do
+                local index_copy = {
+                    id = space_index.id,
+                    name = space_index.name,
+                    unique = space_index.unique,
+                    type = space_index.type,
+                    parts = space_index.parts,
+                }
+                table.insert(space_copy.index, index_copy)
             end
 
             table.insert(uniq_spaces, {space_copy} )

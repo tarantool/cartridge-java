@@ -9,13 +9,15 @@ import io.tarantool.driver.api.cursor.TarantoolCursorOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.mappers.AbstractTarantoolResultMapper;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import io.tarantool.driver.proxy.DeleteProxyOperation;
 import io.tarantool.driver.proxy.InsertProxyOperation;
@@ -26,6 +28,7 @@ import io.tarantool.driver.proxy.UpdateProxyOperation;
 import io.tarantool.driver.proxy.UpsertProxyOperation;
 import org.msgpack.value.ArrayValue;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -35,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Sergey Volgin
  */
-public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
+public class ProxyTarantoolSpace implements TarantoolSpaceOperations, TarantoolSpaceMetadataOperations {
 
     private final String spaceName;
     private final ProxyTarantoolClient client;
@@ -57,7 +60,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
             throws TarantoolClientException {
-        return delete(conditions, tarantoolResultMapperFactory.getByClass(TarantoolTuple.class));
+        return delete(conditions, defaultTupleResultMapper());
     }
 
     @Override
@@ -71,7 +74,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     private <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
                                                             TarantoolCallResultMapper<T> resultMapper)
             throws TarantoolClientException {
-        TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+        TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
 
         DeleteProxyOperation<T> operation = new DeleteProxyOperation.Builder<T>()
                 .withClient(client)
@@ -146,7 +149,8 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                            Class<T> tupleClass) throws TarantoolClientException {
+                                                            Class<T> tupleClass)
+            throws TarantoolClientException {
         return select(conditions, tarantoolResultMapperFactory.getByClass(tupleClass));
     }
 
@@ -162,7 +166,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
                                                              AbstractTarantoolResultMapper<T> resultMapper)
             throws TarantoolClientException {
 
-        SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>(metadataOperations, spaceMetadata)
+        SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>(this)
                 .withClient(client)
                 .withSpaceName(spaceName)
                 .withFunctionName(client.getSelectFunctionName())
@@ -200,7 +204,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
             throw new TarantoolClientException("Space metadata not found for : {}", spaceName);
         }
 
-        return new ProxyTarantoolBatchCursor<T>(this, conditions, options, resultMapper, spaceMetadata.get());
+        return new ProxyTarantoolBatchCursor<>(this, conditions, options, resultMapper);
     }
 
     @Override
@@ -219,7 +223,7 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     private <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
                                                              TupleOperations operations,
                                                              TarantoolCallResultMapper<T> resultMapper) {
-        TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
+        TarantoolIndexQuery indexQuery = conditions.toIndexQuery(this);
 
         UpdateProxyOperation<T> operation = new UpdateProxyOperation.Builder<T>()
                 .withClient(client)
@@ -264,9 +268,41 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return executeOperation(operation);
     }
 
+    @Override
+    public TarantoolIndexMetadata getIndexById(int indexId) {
+        Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations.getIndexById(spaceName, indexId);
+        if (!indexMetadata.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), indexId);
+        }
+
+        return indexMetadata.get();
+    }
+
+    @Override
+    public TarantoolIndexMetadata getIndexByName(String indexName) {
+        Optional<TarantoolIndexMetadata> indexMetadata = metadataOperations.getIndexByName(spaceName, indexName);
+        if (!indexMetadata.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceName, indexName);
+        }
+        return indexMetadata.get();
+    }
+
+    @Override
+    public Map<String, TarantoolIndexMetadata> getSpaceIndexes() {
+        Optional<Map<String, TarantoolIndexMetadata>> indexMetadataMap = metadataOperations.getSpaceIndexes(spaceName);
+        if (!indexMetadataMap.isPresent()) {
+            throw new TarantoolIndexNotFoundException(spaceName);
+        }
+        return indexMetadataMap.get();
+    }
+
+    @Override
+    public TarantoolSpaceMetadata getSpaceMetadata() {
+        return spaceMetadata;
+    }
+
     private TarantoolCallResultMapper<TarantoolTuple> defaultTupleResultMapper() {
-        this.tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
-        return tarantoolResultMapperFactory.getByClass(TarantoolTuple.class);
+        return this.tarantoolResultMapperFactory.withDefaultTupleValueConverter(spaceMetadata);
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> executeOperation(ProxyOperation<T> operation) {

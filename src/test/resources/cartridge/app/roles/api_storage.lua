@@ -15,7 +15,7 @@ local function init_space()
             }
     )
 
-    profile:create_index('profile_id', { parts = { 'profile_id' }, if_not_exists = true, })
+    profile:create_index('primary', { parts = { 'profile_id' }, if_not_exists = true, })
     profile:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     -- create cursor test space
@@ -46,7 +46,7 @@ local function init_space()
             }
     )
 
-    test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    test_space:create_index('primary', { parts = { 'id' }, if_not_exists = true, })
     test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 end
 

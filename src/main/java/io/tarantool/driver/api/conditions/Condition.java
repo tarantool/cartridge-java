@@ -1,7 +1,6 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 
 import java.util.List;
 
@@ -35,9 +34,8 @@ public interface Condition {
     /**
      * Serializes the condition into a form of Java list
      *
-     * @param metadataOperations metadata operations
-     * @param spaceMetadata space metadata
+     * @param spaceMetadataOperations metadata operations for space
      * @return list of serialized conditions
      */
-    List<Object> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);
+    List<Object> toList(TarantoolSpaceMetadataOperations spaceMetadataOperations);
 }

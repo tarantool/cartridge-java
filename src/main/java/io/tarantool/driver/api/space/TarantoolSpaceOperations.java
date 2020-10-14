@@ -1,9 +1,7 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.api.TarantoolSelectOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursorOptions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
-import io.tarantool.driver.api.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;

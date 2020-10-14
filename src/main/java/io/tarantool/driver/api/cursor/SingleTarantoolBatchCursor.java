@@ -15,7 +15,7 @@ public class SingleTarantoolBatchCursor<T> implements TarantoolCursor<T> {
                                       Conditions conditions,
                                       TarantoolCursorOptions options,
                                       AbstractTarantoolResultMapper<T> resultMapper) {
-        this.iterator = new SingleTarantoolBatchCursorIterator<T>(space, conditions, options, resultMapper);
+        this.iterator = new SingleTarantoolBatchCursorIterator<>(space, conditions, options, resultMapper);
     }
 
     @Override

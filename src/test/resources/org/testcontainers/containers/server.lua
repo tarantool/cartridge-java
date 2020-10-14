@@ -45,11 +45,23 @@ c = box.schema.space.create('cursor_test_space')
 c:format({
     { name = 'id', type = 'unsigned' },
     { name = 'name', type = 'string' },
-    { name = 'year', type = 'unsigned' }
+    { name = 'year', type = 'unsigned' },
 });
 c:create_index('primary', {
     type = 'tree',
     parts = {'id'}
+})
+
+m = box.schema.space.create('cursor_test_space_multi_part_key')
+m:format({
+    { name = 'id', type = 'unsigned' },
+    { name = 'name', type = 'string' },
+    { name = 'year', type = 'unsigned' },
+});
+
+m:create_index('primary', {
+    type = 'tree',
+    parts = {'id', 'name'}
 })
 
 function user_function_no_param()

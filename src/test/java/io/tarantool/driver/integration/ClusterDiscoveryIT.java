@@ -14,8 +14,8 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,22 +28,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Sergey Volgin
  * @author Alexey Kuzin
  */
+@Testcontainers
 public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
     private static final String TEST_ROUTER1_URI = "localhost:3301";
     private static final String TEST_ROUTER2_URI = "localhost:3311";
-
-    @BeforeAll
-    public static void setUp() {
-        startCluster();
-    }
 
     @Test
     public void httpClusterDiscovererTest() throws TarantoolClientException {
         HTTPDiscoveryClusterAddressProvider addressProvider = getHttpProvider();
         Collection<TarantoolServerAddress> nodes = addressProvider.getAddresses();
 
-        assertEquals(nodes.size(), 2);
+        assertEquals(2, nodes.size());
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));

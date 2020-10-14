@@ -1,7 +1,6 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadataOperations;
 
 /**
  * Represents filtering operand in conditions, it may be an index or a field
@@ -13,11 +12,10 @@ public interface FieldIdentifier<T, O> {
     /**
      * Returns metadata object corresponding to the field identifier type
      *
-     * @param metadataOperations for retrieving the operand metadata and checking the filed or index availability
-     * @param spaceMetadata space metadata this field or index belongs to
+     * @param spaceMetadataOperations for retrieving the operand metadata and checking the filed or index availability
      * @return name to be used in filter condition
      */
-    T metadata(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);
+    T metadata(TarantoolSpaceMetadataOperations spaceMetadataOperations);
 
     /**
      * Get serializable form of the identifier
