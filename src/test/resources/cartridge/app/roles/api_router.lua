@@ -37,7 +37,7 @@ local function crud_get_schema()
     local uniq_spaces = {}
     local spaces_ids = {}
     for _, space in pairs(replicaset.master.conn.space) do
-        
+
         if (spaces_ids[space.id] == nil) then
             local space_copy = {
                 engine = space.engine,
@@ -48,7 +48,8 @@ local function crud_get_schema()
                 _format = space._format,
             }
 
-            for i, space_index in ipairs(space.index) do
+            for i = 0, #space.index do
+                local space_index = space.index[i]
                 local index_copy = {
                     id = space_index.id,
                     name = space_index.name,

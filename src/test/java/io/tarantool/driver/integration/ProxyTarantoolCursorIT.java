@@ -67,6 +67,7 @@ public class ProxyTarantoolCursorIT extends SharedCartridgeContainer {
 
         assertThrows(NoSuchElementException.class, cursor::next);
     }
+
     @Test
     public void getTuples_withLimitAndCondition() {
         TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
@@ -90,6 +91,32 @@ public class ProxyTarantoolCursorIT extends SharedCartridgeContainer {
 
         assertEquals(13, countTotal);
         assertEquals(Arrays.asList(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24), tupleIds);
+        assertThrows(NoSuchElementException.class, cursor::next);
+    }
+
+    @Test
+    public void getTuples_withLimitAndConditionDescending() {
+        TarantoolSpaceOperations testSpace = client.space(CURSOR_SPACE_NAME);
+
+        Conditions conditions = Conditions
+                .lessOrEquals("id", Collections.singletonList(55))
+                .withLimit(13);
+
+        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, new TarantoolCursorOptions(3));
+
+        assertTrue(cursor.hasNext());
+        List<Integer> tupleIds = new ArrayList<>();
+        int countTotal = 0;
+        boolean hasNext;
+        do {
+            countTotal++;
+            TarantoolTuple t = cursor.next();
+            tupleIds.add(t.getInteger(0));
+            hasNext = cursor.hasNext();
+        } while (hasNext);
+
+        assertEquals(13, countTotal);
+        assertEquals(Arrays.asList(55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43), tupleIds);
         assertThrows(NoSuchElementException.class, cursor::next);
     }
 

@@ -17,12 +17,12 @@ import org.testcontainers.junit.jupiter.Container;
 
 abstract class SharedCartridgeContainer {
 
-    protected static final int DEFAULT_TEST_TIMEOUT = 500 * 1000;
+    protected static final int DEFAULT_TEST_TIMEOUT = 5 * 1000;
 
     @Container
     protected static final TarantoolCartridgeContainer container = new TarantoolCartridgeContainer(
-            "tarantool/tarantool:2.x-centos7",
-            "tarantool/cartridge-driver-test",
+            //"tarantool/tarantool:2.x-centos7",
+            //"tarantool/cartridge-driver-test",
             "cartridge/instances.yml",
             "cartridge/topology.lua")
             .withDirectoryBinding("cartridge")
