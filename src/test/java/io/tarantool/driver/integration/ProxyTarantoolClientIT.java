@@ -14,7 +14,6 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Sergey Volgin
  */
-@Testcontainers
 public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     private static final String TEST_SPACE_NAME = "test__profile";
@@ -40,6 +38,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @BeforeAll
     public static void setUp() {
+        startCluster();
         client = createClusterClient();
     }
 

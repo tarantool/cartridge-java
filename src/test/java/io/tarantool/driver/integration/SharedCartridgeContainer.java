@@ -12,14 +12,20 @@ import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
+import org.junit.ClassRule;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 abstract class SharedCartridgeContainer {
 
     protected static final int DEFAULT_TEST_TIMEOUT = 5 * 1000;
 
-    @Container
+    protected static void startCluster() {
+        if (!container.isRunning()) {
+            container.start();
+        }
+    }
+
+    @ClassRule
     protected static final TarantoolCartridgeContainer container = new TarantoolCartridgeContainer(
             //"tarantool/tarantool:2.x-centos7",
             //"tarantool/cartridge-driver-test",

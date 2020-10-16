@@ -10,7 +10,6 @@ import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Testcontainers
 public class ProxyTarantoolCursorIT extends SharedCartridgeContainer {
 
     private static final String CURSOR_SPACE_NAME = "cursor_test_space";
@@ -34,6 +32,7 @@ public class ProxyTarantoolCursorIT extends SharedCartridgeContainer {
 
     @BeforeAll
     public static void setUp() throws ExecutionException, InterruptedException {
+        startCluster();
         client = createClusterClient();
         insertCursorTestData();
     }
