@@ -1,6 +1,6 @@
 # Java driver for Tarantool Cartridge
 
-[![java-driver:ubuntu/master Actions Status](https://github.com/akudiyar/tarantool-cartridge-java-driver/workflows/ubuntu-master/badge.svg)](https://github.com/akudiyar/tarantool-cartridge-java-driver/actions)
+[![java-driver:ubuntu/master Actions Status](https://github.com/tarantool/cartridge-java/workflows/ubuntu-master/badge.svg)](https://github.com/tarantool/cartridge-java/actions)
 
 Java driver for Tarantool Cartridge for Tarantool versions 1.10+ based on the asynchronous
 [Netty](https://netty.io) framework and official
@@ -177,7 +177,7 @@ class Scratch {
 
 ## Documentation
 
-The Java Docs are available at [Github pages](https://akudiyar.github.io/tarantool-java-driver/).
+The Java Docs are available at [Github pages](https://tarantool.github.io/cartridge-java/).
 
 If you have any questions about working with Tarantool, check out the
 site [tarantool.io](https://tarantool.io/).
@@ -187,13 +187,17 @@ Stack Overflow with tag [tarantool](https://stackoverflow.com/questions/tagged/t
 or join our community support chats in Telegram: [English](https://t.me/tarantool)
 and [Russian](https://t.me/tarantool).
 
-## [Changelog](https://github.com/akudiyar/tarantool-java-driver/blob/master/CHANGELOG.md)
+## [Changelog](https://github.com/tarantool/cartridge-java/blob/master/CHANGELOG.md)
 
-## [License](https://github.com/akudiyar/tarantool-java-driver/blob/master/LICENSE)
+## [License](https://github.com/tarantool/cartridge-java/blob/master/LICENSE)
 
 ## Requirements
 
 Java 1.8 or higher is required for building and using this driver.
+
+##Building
+
+This driver is deployed to Maven central, so you are not required to build it yourself to use. But if you want to, you can use `./mvnw verify` to run unit tests and `./mvnw test -Pintegration` to run integration tests (Docker accessible to curent user is required)
 
 ## Contributing
 
