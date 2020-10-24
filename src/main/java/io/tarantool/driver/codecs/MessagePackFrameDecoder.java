@@ -30,20 +30,30 @@ public class MessagePackFrameDecoder extends ReplayingDecoder<MessagePackFrameDe
 
             switch (state()) {
                 case LENGTH:
-                    try (ByteBufInputStream in = new ByteBufInputStream(byteBuf.readBytes(MINIMAL_HEADER_SIZE))) {
+                    ByteBuf lenBuf = byteBuf.readBytes(MINIMAL_HEADER_SIZE);
+                    try (ByteBufInputStream in = new ByteBufInputStream(lenBuf)) {
                         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
                         size = unpacker.unpackInt();
                         checkpoint(DecoderState.BODY);
                     }
+                    lenBuf.release();
                 case BODY:
                     if (size > 0) {
-                        try (ByteBufInputStream in = new ByteBufInputStream(byteBuf.readBytes(size))) {
+                        if (byteBuf.readableBytes() < size) {
+                            return;
+                        }
+                        ByteBuf bodyBuf = byteBuf.readBytes(size);
+                        try (ByteBufInputStream in = new ByteBufInputStream(bodyBuf)) {
                             MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
                             list.add(TarantoolResponse.fromMessagePack(unpacker));
                             size = 0;
                         }
+                        bodyBuf.release();
                     }
                     checkpoint(DecoderState.LENGTH);
+                    break;
+                default:
+                   throw new Error("Shouldn't reach here.");
             }
     }
 
