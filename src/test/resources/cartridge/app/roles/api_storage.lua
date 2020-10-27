@@ -1,5 +1,3 @@
-local crud = require('crud')
-
 local function init_space()
     local profile = box.schema.space.create(
             'test__profile',
@@ -51,9 +49,6 @@ local function init_space()
 end
 
 local function init(opts)
-    -- initialize crud
-    crud.init()
-
     if opts.is_master then
         init_space()
     end
@@ -65,6 +60,6 @@ return {
     role_name = 'app.roles.api_storage',
     init = init,
     dependencies = {
-        'cartridge.roles.vshard-storage'
+        'cartridge.roles.crud-storage'
     }
 }

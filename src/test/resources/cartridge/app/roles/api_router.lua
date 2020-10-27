@@ -1,35 +1,4 @@
-local cartridge = require('cartridge')
 local vshard = require('vshard')
-local crud = require('crud')
-
--- CRUD functions wrappers
-local function crud_get(space_name, key, opts)
-    return crud.get(space_name, key, opts)
-end
-
-local function crud_insert(space_name, obj, opts)
-    return crud.insert(space_name, obj, opts)
-end
-
-local function crud_delete(space_name, key, opts)
-    return crud.delete(space_name, key, opts)
-end
-
-local function crud_replace(space_name, obj, opts)
-    return crud.replace(space_name, obj, opts)
-end
-
-local function crud_update(space_name, key, operations, opts)
-    return crud.update(space_name, key, operations, opts)
-end
-
-local function crud_upsert(space_name, obj, operations, opts)
-    return crud.upsert(space_name, obj, operations, opts)
-end
-
-local function crud_select(space_name, user_conditions, opts)
-    return crud.select(space_name, user_conditions, opts)
-end
 
 -- function to get cluster schema
 local function crud_get_schema()
@@ -70,16 +39,6 @@ end
 
 
 local function init(opts)
-    if opts.is_master then
-    end
-
-    rawset(_G, 'crud_get', crud_get)
-    rawset(_G, 'crud_insert', crud_insert)
-    rawset(_G, 'crud_delete', crud_delete)
-    rawset(_G, 'crud_replace', crud_replace)
-    rawset(_G, 'crud_update', crud_update)
-    rawset(_G, 'crud_upsert', crud_upsert)
-    rawset(_G, 'crud_select', crud_select)
 
     rawset(_G, 'crud_get_schema', crud_get_schema)
 
@@ -90,6 +49,6 @@ return {
     role_name = 'app.roles.api_router',
     init = init,
     dependencies = {
-        'cartridge.roles.vshard-router'
+        'cartridge.roles.crud-router',
     }
 }
