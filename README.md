@@ -151,7 +151,8 @@ class Scratch {
 ### Proxy Tarantool client
 
 A decorator for any of the basic client types. Allows connecting to instances with CRUD interfaces defined as user API
-functions or as exposed [CRUD](https://github.com/tarantool/crud) functions. Works with tarantool/crud 0.2.0+.
+functions or Cartridge roles based on 'crud-router' from module [CRUD](https://github.com/tarantool/crud). Works with
+tarantool/crud 0.3.0+.
 
 See an example how to use the `ProxyTarantoolClient`:
 
@@ -165,6 +166,7 @@ class Scratch {
         TarantoolClient client = new ProxyTarantoolClient(clusterClient);
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
+        // crud.select(...) on the Cartridge router will be called internally
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
 

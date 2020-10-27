@@ -33,8 +33,8 @@ local cartridge = require('cartridge')
 local ok, err = cartridge.cfg({
     workdir = 'tmp/db',
     roles = {
-        'cartridge.roles.vshard-storage',
-        'cartridge.roles.vshard-router',
+        'cartridge.roles.crud-storage',
+        'cartridge.roles.crud-router',
         'app.roles.api_router',
         'app.roles.api_storage',
         'app.roles.custom',
