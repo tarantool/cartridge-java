@@ -158,8 +158,14 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                             Class<T> tupleClass)
             throws TarantoolClientException {
-        ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
-        return select(conditions, tarantoolResultMapperFactory.withConverter(tupleClass, converter));
+        MessagePackValueMapper mapper;
+        if (TarantoolTuple.class.isAssignableFrom(tupleClass)) {
+            mapper = defaultTupleResultMapper();
+        } else {
+            ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
+            mapper = tarantoolResultMapperFactory.withConverter(tupleClass, converter);
+        }
+        return select(conditions, mapper);
     }
 
     @Override

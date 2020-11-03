@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
@@ -142,8 +143,14 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                             Class<T> tupleClass) throws TarantoolClientException {
-        ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
-        return select(conditions, tarantoolResultMapperFactory.withConverter(tupleClass, converter));
+        TarantoolCallResultMapper<T> mapper;
+        if (TarantoolTuple.class.isAssignableFrom(tupleClass)) {
+            mapper = (TarantoolCallResultMapper<T>) defaultTupleResultMapper();
+        } else {
+            ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
+            mapper = tarantoolResultMapperFactory.withConverter(tupleClass, converter);
+        }
+        return select(conditions, mapper);
     }
 
     @Override
