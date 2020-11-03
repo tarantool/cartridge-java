@@ -67,6 +67,9 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
      * @see TarantoolClientConfig
      */
     protected AbstractTarantoolClient(TarantoolClientConfig config, TarantoolConnectionListeners listeners) {
+        Assert.notNull(config, "Tarantool client config must not be null");
+        Assert.notNull(listeners, "Tarantool connection listeners must not be null");
+
         this.config = config;
         this.mapperFactory = new TarantoolCallResultMapperFactory(config.getMessagePackMapper());
         this.eventLoopGroup = new NioEventLoopGroup();

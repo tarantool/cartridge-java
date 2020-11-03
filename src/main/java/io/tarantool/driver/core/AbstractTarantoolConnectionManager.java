@@ -52,6 +52,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         this.config = config;
         this.connectionFactory = connectionFactory;
         this.selectStrategyFactory = selectStrategyFactory;
+        this.connectionSelectStrategy.set(selectStrategyFactory.create(config, Collections.emptyList()));
         this.connectionListeners = connectionListeners;
     }
 

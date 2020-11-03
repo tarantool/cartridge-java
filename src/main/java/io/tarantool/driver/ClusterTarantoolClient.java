@@ -7,6 +7,7 @@ import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -81,6 +82,10 @@ public class ClusterTarantoolClient extends AbstractTarantoolClient {
                                   TarantoolClusterAddressProvider addressProvider,
                                   ConnectionSelectionStrategyFactory selectStrategyFactory) {
         super(config);
+
+        Assert.notNull(addressProvider, "Address provider must not be null");
+        Assert.notNull(selectStrategyFactory, "Connection selection strategy factory must not be null");
+
         this.addressProvider = addressProvider;
         this.selectStrategyFactory = selectStrategyFactory;
     }

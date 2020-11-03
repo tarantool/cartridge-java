@@ -30,7 +30,7 @@ public class CyclingIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        return true;
+        return size > 0;
     }
 
     @Override

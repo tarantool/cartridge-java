@@ -45,8 +45,8 @@ public class RoundRobinStrategyTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> RoundRobinStrategyFactory.INSTANCE.create(config, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> RoundRobinStrategyFactory.INSTANCE.create(config, connections));
+        assertThrows(NoAvailableConnectionsException.class,
+                () -> RoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
 
         connections.add(new CustomConnection("127.0.0.1", 3001));
         ConnectionSelectionStrategy strategy = RoundRobinStrategyFactory.INSTANCE.create(config, connections);

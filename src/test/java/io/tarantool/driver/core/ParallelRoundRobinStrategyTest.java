@@ -51,8 +51,8 @@ public class ParallelRoundRobinStrategyTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections));
+        assertThrows(NoAvailableConnectionsException.class,
+                () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
 
         connections.add(new CustomConnection("127.0.0.1", 3001));
         ConnectionSelectionStrategy strategy = ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections);

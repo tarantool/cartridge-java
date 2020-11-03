@@ -28,7 +28,6 @@ public final class TarantoolConnectionSelectionStrategies {
         public ConnectionSelectionStrategy create(TarantoolClientConfig config,
                                                   Collection<TarantoolConnection> connections) {
             Assert.notNull(connections, "The collection of Tarantool connections should not be null");
-            Assert.notEmpty(connections, "The collection of Tarantool connections should not be empty");
 
             return new RoundRobinStrategy(connections);
         }
@@ -46,13 +45,17 @@ public final class TarantoolConnectionSelectionStrategies {
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
-            TarantoolConnection connection = connectionIterator.next();
-            int attempts = 0;
-            while (!connection.isConnected() && attempts++ < maxAttempts) {
-                connection = connectionIterator.next();
-            }
-            if (connection.isConnected()) {
-                return connection;
+            if (connectionIterator.hasNext()) {
+                TarantoolConnection connection = connectionIterator.next();
+                int attempts = 0;
+                while (!connection.isConnected() && attempts++ < maxAttempts) {
+                    connection = connectionIterator.next();
+                }
+                if (connection.isConnected()) {
+                    return connection;
+                } else {
+                    throw new NoAvailableConnectionsException();
+                }
             } else {
                 throw new NoAvailableConnectionsException();
             }
@@ -72,7 +75,6 @@ public final class TarantoolConnectionSelectionStrategies {
         public ConnectionSelectionStrategy create(TarantoolClientConfig config,
                                                   Collection<TarantoolConnection> connections) {
             Assert.notNull(connections, "The collection of Tarantool connections should not be null");
-            Assert.notEmpty(connections, "The collection of Tarantool connections should not be empty");
 
             return new ParallelRoundRobinStrategy(config, connections);
         }
@@ -103,13 +105,17 @@ public final class TarantoolConnectionSelectionStrategies {
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
-            TarantoolConnection connection = iteratorsIterator.next().next();
-            int attempts = 0;
-            while (!connection.isConnected() && attempts++ < maxAttempts) {
-                connection = iteratorsIterator.next().next();
-            }
-            if (connection.isConnected()) {
-                return connection;
+            if (iteratorsIterator.hasNext()) {
+                TarantoolConnection connection = iteratorsIterator.next().next();
+                int attempts = 0;
+                while (!connection.isConnected() && attempts++ < maxAttempts) {
+                    connection = iteratorsIterator.next().next();
+                }
+                if (connection.isConnected()) {
+                    return connection;
+                } else {
+                    throw new NoAvailableConnectionsException();
+                }
             } else {
                 throw new NoAvailableConnectionsException();
             }

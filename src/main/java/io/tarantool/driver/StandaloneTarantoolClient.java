@@ -7,6 +7,7 @@ import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.core.TarantoolSingleConnectionManager;
+import org.springframework.util.Assert;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database
@@ -89,6 +90,10 @@ public class StandaloneTarantoolClient extends AbstractTarantoolClient {
                                      TarantoolSingleAddressProvider addressProvider,
                                      ConnectionSelectionStrategyFactory selectStrategyFactory) {
         super(config);
+
+        Assert.notNull(addressProvider, "Address provider must not be null");
+        Assert.notNull(selectStrategyFactory, "Connection selection strategy factory must not be null");
+
         this.addressProvider = addressProvider;
         this.selectStrategyFactory = selectStrategyFactory;
     }
