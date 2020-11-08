@@ -1,9 +1,9 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.TarantoolSimpleResultMapperFactory;
@@ -79,17 +79,17 @@ public class TarantoolMetadata extends AbstractTarantoolMetadata {
     private <T> CompletableFuture<TarantoolResult<T>> select(int spaceId,  ValueConverter<ArrayValue, T> resultMapper)
             throws TarantoolClientException {
         try {
+            Conditions query = Conditions.any();
             TarantoolIndexQuery indexQuery = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
                     .withIteratorType(TarantoolIteratorType.ITER_ALL);
-            TarantoolSelectOptions options = new TarantoolSelectOptions.Builder().build();
 
             TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withIteratorType(indexQuery.getIteratorType())
                     .withKeyValues(indexQuery.getKeyValues())
-                    .withLimit(options.getLimit())
-                    .withOffset(options.getOffset())
+                    .withLimit(query.getLimit())
+                    .withOffset(query.getOffset())
                     .build(config.getMessagePackMapper());
 
             return connectionManager.getConnection().sendRequest(request, mapperFactory.withConverter(resultMapper));

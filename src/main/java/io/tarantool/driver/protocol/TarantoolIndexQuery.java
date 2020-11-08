@@ -1,6 +1,5 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.protocol;
 
-import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.springframework.util.Assert;
 
 import java.util.Collections;

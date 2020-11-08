@@ -11,7 +11,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolNullField implements TarantoolField {
+public final class TarantoolNullField implements TarantoolField {
 
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
@@ -22,5 +22,11 @@ public class TarantoolNullField implements TarantoolField {
     @Override
     public <O> O getValue(Class<O> targetClass, MessagePackValueMapper mapper) {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o instanceof TarantoolNullField;
     }
 }

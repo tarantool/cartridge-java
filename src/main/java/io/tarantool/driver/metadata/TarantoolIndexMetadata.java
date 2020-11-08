@@ -1,6 +1,6 @@
 package io.tarantool.driver.metadata;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 
 import java.util.HashMap;
 import java.util.List;

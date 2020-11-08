@@ -1,20 +1,26 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.ObjectConverter;
 import io.tarantool.driver.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
+import org.msgpack.value.ArrayValue;
+import org.msgpack.value.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,7 +47,7 @@ public final class Conditions {
     private boolean descending;
     private long limit = MAX_LIMIT; // 0 is unlimited
     private long offset; // 0 is no offset
-    private List<Object> startIndexValues = Collections.emptyList();
+    private Packable startTuple;
 
     private Conditions(boolean descending) {
         this.descending = descending;
@@ -56,8 +62,8 @@ public final class Conditions {
         this.offset = offset;
     }
 
-    private Conditions(List<Object> startIndexValues) {
-        this.startIndexValues = startIndexValues;
+    private Conditions(Packable startTuple) {
+        this.startTuple = startTuple;
     }
 
     /**
@@ -184,29 +190,49 @@ public final class Conditions {
     }
 
     /**
-     * Start collecting tuples into result after the specified index parts values. The tuple with key parts equal to the
-     * specified values will not be added to the result.
+     * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
      *
-     * @param startIndexValues index parts values
+     * @param tuple last tuple value from the previous result, may be null
      * @return new {@link Conditions} instance
      */
-    public static Conditions after(List<Object> startIndexValues) {
-        Assert.notNull(startIndexValues, "Start index values should not be null");
-
-        return new Conditions(startIndexValues);
+    public static Conditions after(@Nullable TarantoolTuple tuple) {
+        return new Conditions(tuple);
     }
 
     /**
-     * Start collecting tuples into result after the specified index parts values. The tuple with key parts equal to the
-     * specified values will not be added to the result.
+     * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
      *
-     * @param startIndexValues index parts values
+     * @param tuple last tuple value from the previous result, may be null
+     * @param tupleConverter converter of the specified tuple type into a MessagePack array
      * @return new {@link Conditions} instance
      */
-    public Conditions startAfter(List<Object> startIndexValues) {
-        Assert.notNull(startIndexValues, "Start index values should not be null");
+    public static <T> Conditions after(@Nullable T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
+        Assert.notNull(tupleConverter, "Tuple to ArrayValue converter should not be null");
 
-        this.startIndexValues = startIndexValues;
+        return new Conditions(new StartTupleWrapper<>(tuple, tupleConverter));
+    }
+
+    /**
+     * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
+     *
+     * @param tuple last tuple value from the previous result, may be null
+     * @return new {@link Conditions} instance
+     */
+    public Conditions startAfter(TarantoolTuple tuple) {
+        this.startTuple = tuple;
+        return this;
+    }
+    /**
+     * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
+     *
+     * @param tuple last tuple value from the previous result, may be null
+     * @param tupleConverter converter of the specified tuple type into a MessagePack array
+     * @return new {@link Conditions} instance
+     */
+    public <T> Conditions startAfter(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
+        Assert.notNull(tupleConverter, "Tuple to ArrayValue converter should not be null");
+
+        this.startTuple = new StartTupleWrapper<>(tuple, tupleConverter);
         return this;
     }
 
@@ -215,8 +241,8 @@ public final class Conditions {
      *
      * @return list of index parts values
      */
-    public List<Object> getStartIndexValues() {
-        return startIndexValues;
+    public Packable getStartTuple() {
+        return startTuple;
     }
 
     /**
@@ -763,7 +789,7 @@ public final class Conditions {
 
     public TarantoolIndexQuery toIndexQuery(TarantoolMetadataOperations operations,
                                             TarantoolSpaceMetadata spaceMetadata) {
-        if (startIndexValues != null && !startIndexValues.isEmpty()) {
+        if (startTuple != null) {
             throw new TarantoolClientException("'startAfter' is not supported");
         }
 
@@ -931,5 +957,21 @@ public final class Conditions {
         }
 
         return true;
+    }
+
+    private static class StartTupleWrapper<T> implements Packable {
+
+        private final T tuple;
+        private final ObjectConverter<T, ArrayValue> tupleConverter;
+
+        public StartTupleWrapper(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
+            this.tuple = tuple;
+            this.tupleConverter = tupleConverter;
+        }
+
+        @Override
+        public Value toMessagePackValue(MessagePackObjectMapper mapper) {
+            return tupleConverter.toValue(tuple);
+        }
     }
 }

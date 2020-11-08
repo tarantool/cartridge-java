@@ -1,7 +1,12 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolIndexQueryFactory;
+import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQueryFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
@@ -31,6 +36,15 @@ class ConditionsTest {
                 () -> conditions.toProxyQuery(testOperations, testOperations.getTestSpaceMetadata()));
 
         assertEquals("Offset is not supported", ex.getMessage());
+    }
+    @Test
+    public void testProxyQuery_AfterIsSupported() {
+        MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
+        TarantoolTuple startTuple = factory.create(1, 2, 3);
+        Conditions conditions = Conditions.any().startAfter(startTuple);
+
+        assertEquals(startTuple, conditions.getStartTuple());
     }
 
     @Test
@@ -81,7 +95,9 @@ class ConditionsTest {
 
     @Test
     public void testIndexQuery_AfterNotSupported() {
-        Conditions conditions = Conditions.after(Collections.singletonList(1));
+        TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(
+                DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
+        Conditions conditions = Conditions.after(factory.create());
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
                 () -> conditions.toIndexQuery(testOperations, testOperations.getTestSpaceMetadata()));

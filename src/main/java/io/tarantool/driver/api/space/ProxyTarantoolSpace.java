@@ -1,12 +1,11 @@
 package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.ProxyTarantoolClient;
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;

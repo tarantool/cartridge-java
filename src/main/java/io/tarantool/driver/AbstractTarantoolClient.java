@@ -6,6 +6,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
@@ -50,6 +51,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final TarantoolCallResultMapperFactory mapperFactory;
+    private final DefaultTarantoolTupleFactory tupleFactory;
 
     /**
      * Create a client.
@@ -89,6 +91,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
             }
         });
         this.listeners = listeners;
+        this.tupleFactory = new DefaultTarantoolTupleFactory(config.getMessagePackMapper());
     }
 
     /**
@@ -321,5 +324,10 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     @Override
     public TarantoolConnectionListeners getListeners() {
         return listeners;
+    }
+
+    @Override
+    public TarantoolTupleFactory getTarantoolTupleFactory() {
+        return tupleFactory;
     }
 }
