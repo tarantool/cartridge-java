@@ -109,6 +109,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertTrue(spaceMetadata.getSpaceId() > 0);
         assertEquals(5, spaceMetadata.getSpaceFormatMetadata().size());
         assertEquals(3, spaceMetadata.getFieldPositionByName("age"));
+        assertEquals("unsigned", spaceMetadata.getFieldByName("age").get().getFieldType());
 
         Optional<TarantoolIndexMetadata> indexMeta = metadataOperations
                 .getIndexByName(TEST_SPACE_NAME, "bucket_id");
