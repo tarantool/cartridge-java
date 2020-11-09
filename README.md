@@ -13,11 +13,11 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 
 Add the following dependency into your project:
 
-```
+```xml
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.2</version>
 </dependency>
 ```
 
@@ -164,6 +164,13 @@ class Scratch {
         // Cluster client is set up as described above
         ClusterTarantoolClient clusterClient = ...
         TarantoolClient client = new ProxyTarantoolClient(clusterClient);
+
+        // Use TarantoolTupleFactory for instantiating new tuples
+        // Pass the field corresponding to bucket_id as null for tarantool/crud to compute it automatically
+        TarantoolTuple tuple = client.getTupleFactory().create(1_000_000, null, "profile_name");
+        // Primary index key value will be determined from the tuple
+        Conditions conditions = Conditions.fromTarantoolTuple(tuple);
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, tuple).get();
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
         // crud.select(...) on the Cartridge router will be called internally
