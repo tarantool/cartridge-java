@@ -1,4 +1,4 @@
-package io.tarantool.driver.protocol.operations;
+package io.tarantool.driver.api.tuple.operations;
 
 /**
  * Encapsulates a set of supported Tarantool tuple operators

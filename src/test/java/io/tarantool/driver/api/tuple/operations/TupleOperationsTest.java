@@ -1,4 +1,5 @@
-package io.tarantool.driver.protocol;
+package io.tarantool.driver.api.tuple.operations;
+
 
 import io.tarantool.driver.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolTupleFactory;
@@ -6,9 +7,7 @@ import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.protocol.operations.TarantoolUpdateOperationType;
-import io.tarantool.driver.protocol.operations.TupleOperation;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

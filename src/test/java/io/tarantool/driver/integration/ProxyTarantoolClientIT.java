@@ -23,7 +23,7 @@ import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

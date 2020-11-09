@@ -5,7 +5,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.msgpack.value.ArrayValue;
 
 import java.util.concurrent.CompletableFuture;

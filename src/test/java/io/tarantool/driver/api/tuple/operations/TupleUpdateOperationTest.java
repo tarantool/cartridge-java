@@ -1,10 +1,6 @@
-package io.tarantool.driver.protocol;
+package io.tarantool.driver.api.tuple.operations;
 
 
-import io.tarantool.driver.protocol.operations.TupleOperationBitwiseAnd;
-import io.tarantool.driver.protocol.operations.TupleOperationBitwiseOr;
-import io.tarantool.driver.protocol.operations.TupleOperationBitwiseXor;
-import io.tarantool.driver.protocol.operations.TupleOperationDelete;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

@@ -11,7 +11,7 @@ import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.proxy.DeleteProxyOperation;
 import io.tarantool.driver.proxy.InsertProxyOperation;
 import io.tarantool.driver.proxy.ProxyOperation;

@@ -1,31 +1,31 @@
-package io.tarantool.driver.protocol.operations;
+package io.tarantool.driver.api.tuple.operations;
 
 
 /**
- * Represents bitwise XOR operation on tuple field
+ * Represents bitwise AND operation on tuple field
  *
  * @author Sergey Volgin
  */
-public class TupleOperationBitwiseXor extends TupleUpdateOperation {
+public class TupleOperationBitwiseAnd extends TupleUpdateOperation {
 
-    public TupleOperationBitwiseXor(int fieldIndex, long value) {
-        super(TarantoolUpdateOperationType.BITWISEXOR, fieldIndex, value);
+    public TupleOperationBitwiseAnd(int fieldIndex, long value) {
+        super(TarantoolUpdateOperationType.BITWISEAND, fieldIndex, value);
         checkValue(value);
     }
 
-    public TupleOperationBitwiseXor(String fieldName, long value) {
-        super(TarantoolUpdateOperationType.BITWISEXOR, fieldName, value);
+    public TupleOperationBitwiseAnd(String fieldName, long value) {
+        super(TarantoolUpdateOperationType.BITWISEAND, fieldName, value);
         checkValue(value);
     }
 
-    private TupleOperationBitwiseXor(TarantoolUpdateOperationType operationType, Integer fieldIndex,
+    private TupleOperationBitwiseAnd(TarantoolUpdateOperationType operationType, Integer fieldIndex,
                                      String fieldName, Object value, boolean isProxyOperation) {
         super(operationType, fieldIndex, fieldName, value, isProxyOperation);
     }
 
     @Override
     public TupleOperation toProxyTupleOperation() {
-        return new TupleOperationBitwiseXor(
+        return new TupleOperationBitwiseAnd(
                 this.getOperationType(),
                 this.getFieldNumber(),
                 this.getFieldName(),

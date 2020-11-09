@@ -16,7 +16,7 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.protocol.requests.TarantoolDeleteRequest;
 import io.tarantool.driver.protocol.requests.TarantoolInsertRequest;
 import io.tarantool.driver.protocol.requests.TarantoolReplaceRequest;

@@ -21,7 +21,7 @@ import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

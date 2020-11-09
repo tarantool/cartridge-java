@@ -1,4 +1,4 @@
-package io.tarantool.driver.protocol.operations;
+package io.tarantool.driver.api.tuple.operations;
 
 
 import io.tarantool.driver.api.tuple.TarantoolField;
