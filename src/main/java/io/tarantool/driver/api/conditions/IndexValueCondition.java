@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class IndexValueCondition extends BaseCondition {
 
-    private final List<Object> indexValues;
+    private final List<?> indexValues;
 
     /**
      * Basic constructor
@@ -18,13 +18,13 @@ public class IndexValueCondition extends BaseCondition {
      * @param field the filtering index
      * @param indexValues the index parts values
      */
-    public IndexValueCondition(Operator operator, FieldIdentifier<?, ?> field, List<Object> indexValues) {
+    public IndexValueCondition(Operator operator, FieldIdentifier<?, ?> field, List<?> indexValues) {
         super(operator, field);
         this.indexValues = indexValues;
     }
 
     @Override
-    public List<Object> value() {
+    public List<?> value() {
         return indexValues;
     }
 }

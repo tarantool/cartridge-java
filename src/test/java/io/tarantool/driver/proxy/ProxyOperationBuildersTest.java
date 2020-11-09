@@ -2,8 +2,7 @@ package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.StandaloneTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolSelectOptions;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;

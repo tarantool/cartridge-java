@@ -2,7 +2,7 @@ package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import org.springframework.util.Assert;
 

@@ -80,7 +80,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             CRUDOperationOptions.Builder requestOptions = CRUDOperationOptions.builder()
                     .withTimeout(config.getRequestTimeout())
                     .withSelectBatchSize(conditions.getLimit())
-                    .withSelectLimit(conditions.getLimit());
+                    .withSelectLimit(conditions.getLimit())
+                    .withSelectAfter(conditions.getStartTuple());
 
             List<Object> arguments = Arrays.asList(
                     spaceName,

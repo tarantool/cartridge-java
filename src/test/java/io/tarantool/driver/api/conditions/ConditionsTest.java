@@ -1,7 +1,12 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.api.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolIndexQueryFactory;
+import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
+import io.tarantool.driver.protocol.TarantoolIndexQueryFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
@@ -9,6 +14,7 @@ import io.tarantool.driver.metadata.TestMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +38,15 @@ class ConditionsTest {
 
         assertEquals("Offset is not supported", ex.getMessage());
     }
+    @Test
+    public void testProxyQuery_AfterIsSupported() {
+        MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
+        TarantoolTuple startTuple = factory.create(1, 2, 3);
+        Conditions conditions = Conditions.any().startAfter(startTuple);
+
+        assertEquals(startTuple, conditions.getStartTuple());
+    }
 
     @Test
     public void testProxyQuery_FilteringByMultipleIndexesNotSupported() {
@@ -47,15 +62,17 @@ class ConditionsTest {
 
     @Test
     public void testProxyQuery_IndexConditionsPrecedeFieldConditions() {
+        ArrayList<Integer> startIndex = new ArrayList<>(Arrays.asList(1, 2, 3));
+        ArrayList<Integer> endIndex = new ArrayList<>(Arrays.asList(4, 5, 6));
         Conditions conditions = Conditions
                 .equals("third", 456)
-                .andIndexGreaterOrEquals(0, Collections.singletonList("abc"))
+                .andIndexGreaterOrEquals(0, startIndex)
                 .andEquals(1, 123)
-                .andIndexLessOrEquals("primary", Collections.singletonList("def"));
+                .andIndexLessOrEquals("primary", endIndex);
 
         List<?> query = Arrays.asList(
-                Arrays.asList(">=", "primary", Collections.singletonList("abc")),
-                Arrays.asList("<=", "primary", Collections.singletonList("def")),
+                Arrays.asList(">=", "primary", Arrays.asList(1, 2, 3)),
+                Arrays.asList("<=", "primary", Arrays.asList(4, 5, 6)),
                 Arrays.asList("=", "third", 456),
                 Arrays.asList("=", 1, 123)
         );
@@ -81,7 +98,9 @@ class ConditionsTest {
 
     @Test
     public void testIndexQuery_AfterNotSupported() {
-        Conditions conditions = Conditions.after(Collections.singletonList(1));
+        TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(
+                DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
+        Conditions conditions = Conditions.after(factory.create());
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
                 () -> conditions.toIndexQuery(testOperations, testOperations.getTestSpaceMetadata()));

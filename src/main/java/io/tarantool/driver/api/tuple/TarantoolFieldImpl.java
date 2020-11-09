@@ -6,6 +6,8 @@ import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 import org.springframework.lang.Nullable;
 
+import java.util.Objects;
+
 /**
  * Basic tuple field implementation
  *
@@ -62,5 +64,18 @@ public class TarantoolFieldImpl implements TarantoolField {
         }
         throw new UnsupportedOperationException(
                 String.format("Cannot convert field value of type %s to type %s", value.getClass(), targetClass));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TarantoolFieldImpl)) return false;
+        TarantoolFieldImpl that = (TarantoolFieldImpl) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

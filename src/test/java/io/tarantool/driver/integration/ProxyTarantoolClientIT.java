@@ -1,16 +1,16 @@
 package io.tarantool.driver.integration;
 
 import io.tarantool.driver.ClusterTarantoolClient;
+import io.tarantool.driver.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.ProxyTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolIndexQuery;
+import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
@@ -23,7 +23,6 @@ import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,6 +45,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     private static ProxyTarantoolClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final TarantoolTupleFactory tupleFactory =
+            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -123,19 +124,14 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     public void clusterInsertSelectTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
 
-        List<Object> values;
         TarantoolTuple tarantoolTuple;
 
         for (int i = 0; i < 20; i++) {
-            values = Arrays.asList(1_000_000 + i, null, "FIO", 50 + i, 100 + i);
-            tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+            tarantoolTuple = tupleFactory.create(1_000_000 + i, null, "FIO", 50 + i, 100 + i);
             profileSpace.insert(tarantoolTuple).get();
         }
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
-        TarantoolIndexQuery query = new TarantoolIndexQuery();
-        query.withKeyValues(Collections.singletonList(1_000_000))
-                .withIteratorType(TarantoolIteratorType.ITER_GE);
 
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
@@ -150,6 +146,10 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             assertEquals(50 + i, tuple.getInteger(3));
             assertEquals(100 + i, tuple.getInteger(4));
         }
+
+        conditions = conditions.startAfter(tupleFactory.create(1_000_000 + 9, null, "FIO", 59, 109));
+        selectResult = profileSpace.select(conditions).get();
+        assertEquals(10, selectResult.size());
     }
 
     @Test
@@ -157,7 +157,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(100, null, "fio", 10, 100);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
         TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insert(tarantoolTuple).get();
         assertEquals(insertTuples.size(), 1);
@@ -168,7 +168,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(tuple.getString(2), "fio");
 
         values = Arrays.asList(2, null, "John Doe", 55, 99);
-        tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+        tarantoolTuple = tupleFactory.create(values);
         insertTuples = profileSpace.insert(tarantoolTuple).get();
         assertEquals(1, insertTuples.size());
         tuple = insertTuples.get(0);
@@ -193,7 +193,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(123, null, "Jane Doe", 18, 999);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
         TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insert(tarantoolTuple).get();
         assertEquals(insertTuples.size(), 1);
@@ -206,7 +206,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(tuple.getInteger(4), 999);
 
         List<Object> replaceValues = Arrays.asList(123, null, "John Doe", 21, 100);
-        tarantoolTuple = new TarantoolTupleImpl(replaceValues, mapperFactory.defaultComplexTypesMapper());
+        tarantoolTuple = tupleFactory.create(replaceValues);
         TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replace(tarantoolTuple).get();
         assertEquals(replaceResult.size(), 1);
         tuple = replaceResult.get(0);
@@ -223,7 +223,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(223, null, "Jane Doe", 10, 10);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
         TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insert(tarantoolTuple).get();
         assertEquals(insertTuples.size(), 1);
@@ -247,7 +247,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapperFactory.defaultComplexTypesMapper());
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
         Conditions conditions = Conditions.equals("profile_id", 301);
 

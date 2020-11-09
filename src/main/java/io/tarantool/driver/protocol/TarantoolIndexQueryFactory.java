@@ -1,4 +1,4 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;

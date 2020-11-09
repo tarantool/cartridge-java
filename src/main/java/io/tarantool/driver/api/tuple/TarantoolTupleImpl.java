@@ -11,10 +11,12 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.UUID;
@@ -59,7 +61,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param values list of tuple fields data
      * @param mapper provides conversion between MessagePack values and Java objects
      */
-    public TarantoolTupleImpl(List<Object> values, MessagePackMapper mapper) {
+    public TarantoolTupleImpl(Collection<?> values, MessagePackMapper mapper) {
         this(values, mapper, null);
     }
 
@@ -71,7 +73,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param mapper provides conversion between MessagePack values and Java objects
      * @param metadata provides information about the target space
      */
-    public TarantoolTupleImpl(List<Object> values, MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
+    public TarantoolTupleImpl(@Nullable Collection<?> values, MessagePackMapper mapper,
+                              TarantoolSpaceMetadata metadata) {
         Assert.notNull(mapper, "MessagePack mapper should not be null");
 
         this.mapper = mapper;
@@ -377,5 +380,18 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         }
 
         return fieldPosition;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TarantoolTupleImpl)) return false;
+        TarantoolTupleImpl that = (TarantoolTupleImpl) o;
+        return Objects.equals(getFields(), that.getFields());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFields());
     }
 }

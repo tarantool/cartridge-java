@@ -2,6 +2,7 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.space.ProxyTarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
@@ -107,6 +108,11 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     @Override
     public TarantoolConnectionListeners getListeners() {
         return this.client.getListeners();
+    }
+
+    @Override
+    public TarantoolTupleFactory getTarantoolTupleFactory() {
+        return this.client.getTarantoolTupleFactory();
     }
 
     @Override

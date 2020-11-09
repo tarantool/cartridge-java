@@ -11,8 +11,7 @@ abstract class SharedCartridgeContainer {
             "cartridge/instances.yml",
             "cartridge/topology.lua")
             .withDirectoryBinding("cartridge")
-            .cleanUpDirectory("cartridge/tmp")
-            .withReuse(true);
+            .cleanUpDirectory("cartridge/tmp");
 
     protected static void startCluster() {
         if (!container.isRunning()) {
