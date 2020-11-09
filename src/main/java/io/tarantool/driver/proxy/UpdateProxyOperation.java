@@ -4,7 +4,7 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;

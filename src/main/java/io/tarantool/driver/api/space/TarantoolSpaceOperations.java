@@ -5,7 +5,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.msgpack.value.ArrayValue;
 
 import java.util.concurrent.CompletableFuture;
@@ -124,12 +124,21 @@ public interface TarantoolSpaceOperations {
      * Update a tuple
      *
      * @param conditions query with options
+     * @param tuple tuple with new field values
+     * @return a future that will contain corresponding tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TarantoolTuple tuple);
+
+    /**
+     * Update a tuple
+     *
+     * @param conditions query with options
      * @param operations the list update operations
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
-                                                              TupleOperations operations);
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TupleOperations operations);
 
     /**
      * Update a tuple

@@ -1,19 +1,26 @@
-package io.tarantool.driver.protocol;
+package io.tarantool.driver.api.tuple.operations;
 
+
+import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolField;
+import io.tarantool.driver.api.tuple.TarantoolNullField;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
-import io.tarantool.driver.protocol.operations.TarantoolUpdateOperationType;
-import io.tarantool.driver.protocol.operations.TupleOperation;
-import io.tarantool.driver.protocol.operations.TupleOperations;
+import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TupleOperationsTest {
+
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final TarantoolTupleFactory tupleFactory =
+            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     @Test
     public void createInvalidOperationsList() {
@@ -81,11 +88,40 @@ public class TupleOperationsTest {
         List<Integer> fieldIndexes = operations.asList().stream().map(TupleOperation::getFieldIndex)
                 .collect(Collectors.toList());
 
-        assertEquals(fieldIndexes, Arrays.asList(8, 2));
+        assertEquals(Arrays.asList(8, 2), fieldIndexes);
 
         List<Integer> fieldNumbers = operations.asProxyOperationList().stream().map(TupleOperation::getFieldIndex)
                 .collect(Collectors.toList());
 
-        assertEquals(fieldNumbers, Arrays.asList(9, 3));
+        assertEquals(Arrays.asList(9, 3), fieldNumbers);
+    }
+
+    @Test
+    public void fromTarantoolTuple() {
+        TupleOperations operations;
+
+        assertThrows(RuntimeException.class, () -> TupleOperations.fromTarantoolTuple(null));
+        assertThrows(TarantoolSpaceOperationException.class,
+                () -> TupleOperations.fromTarantoolTuple(tupleFactory.create()));
+
+        operations = TupleOperations.fromTarantoolTuple(tupleFactory.create("abc", "def"));
+        List<Integer> fieldNumbers = operations.asList().stream().map(TupleOperation::getFieldIndex)
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(0, 1), fieldNumbers);
+        String value = ((TarantoolField) operations.asList().get(1).getValue())
+                .getValue(String.class, mapperFactory.defaultComplexTypesMapper());
+        assertEquals("def", value);
+
+        operations = TupleOperations.fromTarantoolTuple(tupleFactory.create("abc", null, "def"));
+        fieldNumbers = operations.asList().stream().map(TupleOperation::getFieldIndex)
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(0, 1, 2), fieldNumbers);
+        assertEquals(new TarantoolNullField(), operations.asList().get(1).getValue());
+
+        operations = TupleOperations.fromTarantoolTuple(tupleFactory.create("abc", null, null));
+        fieldNumbers = operations.asList().stream().map(TupleOperation::getFieldIndex)
+                .collect(Collectors.toList());
+        assertEquals(Arrays.asList(0, 1, 2), fieldNumbers);
+        assertEquals(new TarantoolNullField(), operations.asList().get(2).getValue());
     }
 }

@@ -1,11 +1,15 @@
-package io.tarantool.driver.protocol.operations;
+package io.tarantool.driver.api.tuple.operations;
 
 
+import io.tarantool.driver.api.tuple.TarantoolField;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Create list of {@link TupleOperation} for update and upsert requests
@@ -16,6 +20,12 @@ public final class TupleOperations {
 
     private final List<TupleOperation> operations = new ArrayList<>();
     private final List<TupleOperation> proxyOperations = new ArrayList<>();
+
+    private TupleOperations(List<TupleOperation> operations) {
+        this.operations.addAll(operations);
+        this.proxyOperations.addAll(
+                operations.stream().map(TupleOperation::toProxyTupleOperation).collect(Collectors.toList()));
+    }
 
     private TupleOperations(TupleOperation operation) {
         addOperationToList(operation);
@@ -69,6 +79,26 @@ public final class TupleOperations {
      */
     public List<TupleOperation> asProxyOperationList() {
         return proxyOperations;
+    }
+
+    /**
+     * Build a collection of set operations from passed tuple
+     *
+     * @param tuple tuple, must not be null or empty
+     * @return new instance
+     */
+    public static TupleOperations fromTarantoolTuple(TarantoolTuple tuple) {
+        Assert.notNull(tuple, "Tuple for update must not be null");
+
+        List<TarantoolField> tupleFields = tuple.getFields();
+        if (tupleFields.isEmpty()) {
+            throw new TarantoolSpaceOperationException("Cannot perform update with an empty tuple");
+        }
+        List<TupleOperation> operations = new ArrayList<>(tupleFields.size());
+        for (int i = 0; i < tupleFields.size(); i++) {
+            operations.add(new TupleOperationSet(i, tupleFields.get(i)));
+        }
+        return new TupleOperations(operations);
     }
 
     /**
