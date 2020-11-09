@@ -60,6 +60,8 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
 
     /**
      * Get the default factory for {@link TarantoolTuple} instances
+     *
+     * @return tuple factory instance
      */
     TarantoolTupleFactory getTarantoolTupleFactory();
 }
