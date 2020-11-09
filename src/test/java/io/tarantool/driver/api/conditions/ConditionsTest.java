@@ -14,6 +14,7 @@ import io.tarantool.driver.metadata.TestMetadata;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -61,15 +62,17 @@ class ConditionsTest {
 
     @Test
     public void testProxyQuery_IndexConditionsPrecedeFieldConditions() {
+        ArrayList<Integer> startIndex = new ArrayList<>(Arrays.asList(1, 2, 3));
+        ArrayList<Integer> endIndex = new ArrayList<>(Arrays.asList(4, 5, 6));
         Conditions conditions = Conditions
                 .equals("third", 456)
-                .andIndexGreaterOrEquals(0, Collections.singletonList("abc"))
+                .andIndexGreaterOrEquals(0, startIndex)
                 .andEquals(1, 123)
-                .andIndexLessOrEquals("primary", Collections.singletonList("def"));
+                .andIndexLessOrEquals("primary", endIndex);
 
         List<?> query = Arrays.asList(
-                Arrays.asList(">=", "primary", Collections.singletonList("abc")),
-                Arrays.asList("<=", "primary", Collections.singletonList("def")),
+                Arrays.asList(">=", "primary", Arrays.asList(1, 2, 3)),
+                Arrays.asList("<=", "primary", Arrays.asList(4, 5, 6)),
                 Arrays.asList("=", "third", 456),
                 Arrays.asList("=", 1, 123)
         );

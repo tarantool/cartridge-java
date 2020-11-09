@@ -252,7 +252,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexEquals(String indexName, List<Object> indexPartValues) {
+    public static Conditions indexEquals(String indexName, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.EQ, new NamedIndex(indexName), indexPartValues));
     }
 
@@ -263,7 +263,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public Conditions andIndexEquals(String indexName, List<Object> indexPartValues) {
+    public Conditions andIndexEquals(String indexName, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.EQ, new NamedIndex(indexName), indexPartValues));
         return this;
     }
@@ -275,7 +275,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexEquals(int indexId, List<Object> indexPartValues) {
+    public static Conditions indexEquals(int indexId, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.EQ, new IdIndex(indexId), indexPartValues));
     }
 
@@ -286,7 +286,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
-    public Conditions andIndexEquals(int indexId, List<Object> indexPartValues) {
+    public Conditions andIndexEquals(int indexId, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.EQ, new IdIndex(indexId), indexPartValues));
         return this;
     }
@@ -298,7 +298,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexGreaterThan(String indexName, List<Object> indexPartValues) {
+    public static Conditions indexGreaterThan(String indexName, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.GT, new NamedIndex(indexName), indexPartValues));
     }
 
@@ -309,7 +309,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public Conditions andIndexGreaterThan(String indexName, List<Object> indexPartValues) {
+    public Conditions andIndexGreaterThan(String indexName, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.GT, new NamedIndex(indexName), indexPartValues));
         return this;
     }
@@ -321,7 +321,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexGreaterThan(int indexId, List<Object> indexPartValues) {
+    public static Conditions indexGreaterThan(int indexId, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.GT, new IdIndex(indexId), indexPartValues));
     }
 
@@ -332,7 +332,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
-    public Conditions andIndexGreaterThan(int indexId, List<Object> indexPartValues) {
+    public Conditions andIndexGreaterThan(int indexId, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.GT, new IdIndex(indexId), indexPartValues));
         return this;
     }
@@ -345,7 +345,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexGreaterOrEquals(String indexName, List<Object> indexPartValues) {
+    public static Conditions indexGreaterOrEquals(String indexName, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.GE, new NamedIndex(indexName), indexPartValues));
     }
 
@@ -356,7 +356,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public Conditions andIndexGreaterOrEquals(String indexName, List<Object> indexPartValues) {
+    public Conditions andIndexGreaterOrEquals(String indexName, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.GE, new NamedIndex(indexName), indexPartValues));
         return this;
     }
@@ -369,7 +369,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexGreaterOrEquals(int indexId, List<Object> indexPartValues) {
+    public static Conditions indexGreaterOrEquals(int indexId, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.GE, new IdIndex(indexId), indexPartValues));
     }
 
@@ -380,7 +380,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
-    public Conditions andIndexGreaterOrEquals(int indexId, List<Object> indexPartValues) {
+    public Conditions andIndexGreaterOrEquals(int indexId, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.GE, new IdIndex(indexId), indexPartValues));
         return this;
     }
@@ -392,7 +392,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexLessThan(String indexName, List<Object> indexPartValues) {
+    public static Conditions indexLessThan(String indexName, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.LT, new NamedIndex(indexName), indexPartValues));
     }
 
@@ -403,7 +403,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public Conditions andIndexLessThan(String indexName, List<Object> indexPartValues) {
+    public Conditions andIndexLessThan(String indexName, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.LT, new NamedIndex(indexName), indexPartValues));
         return this;
     }
@@ -415,7 +415,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexLessThan(int indexId, List<Object> indexPartValues) {
+    public static Conditions indexLessThan(int indexId, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.LT, new IdIndex(indexId), indexPartValues));
     }
 
@@ -426,7 +426,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
-    public Conditions andIndexLessThan(int indexId, List<Object> indexPartValues) {
+    public Conditions andIndexLessThan(int indexId, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.LT, new IdIndex(indexId), indexPartValues));
         return this;
     }
@@ -439,7 +439,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexLessOrEquals(String indexName, List<Object> indexPartValues) {
+    public static Conditions indexLessOrEquals(String indexName, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.LE, new NamedIndex(indexName), indexPartValues));
     }
 
@@ -450,7 +450,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public Conditions andIndexLessOrEquals(String indexName, List<Object> indexPartValues) {
+    public Conditions andIndexLessOrEquals(String indexName, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.LE, new NamedIndex(indexName), indexPartValues));
         return this;
     }
@@ -463,7 +463,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
-    public static Conditions indexLessOrEquals(int indexId, List<Object> indexPartValues) {
+    public static Conditions indexLessOrEquals(int indexId, List<?> indexPartValues) {
         return new Conditions(new IndexValueCondition(Operator.LE, new IdIndex(indexId), indexPartValues));
     }
 
@@ -474,7 +474,7 @@ public final class Conditions {
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
-    public Conditions andIndexLessOrEquals(int indexId, List<Object> indexPartValues) {
+    public Conditions andIndexLessOrEquals(int indexId, List<?> indexPartValues) {
         conditions.add(new IndexValueCondition(Operator.LE, new IdIndex(indexId), indexPartValues));
         return this;
     }
@@ -743,7 +743,7 @@ public final class Conditions {
             throw new TarantoolClientException("Filtering by more than one index is not supported");
         }
 
-        List<List<Object>> allConditions = new ArrayList<>();
+        List<List<?>> allConditions = new ArrayList<>();
         if (indexConditions.size() > 0) {
             allConditions.addAll(
                     conditionsListToLists(indexConditions.values().iterator().next(), operations, spaceMetadata));
@@ -781,7 +781,7 @@ public final class Conditions {
         return new IndexValueCondition(condition.operator(), new NamedIndex(indexName), condition.value());
     }
 
-    private List<List<Object>> conditionsListToLists(List<? extends Condition> conditionsList,
+    private List<List<?>> conditionsListToLists(List<? extends Condition> conditionsList,
                                                      TarantoolMetadataOperations operations,
                                                      TarantoolSpaceMetadata spaceMetadata) {
         return conditionsList.stream().map(c -> c.toList(operations, spaceMetadata)).collect(Collectors.toList());
