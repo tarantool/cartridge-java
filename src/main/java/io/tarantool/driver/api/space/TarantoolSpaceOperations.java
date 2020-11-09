@@ -124,12 +124,21 @@ public interface TarantoolSpaceOperations {
      * Update a tuple
      *
      * @param conditions query with options
+     * @param tuple tuple with new field values
+     * @return a future that will contain corresponding tuple once completed
+     * @throws TarantoolClientException in case if the request failed
+     */
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TarantoolTuple tuple);
+
+    /**
+     * Update a tuple
+     *
+     * @param conditions query with options
      * @param operations the list update operations
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
-                                                              TupleOperations operations);
+    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TupleOperations operations);
 
     /**
      * Update a tuple

@@ -176,6 +176,12 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
+                                                                     TarantoolTuple tuple) {
+        return update(conditions, TupleOperations.fromTarantoolTuple(tuple), defaultTupleResultMapper());
+    }
+
+    @Override
+    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
                                                                      TupleOperations operations) {
         return update(conditions, operations, defaultTupleResultMapper());
     }
