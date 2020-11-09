@@ -123,7 +123,7 @@ public class ProxyTarantoolSpaceMetadataConverter
             }
             String fieldName = fieldNameValue.asStringValue().asString();
 
-            Value fieldTypeValue = fieldMap.get(FORMAT_NAME_KEY);
+            Value fieldTypeValue = fieldMap.get(FORMAT_TYPE_KEY);
             if (fieldTypeValue == null || !fieldTypeValue.isStringValue()) {
                 throw new TarantoolClientException(
                         "Unsupported space metadata format: key '" + FORMAT_TYPE_KEY + "' must have string value");
