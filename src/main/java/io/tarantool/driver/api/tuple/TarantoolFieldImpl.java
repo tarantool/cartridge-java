@@ -68,8 +68,12 @@ public class TarantoolFieldImpl implements TarantoolField {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TarantoolFieldImpl)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TarantoolFieldImpl)) {
+            return false;
+        }
         TarantoolFieldImpl that = (TarantoolFieldImpl) o;
         return Objects.equals(value, that.value);
     }

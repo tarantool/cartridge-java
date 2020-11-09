@@ -259,6 +259,11 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
+    public TarantoolSpaceMetadata getMetadata() {
+        return spaceMetadata;
+    }
+
+    @Override
     public String toString() {
         return String.format("ProxyTarantoolSpace [%s]", spaceName);
     }

@@ -6,6 +6,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.msgpack.value.ArrayValue;
 
 import java.util.concurrent.CompletableFuture;
@@ -184,4 +185,11 @@ public interface TarantoolSpaceOperations {
                                                      TarantoolTuple tuple,
                                                      TupleOperations operations,
                                                      ValueConverter<ArrayValue, T> tupleMapper);
+
+    /**
+     * Get metadata associated with this space
+     *
+     * @return space metadata
+     */
+    TarantoolSpaceMetadata getMetadata();
 }

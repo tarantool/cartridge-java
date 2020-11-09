@@ -68,4 +68,14 @@ final class CustomConnection implements TarantoolConnection {
     @Override
     public void close() throws Exception {
     }
+
+    @Override
+    public String toString() {
+        return "CustomConnection{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                ", count=" + count +
+                ", connected=" + connected +
+                '}';
+    }
 }

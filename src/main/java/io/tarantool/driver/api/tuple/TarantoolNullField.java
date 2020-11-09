@@ -6,6 +6,8 @@ import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 import org.springframework.lang.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a field with empty value which serializes to {@code msgpack.NULL}
  *
@@ -26,7 +28,14 @@ public final class TarantoolNullField implements TarantoolField {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {
+            return true;
+        }
         return o instanceof TarantoolNullField;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this);
     }
 }

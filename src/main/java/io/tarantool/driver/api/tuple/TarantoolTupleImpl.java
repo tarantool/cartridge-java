@@ -384,8 +384,12 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TarantoolTupleImpl)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TarantoolTupleImpl)) {
+            return false;
+        }
         TarantoolTupleImpl that = (TarantoolTupleImpl) o;
         return Objects.equals(getFields(), that.getFields());
     }

@@ -301,6 +301,11 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
+    public TarantoolSpaceMetadata getMetadata() {
+        return spaceMetadata;
+    }
+
+    @Override
     public String toString() {
         return String.format("TarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
     }

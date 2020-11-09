@@ -115,6 +115,17 @@ public class TarantoolSpaceMetadata {
         return getFieldByPosition(fieldPosition).map(TarantoolFieldMetadata::getFieldName);
     }
 
+    @Override
+    public String toString() {
+        return "TarantoolSpaceMetadata{" +
+                "spaceId=" + spaceId +
+                ", ownerId=" + ownerId +
+                ", spaceName='" + spaceName + '\'' +
+                ", spaceFormatMetadata=" + spaceFormatMetadata +
+                ", spaceFormatMetadataAsList=" + spaceFormatMetadataAsList +
+                '}';
+    }
+
     /*
       - [281, 1, '_vspace', 'sysview', 0, {}, [{'name': 'id', 'type': 'unsigned'}, {'name': 'owner',
         'type': 'unsigned'}, {'name': 'name', 'type': 'string'}, {'name': 'engine',

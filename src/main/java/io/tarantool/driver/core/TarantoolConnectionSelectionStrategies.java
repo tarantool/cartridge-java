@@ -37,28 +37,26 @@ public final class TarantoolConnectionSelectionStrategies {
 
         private TarantoolConnectionIterator connectionIterator;
         private final int maxAttempts;
+        private final Collection<TarantoolConnection> connections;
 
         RoundRobinStrategy(Collection<TarantoolConnection> connections) {
             this.connectionIterator = new TarantoolConnectionIterator(connections);
-            maxAttempts = connections.size();
+            this.maxAttempts = connections.size();
+            this.connections = connections;
         }
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
             if (connectionIterator.hasNext()) {
-                TarantoolConnection connection = connectionIterator.next();
                 int attempts = 0;
-                while (!connection.isConnected() && attempts++ < maxAttempts) {
-                    connection = connectionIterator.next();
+                while (attempts++ < maxAttempts) {
+                    TarantoolConnection connection = connectionIterator.next();
+                    if (connection.isConnected()) {
+                        return connection;
+                    }
                 }
-                if (connection.isConnected()) {
-                    return connection;
-                } else {
-                    throw new NoAvailableConnectionsException();
-                }
-            } else {
-                throw new NoAvailableConnectionsException();
             }
+            throw new NoAvailableConnectionsException();
         }
     }
 
@@ -100,25 +98,22 @@ public final class TarantoolConnectionSelectionStrategies {
                     .collect(Collectors.groupingBy(
                             conn -> currentSize.getAndIncrement() / groupSize)).values().stream()
                     .map(TarantoolConnectionIterator::new)
+                    .filter(TarantoolConnectionIterator::hasNext)
                     .collect(Collectors.toList());
         }
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
             if (iteratorsIterator.hasNext()) {
-                TarantoolConnection connection = iteratorsIterator.next().next();
                 int attempts = 0;
-                while (!connection.isConnected() && attempts++ < maxAttempts) {
-                    connection = iteratorsIterator.next().next();
+                while (attempts++ < maxAttempts) {
+                    TarantoolConnection connection = iteratorsIterator.next().next();
+                    if (connection.isConnected()) {
+                        return connection;
+                    }
                 }
-                if (connection.isConnected()) {
-                    return connection;
-                } else {
-                    throw new NoAvailableConnectionsException();
-                }
-            } else {
-                throw new NoAvailableConnectionsException();
             }
+            throw new NoAvailableConnectionsException();
         }
     }
 }

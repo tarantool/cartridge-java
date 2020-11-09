@@ -101,7 +101,7 @@ public class RoundRobinStrategyTest {
         List<TarantoolConnection> connections = IntStream.range(1, 11)
                 .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
                 .peek(c -> {
-                    if (c.getPort() % 2 == 0) {
+                    if (c.getPort() < 3006) {
                         c.setConnected(false);
                     }
                 })
@@ -122,7 +122,7 @@ public class RoundRobinStrategyTest {
         futures.forEach(CompletableFuture::join);
 
         for (TarantoolConnection c : connections) {
-            if (((CustomConnection) c).getPort() % 2 == 0) {
+            if (((CustomConnection) c).getPort() < 3006) {
                 assertEquals(0, ((CustomConnection) c).getCount(), "Closed connection must have been used 0 times");
             } else {
                 assertEquals(20, ((CustomConnection) c).getCount(), "Active connection must have been used 20 times");

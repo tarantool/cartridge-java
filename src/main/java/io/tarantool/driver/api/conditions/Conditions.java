@@ -204,6 +204,7 @@ public final class Conditions {
      *
      * @param tuple last tuple value from the previous result, may be null
      * @param tupleConverter converter of the specified tuple type into a MessagePack array
+     * @param <T> tuple type
      * @return new {@link Conditions} instance
      */
     public static <T> Conditions after(@Nullable T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
@@ -227,6 +228,7 @@ public final class Conditions {
      *
      * @param tuple last tuple value from the previous result, may be null
      * @param tupleConverter converter of the specified tuple type into a MessagePack array
+     * @param <T> tuple type
      * @return new {@link Conditions} instance
      */
     public <T> Conditions startAfter(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
@@ -964,7 +966,7 @@ public final class Conditions {
         private final T tuple;
         private final ObjectConverter<T, ArrayValue> tupleConverter;
 
-        public StartTupleWrapper(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
+        StartTupleWrapper(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
             this.tuple = tuple;
             this.tupleConverter = tupleConverter;
         }
