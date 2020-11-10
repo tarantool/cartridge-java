@@ -169,7 +169,7 @@ class Scratch {
         // Pass the field corresponding to bucket_id as null for tarantool/crud to compute it automatically
         TarantoolTuple tuple = client.getTupleFactory().create(1_000_000, null, "profile_name");
         // Primary index key value will be determined from the tuple
-        Conditions conditions = Conditions.fromTarantoolTuple(tuple);
+        Conditions conditions = Conditions.after(tuple);
         TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, tuple).get();
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
