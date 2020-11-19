@@ -1,7 +1,6 @@
 package io.tarantool.driver.mappers;
 
 import org.msgpack.value.Value;
-import org.springframework.lang.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,7 +93,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         return converter.get().fromValue(v);
     }
 
-    @Nullable
     private <T> Optional<T> findConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
         Optional<T> converter = getter.apply(objectClass.getTypeName());
         if (!converter.isPresent() && objectClass.getSuperclass() != null) {

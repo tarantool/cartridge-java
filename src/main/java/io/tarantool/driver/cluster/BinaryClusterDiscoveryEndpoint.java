@@ -2,7 +2,7 @@ package io.tarantool.driver.cluster;
 
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Class-container for {@link BinaryDiscoveryClusterAddressProvider} configuration

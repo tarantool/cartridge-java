@@ -4,7 +4,6 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.springframework.lang.Nullable;
 
 import java.util.Objects;
 
@@ -21,7 +20,7 @@ public class TarantoolFieldImpl implements TarantoolField {
      * Deserializing constructor
      * @param value MessagePack value.
      */
-    TarantoolFieldImpl(@Nullable Value value) {
+    TarantoolFieldImpl(Value value) {
         this.value = value;
     }
 
@@ -30,7 +29,7 @@ public class TarantoolFieldImpl implements TarantoolField {
      * @param object entity object
      * @param <O> entity type
      */
-    <O> TarantoolFieldImpl(@Nullable O object) {
+    <O> TarantoolFieldImpl(O object) {
         this.value = object;
     }
 

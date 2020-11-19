@@ -6,7 +6,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
 import java.util.List;

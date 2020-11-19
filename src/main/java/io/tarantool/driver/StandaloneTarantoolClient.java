@@ -7,7 +7,7 @@ import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.core.TarantoolSingleConnectionManager;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Main class for connecting to a single Tarantool server. Provides basic API for interacting with the database

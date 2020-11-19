@@ -5,7 +5,6 @@ import org.msgpack.value.IntegerValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.springframework.lang.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,7 @@ public final class TarantoolHeader implements Packable {
         this.code = code;
     }
 
-    TarantoolHeader(Long sync, Long code, @Nullable Long schemaVersion) {
+    TarantoolHeader(Long sync, Long code, Long schemaVersion) {
         this.sync = sync;
         this.code = code;
         this.schemaVersion = schemaVersion;
@@ -45,7 +44,6 @@ public final class TarantoolHeader implements Packable {
         this.sync = sync;
     }
 
-    @Nullable
     public Long getSync() {
         return sync;
     }
@@ -54,7 +52,6 @@ public final class TarantoolHeader implements Packable {
         this.code = code;
     }
 
-    @Nullable
     Long getCode() {
         return code;
     }
@@ -63,7 +60,6 @@ public final class TarantoolHeader implements Packable {
         this.schemaVersion = schemaVersion;
     }
 
-    @Nullable
     private Long getSchemaVersion() {
         return schemaVersion;
     }

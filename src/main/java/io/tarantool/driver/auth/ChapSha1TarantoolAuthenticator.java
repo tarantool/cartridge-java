@@ -1,7 +1,6 @@
 package io.tarantool.driver.auth;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import io.tarantool.driver.utils.Assert;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +36,7 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
      */
     @Override
     public boolean canAuthenticateWith(SimpleTarantoolCredentials credentials) {
-        return StringUtils.hasText(credentials.getUsername()) && StringUtils.hasText(credentials.getPassword());
+        return !credentials.isEmpty();
     }
 
     /**

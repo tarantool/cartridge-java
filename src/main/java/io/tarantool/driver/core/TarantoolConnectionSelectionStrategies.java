@@ -4,7 +4,7 @@ import io.tarantool.driver.ConnectionSelectionStrategy;
 import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,14 +35,12 @@ public final class TarantoolConnectionSelectionStrategies {
 
     static final class RoundRobinStrategy implements ConnectionSelectionStrategy {
 
-        private TarantoolConnectionIterator connectionIterator;
+        private final TarantoolConnectionIterator connectionIterator;
         private final int maxAttempts;
-        private final Collection<TarantoolConnection> connections;
 
         RoundRobinStrategy(Collection<TarantoolConnection> connections) {
             this.connectionIterator = new TarantoolConnectionIterator(connections);
             this.maxAttempts = connections.size();
-            this.connections = connections;
         }
 
         @Override

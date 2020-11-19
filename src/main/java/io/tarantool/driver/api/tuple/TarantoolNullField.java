@@ -4,7 +4,6 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.springframework.lang.Nullable;
 
 import java.util.Objects;
 
@@ -20,7 +19,6 @@ public final class TarantoolNullField implements TarantoolField {
         return ValueFactory.newNil();
     }
 
-    @Nullable
     @Override
     public <O> O getValue(Class<O> targetClass, MessagePackValueMapper mapper) {
         return null;

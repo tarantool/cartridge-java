@@ -12,10 +12,9 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
+import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -195,7 +194,7 @@ public final class Conditions {
      * @param tuple last tuple value from the previous result, may be null
      * @return new {@link Conditions} instance
      */
-    public static Conditions after(@Nullable TarantoolTuple tuple) {
+    public static Conditions after(TarantoolTuple tuple) {
         return new Conditions(tuple);
     }
 
@@ -207,7 +206,7 @@ public final class Conditions {
      * @param <T> tuple type
      * @return new {@link Conditions} instance
      */
-    public static <T> Conditions after(@Nullable T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
+    public static <T> Conditions after(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
         Assert.notNull(tupleConverter, "Tuple to ArrayValue converter should not be null");
 
         return new Conditions(new StartTupleWrapper<>(tuple, tupleConverter));

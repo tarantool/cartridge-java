@@ -1,9 +1,11 @@
 package io.tarantool.driver.auth;
 
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Container for plain user and password data for authentication
+ *
+ * @author Alexey Kuzin
  */
 public class SimpleTarantoolCredentials implements TarantoolCredentials {
 
@@ -41,5 +43,9 @@ public class SimpleTarantoolCredentials implements TarantoolCredentials {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isEmpty() {
+        return user.isEmpty() || password.isEmpty();
     }
 }

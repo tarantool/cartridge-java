@@ -17,8 +17,8 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.proxy.ProxyOperationsMapping;
 import io.tarantool.driver.metadata.ProxyTarantoolMetadata;
+import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;

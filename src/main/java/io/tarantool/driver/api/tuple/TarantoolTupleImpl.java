@@ -4,10 +4,9 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -73,7 +72,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param mapper provides conversion between MessagePack values and Java objects
      * @param metadata provides information about the target space
      */
-    public TarantoolTupleImpl(@Nullable Collection<?> values, MessagePackMapper mapper,
+    public TarantoolTupleImpl(Collection<?> values, MessagePackMapper mapper,
                               TarantoolSpaceMetadata metadata) {
         Assert.notNull(mapper, "MessagePack mapper should not be null");
 
@@ -242,31 +241,26 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         setField(fieldName, tarantoolField);
     }
 
-    @Nullable
     @Override
     public byte[] getByteArray(int fieldPosition) {
         return getObject(fieldPosition, byte[].class).orElse(null);
     }
 
-    @Nullable
     @Override
     public byte[] getByteArray(String fieldName) {
         return getObject(fieldName, byte[].class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Boolean getBoolean(int fieldPosition) {
         return getObject(fieldPosition, Boolean.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Boolean getBoolean(String fieldName) {
         return getObject(fieldName, Boolean.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Double getDouble(int fieldPosition) {
         return getObject(fieldPosition, Double.class).orElse(null);
@@ -277,97 +271,81 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         return getObject(fieldName, Double.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Float getFloat(int fieldPosition) {
         return getObject(fieldPosition, Float.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Float getFloat(String fieldName) {
         return getObject(fieldName, Float.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Integer getInteger(int fieldPosition) {
         return getObject(fieldPosition, Integer.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Integer getInteger(String fieldName) {
         return getObject(fieldName, Integer.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Long getLong(int fieldPosition) {
         return getObject(fieldPosition, Long.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Long getLong(String fieldName) {
         return getObject(fieldName, Long.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public String getString(int fieldPosition) {
         return getObject(fieldPosition, String.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public String getString(String fieldName) {
         return getObject(fieldName, String.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public UUID getUUID(int fieldPosition) {
         return getObject(fieldPosition, UUID.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public UUID getUUID(String fieldName) {
         return getObject(fieldName, UUID.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public BigDecimal getDecimal(int fieldPosition) {
         return getObject(fieldPosition, BigDecimal.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public BigDecimal getDecimal(String fieldName) {
         return getObject(fieldName, BigDecimal.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public List getList(int fieldPosition) {
         return getObject(fieldPosition, List.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public List getList(String fieldName) {
         return getObject(fieldName, List.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Map getMap(int fieldPosition) {
         return getObject(fieldPosition, Map.class).orElse(null);
     }
 
-    @Nullable
     @Override
     public Map getMap(String fieldName) {
         return getObject(fieldName, Map.class).orElse(null);

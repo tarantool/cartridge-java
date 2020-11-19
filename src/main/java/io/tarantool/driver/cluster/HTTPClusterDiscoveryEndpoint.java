@@ -1,6 +1,6 @@
 package io.tarantool.driver.cluster;
 
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Class-container for {@link HTTPDiscoveryClusterAddressProvider} configuration
