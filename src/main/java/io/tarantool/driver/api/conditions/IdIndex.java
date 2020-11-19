@@ -4,7 +4,7 @@ import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Optional;
 

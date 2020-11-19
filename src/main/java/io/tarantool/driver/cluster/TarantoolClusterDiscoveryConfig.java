@@ -1,7 +1,7 @@
 package io.tarantool.driver.cluster;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Class-container for service discovery configuration.

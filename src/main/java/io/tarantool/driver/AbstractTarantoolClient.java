@@ -26,8 +26,8 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
+import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
-import org.springframework.util.Assert;
 
 import java.util.Collections;
 import java.util.List;

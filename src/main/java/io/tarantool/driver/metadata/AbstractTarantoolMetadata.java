@@ -1,9 +1,8 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

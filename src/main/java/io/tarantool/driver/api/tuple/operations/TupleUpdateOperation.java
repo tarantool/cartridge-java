@@ -2,7 +2,6 @@ package io.tarantool.driver.api.tuple.operations;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import org.msgpack.value.Value;
-import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -50,7 +49,7 @@ abstract class TupleUpdateOperation implements TupleOperation {
                                    String fieldName,
                                    Object value,
                                    boolean isProxyOperation) {
-        if (fieldIndex == null && StringUtils.isEmpty(fieldName)) {
+        if (fieldIndex == null && (fieldName == null || fieldName.isEmpty())) {
             throw new IllegalArgumentException("Field name must be not empty");
         }
         this.isProxyOperation = isProxyOperation;

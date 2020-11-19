@@ -4,7 +4,7 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Collection;
 

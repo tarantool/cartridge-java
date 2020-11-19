@@ -7,7 +7,7 @@ import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Collection;
 import java.util.Collections;

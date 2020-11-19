@@ -7,7 +7,7 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestType;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
 import java.util.HashMap;

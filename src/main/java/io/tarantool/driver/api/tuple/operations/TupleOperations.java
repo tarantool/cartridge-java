@@ -4,7 +4,7 @@ package io.tarantool.driver.api.tuple.operations;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.ArrayList;
 import java.util.List;

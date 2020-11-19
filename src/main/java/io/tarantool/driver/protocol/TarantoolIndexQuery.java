@@ -1,6 +1,6 @@
 package io.tarantool.driver.protocol;
 
-import org.springframework.util.Assert;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.Collections;
 import java.util.List;
