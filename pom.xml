@@ -135,7 +135,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M4</version>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
@@ -222,7 +222,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.15.0-rc2</version>
+            <version>1.15.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -234,7 +234,7 @@
         <dependency>
             <groupId>io.tarantool</groupId>
             <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>0.2.0</version>
+            <version>0.2.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
