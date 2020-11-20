@@ -23,7 +23,7 @@ public interface Condition {
      *
      * @return operand
      */
-    FieldIdentifier field();
+    FieldIdentifier<?, ?> field();
 
     /**
      * Filtering value for the operand
@@ -39,5 +39,5 @@ public interface Condition {
      * @param spaceMetadata space metadata
      * @return list of serialized conditions
      */
-    List<Object> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);
+    List<?> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);
 }

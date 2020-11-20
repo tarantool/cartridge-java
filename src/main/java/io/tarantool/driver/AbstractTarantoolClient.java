@@ -194,15 +194,13 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
-                                                          Class<T> tupleClass)
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<?> arguments, Class<T> tupleClass)
             throws TarantoolClientException {
         return call(functionName, arguments, config.getMessagePackMapper(), getConverter(tupleClass));
     }
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         return call(functionName, arguments, config.getMessagePackMapper(), tupleMapper);
@@ -210,7 +208,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
                                                           Class<T> tupleClass)
             throws TarantoolClientException {
@@ -220,7 +218,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
                                                           ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
@@ -229,9 +227,10 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
-                                                          TarantoolCallResultMapper<T> resultMapper) {
+                                                          TarantoolCallResultMapper<T> resultMapper)
+            throws TarantoolClientException {
         try {
             TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
                     .withFunctionName(functionName);

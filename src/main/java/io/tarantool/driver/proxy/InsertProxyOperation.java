@@ -20,7 +20,7 @@ public final class InsertProxyOperation<T> extends AbstractProxyOperation<T> {
 
     private InsertProxyOperation(TarantoolClient client,
                                  String functionName,
-                                 List<Object> arguments,
+                                 List<?> arguments,
                                  TarantoolCallResultMapper<T> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
@@ -75,7 +75,7 @@ public final class InsertProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTimeout(config.getRequestTimeout())
                     .build();
 
-            List<Object> arguments = Arrays.asList(spaceName, tuple.getFields(), options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuple.getFields(), options.asMap());
 
             return new InsertProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
         }

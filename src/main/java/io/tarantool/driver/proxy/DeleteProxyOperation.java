@@ -19,7 +19,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
 
     private DeleteProxyOperation(TarantoolClient client,
                                  String functionName,
-                                 List<Object> arguments,
+                                 List<?> arguments,
                                  TarantoolCallResultMapper<T> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
@@ -74,7 +74,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTimeout(config.getRequestTimeout())
                     .build();
 
-            List<Object> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
 
             return new DeleteProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
         }

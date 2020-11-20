@@ -19,7 +19,7 @@ public final class ReplaceProxyOperation<T> extends AbstractProxyOperation<T> {
 
     ReplaceProxyOperation(TarantoolClient client,
                           String functionName,
-                          List<Object> arguments,
+                          List<?> arguments,
                           TarantoolCallResultMapper<T> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
@@ -74,7 +74,7 @@ public final class ReplaceProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTimeout(config.getRequestTimeout())
                     .build();
 
-            List<Object> arguments = Arrays.asList(spaceName, tuple.getFields(), options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuple.getFields(), options.asMap());
 
             return new ReplaceProxyOperation<T>(this.client, this.functionName, arguments, resultMapper);
         }

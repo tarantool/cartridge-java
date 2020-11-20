@@ -20,7 +20,7 @@ public final class UpsertProxyOperation<T> extends AbstractProxyOperation<T> {
 
     UpsertProxyOperation(TarantoolClient client,
                          String functionName,
-                         List<Object> arguments,
+                         List<?> arguments,
                          TarantoolCallResultMapper<T> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
@@ -82,7 +82,7 @@ public final class UpsertProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTimeout(config.getRequestTimeout())
                     .build();
 
-            List<Object> arguments = Arrays.asList(spaceName,
+            List<?> arguments = Arrays.asList(spaceName,
                     tuple.getFields(),
                     operations.asProxyOperationList(),
                     options.asMap());

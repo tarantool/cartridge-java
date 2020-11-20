@@ -146,15 +146,14 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
-                                                          Class<T> entityClass) throws TarantoolClientException {
+    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<?> arguments, Class<T> entityClass)
+            throws TarantoolClientException {
         return client.call(functionName, arguments, entityClass);
     }
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
         return client.call(functionName, arguments, tupleMapper);
@@ -162,7 +161,7 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
                                                           Class<T> entityClass) throws TarantoolClientException {
         return client.call(functionName, arguments, argumentsMapper, entityClass);
@@ -170,7 +169,7 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
                                                           ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException {
@@ -179,7 +178,7 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<Object> arguments,
+                                                          List<?> arguments,
                                                           MessagePackObjectMapper argumentsMapper,
                                                           TarantoolCallResultMapper<T> resultMapper)
             throws TarantoolClientException {
@@ -203,9 +202,8 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression,
-                                           List<?> arguments,
-                                           MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public CompletableFuture<List<?>> eval(String expression, List<?> arguments, MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
         return client.eval(expression, arguments, resultMapper);
     }
 

@@ -15,12 +15,12 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
     protected final TarantoolClient client;
     protected final String functionName;
-    protected final List<Object> arguments;
+    protected final List<?> arguments;
     protected final TarantoolCallResultMapper<T> resultMapper;
 
     AbstractProxyOperation(TarantoolClient client,
                            String functionName,
-                           List<Object> arguments,
+                           List<?> arguments,
                            TarantoolCallResultMapper<T> resultMapper) {
         this.client = client;
         this.arguments = arguments;
@@ -36,7 +36,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return functionName;
     }
 
-    public List<Object> getArguments() {
+    public List<?> getArguments() {
         return arguments;
     }
 

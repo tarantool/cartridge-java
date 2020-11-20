@@ -55,11 +55,12 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
 
     @BeforeAll
-    public static void setUp() {
+    public static void setUp() throws Exception {
         startCluster();
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
         initClient();
+        client.space(TEST_SPACE_NAME).delete(Conditions.any()).get();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {

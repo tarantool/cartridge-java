@@ -21,7 +21,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
     private SelectProxyOperation(TarantoolClient client,
                                  String functionName,
-                                 List<Object> arguments,
+                                 List<?> arguments,
                                  TarantoolCallResultMapper<T> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
@@ -83,7 +83,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withSelectLimit(conditions.getLimit())
                     .withSelectAfter(conditions.getStartTuple());
 
-            List<Object> arguments = Arrays.asList(
+            List<?> arguments = Arrays.asList(
                     spaceName,
                     conditions.toProxyQuery(operations, metadata),
                     requestOptions.build().asMap()

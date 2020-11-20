@@ -89,7 +89,7 @@ public interface TarantoolCallOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<Object> arguments,
+                                                   List<?> arguments,
                                                    Class<T> entityClass)
             throws TarantoolClientException;
 
@@ -105,7 +105,7 @@ public interface TarantoolCallOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<Object> arguments,
+                                                   List<?> arguments,
                                                    ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
 
@@ -122,7 +122,7 @@ public interface TarantoolCallOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<Object> arguments,
+                                                   List<?> arguments,
                                                    MessagePackObjectMapper argumentsMapper,
                                                    Class<T> entityClass)
             throws TarantoolClientException;
@@ -139,7 +139,7 @@ public interface TarantoolCallOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<Object> arguments,
+                                                   List<?> arguments,
                                                    MessagePackObjectMapper argumentsMapper,
                                                    ValueConverter<ArrayValue, T> tupleMapper)
             throws TarantoolClientException;
@@ -156,7 +156,7 @@ public interface TarantoolCallOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<Object> arguments,
+                                                   List<?> arguments,
                                                    MessagePackObjectMapper argumentsMapper,
                                                    TarantoolCallResultMapper<T> resultMapper)
             throws TarantoolClientException;
