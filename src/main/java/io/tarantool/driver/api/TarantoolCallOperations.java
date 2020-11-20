@@ -32,6 +32,18 @@ public interface TarantoolCallOperations {
      * used for converting the result values from MessagePack entities to objects.
      *
      * @param functionName function name, must not be null or empty
+     * @param arguments    vararg array of function arguments. The object mapper specified in the client configuration
+     *                     will be used for arguments conversion to MessagePack entities
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected
+     */
+    CompletableFuture<List<?>> call(String functionName, Object... arguments) throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance, The value mapper specified in the client configuration will be
+     * used for converting the result values from MessagePack entities to objects.
+     *
+     * @param functionName function name, must not be null or empty
      * @param arguments    list of function arguments. The object mapper specified in the client configuration
      *                     will be used for arguments conversion to MessagePack entities
      * @return some result

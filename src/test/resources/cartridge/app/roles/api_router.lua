@@ -1,4 +1,6 @@
 local vshard = require('vshard')
+local cartridge_pool = require('cartridge.pool')
+local cartridge_rpc = require('cartridge.rpc')
 
 -- function to get cluster schema
 local function crud_get_schema()
@@ -37,10 +39,15 @@ local function crud_get_schema()
     return uniq_spaces
 end
 
+local function truncate_space(space_name)
+    local storages = cartridge_rpc.get_candidates('app.roles.api_storage')
+    cartridge_pool.map_call('box.schema.space[' .. space_name .. ']:truncate', nil, {uri_list = storages})
+end
 
 local function init(opts)
 
     rawset(_G, 'crud_get_schema', crud_get_schema)
+    rawset(_G, 'truncate_space', truncate_space)
 
     return true
 end

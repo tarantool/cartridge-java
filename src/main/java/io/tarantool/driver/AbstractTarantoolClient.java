@@ -29,6 +29,7 @@ import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
 import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -154,6 +155,12 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     @Override
     public CompletableFuture<List<?>> call(String functionName) throws TarantoolClientException {
         return call(functionName, Collections.emptyList());
+    }
+
+    @Override
+    public CompletableFuture<List<?>> call(String functionName, Object... arguments)
+            throws TarantoolClientException {
+        return call(functionName, Arrays.asList(arguments));
     }
 
     @Override
