@@ -20,6 +20,7 @@ import io.tarantool.driver.metadata.ProxyTarantoolMetadata;
 import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -118,6 +119,12 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     @Override
     public CompletableFuture<List<?>> call(String functionName) throws TarantoolClientException {
         return client.call(functionName);
+    }
+
+    @Override
+    public CompletableFuture<List<?>> call(String functionName, Object... arguments)
+            throws TarantoolClientException {
+        return client.call(functionName, Arrays.asList(arguments));
     }
 
     @Override

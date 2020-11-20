@@ -60,7 +60,11 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
         initClient();
-        client.space(TEST_SPACE_NAME).delete(Conditions.any()).get();
+        truncateSpace(TEST_SPACE_NAME);
+    }
+
+    private static void truncateSpace(String spaceName) {
+        client.call("truncate_space", spaceName);
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
