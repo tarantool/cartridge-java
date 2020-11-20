@@ -25,7 +25,7 @@ public interface TarantoolCallOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException;
+    CompletableFuture<List<?>> call(String functionName) throws TarantoolClientException;
 
     /**
      * Execute a function defined on Tarantool instance, The value mapper specified in the client configuration will be
@@ -37,7 +37,7 @@ public interface TarantoolCallOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> call(String functionName, List<Object> arguments) throws TarantoolClientException;
+    CompletableFuture<List<?>> call(String functionName, List<?> arguments) throws TarantoolClientException;
 
     /**
      * Execute a function defined on Tarantool instance
@@ -48,9 +48,8 @@ public interface TarantoolCallOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> call(String functionName,
-                                         List<Object> arguments,
-                                         MessagePackMapper mapper) throws TarantoolClientException;
+    CompletableFuture<List<?>> call(String functionName, List<?> arguments, MessagePackMapper mapper)
+            throws TarantoolClientException;
 
     /**
      * Execute a function defined on Tarantool instance. The value mapper specified in the client configuration will be

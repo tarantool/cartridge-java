@@ -100,7 +100,7 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
 
     protected Collection<TarantoolServerAddress> discoverAddresses() {
         try {
-            List<Object> functionResult = client.call(endpoint.getDiscoveryFunction(), Collections.emptyList()).get();
+            List<?> functionResult = client.call(endpoint.getDiscoveryFunction(), Collections.emptyList()).get();
             String valueAsString = objectMapper.writeValueAsString(functionResult.get(0));
             TypeReference<HashMap<String, ServerNodeInfo>> typeReference =
                     new TypeReference<HashMap<String, ServerNodeInfo>>() {

@@ -116,18 +116,18 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public CompletableFuture<List<Object>> call(String functionName) throws TarantoolClientException {
+    public CompletableFuture<List<?>> call(String functionName) throws TarantoolClientException {
         return client.call(functionName);
     }
 
     @Override
-    public CompletableFuture<List<Object>> call(String functionName, List<Object> arguments)
+    public CompletableFuture<List<?>> call(String functionName, List<?> arguments)
             throws TarantoolClientException {
         return client.call(functionName, arguments);
     }
 
     @Override
-    public CompletableFuture<List<Object>> call(String functionName, List<Object> arguments, MessagePackMapper mapper)
+    public CompletableFuture<List<?>> call(String functionName, List<?> arguments, MessagePackMapper mapper)
             throws TarantoolClientException {
         return client.call(functionName, arguments, mapper);
     }
@@ -187,34 +187,33 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException {
+    public CompletableFuture<List<?>> eval(String expression) throws TarantoolClientException {
         return client.eval(expression);
     }
 
     @Override
-    public CompletableFuture<List<Object>> eval(String expression, List<Object> arguments)
-            throws TarantoolClientException {
+    public CompletableFuture<List<?>> eval(String expression, List<?> arguments) throws TarantoolClientException {
         return client.eval(expression, arguments);
     }
 
     @Override
-    public CompletableFuture<List<Object>> eval(String expression, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         return client.eval(expression, resultMapper);
     }
 
     @Override
-    public CompletableFuture<List<Object>> eval(String expression,
-                                                List<Object> arguments,
-                                                MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public CompletableFuture<List<?>> eval(String expression,
+                                           List<?> arguments,
+                                           MessagePackValueMapper resultMapper) throws TarantoolClientException {
         return client.eval(expression, arguments, resultMapper);
     }
 
     @Override
-    public CompletableFuture<List<Object>> eval(String expression,
-                                                List<Object> arguments,
-                                                MessagePackObjectMapper argumentsMapper,
-                                                MessagePackValueMapper resultMapper) throws TarantoolClientException {
+    public CompletableFuture<List<?>> eval(String expression,
+                                           List<?> arguments,
+                                           MessagePackObjectMapper argumentsMapper,
+                                           MessagePackValueMapper resultMapper) throws TarantoolClientException {
         return client.eval(expression, arguments, argumentsMapper, resultMapper);
     }
 

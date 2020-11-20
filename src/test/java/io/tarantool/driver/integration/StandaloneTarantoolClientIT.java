@@ -117,7 +117,7 @@ public class StandaloneTarantoolClientIT {
         }
     }
 
-    private CompletableFuture<List<Object>> connectAndEval(String command) throws Exception {
+    private CompletableFuture<List<?>> connectAndEval(String command) throws Exception {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
                 tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
@@ -133,7 +133,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void connectAndCloseAfterFuture() throws Exception {
-        List<Object> result = connectAndEval("return 1, 2").get(1000, TimeUnit.MILLISECONDS);
+        List<?> result = connectAndEval("return 1, 2").get(1000, TimeUnit.MILLISECONDS);
         assertEquals(2, result.size());
         assertEquals(1, result.get(0));
         assertEquals(2, result.get(1));
@@ -374,13 +374,12 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void callTest() throws Exception {
-        List<Object> resultNoParam = client.call("user_function_no_param").get();
+        List<?> resultNoParam = client.call("user_function_no_param").get();
 
         assertEquals(1, resultNoParam.size());
         assertEquals(5, resultNoParam.get(0));
 
-        List<Object> resultTwoParams =
-                client.call("user_function_two_param", Arrays.asList(1, "abc")).get();
+        List<?> resultTwoParams = client.call("user_function_two_param", Arrays.asList(1, "abc")).get();
 
         assertEquals(3, resultTwoParams.size());
         assertEquals(1, resultTwoParams.get(0));
@@ -407,8 +406,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void evalTest() throws ExecutionException, InterruptedException {
-        List<Object> result =
-                client.eval("return 2+2").get();
+        List<?> result = client.eval("return 2+2").get();
 
         assertEquals(1, result.size());
         assertEquals(4, result.get(0));
@@ -422,7 +420,7 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void evalReturnNil() throws ExecutionException, InterruptedException {
-        List<Object> result = client.eval("return 2.2 + 2, nil").get();
+        List<?> result = client.eval("return 2.2 + 2, nil").get();
 
         assertEquals(2, result.size());
         assertEquals(4.2f, result.get(0));
@@ -471,7 +469,7 @@ public class StandaloneTarantoolClientIT {
     @Test
     public void testCallReturnLongValue() throws Exception {
         client.getVersion();
-        List<Object> result = client.call("user_function_return_long_value").get();
+        List<?> result = client.call("user_function_return_long_value").get();
 
         assertEquals(1, result.size());
     }

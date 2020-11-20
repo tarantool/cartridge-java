@@ -22,7 +22,7 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> eval(String expression) throws TarantoolClientException;
+    CompletableFuture<List<?>> eval(String expression) throws TarantoolClientException;
 
     /**
      * Execute a Lua expression in the Tarantool instance. If a result is expected, the expression must start with
@@ -35,7 +35,7 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> eval(String expression, List<Object> arguments) throws TarantoolClientException;
+    CompletableFuture<List<?>> eval(String expression, List<?> arguments) throws TarantoolClientException;
 
     /**
      * Execute a Lua expression in the Tarantool instance. If a result is expected, the expression must start with
@@ -46,7 +46,7 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> eval(String expression, MessagePackValueMapper resultMapper)
+    CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
     /**
@@ -60,9 +60,7 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> eval(String expression,
-                                         List<Object> arguments,
-                                         MessagePackValueMapper resultMapper)
+    CompletableFuture<List<?>> eval(String expression, List<?> arguments, MessagePackValueMapper resultMapper)
             throws TarantoolClientException;
 
     /**
@@ -76,8 +74,8 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<Object>> eval(String expression,
-                                         List<Object> arguments,
-                                         MessagePackObjectMapper argumentsMapper,
-                                         MessagePackValueMapper resultMapper) throws TarantoolClientException;
+    CompletableFuture<List<?>> eval(String expression,
+                                    List<?> arguments,
+                                    MessagePackObjectMapper argumentsMapper,
+                                    MessagePackValueMapper resultMapper) throws TarantoolClientException;
 }

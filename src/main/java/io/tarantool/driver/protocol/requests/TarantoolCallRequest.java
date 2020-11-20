@@ -50,7 +50,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
          * @param arguments function arguments
          * @return builder
          */
-        public Builder withArguments(List<Object> arguments) {
+        public Builder withArguments(List<?> arguments) {
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), arguments);
             return this;
         }
