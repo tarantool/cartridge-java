@@ -97,10 +97,14 @@ class Scratch {
 
 ### Cluster Tarantool client
 
-Connects to multiple Tarantool nodes, usually Tarantool Cartridge routers. Supports multiple connections.
+Connects to multiple Tarantool nodes, usually Tarantool Cartridge routers. Supports multiple connections to one node.
+Cluster client connects to all specified nodes simultaneously and then routes all requests to different nodes using
+the specified connection selection strategy. If any connection goes down, reconnection is performed automatically.
 
-The next example is showing the instantiation of the `ClusterTarantoolClient`
-with binary discovery endpoint:
+You may set up automatic retrieving of the list of cluster nodes available for connection (aka discovery). Discovery
+providers with a HTTP endpoint and a stored function in Tarantool are available out-of-the-box.
+
+The next example is showing the instantiation of the `ClusterTarantoolClient` with stored function discovery provider:
 
 ```java
 
@@ -126,8 +130,8 @@ class Scratch {
                 .withDelay(1)
                 .build();
 
-        // Address provider is a customizable point for providing
-        // server nodes addreses
+        // Address provider is a customizable point for providing server nodes addresses
+        // BinaryDiscoveryClusterAddressProvider calls a stored function in a Tarantool instance, e.g. Cartridge router
         BinaryDiscoveryClusterAddressProvider addressProvider =
                 new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
 
@@ -138,10 +142,29 @@ class Scratch {
                 .withRequestTimeout(1000 * 5) // 5 seconds, timeout for receiving the server response
                 .build();
 
+        // The chosen connection selection strategy will determine how hosts and connections are selected for performing
+        // the next request to the cluster
         ClusterTarantoolClient client = new ClusterTarantoolClient(
                 config, getBinaryProvider(), TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
 
-        ...
+        // Mappers are used for converting MessagePack primitives to Java objects
+        // The default mappers can be instantiated via the default mapper factory and further customized
+        DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+        // Use tuple factory for instantiating new tuples
+        TarantoolTupleFactory tupleFactory =
+            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        TarantoolSpaceOperations testSpace = client.space("test");
+        TarantoolTuple tarantoolTuple;
+
+        // Multiple requests are processed in an asynchronous way
+        List<CompletableFuture<?>> allFutures = new ArrayList<>(20);
+        for (int i = 0; i < 20; i++) {
+            // If you are inserting tuples into a space sharded with tarantool/vshard, you will have to specify the
+            // bucket_id field value or leave it as null
+            tarantoolTuple = tupleFactory.create(1_000_000 + i, null, "FIO", 50 + i, 100 + i);
+            allFutures.add(profileSpace.insert(tarantoolTuple));
+        }
+        allFutures.forEach(CompletableFuture::join);
 
         client.close();
     }
@@ -154,7 +177,7 @@ A decorator for any of the basic client types. Allows connecting to instances wi
 functions or Cartridge roles based on 'crud-router' from module [CRUD](https://github.com/tarantool/crud). Works with
 tarantool/crud 0.3.0+.
 
-See an example how to use the `ProxyTarantoolClient`:
+See an example of how to use the `ProxyTarantoolClient`:
 
 ```java
 
@@ -177,6 +200,7 @@ class Scratch {
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
 
+        // Any other operations with tuples as described in the examples above
         ...
 
         client.close();
@@ -204,9 +228,11 @@ and [Russian](https://t.me/tarantool).
 
 Java 1.8 or higher is required for building and using this driver.
 
-##Building
+## Building
 
-This driver is deployed to Maven central, so you are not required to build it yourself to use. But if you want to, you can use `./mvnw verify` to run unit tests and `./mvnw test -Pintegration` to run integration tests (Docker accessible to curent user is required)
+Docker accessible to the current user is required for running integration tests.
+Use `./mvnw verify` to run unit tests and `./mvnw test -Pintegration` to run integration tests.
+Use `./mvnw install` for installing the artifact locally.
 
 ## Contributing
 

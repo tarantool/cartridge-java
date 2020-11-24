@@ -53,6 +53,8 @@ local function init(opts)
         init_space()
     end
 
+    rawset(_G, 'ddl', { get_schema = require('ddl').get_schema })
+
     return true
 end
 

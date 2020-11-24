@@ -27,10 +27,12 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -99,7 +101,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         ClusterTarantoolClient clusterClient =
                 new ClusterTarantoolClient(config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
-        client = new ProxyTarantoolClient(clusterClient);
+        client = new TestProxyTarantoolClient(clusterClient);
     }
 
     @Test
@@ -132,10 +134,12 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         TarantoolTuple tarantoolTuple;
 
+        List<CompletableFuture<?>> allFutures = new ArrayList<>(20);
         for (int i = 0; i < 20; i++) {
             tarantoolTuple = tupleFactory.create(1_000_000 + i, null, "FIO", 50 + i, 100 + i);
-            profileSpace.insert(tarantoolTuple).get();
+            allFutures.add(profileSpace.insert(tarantoolTuple));
         }
+        allFutures.forEach(CompletableFuture::join);
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
 
