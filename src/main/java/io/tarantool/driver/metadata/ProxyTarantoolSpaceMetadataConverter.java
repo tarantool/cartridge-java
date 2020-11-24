@@ -28,8 +28,8 @@ public class ProxyTarantoolSpaceMetadataConverter
 
     private static final ImmutableStringValue SPACE_ID_KEY = new ImmutableStringValueImpl("id");
     private static final ImmutableStringValue SPACE_NAME_KEY = new ImmutableStringValueImpl("name");
-    private static final ImmutableStringValue SPACE_FORMAT_KEY = new ImmutableStringValueImpl("_format");
-    private static final ImmutableStringValue SPACE_INDEX_KEY = new ImmutableStringValueImpl("index");
+    private static final ImmutableStringValue SPACE_FORMAT_KEY = new ImmutableStringValueImpl("format");
+    private static final ImmutableStringValue SPACE_INDEXES_KEY = new ImmutableStringValueImpl("indexes");
 
     private static final ImmutableStringValue FORMAT_NAME_KEY = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue FORMAT_TYPE_KEY = new ImmutableStringValueImpl("type");
@@ -96,7 +96,7 @@ public class ProxyTarantoolSpaceMetadataConverter
 
         proxyMetadata.addSpace(spaceMetadata);
 
-        Value indexesValue = spacesMap.get(SPACE_INDEX_KEY);
+        Value indexesValue = spacesMap.get(SPACE_INDEXES_KEY);
         if (indexesValue != null && indexesValue.isArrayValue() && indexesValue.asArrayValue().size() > 0) {
             List<Value> indexes = indexesValue.asArrayValue().list();
             proxyMetadata.addIndexes(spaceMetadata.getSpaceName(), parseIndexes(indexes));

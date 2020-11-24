@@ -7,14 +7,14 @@ package io.tarantool.driver.proxy;
  */
 public interface ProxyOperationsMapping {
 
-    String FUNCTION_PREFIX = "crud.";
-    String SCHEMA_FUNCTION = "crud_get_schema";
-    String DELETE_FUNCTION = FUNCTION_PREFIX + "delete";
-    String INSERT_FUNCTION = FUNCTION_PREFIX + "insert";
-    String REPLACE_FUNCTION = FUNCTION_PREFIX + "replace";
-    String SELECT_FUNCTION = FUNCTION_PREFIX + "select";
-    String UPDATE_FUNCTION = FUNCTION_PREFIX + "update";
-    String UPSERT_UPSERT = FUNCTION_PREFIX + "upsert";
+    String CRUD_PREFIX = "crud.";
+    String SCHEMA_FUNCTION = "cartridge.get_schema";
+    String DELETE_FUNCTION = CRUD_PREFIX + "delete";
+    String INSERT_FUNCTION = CRUD_PREFIX + "insert";
+    String REPLACE_FUNCTION = CRUD_PREFIX + "replace";
+    String SELECT_FUNCTION = CRUD_PREFIX + "select";
+    String UPDATE_FUNCTION = CRUD_PREFIX + "update";
+    String UPSERT_UPSERT = CRUD_PREFIX + "upsert";
 
     /**
      * Get API function name for getting the spaces and indexes schema. The default value is
