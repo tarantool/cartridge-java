@@ -3,9 +3,11 @@ package io.tarantool.driver.metadata;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolMetadataRequestException;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 /**
  * Populates metadata from results of a call to proxy API function in Tarantool instance. The function result is
@@ -53,6 +55,14 @@ public class ProxyTarantoolMetadata extends AbstractTarantoolMetadata {
                     }
                 });
             });
+        }).exceptionally(ex -> {
+            if (ex.getCause() != null && ex.getCause() instanceof TarantoolClientException) {
+                throw new TarantoolMetadataRequestException(metadataFunctionName, ex);
+            } else if (ex instanceof RuntimeException) {
+                throw (RuntimeException) ex;
+            } else {
+                throw new CompletionException(ex);
+            }
         });
     }
 }

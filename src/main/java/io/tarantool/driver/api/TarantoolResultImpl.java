@@ -1,6 +1,9 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import io.tarantool.driver.mappers.ValueConverter;
+import org.msgpack.core.MessageTypeCastException;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
@@ -21,7 +24,13 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
 
     public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter) {
         this.tuples = value.list().stream()
-                .map(v -> tupleConverter.fromValue(v.asArrayValue()))
+                .map(v -> {
+                    try {
+                        return tupleConverter.fromValue(v.asArrayValue());
+                    } catch (MessageTypeCastException e) {
+                        throw new TarantoolTupleConversionException(v, e);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
