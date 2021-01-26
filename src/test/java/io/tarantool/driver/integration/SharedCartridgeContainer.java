@@ -14,11 +14,10 @@ abstract class SharedCartridgeContainer {
 
     @ClassRule
     protected static final TarantoolCartridgeContainer container =
-            (TarantoolCartridgeContainer) new TarantoolCartridgeContainer(
+            new TarantoolCartridgeContainer(
             "cartridge/instances.yml",
             "cartridge/topology.lua")
             .withDirectoryBinding("cartridge")
-            .cleanUpDirectory("cartridge/tmp")
             .withLogConsumer(new Slf4jLogConsumer(logger));
 
     protected static void startCluster() {
