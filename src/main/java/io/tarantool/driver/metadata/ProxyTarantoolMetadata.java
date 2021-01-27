@@ -20,13 +20,13 @@ import java.util.concurrent.CompletionException;
  */
 public class ProxyTarantoolMetadata extends AbstractTarantoolMetadata {
 
-    private final String getMetadataFunctionName;
+    private final String metadataFunctionName;
     private final TarantoolClient client;
     private final ProxyTarantoolSpaceMetadataConverter metadataConverter;
 
-    public ProxyTarantoolMetadata(String getMetadataFunctionName,
+    public ProxyTarantoolMetadata(String metadataFunctionName,
                                   TarantoolClient client) {
-        this.getMetadataFunctionName = getMetadataFunctionName;
+        this.metadataFunctionName = metadataFunctionName;
         this.client = client;
         this.metadataConverter = new ProxyTarantoolSpaceMetadataConverter(client.getConfig().getMessagePackMapper());
     }
@@ -35,7 +35,7 @@ public class ProxyTarantoolMetadata extends AbstractTarantoolMetadata {
     public CompletableFuture<Void> populateMetadata() throws TarantoolClientException {
 
         CompletableFuture<TarantoolResult<ProxyTarantoolSpaceMetadataContainer>> callResult = client.call(
-                getMetadataFunctionName,
+                metadataFunctionName,
                 metadataConverter);
 
         return callResult.thenAccept(result -> {
