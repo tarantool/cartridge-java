@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
 
 import java.util.Collections;
@@ -24,6 +25,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     private Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
     private Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;
     private Map<String, ObjectConverter<?, ? extends Value>> objectConvertersByTarget;
+    private final ObjectConverter<Object, NilValue> nilConverter = new DefaultNilConverter();
 
     /**
      * Basic constructor
@@ -47,6 +49,18 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         this.objectConvertersByTarget.putAll(mapper.objectConvertersByTarget);
     }
 
+    private <V extends Value, O> ObjectConverter<O, V>
+    getObjectConverter(O o, Function<String, Optional<ObjectConverter<O, V>>> getter) {
+        if (o == null) {
+            return (ObjectConverter<O, V>) nilConverter;
+        }
+        Optional<ObjectConverter<O, V>> converter = findConverter(o.getClass(), getter);
+        if (!converter.isPresent()) {
+            throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
+        }
+        return converter.get();
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <V extends Value, O> V toValue(O o) {
@@ -55,11 +69,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                         .map(c -> (ObjectConverter<O, V>) c)
                         .filter(c -> c.canConvertObject(o))
                         .findFirst();
-        Optional<ObjectConverter<O, V>> converter = findConverter(o.getClass(), getter);
-        if (!converter.isPresent()) {
-            throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
-        }
-        return converter.get().toValue(o);
+
+        ObjectConverter<O, V> converter = getObjectConverter(o, getter);
+        return converter.toValue(o);
     }
 
     @Override

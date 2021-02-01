@@ -57,6 +57,9 @@ class DefaultMessagePackMapperTest {
         // uuid
         UUID uuid = UUID.fromString("84b56906-aeed-11ea-b3de-0242ac130004");
         assertEquals(uuid, mapper.fromValue(mapper.toValue(uuid)));
+
+        // null
+        assertEquals(ValueFactory.newNil(), mapper.toValue(null));
     }
 
     @Test
