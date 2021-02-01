@@ -74,6 +74,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             Assert.notNull(functionName, "Proxy delete function name should not be null");
             Assert.notNull(resultMapper, "Result tuple mapper should not be null");
             Assert.notNull(conditions, "Select conditions should not be null");
+            Assert.state(conditions.getOffset() == 0,
+                    "Select conditions for cluster can not contain positive offset");
 
             TarantoolClientConfig config = client.getConfig();
 

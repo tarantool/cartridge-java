@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolCursor;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
@@ -23,13 +24,14 @@ import io.tarantool.driver.protocol.requests.TarantoolReplaceRequest;
 import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpdateRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
+import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Basic Tarantool space operations implementation for standalone server
+ * Basic Tarantool space operations implementation for standalone server.
  *
  * @author Alexey Kuzin
  */
@@ -69,9 +71,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
-                                                            ValueConverter<ArrayValue, T> tupleMapper)
+                                                            ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return delete(conditions, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return delete(conditions, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
@@ -100,9 +102,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
-                                                            ValueConverter<ArrayValue, T> tupleMapper)
+                                                            ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return replace(tuple, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return replace(tuple, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
@@ -128,9 +130,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
-                                                             ValueConverter<ArrayValue, T> tupleMapper)
+                                                             ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return replace(tuple, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return replace(tuple, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
@@ -158,27 +160,32 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                             Class<T> tupleClass)
             throws TarantoolClientException {
-        MessagePackValueMapper mapper;
-        if (TarantoolTuple.class.isAssignableFrom(tupleClass)) {
-            mapper = defaultTupleResultMapper();
-        } else {
-            ValueConverter<ArrayValue, T> converter = getConverter(tupleClass);
-            mapper = tarantoolResultMapperFactory.withConverter(tupleClass, converter);
-        }
+        MessagePackValueMapper mapper  = createTupleMapper(tupleClass);
         return select(conditions, mapper);
+    }
+
+    private <T> MessagePackValueMapper createTupleMapper(Class<T> tupleClass) {
+        if (TarantoolTuple.class.isAssignableFrom(tupleClass)) {
+            return defaultTupleResultMapper();
+        }
+        ValueConverter<ArrayValue, T> converter = getValueConverter(tupleClass);
+        return tarantoolResultMapperFactory.withConverter(tupleClass, converter);
     }
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                            ValueConverter<ArrayValue, T> tupleMapper)
+                                                            ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return select(conditions, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return select(conditions, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
                                                              MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
+            Assert.isNull(conditions.getStartTuple(),
+                    "Select query does not support 'after' condition for standalone client.");
+
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
             TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
                     .withSpaceId(spaceId)
@@ -209,9 +216,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
                                                             TupleOperations operations,
-                                                            ValueConverter<ArrayValue, T> tupleMapper)
+                                                            ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return update(conditions, operations, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return update(conditions, operations, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
@@ -252,9 +259,9 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     public <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
                                                             TarantoolTuple tuple,
                                                             TupleOperations operations,
-                                                            ValueConverter<ArrayValue, T> tupleMapper)
+                                                            ValueConverter<ArrayValue, T> tupleConverter)
             throws TarantoolClientException {
-        return upsert(conditions, tuple, operations, tarantoolResultMapperFactory.withConverter(tupleMapper));
+        return upsert(conditions, tuple, operations, tarantoolResultMapperFactory.withConverter(tupleConverter));
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
@@ -278,7 +285,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
     }
 
-    private <T> ValueConverter<ArrayValue, T> getConverter(Class<T> tupleClass) {
+    private <T> ValueConverter<ArrayValue, T> getValueConverter(Class<T> tupleClass) {
         Optional<ValueConverter<ArrayValue, T>> converter =
                 config.getMessagePackMapper().getValueConverter(ArrayValue.class, tupleClass);
         if (!converter.isPresent()) {
@@ -306,7 +313,18 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions, int batchSize) {
+        return new TarantoolSpaceCursor<>(this, conditions, batchSize, TarantoolTuple.class);
+    }
+
+    @Override
+    public <T> TarantoolCursor<T> cursor(Conditions conditions, int batchSize, Class<T> tupleClass) {
+        return new TarantoolSpaceCursor<T>(this, conditions, batchSize, tupleClass);
+    }
+
+    @Override
     public String toString() {
         return String.format("TarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
     }
 }
+

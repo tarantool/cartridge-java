@@ -14,6 +14,7 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSocketException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -38,46 +39,21 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
-public class StandaloneTarantoolClientIT {
+public class StandaloneTarantoolClientIT extends SharedStandaloneContainer {
 
     private static final String TEST_SPACE_NAME = "test_space";
     private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
 
     @Container
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
-
-    private static TarantoolClient client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
-        assertTrue(tarantoolContainer.isRunning());
-        initClient();
+        SharedStandaloneContainer.setUp();
     }
 
     public static void tearDown() throws Exception {
-        client.close();
-        assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
-    }
-
-    private static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
-
-        log.info("Attempting connect to Tarantool");
-        client = new StandaloneTarantoolClient(config, serverAddress);
-        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
+        SharedStandaloneContainer.tearDown();
     }
 
     //TODO: reset space before each test
@@ -109,8 +85,8 @@ public class StandaloneTarantoolClientIT {
 
         //repeat insert same data
         assertThrows(ExecutionException.class,
-                 () -> testSpace.insert(tarantoolTuple).get(),
-        "Duplicate key exists in unique index 'primary' in space 'test_space'");
+                () -> testSpace.insert(tarantoolTuple).get(),
+                "Duplicate key exists in unique index 'primary' in space 'test_space'");
 
         //repeat select request
         TarantoolResult<TarantoolTuple> selectAfterInsertResult =
@@ -263,7 +239,7 @@ public class StandaloneTarantoolClientIT {
         Conditions queryByNotUniqIndex = Conditions.indexEquals(1, Collections.singletonList("J. R. R. Tolkien"));
 
         assertThrows(TarantoolSpaceOperationException.class, () -> testSpace.update(queryByNotUniqIndex,
-            TupleOperations.add(4, 12)));
+                TupleOperations.add(4, 12)));
     }
 
     @Test

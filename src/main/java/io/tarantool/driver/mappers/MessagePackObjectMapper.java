@@ -1,6 +1,9 @@
 package io.tarantool.driver.mappers;
 
+import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+
+import java.util.Optional;
 
 /**
  * Basic interface for generic converters between Java objects and MessagePack entities.
@@ -30,4 +33,6 @@ public interface MessagePackObjectMapper {
      */
     <V extends Value, O> void registerObjectConverter(Class<O> objectClass, Class<V> valueClass,
                                                       ObjectConverter<O, V> converter);
+
+    <T, V extends Value> Optional<ObjectConverter<T, V>> getObjectConverter(Class<T> tupleClass, Class<V> valueClass);
 }

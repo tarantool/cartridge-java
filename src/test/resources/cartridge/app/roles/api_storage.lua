@@ -16,21 +16,6 @@ local function init_space()
     profile:create_index('profile_id', { parts = { 'profile_id' }, if_not_exists = true, })
     profile:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
-    -- create cursor test space
-    local cursor_test_space = box.schema.space.create('cursor_test_space',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'name', 'string' },
-                    { 'year', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                },
-                if_not_exists = true,
-            })
-
-    cursor_test_space:create_index('primary', { type = 'tree', parts = { 'id' }, if_not_exists = true, })
-    cursor_test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
-
     local test_space = box.schema.space.create(
             'test_space',
             {

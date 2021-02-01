@@ -36,6 +36,19 @@ public final class Assert {
     }
 
     /**
+     * Asserts if the passed object is {@code null}
+     *
+     * @param object nullable object
+     * @param message exception message
+     * @throws IllegalArgumentException if the assertion fails
+     */
+    public static void isNull(Object object, String message) {
+        if (object != null) {
+            throw new IllegalArgumentException(message != null ? message : "");
+        }
+    }
+
+    /**
      * Asserts if the given String is not empty
      *
      * @param object nullable String

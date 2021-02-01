@@ -48,6 +48,14 @@ public final class Conditions {
     private long offset; // 0 is no offset
     private Packable startTuple;
 
+    public Conditions(Conditions conditions) {
+        this.descending = conditions.descending;
+        this.limit = conditions.limit;
+        this.offset = conditions.offset;
+        this.startTuple = conditions.startTuple;
+        this.conditions.addAll(conditions.conditions);
+    }
+
     private Conditions(boolean descending) {
         this.descending = descending;
     }
