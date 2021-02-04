@@ -4,9 +4,9 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
-import io.tarantool.driver.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.metadata.TestMetadata;
+import io.tarantool.driver.metadata.TestMetadataProvider;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;
 import org.msgpack.value.Value;
@@ -16,11 +16,9 @@ import org.msgpack.value.impl.ImmutableDoubleValueImpl;
 import org.msgpack.value.impl.ImmutableLongValueImpl;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,8 +89,8 @@ public class TarantoolTupleTest {
 
     @Test
     void setTupleValueByName() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        TestMetadata testMetadata = new TestMetadata();
-        TarantoolSpaceMetadata spaceMetadata = testMetadata.getTestSpaceMetadata();
+        TarantoolMetadata testOperations = new TarantoolMetadata(new TestMetadataProvider());
+        TarantoolSpaceMetadata spaceMetadata = testOperations.getSpaceByName("test").get();
 
         ImmutableArrayValue values = ValueFactory.newArray();
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();

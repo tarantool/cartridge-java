@@ -1,99 +1,181 @@
 package io.tarantool.driver.metadata;
 
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.TarantoolSimpleResultMapperFactory;
-import io.tarantool.driver.mappers.ValueConverter;
-import io.tarantool.driver.protocol.TarantoolIteratorType;
-import io.tarantool.driver.protocol.TarantoolProtocolException;
-import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.utils.Assert;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
- * Populates metadata from system spaces on a standalone Tarantool instance
+ * Base class for {@link TarantoolMetadataOperations} implementations
  *
  * @author Alexey Kuzin
  */
-public class TarantoolMetadata extends AbstractTarantoolMetadata {
+public class TarantoolMetadata implements TarantoolMetadataOperations {
 
-    private static final int VSPACE_SPACE_ID = 281; // System space with all space descriptions (_vspace)
-    private static final int VINDEX_SPACE_ID = 289; // System space with all index descriptions (_vindex)
+    protected final Map<String, TarantoolSpaceMetadata> spaceMetadataByName = new ConcurrentHashMap<>();
+    protected final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName =
+            new ConcurrentHashMap<>();
+    protected final Map<Integer, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceId =
+            new ConcurrentHashMap<>();
+    private final CountDownLatch initLatch = new CountDownLatch(1);
+    private final TarantoolMetadataProvider metadataProvider;
 
-    private final TarantoolSpaceMetadataConverter spaceMetadataMapper;
-    private final TarantoolIndexMetadataConverter indexMetadataMapper;
-    private final TarantoolClientConfig config;
-    private final TarantoolConnectionManager connectionManager;
-    private final TarantoolSimpleResultMapperFactory mapperFactory;
+    public TarantoolMetadata(TarantoolMetadataProvider metadataProvider) {
+        this.metadataProvider = metadataProvider;
+        // dirty hack for skipping the "space metadata exists" check on metadata refreshing
+        this.spaceMetadataById.put(SpacesMetadataProvider.VSPACE_SPACE_ID, new TarantoolSpaceMetadata());
+        this.spaceMetadataById.put(SpacesMetadataProvider.VINDEX_SPACE_ID, new TarantoolSpaceMetadata());
+    }
 
-    /**
-     * Basic constructor.
-     *
-     * @param config client configuration
-     * @param connectionManager configured {@link TarantoolConnectionManager} instance
-     */
-    public TarantoolMetadata(TarantoolClientConfig config, TarantoolConnectionManager connectionManager) {
-        super();
-        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(config.getMessagePackMapper());
-        this.indexMetadataMapper = new TarantoolIndexMetadataConverter(config.getMessagePackMapper());
-        this.config = config;
-        this.connectionManager = connectionManager;
-        this.mapperFactory = new TarantoolSimpleResultMapperFactory(config.getMessagePackMapper());
+    protected Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {
+        awaitInitLatch();
+        return spaceMetadataByName;
+    }
+
+    protected Map<Integer, TarantoolSpaceMetadata> getSpaceMetadataById() {
+        awaitInitLatch();
+        return spaceMetadataById;
+    }
+
+    protected Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadata() {
+        awaitInitLatch();
+        return indexMetadataBySpaceName;
+    }
+
+    protected Map<Integer, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceId() {
+        awaitInitLatch();
+        return indexMetadataBySpaceId;
     }
 
     @Override
-    public CompletableFuture<Void> populateMetadata() throws TarantoolClientException {
-
-        CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces =
-                select(VSPACE_SPACE_ID, spaceMetadataMapper);
-        CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes =
-                select(VINDEX_SPACE_ID, indexMetadataMapper);
-
-        return spaces.thenAcceptBoth(indexes, (spacesCollection, indexesCollection) -> {
-            spaceMetadata.clear(); // clear the metadata only after the result fetching is successful
-            spaceMetadataById.clear();
-            indexMetadata.clear();
-            indexMetadataBySpaceId.clear();
-
-            spacesCollection.forEach(meta -> {
-                spaceMetadata.put(meta.getSpaceName(), meta);
-                spaceMetadataById.put(meta.getSpaceId(), meta);
-            });
-
-            indexesCollection.forEach(meta -> {
-                String spaceName = spaceMetadataById.get(meta.getSpaceId()).getSpaceName();
-                indexMetadata.putIfAbsent(spaceName, new HashMap<>());
-                indexMetadata.get(spaceName).put(meta.getIndexName(), meta);
-                indexMetadataBySpaceId.putIfAbsent(meta.getSpaceId(), new HashMap<>());
-                indexMetadataBySpaceId.get(meta.getSpaceId()).put(meta.getIndexName(), meta);
-            });
+    public CompletableFuture<Void> refresh() throws TarantoolClientException {
+        return populateMetadata().whenComplete((v, ex) -> {
+            if (initLatch.getCount() > 0) {
+                initLatch.countDown();
+            }
+            if (ex != null) {
+                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", ex);
+            }
         });
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> select(int spaceId,  ValueConverter<ArrayValue, T> resultMapper)
-            throws TarantoolClientException {
+    private CompletableFuture<Void> populateMetadata() {
+        CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            Conditions query = Conditions.any();
-            TarantoolIndexQuery indexQuery = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
-                    .withIteratorType(TarantoolIteratorType.ITER_ALL);
+            result = metadataProvider.getMetadata().thenAccept(container -> {
+                spaceMetadataByName.clear();
+                spaceMetadataById.clear();
+                indexMetadataBySpaceName.clear();
+                indexMetadataBySpaceId.clear();
 
-            TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withIndexId(indexQuery.getIndexId())
-                    .withIteratorType(indexQuery.getIteratorType())
-                    .withKeyValues(indexQuery.getKeyValues())
-                    .withLimit(query.getLimit())
-                    .withOffset(query.getOffset())
-                    .build(config.getMessagePackMapper());
+                indexMetadataBySpaceName.putAll(container.getIndexMetadataBySpaceName());
+                container.getSpaceMetadataByName().forEach((spaceName, spaceMetadata) -> {
+                    spaceMetadataByName.put(spaceName, spaceMetadata);
+                    spaceMetadataById.put(spaceMetadata.getSpaceId(), spaceMetadata);
+                    Map<String, TarantoolIndexMetadata> indexesForSpace =
+                            indexMetadataBySpaceName.get(spaceMetadata.getSpaceName());
+                    if (indexesForSpace != null) {
+                        indexMetadataBySpaceId.put(spaceMetadata.getSpaceId(), indexesForSpace);
+                    }
+                });
+            });
+        } catch (Throwable e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
 
-            return connectionManager.getConnection().sendRequest(request, mapperFactory.withConverter(resultMapper));
-        } catch (TarantoolProtocolException e) {
+    @Override
+    public Optional<TarantoolSpaceMetadata> getSpaceByName(String spaceName) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+
+        return Optional.ofNullable(getSpaceMetadata().get(spaceName));
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexByName(int spaceId, String indexName) {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        Assert.hasText(indexName, "Index name must not be null or empty");
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadataBySpaceId().get(spaceId);
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(metaMap.get(indexName));
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexByName(String spaceName, String indexName) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+        Assert.hasText(indexName, "Index name must not be null or empty");
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceName);
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(metaMap.get(indexName));
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexById(String spaceName, int indexId) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadata().get(spaceName);
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return metaMap.values().stream().filter(i -> i.getIndexId() == indexId).findFirst();
+    }
+
+    @Override
+    public Optional<TarantoolIndexMetadata> getIndexById(int spaceId, int indexId) {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+        Assert.state(indexId >= 0, "Index ID must be greater than or equal 0");
+
+        Map<String, TarantoolIndexMetadata> metaMap = getIndexMetadataBySpaceId().get(spaceId);
+        if (metaMap == null) {
+            return Optional.empty();
+        }
+
+        return metaMap.values().stream().filter(i -> i.getIndexId() == indexId).findFirst();
+    }
+
+    @Override
+    public Optional<TarantoolSpaceMetadata> getSpaceById(int spaceId) {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+
+        return Optional.ofNullable(getSpaceMetadataById().get(spaceId));
+    }
+
+    @Override
+    public Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(int spaceId) {
+        Assert.state(spaceId > 0, "Space ID must be greater than 0");
+
+        return Optional.ofNullable(getIndexMetadataBySpaceId().get(spaceId));
+    }
+
+    @Override
+    public Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(String spaceName) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+
+        return Optional.ofNullable(getIndexMetadata().get(spaceName));
+    }
+
+    private void awaitInitLatch() {
+        if (initLatch.getCount() > 0) {
+            refresh();
+        }
+        try {
+            initLatch.await();
+        } catch (InterruptedException e) {
             throw new TarantoolClientException(e);
         }
     }

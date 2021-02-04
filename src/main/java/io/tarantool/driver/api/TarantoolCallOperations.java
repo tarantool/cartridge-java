@@ -3,9 +3,7 @@ package io.tarantool.driver.api;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.TarantoolCallResultMapper;
-import io.tarantool.driver.mappers.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.CallResultMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +21,7 @@ public interface TarantoolCallOperations {
      *
      * @param functionName function name, must not be null or empty
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     CompletableFuture<List<?>> call(String functionName) throws TarantoolClientException;
 
@@ -35,19 +33,19 @@ public interface TarantoolCallOperations {
      * @param arguments    vararg array of function arguments. The object mapper specified in the client configuration
      *                     will be used for arguments conversion to MessagePack entities
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     CompletableFuture<List<?>> call(String functionName, Object... arguments) throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance, The value mapper specified in the client configuration will be
+     * Execute a function defined on Tarantool instance. The value mapper specified in the client configuration will be
      * used for converting the result values from MessagePack entities to objects.
      *
      * @param functionName function name, must not be null or empty
      * @param arguments    list of function arguments. The object mapper specified in the client configuration
      *                     will be used for arguments conversion to MessagePack entities
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     CompletableFuture<List<?>> call(String functionName, List<?> arguments) throws TarantoolClientException;
 
@@ -64,33 +62,37 @@ public interface TarantoolCallOperations {
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance. The value mapper specified in the client configuration will be
-     * used for converting the result values from MessagePack arrays to the specified entity type.
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples. The value
+     * mapper specified in the client configuration will be used for converting the result values from MessagePack
+     * arrays to the specified entity type.
      *
      * @param <T>          desired function call result type
      * @param functionName function name, must not be null or empty
      * @param entityClass  target result entity class
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName, Class<T> entityClass)
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples.
      *
      * @param <T>          desired function call result type
      * @param functionName function name, must not be null or empty
-     * @param tupleMapper  mapper for result value MessagePack array-to-object conversion
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
-    <T> CompletableFuture<TarantoolResult<T>> call(String functionName, ValueConverter<ArrayValue, T> tupleMapper)
+    <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance. The value mapper specified in the client configuration will be
-     * used for converting the result values from MessagePack arrays to the specified entity type.
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples.
+     * The value mapper specified in the client configuration will be used for converting the result values from
+     * MessagePack arrays to the specified entity type.
      *
      * @param <T>          desired function call result type
      * @param functionName function name, must not be null or empty
@@ -98,7 +100,7 @@ public interface TarantoolCallOperations {
      *                     will be used for arguments conversion to MessagePack entities
      * @param entityClass  target result entity class
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
                                                    List<?> arguments,
@@ -106,24 +108,26 @@ public interface TarantoolCallOperations {
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples.
      *
      * @param <T>          desired function call result type
      * @param functionName function name, must not be null or empty
      * @param arguments    list of function arguments. The object mapper specified in the client configuration
      *                     will be used for arguments conversion to MessagePack entities
-     * @param tupleMapper  mapper for result value MessagePack array-to-object conversion
+     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
-    <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<?> arguments,
-                                                   ValueConverter<ArrayValue, T> tupleMapper)
+    <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance. The value mapper specified in the client configuration will be
-     * used for converting the result values from MessagePack arrays to the specified entity type.
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples. The value
+     * mapper specified in the client configuration will be used for converting the result values from MessagePack
+     * arrays to the specified entity type.
      *
      * @param <T>             desired function call result type
      * @param functionName    function name, must not be null or empty
@@ -131,7 +135,7 @@ public interface TarantoolCallOperations {
      * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
      * @param entityClass     target result entity class
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
                                                    List<?> arguments,
@@ -140,24 +144,7 @@ public interface TarantoolCallOperations {
             throws TarantoolClientException;
 
     /**
-     * Execute a function defined on Tarantool instance
-     *
-     * @param <T>             desired function call result type
-     * @param functionName    function name, must not be null or empty
-     * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
-     * @param tupleMapper     mapper for result value MessagePack array-to-object conversion
-     * @return some result
-     * @throws TarantoolClientException if the client is not connected
-     */
-    <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<?> arguments,
-                                                   MessagePackObjectMapper argumentsMapper,
-                                                   ValueConverter<ArrayValue, T> tupleMapper)
-            throws TarantoolClientException;
-
-    /**
-     * Execute a function defined on Tarantool instance
+     * Execute a function defined on Tarantool instance. The call result is interpreted as an array of tuples.
      *
      * @param <T>             desired function call result type
      * @param functionName    function name, must not be null or empty
@@ -165,11 +152,216 @@ public interface TarantoolCallOperations {
      * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
      * @param resultMapper    mapper for result value MessagePack entity-to-object conversion
      * @return some result
-     * @throws TarantoolClientException if the client is not connected
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
-    <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                   List<?> arguments,
-                                                   MessagePackObjectMapper argumentsMapper,
-                                                   TarantoolCallResultMapper<T> resultMapper)
+    <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Class<R> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            Class<R> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param resultClass     target result entity class
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            Class<R> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param resultMapper    mapper for result conversion
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
             throws TarantoolClientException;
 }

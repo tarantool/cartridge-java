@@ -4,23 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is not part of the public API.
+ * Contains spaces and indexes metadata information retrieved from a call to a stored function
  *
  * @author Sergey Volgin
  */
-public class ProxyTarantoolSpaceMetadataContainer {
+public class ProxyTarantoolMetadataContainer implements TarantoolMetadataContainer {
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new HashMap<>();
     private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
 
-    public ProxyTarantoolSpaceMetadataContainer() {
+    public ProxyTarantoolMetadataContainer() {
     }
 
-    public Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {
+    @Override
+    public Map<String, TarantoolSpaceMetadata> getSpaceMetadataByName() {
         return spaceMetadata;
     }
 
-    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadata() {
+    @Override
+    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
         return indexMetadata;
     }
 

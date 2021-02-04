@@ -28,7 +28,7 @@ public class TarantoolFunctionCallException extends TarantoolException {
     public TarantoolFunctionCallException(MapValue value) {
         super();
         Map<Value, Value> error = value.map();
-        this.errorMessage = error.get(ERROR_MESSAGE).toString();
+        this.errorMessage = error.getOrDefault(ERROR_MESSAGE, value).toString();
         this.stacktrace = error.containsKey(STACKTRACE) ? error.get(STACKTRACE).toString() : null;
     }
 

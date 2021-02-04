@@ -1,9 +1,10 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Proxy operation for select
  *
- * @param <T> tuple result type
+ * @param <T> result type
  * @author Sergey Volgin
  */
 public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
@@ -22,7 +23,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
     private SelectProxyOperation(TarantoolClient client,
                                  String functionName,
                                  List<?> arguments,
-                                 TarantoolCallResultMapper<T> resultMapper) {
+                                 CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
 
@@ -35,7 +36,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         private TarantoolClient client;
         private String spaceName;
         private String functionName;
-        private TarantoolCallResultMapper<T> resultMapper;
+        private CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
         private Conditions conditions;
 
         public Builder(TarantoolMetadataOperations operations, TarantoolSpaceMetadata metadata) {
@@ -63,7 +64,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withResultMapper(TarantoolCallResultMapper<T> resultMapper) {
+        public Builder<T> withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
             this.resultMapper = resultMapper;
             return this;
         }
@@ -89,7 +90,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                     requestOptions.build().asMap()
             );
 
-            return new SelectProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
+            return new SelectProxyOperation<>(this.client, this.functionName, arguments, this.resultMapper);
         }
     }
 }

@@ -5,12 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Alexey Kuzin
  */
-public class TestMetadata extends AbstractTarantoolMetadata {
+public class TestMetadataContainer implements TarantoolMetadataContainer {
 
     private final TarantoolSpaceMetadata testSpaceMetadata;
     private final TarantoolIndexMetadata testPrimaryIndexMetadata;
@@ -19,7 +18,7 @@ public class TestMetadata extends AbstractTarantoolMetadata {
     private final TarantoolIndexMetadata testIndexMetadata3;
     private final TarantoolIndexMetadata testIndexMetadata4;
 
-    public TestMetadata() {
+    public TestMetadataContainer() {
         testSpaceMetadata = new TarantoolSpaceMetadata();
         testSpaceMetadata.setSpaceId(512);
         testSpaceMetadata.setSpaceName("test");
@@ -75,35 +74,15 @@ public class TestMetadata extends AbstractTarantoolMetadata {
         testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadata(1, "number")));
     }
 
-    public TarantoolSpaceMetadata getTestSpaceMetadata() {
-        return testSpaceMetadata;
-    }
-
-    public TarantoolIndexMetadata getTestPrimaryIndexMetadata() {
-        return testPrimaryIndexMetadata;
-    }
-
-    public TarantoolIndexMetadata getTestIndexMetadata1() {
-        return testIndexMetadata1;
-    }
-    public TarantoolIndexMetadata getTestIndexMetadata2() {
-        return testIndexMetadata2;
-    }
-
-    public TarantoolIndexMetadata getTestIndexMetadata3() {
-        return testIndexMetadata3;
-    }
-
-    public TarantoolIndexMetadata getTestIndexMetadata4() {
-        return testIndexMetadata4;
+    @Override
+    public Map<String, TarantoolSpaceMetadata> getSpaceMetadataByName() {
+        Map<String, TarantoolSpaceMetadata> spaceMetadataByName = new HashMap<>();
+        spaceMetadataByName.put("test", testSpaceMetadata);
+        return spaceMetadataByName;
     }
 
     @Override
-    protected CompletableFuture<Void> populateMetadata() {
-
-        spaceMetadata.put("test", testSpaceMetadata);
-        spaceMetadataById.put(512, testSpaceMetadata);
-
+    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
         Map<String, TarantoolIndexMetadata> indexes = new HashMap<>();
         indexes.put("primary", testPrimaryIndexMetadata);
         indexes.put("asecondary", testIndexMetadata1);
@@ -111,9 +90,8 @@ public class TestMetadata extends AbstractTarantoolMetadata {
         indexes.put("secondary2", testIndexMetadata3);
         indexes.put("asecondary3", testIndexMetadata4);
 
-        indexMetadata.put("test", indexes);
-        indexMetadataBySpaceId.put(512, indexes);
-
-        return CompletableFuture.completedFuture(null);
+        Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
+        indexMetadataBySpaceName.put("test", indexes);
+        return indexMetadataBySpaceName;
     }
 }

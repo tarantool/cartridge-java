@@ -9,6 +9,7 @@ import org.msgpack.value.Value;
  */
 public class TarantoolTupleConversionException extends TarantoolClientException {
     public TarantoolTupleConversionException(Value messagePackValue, Throwable cause) {
-        super(String.format("Failed to convert MessagePack array %s to tuple", messagePackValue.toString()), cause);
+        super(String.format("Failed to convert MessagePack value of type %s to tuple",
+                messagePackValue.getValueType()), cause);
     }
 }
