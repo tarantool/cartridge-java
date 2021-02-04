@@ -3,6 +3,7 @@ package io.tarantool.driver.metadata;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -124,6 +125,27 @@ public class TarantoolSpaceMetadata {
                 ", spaceFormatMetadata=" + spaceFormatMetadata +
                 ", spaceFormatMetadataAsList=" + spaceFormatMetadataAsList +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TarantoolSpaceMetadata that = (TarantoolSpaceMetadata) o;
+        return spaceId == that.spaceId &&
+                ownerId == that.ownerId &&
+                spaceName.equals(that.spaceName) &&
+                Objects.equals(spaceFormatMetadata, that.spaceFormatMetadata) &&
+                Objects.equals(spaceFormatMetadataAsList, that.spaceFormatMetadataAsList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(spaceId, ownerId, spaceName, spaceFormatMetadata, spaceFormatMetadataAsList);
     }
 
     /*

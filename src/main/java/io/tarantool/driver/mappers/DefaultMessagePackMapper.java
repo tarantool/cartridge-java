@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
 
@@ -21,10 +22,10 @@ import static io.tarantool.driver.mappers.MapperReflectionUtils.getInterfacePara
  */
 public class DefaultMessagePackMapper implements MessagePackMapper {
 
-    private Map<String, List<ValueConverter<? extends Value, ?>>> valueConverters;
-    private Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
-    private Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;
-    private Map<String, ObjectConverter<?, ? extends Value>> objectConvertersByTarget;
+    private final Map<String, List<ValueConverter<? extends Value, ?>>> valueConverters;
+    private final Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
+    private final Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;
+    private final Map<String, ObjectConverter<?, ? extends Value>> objectConvertersByTarget;
     private final ObjectConverter<Object, NilValue> nilConverter = new DefaultNilConverter();
 
     /**
@@ -49,6 +50,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         this.objectConvertersByTarget.putAll(mapper.objectConvertersByTarget);
     }
 
+    @SuppressWarnings("unchecked")
     private <V extends Value, O> ObjectConverter<O, V>
     getObjectConverter(O o, Function<String, Optional<ObjectConverter<O, V>>> getter) {
         if (o == null) {
@@ -129,13 +131,13 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O> object type
      * @see ValueConverter
      */
-    public <V extends Value, O> void registerValueConverter(ValueConverter<V, O> converter) {
+    public <V extends Value, O> void registerValueConverter(ValueConverter<V, ? extends O> converter) {
         try {
             registerValueConverter(
                     getInterfaceParameterClass(converter, ValueConverter.class, 0), converter);
-        } catch (ConverterParameterTypeNotFoundException e) {
-            throw new RuntimeException("Failed to determine the source parameter type of the generic interface, " +
-                    "try to use the method registerValueConverter(valueClass, objectClass, converter) " +
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
+            throw new TarantoolClientException("Failed to determine the source parameter type of the generic " +
+                    "interface, try to use the method registerValueConverter(valueClass, objectClass, converter) " +
                     "for registering the converter");
         }
     }
@@ -149,23 +151,25 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O> object type
      * @see ValueConverter
      */
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass, ValueConverter<V, O> converter) {
+    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+                                                            ValueConverter<V, ? extends O> converter) {
         try {
             Class<O> objectClass = getInterfaceParameterClass(converter, ValueConverter.class, 1);
             registerValueConverter(valueClass, objectClass, converter);
-        } catch (ConverterParameterTypeNotFoundException e) {
-            throw new RuntimeException("Failed to determine the target parameter type of the generic interface, " +
-                    "try to use the method registerValueConverter(valueClass, objectClass, converter) " +
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
+            throw new TarantoolClientException("Failed to determine the target parameter type of the generic " +
+                    "interface, try to use the method registerValueConverter(valueClass, objectClass, converter) " +
                     "for registering the converter");
         }
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<O> objectClass,
-                                                            ValueConverter<V, O> converter) {
+    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+                                                            Class<? extends O> objectClass,
+                                                            ValueConverter<V, ? extends O> converter) {
         List<ValueConverter<? extends Value, ?>> converters =
                 valueConverters.computeIfAbsent(valueClass.getTypeName(), k -> new LinkedList<>());
-        converters.add(converter);
+        converters.add(0, converter);
         valueConvertersByTarget.put(objectClass.getTypeName(), converter);
     }
 
@@ -174,10 +178,10 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      */
     private boolean checkConverterByTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
         try {
-            return valueConvertersByTarget.get(targetClass.getTypeName()) == converter ||
-                    getInterfaceParameterClass(converter, converter.getClass(), 1)
-                            .isAssignableFrom(targetClass);
-        } catch (ConverterParameterTypeNotFoundException e) {
+            ValueConverter<? extends Value, ?> exactMatch = valueConvertersByTarget.get(targetClass.getTypeName());
+            return exactMatch == converter ||
+                getInterfaceParameterClass(converter, converter.getClass(), 1).isAssignableFrom(targetClass);
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
             return false;
         }
     }
@@ -206,9 +210,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         try {
             registerObjectConverter(
                     getInterfaceParameterClass(converter, ObjectConverter.class, 0), converter);
-        } catch (ConverterParameterTypeNotFoundException e) {
-            throw new RuntimeException("Failed to determine the target parameter type of the generic interface, " +
-                    "try to use the method registerObjectConverter(objectClass, valueClass, converter) " +
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
+            throw new TarantoolClientException("Failed to determine the target parameter type of the generic " +
+                    "interface, try to use the method registerObjectConverter(objectClass, valueClass, converter) " +
                     "for registering the converter");
         }
     }
@@ -226,19 +230,20 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         try {
             Class<V> valueClass = getInterfaceParameterClass(converter, ObjectConverter.class, 1);
             registerObjectConverter(objectClass, valueClass, converter);
-        } catch (ConverterParameterTypeNotFoundException e) {
-            throw new RuntimeException("Failed to determine the target parameter type of the generic interface, " +
-                    "try to use the method registerObjectConverter(objectClass, valueClass, converter) " +
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
+            throw new TarantoolClientException("Failed to determine the target parameter type of the generic " +
+                    "interface, try to use the method registerObjectConverter(objectClass, valueClass, converter) " +
                     "for registering the converter");
         }
     }
 
     @Override
-    public <V extends Value, O> void registerObjectConverter(Class<O> objectClass, Class<V> valueClass,
+    public <V extends Value, O> void registerObjectConverter(Class<O> objectClass,
+                                                             Class<V> valueClass,
                                                              ObjectConverter<O, V> converter) {
         List<ObjectConverter<?, ? extends Value>> converters =
                 objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new LinkedList<>());
-        converters.add(converter);
+        converters.add(0, converter);
         objectConvertersByTarget.put(valueClass.getTypeName(), converter);
     }
 

@@ -18,9 +18,11 @@ final class MapperReflectionUtils {
      * @param converter a converter, must have at least one generic interface with 2 type parameters
      * @param <T> the target converter type
      * @return the converter class
+     * @throws InterfaceParameterClassNotFoundException if the class of the parameter type on the specified position
+     * cannot be determined or is not found
      */
     @SuppressWarnings("unchecked")
-    static <T> Class<T> getConverterTargetType(Object converter) {
+    static <T> Class<T> getConverterTargetType(Object converter) throws InterfaceParameterClassNotFoundException {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         if (genericInterfaces.length < 1) {
             throw new RuntimeException(
@@ -34,14 +36,14 @@ final class MapperReflectionUtils {
         }
         if (!(genericInterfaces[0] instanceof ParameterizedType)) {
             throw new RuntimeException(
-                    String.format("The passed converter object of type %s interfacetype is not a parameterized type",
+                    String.format("The passed converter object of type %s interface type is not a parameterized type",
                         converter.getClass()));
         }
         try {
             return (Class<T>) Class.forName(
                     ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments()[1].getTypeName());
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new InterfaceParameterClassNotFoundException(e);
         }
     }
 
@@ -52,19 +54,21 @@ final class MapperReflectionUtils {
      * @param parameterTypePosition the position of the generic type parameter in the interface definition
      * @param <T> the target generic interface parameter type
      * @return the generic interface parameter class
-     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be
+     * @throws InterfaceParameterTypeNotFoundException if the parameter type on the specified position cannot be
      * determined
+     * @throws InterfaceParameterClassNotFoundException if the class of the parameter type on the specified position
+     * cannot be determined or is not found
      */
     @SuppressWarnings("unchecked")
     static <T> Class<T> getInterfaceParameterClass(Object converter,
                                                    Class<?> interfaceClass,
                                                    int parameterTypePosition)
-            throws ConverterParameterTypeNotFoundException {
+            throws InterfaceParameterTypeNotFoundException, InterfaceParameterClassNotFoundException {
         try {
             return (Class<T>) Class.forName(
                     getInterfaceParameterType(converter, interfaceClass, parameterTypePosition).getTypeName());
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new InterfaceParameterClassNotFoundException(e);
         }
     }
 
@@ -79,13 +83,15 @@ final class MapperReflectionUtils {
      * @param interfaceClass the target converter generic interface
      * @param parameterTypePosition the position of the generic type parameter in the interface definition
      * @return the generic interface parameter type
-     * @throws ConverterParameterTypeNotFoundException if the parameter type on the specified position cannot be
+     * @throws InterfaceParameterTypeNotFoundException if the parameter type on the specified position cannot be
      * determined
+     * @throws InterfaceParameterClassNotFoundException if the class of the parameter type on the specified position
+     * cannot be determined or is not found
      */
     private static Type getInterfaceParameterType(Object converter,
                                                   Class<?> interfaceClass,
                                                   int parameterTypePosition)
-            throws ConverterParameterTypeNotFoundException {
+            throws InterfaceParameterTypeNotFoundException, InterfaceParameterClassNotFoundException {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         try {
             for (Type iface : genericInterfaces) {
@@ -97,9 +103,9 @@ final class MapperReflectionUtils {
                 }
             }
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new InterfaceParameterClassNotFoundException(e);
         }
-        throw new ConverterParameterTypeNotFoundException(
+        throw new InterfaceParameterTypeNotFoundException(
                 "Unable to determine the generic parameter type on position %d for %s. " +
                 "Either the class does not implement any generic interfaces or the parametrized types " +
                 "cannot be determined due to type erasure", parameterTypePosition, converter.getClass());

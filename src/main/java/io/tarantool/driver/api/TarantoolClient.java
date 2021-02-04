@@ -6,7 +6,9 @@ import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 
 /**
  * Basic Tarantool client interface
@@ -14,6 +16,13 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
  * @author Alexey Kuzin
  */
 public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations, TarantoolEvalOperations {
+    /**
+     * Provides implementation of retrieving the metadata for spaces and instances from Tarantool servers
+     *
+     * @return metadata provider instance
+     */
+    TarantoolMetadataProvider metadataProvider();
+
     /**
      * Get the Tarantool client config passed to this client
      * @return {@link TarantoolClientConfig} instance
@@ -64,4 +73,11 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
      * @return tuple factory instance
      */
     TarantoolTupleFactory getTarantoolTupleFactory();
+
+    /**
+     * Get the default factory for result mapper factory instances
+     *
+     * @return result mapper factory instances factory instance
+     */
+    ResultMapperFactoryFactory getResultMapperFactoryFactory();
 }

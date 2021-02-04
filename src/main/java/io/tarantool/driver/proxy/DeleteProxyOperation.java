@@ -1,9 +1,10 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
-import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Proxy operation for delete
  *
- * @param <T> tuple result type
+ * @param <T> result type
  * @author Sergey Volgin
  */
 public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
@@ -20,7 +21,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
     private DeleteProxyOperation(TarantoolClient client,
                                  String functionName,
                                  List<?> arguments,
-                                 TarantoolCallResultMapper<T> resultMapper) {
+                                 CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
 
@@ -32,7 +33,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         private String spaceName;
         private String functionName;
         private TarantoolIndexQuery indexQuery;
-        private TarantoolCallResultMapper<T> resultMapper;
+        private CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
 
         public Builder() {
         }
@@ -57,7 +58,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withResultMapper(TarantoolCallResultMapper<T> resultMapper) {
+        public Builder<T> withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
             this.resultMapper = resultMapper;
             return this;
         }
@@ -76,7 +77,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
 
             List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
 
-            return new DeleteProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
+            return new DeleteProxyOperation<>(this.client, this.functionName, arguments, this.resultMapper);
         }
     }
 }

@@ -1,9 +1,7 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.ValueConverter;
-import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ImmutableStringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.impl.ImmutableStringValueImpl;
@@ -16,15 +14,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Maps MessagePack {@link ArrayValue} from proxy schema API function call result into
- * {@link ProxyTarantoolSpaceMetadataContainer}.
- * See <a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>
+ * Populates metadata from results of a call to proxy API function in Tarantool instance. The function result is
+ * expected to have the format which is returned by DDL module.
+ * See <a href="https://github.com/tarantool/ddl#input-data-format">
+ * https://github.com/tarantool/ddl#input-data-format</a>
  *
  * @author Sergey Volgin
  * @author Artyom Dubinin
  */
-public class ProxyTarantoolSpaceMetadataConverter
-        implements ValueConverter<ArrayValue, ProxyTarantoolSpaceMetadataContainer> {
+public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value, TarantoolMetadataContainer> {
 
     private static final int ID_UNKNOWN = -1;
 
@@ -46,24 +44,17 @@ public class ProxyTarantoolSpaceMetadataConverter
     private static final ImmutableStringValue INDEX_PARTS_FIELD_NO = new ImmutableStringValueImpl("fieldno");
     private static final ImmutableStringValue INDEX_PARTS_TYPE_KEY = new ImmutableStringValueImpl("type");
 
-    private final MessagePackValueMapper mapper;
-
-    public ProxyTarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
-        this.mapper = mapper;
+    public DDLTarantoolSpaceMetadataConverter() {
     }
 
     @Override
-    public ProxyTarantoolSpaceMetadataContainer fromValue(ArrayValue value) {
+    public TarantoolMetadataContainer fromValue(Value value) {
 
-        if (value.size() == 0) {
-            throw new TarantoolClientException("Empty tuple returned for space metadata");
-        }
-
-        if (!value.get(0).isMapValue()) {
+        if (!value.isMapValue()) {
             throw new TarantoolClientException("Unsupported space metadata format: expected map");
         }
 
-        Map<Value, Value> spacesMap = value.get(0).asMapValue().map();
+        Map<Value, Value> spacesMap = value.asMapValue().map();
 
         Value nameValue = spacesMap.get(SPACE_NAME_KEY);
         if (nameValue == null) {
@@ -77,7 +68,7 @@ public class ProxyTarantoolSpaceMetadataConverter
                     "Unsupported space metadata format: key '" + SPACE_ID_KEY + "' not found");
         }
 
-        ProxyTarantoolSpaceMetadataContainer proxyMetadata = new ProxyTarantoolSpaceMetadataContainer();
+        ProxyTarantoolMetadataContainer proxyMetadata = new ProxyTarantoolMetadataContainer();
 
         TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
         spaceMetadata.setSpaceId(idValue.asIntegerValue().asInt());

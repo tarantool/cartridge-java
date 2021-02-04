@@ -8,7 +8,7 @@ import org.msgpack.value.Value;
  *
  * @author Alexey Kuzin
  */
-public interface MessagePackObjectMapper {
+public interface MessagePackObjectMapper extends Cloneable {
     /**
      * Create MessagePack entity representation for an object.
      * @param o an object to be converted

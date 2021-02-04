@@ -1,25 +1,25 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.api.TarantoolResultImpl;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 import java.util.Optional;
 
 /**
- * Base class for TarantoolResult tuple mappers
+ * Base class for result tuple mappers
  *
- * @param <T> target tuple type
+ * @param <T> target result type
  * @author Alexey Kuzin
  */
-public abstract class AbstractTarantoolResultMapper<T> implements MessagePackValueMapper {
+public abstract class AbstractResultMapper<T> implements MessagePackValueMapper {
 
     protected final MessagePackValueMapper valueMapper;
 
-    public AbstractTarantoolResultMapper(MessagePackValueMapper valueMapper,
-                                         ValueConverter<ArrayValue, TarantoolResultImpl> tarantoolResultConverter) {
+    public AbstractResultMapper(MessagePackValueMapper valueMapper,
+                                ValueConverter<ArrayValue, ? extends T> resultConverter,
+                                Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
-        valueMapper.registerValueConverter(ArrayValue.class, TarantoolResultImpl.class, tarantoolResultConverter);
+        valueMapper.registerValueConverter(ArrayValue.class, resultClass, resultConverter);
     }
 
     @Override
@@ -34,8 +34,8 @@ public abstract class AbstractTarantoolResultMapper<T> implements MessagePackVal
 
     @Override
     public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
-                                                            Class<O> objectClass,
-                                                            ValueConverter<V, O> converter) {
+                                                            Class<? extends O> objectClass,
+                                                            ValueConverter<V, ? extends O> converter) {
         valueMapper.registerValueConverter(valueClass, objectClass, converter);
     }
 

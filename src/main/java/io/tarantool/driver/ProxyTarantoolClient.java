@@ -1,5 +1,7 @@
 package io.tarantool.driver;
 
+import io.tarantool.driver.api.MultiValueCallResult;
+import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolTupleFactory;
@@ -11,21 +13,21 @@ import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.TarantoolCallResultMapper;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
+import io.tarantool.driver.metadata.DDLTarantoolSpaceMetadataConverter;
+import io.tarantool.driver.metadata.ProxyMetadataProvider;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.proxy.ProxyOperationsMapping;
-import io.tarantool.driver.metadata.ProxyTarantoolMetadata;
 import io.tarantool.driver.utils.Assert;
-import org.msgpack.value.ArrayValue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, proxying all CRUD operations through the
@@ -33,10 +35,16 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * Proxy functions to be called can be specified by overriding the methods of the implemented
  * {@link ProxyOperationsMapping} interface. These functions must be public API functions available on the Tarantool
- * instance fro the connected API user.
+ * instance for the connected API user.
  *
  * It is recommended to use this client with the CRUD module (<a href="https://github.com/tarantool/crud">
- * https://github.com/tarantool/crud</a>) installed on the target Tarantool instance.
+ * https://github.com/tarantool/crud</a>) installed on the target Tarantool instance. Be sure that the server instances
+ * you are connecting to with this client have the {@code crud-router} role enabled.
+ *
+ * The default implementation of metadata retrieving function is provided by the DDL module
+ * (<a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>). It is available by default
+ * on the Cartridge instances. In the other cases, you'll have to expose the DDL module as public API on the target
+ * Tarantool instance or use some other implementation of that function.
  *
  * See <a href="https://github.com/tarantool/examples/blob/master/profile-storage/README.md">
  *     https://github.com/tarantool/examples/blob/master/profile-storage/README.md</a>
@@ -47,7 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMapping {
 
     private final TarantoolClient client;
-    private final AtomicReference<ProxyTarantoolMetadata> metadataHolder = new AtomicReference<>();
+    private final ProxyMetadataProvider metadataProvider;
 
     public ProxyTarantoolClient(TarantoolClient decoratedClient) {
         this.client = decoratedClient;
@@ -59,6 +67,8 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
                 throw new CompletionException(e);
             }
         });
+        this.metadataProvider = new ProxyMetadataProvider(
+                client, getGetSchemaFunctionName(), new DDLTarantoolSpaceMetadataConverter());
     }
 
     @Override
@@ -72,6 +82,16 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
         }
 
         return new ProxyTarantoolSpace(this, meta.get());
+    }
+
+    @Override
+    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
+        return client.metadata();
+    }
+
+    @Override
+    public TarantoolMetadataProvider metadataProvider() {
+        return metadataProvider;
     }
 
     @Override
@@ -98,15 +118,6 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        if (metadataHolder.get() == null) {
-            this.metadataHolder.compareAndSet(
-                    null, new ProxyTarantoolMetadata(this.getGetSchemaFunctionName(), this));
-        }
-        return metadataHolder.get();
-    }
-
-    @Override
     public TarantoolConnectionListeners getListeners() {
         return this.client.getListeners();
     }
@@ -114,6 +125,11 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     @Override
     public TarantoolTupleFactory getTarantoolTupleFactory() {
         return this.client.getTarantoolTupleFactory();
+    }
+
+    @Override
+    public ResultMapperFactoryFactory getResultMapperFactoryFactory() {
+        return client.getResultMapperFactoryFactory();
     }
 
     @Override
@@ -146,10 +162,11 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException {
-        return client.call(functionName, tupleMapper);
+        return client.call(functionName, resultMapper);
     }
 
     @Override
@@ -159,11 +176,12 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<?> arguments,
-                                                          ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException {
-        return client.call(functionName, arguments, tupleMapper);
+        return client.call(functionName, arguments, resultMapper);
     }
 
     @Override
@@ -175,21 +193,108 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<?> arguments,
-                                                          MessagePackObjectMapper argumentsMapper,
-                                                          ValueConverter<ArrayValue, T> tupleMapper)
+    public <T> CompletableFuture<TarantoolResult<T>> call(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException {
-        return client.call(functionName, arguments, argumentsMapper, tupleMapper);
+        return client.call(functionName, arguments, argumentsMapper, resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName,
-                                                          List<?> arguments,
-                                                          MessagePackObjectMapper argumentsMapper,
-                                                          TarantoolCallResultMapper<T> resultMapper)
+    public <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Class<T> resultClass)
             throws TarantoolClientException {
-        return client.call(functionName, arguments, argumentsMapper, resultMapper);
+        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultClass);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(String functionName, List<?> arguments, Class<T> resultClass)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, arguments, resultClass);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
+        return client.callForSingleResult(functionName, arguments, resultMapper);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(String functionName, Class<T> resultClass)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, resultClass);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
+        return client.callForSingleResult(functionName, resultMapper);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Class<R> resultClass) throws TarantoolClientException {
+        return client.callForMultiResult(functionName, arguments, argumentsMapper, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) throws TarantoolClientException {
+        return client.callForMultiResult(functionName, arguments, argumentsMapper, resultMapper);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName,
+                                                                          List<?> arguments,
+                                                                          Class<R> resultClass)
+            throws TarantoolClientException {
+        return client.callForMultiResult(functionName, arguments, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) throws TarantoolClientException {
+        return client.callForMultiResult(functionName, arguments, resultMapper);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName, Class<R> resultClass)
+            throws TarantoolClientException {
+        return client.callForMultiResult(functionName, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
+            throws TarantoolClientException {
+        return client.callForMultiResult(functionName, resultMapper);
     }
 
     @Override

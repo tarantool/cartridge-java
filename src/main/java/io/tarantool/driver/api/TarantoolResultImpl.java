@@ -5,33 +5,71 @@ import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.core.MessageTypeCastException;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.StringValue;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Basic TarantoolResult implementation
+ * Basic TarantoolResult implementation. Supports two types of the tuple result: a MessagePack array of arrays
+ * (as in IPROTO) and a map with format {@code {"rows": [[], ...], "metadata": []}} as returned by tarantool/crud module
  *
  * @param <T> target result tuple type
  * @author Alexey Kuzin
  */
 public class TarantoolResultImpl<T> implements TarantoolResult<T> {
 
+    private static final StringValue RESULT_META = ValueFactory.newString("metadata");
+    private static final StringValue RESULT_ROWS = ValueFactory.newString("rows");
+
     private List<T> tuples;
 
-    public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> tupleConverter) {
-        this.tuples = value.list().stream()
-                .map(v -> {
-                    try {
-                        return tupleConverter.fromValue(v.asArrayValue());
-                    } catch (MessageTypeCastException e) {
-                        throw new TarantoolTupleConversionException(v, e);
-                    }
-                })
-                .collect(Collectors.toList());
+    public TarantoolResultImpl(Value value, ValueConverter<ArrayValue, T> tupleConverter) {
+        if (value.isArrayValue()) {
+            // [[[],...]]
+            setTuples(value.asArrayValue(), tupleConverter);
+        } else if (value.isMapValue()) {
+            // [{"metadata" : [...], "rows": [...]}]
+            Map<Value, Value> tupleMap = value.asMapValue().map();
+            if (!hasRowsAndMetadata(tupleMap)) {
+                throw new TarantoolClientException("The received tuple map has wrong format, " +
+                        "expected {\"metadata\" : [...], \"rows\": [...]}, got %s", value.toString());
+            }
+            Value tupleArray = tupleMap.get(RESULT_ROWS);
+            if (!tupleArray.isArrayValue()) {
+                throw new TarantoolClientException("The \"rows\" field must contain a MessagePack array");
+            }
+            setTuples(tupleArray.asArrayValue(), tupleConverter);
+        } else if (value.isNilValue()) {
+            // [nil]
+            this.tuples = new ArrayList<>();
+        } else {
+            throw new TarantoolClientException("The received result cannot be converted to an array of tuples: %s",
+                    value.toString());
+        }
+    }
+
+    private void setTuples(ArrayValue tupleArray, ValueConverter<ArrayValue, T> tupleConverter) {
+        this.tuples = tupleArray.list().stream()
+            .map(v -> {
+                try {
+                    return tupleConverter.fromValue(v.asArrayValue());
+                } catch (MessageTypeCastException e) {
+                    throw new TarantoolTupleConversionException(v, e);
+                }
+            })
+            .collect(Collectors.toList());
+    }
+
+    private static boolean hasRowsAndMetadata(Map<Value, Value> valueMap) {
+        return valueMap.containsKey(RESULT_META) && valueMap.containsKey(RESULT_ROWS);
     }
 
     @Override

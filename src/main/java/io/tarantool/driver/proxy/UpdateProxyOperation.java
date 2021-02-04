@@ -1,9 +1,10 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
-import io.tarantool.driver.mappers.TarantoolCallResultMapper;
+import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.utils.Assert;
 
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Proxy operation for update
  *
- * @param <T> tuple result type
+ * @param <T> result type
  * @author Sergey Volgin
  */
 public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
@@ -21,7 +22,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
     UpdateProxyOperation(TarantoolClient client,
                          String functionName,
                          List<?> arguments,
-                         TarantoolCallResultMapper<T> resultMapper) {
+                         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, resultMapper);
     }
 
@@ -34,7 +35,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         private String functionName;
         private TarantoolIndexQuery indexQuery;
         private TupleOperations operations;
-        private TarantoolCallResultMapper<T> resultMapper;
+        private CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
 
         public Builder() {
         }
@@ -64,7 +65,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
-        public Builder<T> withResultMapper(TarantoolCallResultMapper<T> resultMapper) {
+        public Builder<T> withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
             this.resultMapper = resultMapper;
             return this;
         }
@@ -87,7 +88,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
                     operations.asProxyOperationList(),
                     options.asMap());
 
-            return new UpdateProxyOperation<T>(this.client, this.functionName, arguments, this.resultMapper);
+            return new UpdateProxyOperation<>(this.client, this.functionName, arguments, this.resultMapper);
         }
     }
 }

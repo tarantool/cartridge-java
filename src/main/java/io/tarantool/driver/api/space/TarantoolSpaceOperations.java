@@ -32,14 +32,16 @@ public interface TarantoolSpaceOperations {
      * Delete a tuple
      *
      * @param conditions query with options
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                          an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> result type
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
     <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
-                                                     ValueConverter<ArrayValue, T> tupleMapper)
+                                                     ValueConverter<ArrayValue, T> tupleConverter,
+                                                     Class<? extends TarantoolResult<T>> resultClass)
             throws TarantoolClientException;
 
     /**
@@ -55,13 +57,16 @@ public interface TarantoolSpaceOperations {
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
      *
      * @param tuple new data
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                    an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> result tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+    <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
+                                                     ValueConverter<ArrayValue, T> tupleConverter,
+                                                     Class<? extends TarantoolResult<T>> resultClass)
             throws TarantoolClientException;
 
     /**
@@ -77,13 +82,16 @@ public interface TarantoolSpaceOperations {
      * Insert a tuple into the space or replace an existing one.
      *
      * @param tuple new data
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                    an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> result tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple, ValueConverter<ArrayValue, T> tupleMapper)
+    <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
+                                                      ValueConverter<ArrayValue, T> tupleConverter,
+                                                      Class<? extends TarantoolResult<T>> resultClass)
             throws TarantoolClientException;
 
     /**
@@ -99,26 +107,28 @@ public interface TarantoolSpaceOperations {
      * Select tuples matching the specified index query with options.
      *
      * @param conditions query with options
-     * @param tupleCLass target tuple class
+     * @param tupleClass target tuple class
      * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed or value converter not found
      */
     <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                     Class<T> tupleCLass) throws TarantoolClientException;
+                                                     Class<T> tupleClass) throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified query with options.
      *
      * @param conditions query with options
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                    an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> target tuple type
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
     <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                     ValueConverter<ArrayValue, T> tupleMapper)
+                                                     ValueConverter<ArrayValue, T> tupleConverter,
+                                                     Class<? extends TarantoolResult<T>> resultClass)
             throws TarantoolClientException;
 
     /**
@@ -146,15 +156,17 @@ public interface TarantoolSpaceOperations {
      *
      * @param conditions query with options
      * @param operations the list update operations
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                    an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> result type
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
     <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
                                                      TupleOperations operations,
-                                                     ValueConverter<ArrayValue, T> tupleMapper);
+                                                     ValueConverter<ArrayValue, T> tupleConverter,
+                                                     Class<? extends TarantoolResult<T>> resultClass);
 
     /**
      * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
@@ -175,8 +187,9 @@ public interface TarantoolSpaceOperations {
      * @param conditions query with options
      * @param tuple new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
-     * @param tupleMapper the entity-to-object tupleMapper capable of converting MessagePack {@link ArrayValue} into
-     *                          an object of type {@code T}
+     * @param tupleConverter the entity-to-object tupleConverter capable of converting MessagePack {@link ArrayValue}
+     *                       into an object of type {@code T}
+     * @param resultClass result class
      * @param <T> result type
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
@@ -184,7 +197,8 @@ public interface TarantoolSpaceOperations {
     <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
                                                      TarantoolTuple tuple,
                                                      TupleOperations operations,
-                                                     ValueConverter<ArrayValue, T> tupleMapper);
+                                                     ValueConverter<ArrayValue, T> tupleConverter,
+                                                     Class<? extends TarantoolResult<T>> resultClass);
 
     /**
      * Get metadata associated with this space
