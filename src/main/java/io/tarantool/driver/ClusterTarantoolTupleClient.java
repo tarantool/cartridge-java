@@ -53,6 +53,17 @@ public class ClusterTarantoolTupleClient
     }
 
     /**
+     * Create a client. Connects to a Tarantool server using the specified host and port.
+     * @param config                client configuration
+     * @param host                  valid host name or IP address
+     * @param port                  valid port number
+     * @see TarantoolCredentials
+     */
+    public ClusterTarantoolTupleClient(TarantoolClientConfig config, String host, int port) {
+        this(config, Collections.singletonList(new TarantoolServerAddress(host, port)));
+    }
+
+    /**
      * Create a client using provided credentials information. Connects to a Tarantool server using the specified
      * server address.
      *
