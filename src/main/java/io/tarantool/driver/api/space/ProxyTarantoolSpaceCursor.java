@@ -45,6 +45,7 @@ public class ProxyTarantoolSpaceCursor<T> implements TarantoolCursor<T> {
         this.tupleConverter = tupleConverter;
         this.batchOffset = 0;
 
+        //FIXME implement condition with spaceOffset check (as in Standalone cursor)
         if (conditions.getLimit() > 0 && conditions.getLimit() < batchSize) {
             this.batchSize = conditions.getLimit();
         } else {

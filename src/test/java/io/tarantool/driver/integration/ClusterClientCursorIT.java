@@ -69,7 +69,6 @@ public class ClusterClientCursorIT extends SharedCartridgeContainer {
         SharedStandaloneContainer.tearDown();
     }
 
-
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
