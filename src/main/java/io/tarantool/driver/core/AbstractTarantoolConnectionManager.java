@@ -116,13 +116,19 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private CompletableFuture<Map<TarantoolServerAddress, List<TarantoolConnection>>> establishConnections()
             throws TarantoolClientException {
-        List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> endpointConnections =
-                getConnections();
-        return CompletableFuture
-                .allOf(endpointConnections.toArray(new CompletableFuture[0]))
-                .thenApply(v -> endpointConnections.parallelStream()
-                        .map(CompletableFuture::join)
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        CompletableFuture<Map<TarantoolServerAddress, List<TarantoolConnection>>> result = new CompletableFuture<>();
+        try {
+            List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> endpointConnections =
+                    getConnections();
+            result = CompletableFuture
+                    .allOf(endpointConnections.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> endpointConnections.parallelStream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        } catch (Throwable e) {
+            result.completeExceptionally(e);
+        }
+        return result;
     }
 
     private List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> getConnections() {

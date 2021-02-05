@@ -2,17 +2,18 @@ package io.tarantool.driver.integration;
 
 
 import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.exceptions.TarantoolSocketException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -20,8 +21,6 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapper;
 import io.tarantool.driver.mappers.TarantoolCallResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -30,22 +29,13 @@ import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 public class StandaloneTarantoolClientIT {
@@ -88,55 +78,6 @@ public class StandaloneTarantoolClientIT {
         log.info("Attempting connect to Tarantool");
         client = new StandaloneTarantoolClient(config, serverAddress);
         log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
-    }
-
-    @Test
-    public void connectAndCheckMetadata() throws Exception {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
-            ExecutorService executor = Executors.newFixedThreadPool(10);
-            List<CompletableFuture<?>> futures = new ArrayList<>(10);
-            for (int i = 0; i < 10; i++) {
-                futures.add(CompletableFuture.runAsync(() -> {
-                    Optional<TarantoolSpaceMetadata> spaceHolder = client.metadata().getSpaceByName("_space");
-                    assertTrue(spaceHolder.isPresent(), "Failed to get space metadata");
-                }, executor));
-            }
-            futures.forEach(CompletableFuture::join);
-
-            Optional<TarantoolSpaceMetadata> spaceMetadata = client.metadata().getSpaceByName(TEST_SPACE_NAME);
-            assertTrue(spaceMetadata.isPresent(), String.format("Failed to get '%s' metadata", TEST_SPACE_NAME));
-            assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
-            log.info("Retrieved ID from metadata for space '{}': {}",
-                    spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
-        }
-    }
-
-    private CompletableFuture<List<?>> connectAndEval(String command) throws Exception {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
-            return client.eval(command);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Test
-    public void connectAndCloseAfterFuture() throws Exception {
-        List<?> result = connectAndEval("return 1, 2").get(1000, TimeUnit.MILLISECONDS);
-        assertEquals(2, result.size());
-        assertEquals(1, result.get(0));
-        assertEquals(2, result.get(1));
     }
 
     //TODO: reset space before each test
@@ -424,46 +365,6 @@ public class StandaloneTarantoolClientIT {
 
         assertEquals(2, result.size());
         assertEquals(4.2f, result.get(0));
-    }
-
-    @Test
-    public void testIncorrectHostname_shouldThrowException() {
-        assertThrows(TarantoolSocketException.class, () -> {
-            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                    "wronghost", tarantoolContainer.getPort());
-            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
-            // Connection is actually performed here
-            client.getVersion();
-        });
-    }
-
-    @Test
-    public void testIncorrectPort_shouldThrowException() {
-        assertThrows(TarantoolClientException.class, () -> {
-            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                    tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                    tarantoolContainer.getHost(), 9999);
-            TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress);
-            // Connection is actually performed here
-            client.getVersion();
-        });
-    }
-
-    @Test
-    public void testCloseAfterIncorrectPort_shouldThrowException() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), 9999);
-        assertThrows(TarantoolClientException.class, () -> {
-            try (TarantoolClient client = new StandaloneTarantoolClient(credentials, serverAddress)) {
-                // Connection is actually performed here
-                client.getVersion();
-            }
-        });
     }
 
     @Test
