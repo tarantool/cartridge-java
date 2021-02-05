@@ -6,9 +6,17 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 public interface TarantoolConnection extends AutoCloseable {
+    /**
+     * Get the Tarantool server address for this connection
+     * @return server address
+     * @throws TarantoolClientException if the client is not connected
+     */
+    InetSocketAddress getRemoteAddress() throws TarantoolClientException;
+
     /**
      * Get the Tarantool server version
      * @return {@link TarantoolVersion}

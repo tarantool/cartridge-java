@@ -7,6 +7,7 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +34,14 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
                }
            }
         });
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() throws TarantoolClientException {
+        if (!isConnected()) {
+            throw new TarantoolClientException("Not connected to Tarantool server");
+        }
+        return (InetSocketAddress) channel.remoteAddress();
     }
 
     @Override
