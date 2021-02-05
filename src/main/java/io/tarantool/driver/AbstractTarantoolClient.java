@@ -16,6 +16,8 @@ import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
+import io.tarantool.driver.mappers.InterfaceParameterClassNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -264,53 +266,50 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(String functionName,
+    public <S> CompletableFuture<S> callForSingleResult(String functionName,
                                                         List<?> arguments,
-                                                        Class<T> resultClass)
+                                                        Class<S> resultClass)
             throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), resultClass);
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(
+    public <S> CompletableFuture<S> callForSingleResult(
             String functionName,
             List<?> arguments,
-            CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
+            CallResultMapper<S, SingleValueCallResult<S>> resultMapper) throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(String functionName, Class<T> resultClass)
+    public <S> CompletableFuture<S> callForSingleResult(String functionName, Class<S> resultClass)
             throws TarantoolClientException {
         return callForSingleResult(functionName, Collections.emptyList(), resultClass);
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(
+    public <S> CompletableFuture<S> callForSingleResult(
             String functionName,
-            CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
+            CallResultMapper<S, SingleValueCallResult<S>> resultMapper) throws TarantoolClientException {
         return callForSingleResult(functionName, Collections.emptyList(), resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(
+    public <S> CompletableFuture<S> callForSingleResult(
             String functionName,
             List<?> arguments,
             MessagePackObjectMapper argumentsMapper,
-            Class<T> resultClass)
+            Class<S> resultClass)
             throws TarantoolClientException {
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper = mapperFactoryFactory
-                .singleValueResultMapperFactory(resultClass)
-                .withSingleValueResultConverter(getValueConverter(resultClass));
-        return callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
+        return callForSingleResult(functionName, arguments, argumentsMapper, getDefaultSingleValueMapper(resultClass));
     }
 
     @Override
-    public <T> CompletableFuture<T> callForSingleResult(
+    public <S> CompletableFuture<S> callForSingleResult(
             String functionName,
             List<?> arguments,
             MessagePackObjectMapper argumentsMapper,
-            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+            CallResultMapper<S, SingleValueCallResult<S>> resultMapper)
             throws TarantoolClientException {
         return makeRequestForSingleResult(functionName, arguments, argumentsMapper, resultMapper)
                 .thenApply(CallResult::value);
@@ -382,7 +381,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         return makeRequest(functionName, arguments, argumentsMapper, resultMapper);
     }
 
-    private <T> CompletableFuture<T> makeRequest(String functionName,
+    private <S> CompletableFuture<S> makeRequest(String functionName,
                                                  List<?> arguments,
                                                  MessagePackObjectMapper argumentsMapper,
                                                  MessagePackValueMapper resultMapper)
@@ -413,6 +412,11 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     private <T> SingleValueTarantoolResultMapperFactory<T> getMapperFactory(Class<T> resultClass) {
         return mapperFactoryFactory.singleValueTarantoolResultMapperFactory(resultClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> CallResultMapper<T, SingleValueCallResult<T>> getDefaultSingleValueMapper(Class<T> tupleClass) {
+        return new DefaultSingleValueResultMapper<>(config.getMessagePackMapper(), tupleClass);
     }
 
     @SuppressWarnings("unchecked")

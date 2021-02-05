@@ -117,8 +117,7 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
                 .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, getClusterAddressProvider(),
-                TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+                config, getClusterAddressProvider());
         client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
