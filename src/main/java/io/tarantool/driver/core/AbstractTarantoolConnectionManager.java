@@ -162,6 +162,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
             .multiConnection(serverAddress.getSocketAddress(), config.getConnections()).stream()
             .peek(cf -> cf.thenApply(conn -> {
+                if (conn.isConnected()) {
+                    logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
+                }
                 conn.addConnectionFailureListener(ex -> {
                     logger.error("Disconnected from Tarantool server", ex);
                     connectionMode.set(true);

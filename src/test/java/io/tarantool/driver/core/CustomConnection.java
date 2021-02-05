@@ -6,6 +6,7 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +40,11 @@ final class CustomConnection implements TarantoolConnection {
 
     public int getCount() {
         return count.get();
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() throws TarantoolClientException {
+        return new InetSocketAddress(host, port);
     }
 
     @Override
