@@ -13,7 +13,8 @@ import java.util.UUID;
 /**
  * Provides shortcuts for instantiating {@link DefaultMessagePackMapper}
  *
- * @author Alexey Kuzin, Artyom Dubinin
+ * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class DefaultMessagePackMapperFactory {
 
@@ -36,6 +37,8 @@ public class DefaultMessagePackMapperFactory {
                 .withConverter(FloatValue.class, Double.class, new DefaultDoubleConverter())
                 .withConverter(ExtensionValue.class, UUID.class, new DefaultUUIDConverter())
                 .withConverter(ExtensionValue.class, BigDecimal.class, new DefaultBigDecimalConverter())
+                .withValueConverter(IntegerValue.class, Float.class, new DefaultIntegerValueToFloatConverter())
+                .withValueConverter(IntegerValue.class, Double.class, new DefaultIntegerValueToDoubleConverter())
                 .withValueConverter(new DefaultNilConverter())
                 .build();
     }
@@ -65,6 +68,7 @@ public class DefaultMessagePackMapperFactory {
                 .withDefaultMapObjectConverter()
                 .withDefaultMapValueConverter()
                 .build();
+
         // internal types converter
         defaultComplexTypesMapper.registerObjectConverter(
                 new DefaultPackableObjectConverter(defaultComplexTypesMapper));
