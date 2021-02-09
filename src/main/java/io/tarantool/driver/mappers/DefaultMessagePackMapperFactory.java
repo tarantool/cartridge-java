@@ -13,14 +13,13 @@ import java.util.UUID;
 /**
  * Provides shortcuts for instantiating {@link DefaultMessagePackMapper}
  *
- * @author Alexey Kuzin
+ * @author Alexey Kuzin, Artyom Dubinin
  */
 public class DefaultMessagePackMapperFactory {
 
     private static final DefaultMessagePackMapperFactory instance = new DefaultMessagePackMapperFactory();
 
     private final DefaultMessagePackMapper defaultSimpleTypesMapper;
-    private final DefaultMessagePackMapper defaultComplexTypesMapper;
 
     /**
      * Basic constructor.
@@ -39,15 +38,6 @@ public class DefaultMessagePackMapperFactory {
                 .withConverter(ExtensionValue.class, BigDecimal.class, new DefaultBigDecimalConverter())
                 .withValueConverter(new DefaultNilConverter())
                 .build();
-        defaultComplexTypesMapper = new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
-                .withDefaultListObjectConverter()
-                .withDefaultArrayValueConverter()
-                .withDefaultMapObjectConverter()
-                .withDefaultMapValueConverter()
-                .build();
-        // internal types converter
-        defaultComplexTypesMapper.registerObjectConverter(
-                new DefaultPackableObjectConverter(defaultComplexTypesMapper));
     }
 
     /**
@@ -55,7 +45,11 @@ public class DefaultMessagePackMapperFactory {
      * @return {@link DefaultMessagePackMapper} instance
      */
     public DefaultMessagePackMapper defaultSimpleTypeMapper() {
-        return new DefaultMessagePackMapper(defaultSimpleTypesMapper);
+        // internal types converter
+        DefaultMessagePackMapper simpleTypesMapper = new DefaultMessagePackMapper(defaultSimpleTypesMapper);
+        simpleTypesMapper.registerObjectConverter(
+                new DefaultPackableObjectConverter(simpleTypesMapper));
+        return simpleTypesMapper;
     }
 
     /**
@@ -64,7 +58,17 @@ public class DefaultMessagePackMapperFactory {
      * @return {@link DefaultMessagePackMapper} instance
      */
     public DefaultMessagePackMapper defaultComplexTypesMapper() {
-        return new DefaultMessagePackMapper(defaultComplexTypesMapper);
+        DefaultMessagePackMapper defaultComplexTypesMapper =
+                new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
+                .withDefaultListObjectConverter()
+                .withDefaultArrayValueConverter()
+                .withDefaultMapObjectConverter()
+                .withDefaultMapValueConverter()
+                .build();
+        // internal types converter
+        defaultComplexTypesMapper.registerObjectConverter(
+                new DefaultPackableObjectConverter(defaultComplexTypesMapper));
+        return defaultComplexTypesMapper;
     }
 
     /**
