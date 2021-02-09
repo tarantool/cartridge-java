@@ -47,7 +47,12 @@ class DefaultMessagePackMapperTest {
             Double result = mapper.fromValue(ValueFactory.newFloat(111.0D));
         });
         assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newFloat(111.0F), Double.class));
+        assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newInteger(111L), Double.class));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0D), Float.class));
+        assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newInteger(111), Float.class));
+        assertThrows(ClassCastException.class, () -> {
+            Float result = mapper.fromValue(ValueFactory.newInteger(4_000_000_000_000L));
+        });
         assertEquals("hello", mapper.fromValue(ValueFactory.newString("hello")));
         assertArrayEquals(new byte[]{1, 2, 3, 4}, mapper.fromValue(ValueFactory.newBinary(new byte[]{1, 2, 3, 4})));
 

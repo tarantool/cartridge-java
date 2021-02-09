@@ -6,13 +6,13 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;
 
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 public class CustomMappersTest {
     @Test
     void testCustomTimestampMapper() {
