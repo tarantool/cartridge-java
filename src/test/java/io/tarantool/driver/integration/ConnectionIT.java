@@ -163,7 +163,7 @@ public class ConnectionIT {
                 try {
                     client.getVersion();
                 } catch (TarantoolServerException e) {
-                    // ignore
+                    log.error("Caught exception", e);
                 }
                 // the second request should not hang, but should throw the exception
                 client.metadata().getSpaceByName("_vspace");

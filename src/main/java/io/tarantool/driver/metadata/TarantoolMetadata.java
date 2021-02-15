@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base class for {@link TarantoolMetadataOperations} implementations
@@ -22,14 +24,12 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
             new ConcurrentHashMap<>();
     protected final Map<Integer, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceId =
             new ConcurrentHashMap<>();
-    private final CountDownLatch initLatch = new CountDownLatch(1);
+    private final Phaser initPhaser = new Phaser(0);
+    private final AtomicBoolean needRefresh = new AtomicBoolean(true);
     private final TarantoolMetadataProvider metadataProvider;
 
     public TarantoolMetadata(TarantoolMetadataProvider metadataProvider) {
         this.metadataProvider = metadataProvider;
-        // dirty hack for skipping the "space metadata exists" check on metadata refreshing
-        this.spaceMetadataById.put(SpacesMetadataProvider.VSPACE_SPACE_ID, new TarantoolSpaceMetadata());
-        this.spaceMetadataById.put(SpacesMetadataProvider.VINDEX_SPACE_ID, new TarantoolSpaceMetadata());
     }
 
     protected Map<String, TarantoolSpaceMetadata> getSpaceMetadata() {
@@ -53,13 +53,18 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     }
 
     @Override
+    public void scheduleRefresh() {
+        needRefresh.set(true);
+    }
+
+    @Override
     public CompletableFuture<Void> refresh() throws TarantoolClientException {
         return populateMetadata().whenComplete((v, ex) -> {
-            if (initLatch.getCount() > 0) {
-                initLatch.countDown();
-            }
+            initPhaser.arriveAndDeregister();
             if (ex != null) {
                 throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", ex);
+            } else {
+                needRefresh.set(false);
             }
         });
     }
@@ -170,13 +175,17 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     }
 
     private void awaitInitLatch() {
-        if (initLatch.getCount() > 0) {
-            refresh();
-        }
-        try {
-            initLatch.await();
-        } catch (InterruptedException e) {
-            throw new TarantoolClientException(e);
+        if (needRefresh.get() && initPhaser.getRegisteredParties() == 0) {
+            initPhaser.register();
+            try {
+                refresh().get();
+            } catch (InterruptedException e) {
+                throw new TarantoolClientException(e);
+            } catch (ExecutionException e) {
+                throw new TarantoolClientException(e.getCause());
+            }
+        } else {
+            initPhaser.awaitAdvance(0);
         }
     }
 }

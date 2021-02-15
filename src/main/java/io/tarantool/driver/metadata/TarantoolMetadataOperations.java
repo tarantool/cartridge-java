@@ -13,6 +13,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface TarantoolMetadataOperations {
     /**
+     * Initiates metadata refresh cycle
+     */
+    void scheduleRefresh();
+
+    /**
      * Refresh metadata cache
      * @return future with empty value for tracking the refresh progress
      * @throws TarantoolClientException if fetching data failed with error
