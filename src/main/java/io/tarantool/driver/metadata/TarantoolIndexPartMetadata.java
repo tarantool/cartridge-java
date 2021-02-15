@@ -9,10 +9,16 @@ public class TarantoolIndexPartMetadata {
 
     private final int fieldIndex;
     private final String fieldType;
+    private final String path;
 
     public TarantoolIndexPartMetadata(int fieldIndex, String fieldType) {
+        this(fieldIndex, fieldType, null);
+    }
+
+    public TarantoolIndexPartMetadata(int fieldIndex, String fieldType, String path) {
         this.fieldIndex = fieldIndex;
         this.fieldType = fieldType;
+        this.path = path;
     }
 
     /**
@@ -31,5 +37,14 @@ public class TarantoolIndexPartMetadata {
      */
     public String getFieldType() {
         return fieldType;
+    }
+
+    /**
+     * Get path inside field (for "JSON-path" indexes)
+     *
+     * @return path inside field (may be null)
+     */
+    public String getPath() {
+        return path;
     }
 }

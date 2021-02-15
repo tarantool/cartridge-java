@@ -20,6 +20,7 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
     private final String metadataFunctionName;
     private final TarantoolClient client;
     private final ValueConverter<Value, TarantoolMetadataContainer> metadataConverter;
+    private final Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass;
 
     /**
      * Basic constructor
@@ -27,20 +28,23 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
      * @param client configured Tarantool client to make requests with
      * @param metadataFunctionName the stored function name
      * @param metadataConverter converter to {@link TarantoolMetadataContainer} aware of the function call result format
+     * @param resultClass result class
      */
     public ProxyMetadataProvider(TarantoolClient client,
                                  String metadataFunctionName,
-                                 ValueConverter<Value, TarantoolMetadataContainer> metadataConverter) {
+                                 ValueConverter<Value, TarantoolMetadataContainer> metadataConverter,
+                                 Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {
         this.metadataFunctionName = metadataFunctionName;
         this.client = client;
         this.metadataConverter = metadataConverter;
+        this.resultClass = resultClass;
     }
 
     @Override
     public CompletableFuture<TarantoolMetadataContainer> getMetadata() {
         CallResultMapper<TarantoolMetadataContainer, SingleValueCallResult<TarantoolMetadataContainer>> mapper =
                 client.getResultMapperFactoryFactory().singleValueResultMapperFactory(TarantoolMetadataContainer.class)
-                        .withSingleValueResultConverter(metadataConverter);
+                        .withSingleValueResultConverter(metadataConverter, resultClass);
         return client.callForSingleResult(metadataFunctionName, mapper)
             .exceptionally(ex -> {
                 if (ex.getCause() != null && ex.getCause() instanceof TarantoolClientException) {

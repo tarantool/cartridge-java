@@ -15,8 +15,10 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
+import io.tarantool.driver.metadata.DDLMetadataContainerResult;
 import io.tarantool.driver.metadata.DDLTarantoolSpaceMetadataConverter;
 import io.tarantool.driver.metadata.ProxyMetadataProvider;
+import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
@@ -27,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, proxying all CRUD operations through the
@@ -55,12 +58,13 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
 
     private final TarantoolClient client;
     private final ProxyMetadataProvider metadataProvider;
+    private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
 
     public ProxyTarantoolClient(TarantoolClient decoratedClient) {
         this.client = decoratedClient;
         this.client.getListeners().clear();
-        this.metadataProvider = new ProxyMetadataProvider(
-                client, getGetSchemaFunctionName(), new DDLTarantoolSpaceMetadataConverter());
+        this.metadataProvider = new ProxyMetadataProvider(client, getGetSchemaFunctionName(),
+                new DDLTarantoolSpaceMetadataConverter(), DDLMetadataContainerResult.class);
     }
 
     @Override
@@ -78,7 +82,10 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
 
     @Override
     public TarantoolMetadataOperations metadata() throws TarantoolClientException {
-        return client.metadata();
+        if (metadataHolder.get() == null) {
+            this.metadataHolder.compareAndSet(null, new TarantoolMetadata(metadataProvider()));
+        }
+        return metadataHolder.get();
     }
 
     @Override
