@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -94,13 +93,6 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
         this.connectionFactory = new TarantoolConnectionFactory(config, getBootstrap());
-        listeners.add(connection -> {
-            try {
-                return metadata().refresh().thenApply(v -> connection);
-            } catch (Throwable e) {
-                throw new CompletionException(e);
-            }
-        });
         this.listeners = listeners;
         this.tupleFactory = new DefaultTarantoolTupleFactory(config.getMessagePackMapper());
         this.metadataProvider = new SpacesMetadataProvider(this, config.getMessagePackMapper());
@@ -152,7 +144,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
 
-        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata());
+        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata);
     }
 
     @Override

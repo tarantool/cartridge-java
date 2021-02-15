@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, proxying all CRUD operations through the
@@ -60,13 +59,6 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     public ProxyTarantoolClient(TarantoolClient decoratedClient) {
         this.client = decoratedClient;
         this.client.getListeners().clear();
-        this.client.getListeners().add(connection -> {
-            try {
-                return metadata().refresh().thenApply(v -> connection);
-            } catch (Throwable e) {
-                throw new CompletionException(e);
-            }
-        });
         this.metadataProvider = new ProxyMetadataProvider(
                 client, getGetSchemaFunctionName(), new DDLTarantoolSpaceMetadataConverter());
     }

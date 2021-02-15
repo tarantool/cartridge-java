@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +42,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
             new AtomicReference<>(new HashMap<>());
     private final AtomicReference<ConnectionSelectionStrategy> connectionSelectStrategy = new AtomicReference<>();
     private final AtomicBoolean connectionMode = new AtomicBoolean(true);
-    private final CountDownLatch initLatch = new CountDownLatch(1);
+    private final Phaser initPhaser = new Phaser(0);
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public AbstractTarantoolConnectionManager(TarantoolClientConfig config,
@@ -84,7 +84,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
         CompletableFuture<TarantoolConnection> result;
-        if (connectionMode.compareAndSet(true, false)) {
+        if (connectionMode.get() && initPhaser.getRegisteredParties() == 0) {
+            initPhaser.register();
             result = establishConnections()
                 .thenAccept(registry -> {
                     connectionRegistry.set(registry);
@@ -96,19 +97,16 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 })
                 .thenApply(v -> connectionSelectStrategy.get().next())
                 .whenComplete((v, ex) -> {
-                    if (initLatch.getCount() > 0) {
-                        initLatch.countDown();
+                    initPhaser.arriveAndDeregister();
+                    if (ex == null) {
+                        connectionMode.set(false);
                     }
                 });
             for (TarantoolConnectionListener connectionListener : connectionListeners.all()) {
                 result = result.thenCompose(connectionListener::onConnection);
             }
         } else {
-            try {
-                initLatch.await();
-            } catch (InterruptedException e) {
-                throw new TarantoolClientException("Interrupted while waiting for connection manager initialization");
-            }
+            initPhaser.awaitAdvance(0);
             result = CompletableFuture.completedFuture(connectionSelectStrategy.get().next());
         }
         return result;
@@ -187,11 +185,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     @Override
     public void close() {
-        try {
-            initLatch.await();
-        } catch (InterruptedException e) {
-            throw new TarantoolClientException("Interrupted while waiting for connection manager initialization");
-        }
+        initPhaser.awaitAdvance(0);
         connectionRegistry.get().values().stream()
             .flatMap(Collection::stream)
             .forEach(conn -> {
