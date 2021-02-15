@@ -29,4 +29,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
     - name: Run integration tests
-      run: mvn -B test -P integration --file pom.xml -DdockerfileUseRoot=true
+      env:
+        TARANTOOL_SERVER_USER: root
+        TARANTOOL_SERVER_GROUP: root
+      run: mvn -B test -P integration --file pom.xml
