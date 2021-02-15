@@ -46,6 +46,33 @@ local function init_space()
 
     test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
+    local test_space_to_join = box.schema.space.create(
+            'test_space_to_join',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'bucket_id', 'unsigned' },
+                    { 'field3', 'boolean' },
+                    { 'field4', 'number' },
+                },
+                if_not_exists = true,
+            }
+    )
+
+    test_space_to_join:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    test_space_to_join:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+end
+
+local function get_composite_data(id)
+    local composite = { id = id }
+    local data1 = box.space.test_space:get(id)
+    composite.field1 = data1.field1
+    composite.field2 = data1.field2
+    local data2 = box.space.test_space_to_join:get(id)
+    composite.field3 = data2.field3
+    composite.field4 = data2.field4
+    return composite
 end
 
 local function init(opts)
@@ -54,6 +81,7 @@ local function init(opts)
     end
 
     rawset(_G, 'ddl', { get_schema = require('ddl').get_schema })
+    rawset(_G, 'get_composite_data', get_composite_data)
 
     return true
 end
@@ -61,6 +89,7 @@ end
 return {
     role_name = 'app.roles.api_storage',
     init = init,
+    get_composite_data = get_composite_data,
     dependencies = {
         'cartridge.roles.crud-storage'
     }

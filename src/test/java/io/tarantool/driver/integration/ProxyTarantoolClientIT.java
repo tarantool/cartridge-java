@@ -6,6 +6,7 @@ import io.tarantool.driver.ProxyTarantoolClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
@@ -18,7 +19,10 @@ import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
+import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.SingleValueTarantoolResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
@@ -26,11 +30,14 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -287,5 +294,36 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals(35, upsertResult.get(0).getInteger(3));
         assertEquals(7, upsertResult.get(0).getInteger(4));
+    }
+
+    @Test
+    public void functionAggregateResultViaCallTest() throws ExecutionException, InterruptedException {
+        List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
+        TarantoolResult<TarantoolTuple> tuple1 = client.space("test_space").insert(tarantoolTuple).get();
+
+        values = Arrays.asList(123000, null, true, 123.456);
+        tarantoolTuple = tupleFactory.create(values);
+        TarantoolResult<TarantoolTuple> tuple2 = client.space("test_space_to_join").insert(tarantoolTuple).get();
+
+        MessagePackValueMapper valueMapper = client.getConfig().getMessagePackMapper();
+        CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>> mapper =
+                client.getResultMapperFactoryFactory().singleValueResultMapperFactory(TestComposite.class)
+                        .withSingleValueResultConverter(v -> {
+                            Map<String, Object> valueMap = valueMapper.fromValue(v);
+                            TestComposite composite = new TestComposite();
+                            composite.field1 = (String) valueMap.get("field1");
+                            composite.field2 = (Integer) valueMap.get("field2");
+                            composite.field3 = (Boolean) valueMap.get("field3");
+                            composite.field4 = (Float) valueMap.get("field4");
+                            return composite;
+                        }, TestCompositeCallResult.class);
+        TestComposite actual =
+                client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapper).get();
+
+        assertEquals("Jane Doe", actual.field1);
+        assertEquals(999, actual.field2);
+        assertEquals(true, actual.field3);
+        assertEquals(123.456F, actual.field4);
     }
 }
