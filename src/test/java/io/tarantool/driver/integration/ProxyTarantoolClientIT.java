@@ -101,7 +101,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         ClusterTarantoolClient clusterClient =
                 new ClusterTarantoolClient(config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
-        client = new TestProxyTarantoolClient(clusterClient);
+        client = new ProxyTarantoolClient(clusterClient);
     }
 
     @Test

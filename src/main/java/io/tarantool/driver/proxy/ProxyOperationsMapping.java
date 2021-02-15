@@ -8,7 +8,7 @@ package io.tarantool.driver.proxy;
 public interface ProxyOperationsMapping {
 
     String CRUD_PREFIX = "crud.";
-    String SCHEMA_FUNCTION = "cartridge.get_schema";
+    String SCHEMA_FUNCTION = "ddl.get_schema";
     String DELETE_FUNCTION = CRUD_PREFIX + "delete";
     String INSERT_FUNCTION = CRUD_PREFIX + "insert";
     String REPLACE_FUNCTION = CRUD_PREFIX + "replace";
