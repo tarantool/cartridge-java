@@ -10,16 +10,19 @@ import org.msgpack.value.impl.ImmutableStringValueImpl;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Maps MessagePack {@link ArrayValue} into {@link TarantoolSpaceMetadata}
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValue, TarantoolSpaceMetadata> {
 
     private static final ImmutableStringValue FORMAT_FIELD_NAME = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue FORMAT_FIELD_TYPE = new ImmutableStringValueImpl("type");
+    private static final ImmutableStringValue FORMAT_FIELD_IS_NULLABLE = new ImmutableStringValueImpl("is_nullable");
 
     private MessagePackValueMapper mapper;
 
@@ -45,12 +48,14 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
         int fieldPosition = 0;
         for (Value fieldValueMetadata : spaceMetadataValue.asArrayValue()) {
             Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
+            Optional<Value> isNullable = Optional.ofNullable(fieldMap.get(FORMAT_FIELD_IS_NULLABLE));
             spaceFormatMetadata.put(
                     fieldMap.get(FORMAT_FIELD_NAME).toString(),
                     new TarantoolFieldMetadata(
-                            fieldMap.get(FORMAT_FIELD_NAME).toString(),
-                            fieldMap.get(FORMAT_FIELD_TYPE).toString(),
-                            fieldPosition
+                            fieldMap.get(FORMAT_FIELD_NAME).asStringValue().asString(),
+                            fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().asString(),
+                            fieldPosition,
+                            isNullable.isPresent() && isNullable.get().asBooleanValue().getBoolean()
                     )
             );
             fieldPosition++;

@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 @Testcontainers
 public class ConnectionIT {
@@ -70,6 +71,7 @@ public class ConnectionIT {
             assertEquals(TEST_SPACE_NAME, spaceMetadata.get().getSpaceName());
             log.info("Retrieved ID from metadata for space '{}': {}",
                     spaceMetadata.get().getSpaceName(), spaceMetadata.get().getSpaceId());
+            assertTrue(spaceMetadata.get().getFieldByName("year").get().getIsNullable());
         }
     }
 

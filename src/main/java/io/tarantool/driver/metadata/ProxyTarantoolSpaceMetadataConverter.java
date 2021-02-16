@@ -8,10 +8,11 @@ import org.msgpack.value.ImmutableStringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.impl.ImmutableStringValueImpl;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * See <a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>
  *
  * @author Sergey Volgin
+ * @author Artyom Dubinin
  */
 public class ProxyTarantoolSpaceMetadataConverter
         implements ValueConverter<ArrayValue, ProxyTarantoolSpaceMetadataContainer> {
@@ -33,6 +35,7 @@ public class ProxyTarantoolSpaceMetadataConverter
 
     private static final ImmutableStringValue FORMAT_NAME_KEY = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue FORMAT_TYPE_KEY = new ImmutableStringValueImpl("type");
+    private static final ImmutableStringValue FORMAT_IS_NULLABLE = new ImmutableStringValueImpl("is_nullable");
 
     private static final ImmutableStringValue INDEX_ID_KEY = new ImmutableStringValueImpl("id");
     private static final ImmutableStringValue INDEX_NAME_KEY = new ImmutableStringValueImpl("name");
@@ -130,7 +133,17 @@ public class ProxyTarantoolSpaceMetadataConverter
             }
             String fieldType = fieldTypeValue.asStringValue().asString();
 
-            spaceFormatMetadata.put(fieldName, new TarantoolFieldMetadata(fieldName, fieldType, fieldPosition++));
+            Value fieldIsNullableValue = fieldMap.get(FORMAT_IS_NULLABLE);
+            boolean fieldIsNullable = false;
+            if (fieldIsNullableValue != null) {
+                if (!fieldIsNullableValue.isBooleanValue()) {
+                    throw new TarantoolClientException("Unsupported space metadata format: key '"
+                            + FORMAT_IS_NULLABLE + "' must have boolean value");
+                }
+                fieldIsNullable = fieldIsNullableValue.asBooleanValue().getBoolean();
+            }
+            spaceFormatMetadata.put(fieldName,
+                    new TarantoolFieldMetadata(fieldName, fieldType, fieldPosition++, fieldIsNullable));
         }
 
         return spaceFormatMetadata;
