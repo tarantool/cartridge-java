@@ -60,13 +60,26 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     @Override
     public CompletableFuture<Void> refresh() throws TarantoolClientException {
         return populateMetadata().whenComplete((v, ex) -> {
-            initPhaser.arriveAndDeregister();
             if (ex != null) {
-                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", ex);
-            } else {
-                needRefresh.set(false);
+                needRefresh.set(true);
             }
+            initPhaser.arriveAndDeregister();
         });
+    }
+
+    private void awaitInitLatch() {
+        if (initPhaser.getRegisteredParties() == 0 && needRefresh.compareAndSet(true, false)) {
+            initPhaser.register();
+            try {
+                refresh().get();
+            } catch (InterruptedException e) {
+                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", e);
+            } catch (ExecutionException e) {
+                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", e.getCause());
+            }
+        } else {
+            initPhaser.awaitAdvance(initPhaser.getPhase());
+        }
     }
 
     private CompletableFuture<Void> populateMetadata() {
@@ -172,20 +185,5 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         Assert.hasText(spaceName, "Space name must not be null or empty");
 
         return Optional.ofNullable(getIndexMetadata().get(spaceName));
-    }
-
-    private void awaitInitLatch() {
-        if (needRefresh.get() && initPhaser.getRegisteredParties() == 0) {
-            initPhaser.register();
-            try {
-                refresh().get();
-            } catch (InterruptedException e) {
-                throw new TarantoolClientException(e);
-            } catch (ExecutionException e) {
-                throw new TarantoolClientException(e.getCause());
-            }
-        } else {
-            initPhaser.awaitAdvance(0);
-        }
     }
 }

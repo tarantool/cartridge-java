@@ -41,7 +41,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> connectionRegistry =
             new AtomicReference<>(new HashMap<>());
     private final AtomicReference<ConnectionSelectionStrategy> connectionSelectStrategy = new AtomicReference<>();
+    // connection init sequence state
     private final AtomicBoolean connectionMode = new AtomicBoolean(true);
+    // resettable barrier for preventing multiple threads from running into the connection init sequence
     private final Phaser initPhaser = new Phaser(0);
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
@@ -84,7 +86,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
         CompletableFuture<TarantoolConnection> result;
-        if (connectionMode.get() && initPhaser.getRegisteredParties() == 0) {
+        if (initPhaser.getRegisteredParties() == 0 && connectionMode.compareAndSet(true, false)) {
+            // Only one thread can reach to this line because of CAS. Rise up the barrier for 1 thread
             initPhaser.register();
             result = establishConnections()
                 .thenAccept(registry -> {
@@ -97,16 +100,27 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 })
                 .thenApply(v -> connectionSelectStrategy.get().next())
                 .whenComplete((v, ex) -> {
-                    initPhaser.arriveAndDeregister();
-                    if (ex == null) {
-                        connectionMode.set(false);
+                    if (ex != null) {
+                        // Connection attempt failed, signal the next thread coming for connection
+                        // to start the init sequence
+                        connectionMode.set(true);
                     }
+                    // Connection init sequence completed, release all waiting threads and lower the barrier
+                    initPhaser.arriveAndDeregister();
                 });
             for (TarantoolConnectionListener connectionListener : connectionListeners.all()) {
                 result = result.thenCompose(connectionListener::onConnection);
             }
         } else {
-            initPhaser.awaitAdvance(0);
+            // Wait until a thread finishes the init sequence and lowers the barrier. Once the barrier is lowered, the
+            // phaser advances to the next phase.
+            // As soon as all parties have arrived (register() is called once, so a single thread), all threads blocked
+            // on awaitAdvance() continue running. getPhase() in thiss case returns the last phase value before
+            // the termination.
+            initPhaser.awaitAdvance(initPhaser.getPhase());
+            // This call may produce NoAvailableConnectionsException if the connection attempt failed in all threads
+            // that waited for the init sequence completion on the line above.
+            // In this case the calling code may perform the request again.
             result = CompletableFuture.completedFuture(connectionSelectStrategy.get().next());
         }
         return result;
@@ -171,6 +185,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 }
                 conn.addConnectionFailureListener(ex -> {
                     logger.error("Disconnected from Tarantool server", ex);
+                    // Connection lost, signal the next thread coming for connection to start the init sequence
                     connectionMode.set(true);
                 });
                 return conn;
