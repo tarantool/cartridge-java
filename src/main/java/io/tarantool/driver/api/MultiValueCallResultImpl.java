@@ -18,10 +18,10 @@ public class MultiValueCallResultImpl<T, R extends List<T>> implements MultiValu
 
     public MultiValueCallResultImpl(Value result, ValueConverter<ArrayValue, R> valueConverter) {
         if (result == null) {
-            throw new TarantoolFunctionCallException("Function result is null");
+            throw new TarantoolFunctionCallException("Function call result is null");
         }
         if (!result.isArrayValue()) {
-            throw new TarantoolFunctionCallException("Function result is not a MessagePack array");
+            throw new TarantoolFunctionCallException("Function call result is not a MessagePack array");
         }
         this.value = valueConverter.fromValue(result.asArrayValue());
     }

@@ -15,7 +15,9 @@ public class SingleValueCallResultImpl<T> implements SingleValueCallResult<T> {
     private T value;
 
     public SingleValueCallResultImpl(ArrayValue result, ValueConverter<Value, T> valueConverter) {
-
+        if (result == null) {
+            throw new TarantoolFunctionCallException("Function call result is null");
+        }
         if (result.size() == 0 || result.size() == 1 && result.get(0).isNilValue()) {
             // [nil] or []
             value = null;
