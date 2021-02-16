@@ -1,8 +1,9 @@
 package io.tarantool.driver.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -15,24 +16,26 @@ import java.util.concurrent.CompletableFuture;
  */
 abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
-    protected final TarantoolClient client;
+    protected final TarantoolCallOperations client;
     protected final String functionName;
     protected final List<?> arguments;
-    protected final
-    CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
+    private final MessagePackObjectMapper argumentsMapper;
+    protected final CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
 
     AbstractProxyOperation(
-            TarantoolClient client,
+            TarantoolCallOperations client,
             String functionName,
             List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
             CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         this.client = client;
+        this.argumentsMapper = argumentsMapper;
         this.arguments = arguments;
         this.functionName = functionName;
         this.resultMapper = resultMapper;
     }
 
-    public TarantoolClient getClient() {
+    public TarantoolCallOperations getClient() {
         return client;
     }
 
@@ -50,7 +53,6 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
     @Override
     public CompletableFuture<T> execute() {
-        return client.callForSingleResult(
-                functionName, arguments, client.getConfig().getMessagePackMapper(), resultMapper);
+        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
     }
 }

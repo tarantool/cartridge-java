@@ -1,9 +1,9 @@
 package io.tarantool.driver.auth;
 
-import io.tarantool.driver.StandaloneTarantoolClient;
+import io.tarantool.driver.AbstractTarantoolClient;
 
 /**
- * This exception is thrown when the {@link StandaloneTarantoolClient} fails to authenticate with given data
+ * This exception is thrown when the {@link AbstractTarantoolClient} fails to authenticate with given data
  *
  * @author Alexey Kuzin
  */

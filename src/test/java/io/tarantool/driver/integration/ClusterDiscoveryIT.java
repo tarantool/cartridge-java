@@ -1,6 +1,6 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolClient;
+import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -18,11 +18,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 /**
  * @author Sergey Volgin
@@ -51,12 +51,14 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
     private HTTPDiscoveryClusterAddressProvider getHttpProvider() {
         String discoveryAddress = "http://" + container.getAPIHost() + ":" + container.getAPIPort() + "/routers";
-        HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint(discoveryAddress);
+        HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint.Builder()
+                .withURI(discoveryAddress)
+                .withReadTimeout(1000 * 5)
+                .withConnectTimeout(1000 * 5)
+                .build();
 
         TarantoolClusterDiscoveryConfig config = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
-                .withReadTimeout(1000 * 5)
-                .withConnectTimeout(1000 * 5)
                 .build();
 
         return new HTTPDiscoveryClusterAddressProvider(config);
@@ -76,16 +78,22 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
     private TarantoolClusterAddressProvider getBinaryProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
                 container.getUsername(), container.getPassword());
-        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+
+        TarantoolClientConfig config = TarantoolClientConfig.builder()
                 .withCredentials(credentials)
+                .withReadTimeout(1000 * 5)
+                .withConnectTimeout(1000 * 5)
+                .build();
+
+        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+                .withClientConfig(config)
                 .withEntryFunction("get_routers")
-                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
+                .withEndpointProvider(() -> Collections.singletonList(
+                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
                 .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
-                .withReadTimeout(1000 * 5)
-                .withConnectTimeout(1000 * 5)
                 .withDelay(1)
                 .build();
 
@@ -101,7 +109,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
                 .withRequestTimeout(1000 * 5)
                 .build();
 
-        ClusterTarantoolClient client = new ClusterTarantoolClient(
+        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
                 config,
                 new TestWrappedClusterAddressProvider(getBinaryProvider(), container),
                 TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
@@ -119,7 +127,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
                 .withRequestTimeout(1000 * 5)
                 .build();
 
-        ClusterTarantoolClient client = new ClusterTarantoolClient(
+        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
                 config,
                 new TestWrappedClusterAddressProvider(getHttpProvider(), container),
                 TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);

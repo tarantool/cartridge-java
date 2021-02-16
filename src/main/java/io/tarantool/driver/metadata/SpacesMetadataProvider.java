@@ -1,12 +1,12 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.SingleValueTarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
@@ -23,7 +23,7 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
     static final String VSPACE_SELECT_CMD = "box.space._vspace:select"; // System space with all space descriptions
     static final String VINDEX_SELECT_CMD = "box.space._vindex:select"; // System space with all index descriptions
 
-    private final TarantoolClient client;
+    private final TarantoolCallOperations client;
     private final TarantoolSpaceMetadataConverter spaceMetadataMapper;
     private final TarantoolIndexMetadataConverter indexMetadataMapper;
 
@@ -33,7 +33,7 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
      * @param client configured client instance
      * @param messagePackMapper MessagePack mapper configured for the caller client
      */
-    public SpacesMetadataProvider(TarantoolClient client,
+    public SpacesMetadataProvider(TarantoolCallOperations client,
                                   MessagePackMapper messagePackMapper) {
         this.client = client;
         this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(messagePackMapper);

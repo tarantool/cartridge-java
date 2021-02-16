@@ -1,11 +1,10 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,27 +17,30 @@ import java.util.List;
  */
 public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
 
-    private DeleteProxyOperation(TarantoolClient client,
+    private DeleteProxyOperation(TarantoolCallOperations client,
                                  String functionName,
                                  List<?> arguments,
+                                 MessagePackObjectMapper argumentsMapper,
                                  CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
-        super(client, functionName, arguments, resultMapper);
+        super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
     /**
      * The builder for this class.
      */
     public static final class Builder<T> {
-        private TarantoolClient client;
+        private TarantoolCallOperations client;
         private String spaceName;
         private String functionName;
         private TarantoolIndexQuery indexQuery;
+        private MessagePackObjectMapper argumentsMapper;
         private CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
+        private int requestTimeout;
 
         public Builder() {
         }
 
-        public Builder<T> withClient(TarantoolClient client) {
+        public Builder<T> withClient(TarantoolCallOperations client) {
             this.client = client;
             return this;
         }
@@ -58,26 +60,28 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
+        public Builder<T> withArgumentsMapper(MessagePackObjectMapper argumentsMapper) {
+            this.argumentsMapper = argumentsMapper;
+            return this;
+        }
+
         public Builder<T> withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
             this.resultMapper = resultMapper;
             return this;
         }
 
-        public DeleteProxyOperation<T> build() {
-            Assert.notNull(client, "Tarantool client should not be null");
-            Assert.notNull(spaceName, "Tarantool spaceName should not be null");
-            Assert.notNull(functionName, "Proxy delete function name should not be null");
-            Assert.notNull(indexQuery, "Tarantool indexQuery should not be null");
-            Assert.notNull(resultMapper, "Result tuple mapper should not be null");
+        public Builder<T> withRequestTimeout(int requestTimeout) {
+            this.requestTimeout = requestTimeout;
+            return this;
+        }
 
-            TarantoolClientConfig config = client.getConfig();
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
-                    .withTimeout(config.getRequestTimeout())
-                    .build();
+        public DeleteProxyOperation<T> build() {
+            CRUDOperationOptions options = CRUDOperationOptions.builder().withTimeout(requestTimeout).build();
 
             List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
 
-            return new DeleteProxyOperation<>(this.client, this.functionName, arguments, this.resultMapper);
+            return new DeleteProxyOperation<>(
+                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

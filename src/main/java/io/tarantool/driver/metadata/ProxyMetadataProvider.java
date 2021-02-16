@@ -1,7 +1,7 @@
 package io.tarantool.driver.metadata;
 
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolMetadataRequestException;
 import io.tarantool.driver.mappers.CallResultMapper;
@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public class ProxyMetadataProvider implements TarantoolMetadataProvider {
 
     private final String metadataFunctionName;
-    private final TarantoolClient client;
+    private final TarantoolCallOperations client;
     private final ValueConverter<Value, TarantoolMetadataContainer> metadataConverter;
     private final Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass;
 
@@ -30,7 +30,7 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
      * @param metadataConverter converter to {@link TarantoolMetadataContainer} aware of the function call result format
      * @param resultClass result class
      */
-    public ProxyMetadataProvider(TarantoolClient client,
+    public ProxyMetadataProvider(TarantoolCallOperations client,
                                  String metadataFunctionName,
                                  ValueConverter<Value, TarantoolMetadataContainer> metadataConverter,
                                  Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {

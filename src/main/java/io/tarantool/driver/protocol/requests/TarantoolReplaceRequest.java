@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol.requests;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
@@ -50,8 +50,8 @@ public final class TarantoolReplaceRequest extends TarantoolRequest {
          * @param tuple tuple value
          * @return builder
          */
-        public TarantoolReplaceRequest.Builder withTuple(TarantoolTuple tuple) {
-            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), tuple.getFields());
+        public TarantoolReplaceRequest.Builder withTuple(Packable tuple) {
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), tuple);
             return this;
         }
 

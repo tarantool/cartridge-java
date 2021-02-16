@@ -1,8 +1,8 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolClient;
+import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.ProxyTarantoolClient;
+import io.tarantool.driver.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -22,7 +22,6 @@ import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobi
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.SingleValueTarantoolResultMapperFactory;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
@@ -30,8 +29,6 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.msgpack.value.Value;
-import org.msgpack.value.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
-    private static ProxyTarantoolClient client;
+    private static ProxyTarantoolTupleClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
             new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -78,16 +75,21 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+        TarantoolClientConfig config = TarantoolClientConfig.builder()
                 .withCredentials(credentials)
+                .withReadTimeout(DEFAULT_TIMEOUT)
+                .withConnectTimeout(DEFAULT_TIMEOUT)
+                .build();
+
+        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+                .withClientConfig(config)
                 .withEntryFunction("get_routers")
-                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
+                .withEndpointProvider(() -> Collections.singletonList(
+                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
                 .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
                 .withDelay(1)
                 .build();
 
@@ -106,9 +108,9 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                 .withRequestTimeout(DEFAULT_TIMEOUT)
                 .build();
 
-        ClusterTarantoolClient clusterClient =
-                new ClusterTarantoolClient(config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
-        client = new ProxyTarantoolClient(clusterClient);
+        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
+                config, getClusterAddressProvider(), RoundRobinStrategyFactory.INSTANCE);
+        client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
     @Test
@@ -138,7 +140,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void clusterInsertSelectTest() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple;
 
@@ -172,7 +175,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void clusterInsertDeleteTest() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(100, null, "fio", 10, 100);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -208,7 +212,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void replaceTest() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(123, null, "Jane Doe", 18, 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -238,7 +243,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void clusterUpdateTest() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(223, null, "Jane Doe", 10, 10);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -262,7 +268,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void clusterUpsertTest() throws ExecutionException, InterruptedException {
-        TarantoolSpaceOperations profileSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);

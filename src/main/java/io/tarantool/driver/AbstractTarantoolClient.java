@@ -9,8 +9,6 @@ import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolTupleFactory;
-import io.tarantool.driver.api.space.TarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
@@ -31,6 +29,7 @@ import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
@@ -39,6 +38,7 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -48,9 +48,12 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Basic Tarantool client implementation. Subclasses must provide the connection manager.
  *
+ * @param <T> target tuple type
+ * @param <R> target tuple collection type
  * @author Alexey Kuzin
  */
-public abstract class AbstractTarantoolClient implements TarantoolClient {
+public abstract class AbstractTarantoolClient<T extends Packable, R extends Collection<T>>
+        implements TarantoolClient<T, R> {
 
     private final NioEventLoopGroup eventLoopGroup;
     private final TarantoolClientConfig config;
@@ -60,7 +63,6 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
-    private final DefaultTarantoolTupleFactory tupleFactory;
     private final SpacesMetadataProvider metadataProvider;
 
     /**
@@ -94,7 +96,6 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
         this.connectionFactory = new TarantoolConnectionFactory(config, getBootstrap());
         this.listeners = listeners;
-        this.tupleFactory = new DefaultTarantoolTupleFactory(config.getMessagePackMapper());
         this.metadataProvider = new SpacesMetadataProvider(this, config.getMessagePackMapper());
     }
 
@@ -122,7 +123,7 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     }
 
     @Override
-    public TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException {
+    public TarantoolSpaceOperations<T, R> space(String spaceName) throws TarantoolClientException {
         Assert.hasText(spaceName, "Space name must not be null or empty");
 
         TarantoolMetadataOperations metadata = this.metadata();
@@ -131,11 +132,11 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
             throw new TarantoolSpaceNotFoundException(spaceName);
         }
 
-        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata);
+        return spaceOperations(config, connectionManager(), metadata, meta.get());
     }
 
     @Override
-    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
+    public TarantoolSpaceOperations<T, R> space(int spaceId) throws TarantoolClientException {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 
         TarantoolMetadataOperations metadata = this.metadata();
@@ -144,8 +145,22 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
 
-        return new TarantoolSpace(config, connectionManager(), meta.get(), metadata);
+        return spaceOperations(config, connectionManager(), metadata, meta.get());
     }
+
+    /**
+     * Creates a space API implementation instance for the specified space
+     *
+     * @param config Tarantool client configuration
+     * @param connectionManager configured internal connection manager
+     * @param metadata metadata operations
+     * @param spaceMetadata current space metadata
+     * @return space API implementation instance
+     */
+    protected abstract TarantoolSpaceOperations<T, R> spaceOperations(TarantoolClientConfig config,
+                                                                      TarantoolConnectionManager connectionManager,
+                                                                      TarantoolMetadataOperations metadata,
+                                                                      TarantoolSpaceMetadata spaceMetadata);
 
     @Override
     public TarantoolMetadataOperations metadata() throws TarantoolClientException {
@@ -470,11 +485,6 @@ public abstract class AbstractTarantoolClient implements TarantoolClient {
     @Override
     public TarantoolConnectionListeners getListeners() {
         return listeners;
-    }
-
-    @Override
-    public TarantoolTupleFactory getTarantoolTupleFactory() {
-        return tupleFactory;
     }
 
     @Override

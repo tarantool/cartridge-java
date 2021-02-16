@@ -150,7 +150,7 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
                 .group(this.eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, endpoint.getConnectTimeout());
         startDiscoveryTask();
     }
 
@@ -193,12 +193,13 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
         CompletableFuture<Map<String, ServerNodeInfo>> completableFuture = new CompletableFuture<>();
 
         TarantoolClusterDiscoveryConfig config = getDiscoveryConfig();
+        HTTPClusterDiscoveryEndpoint endpoint = (HTTPClusterDiscoveryEndpoint) config.getEndpoint();
         getExecutorService().schedule(() -> {
             if (!completableFuture.isDone()) {
                 completableFuture.completeExceptionally(new TimeoutException(String.format(
-                        "Failed to get response for request in %d ms", config.getReadTimeout())));
+                        "Failed to get response for request in %d ms", endpoint.getReadTimeout())));
             }
-        }, config.getReadTimeout(), TimeUnit.MILLISECONDS);
+        }, endpoint.getReadTimeout(), TimeUnit.MILLISECONDS);
 
         Bootstrap bootstrap = this.bootstrap.clone()
                 .handler(new SimpleHttpClientInitializer(sslContext, completableFuture));
