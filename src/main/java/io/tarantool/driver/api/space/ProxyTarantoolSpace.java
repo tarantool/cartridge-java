@@ -3,15 +3,12 @@ package io.tarantool.driver.api.space;
 import io.tarantool.driver.ProxyTarantoolClient;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
-import io.tarantool.driver.mappers.DefaultTarantoolTupleValueConverter;
-import io.tarantool.driver.mappers.SingleValueTarantoolResultMapperFactory;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
@@ -22,9 +19,7 @@ import io.tarantool.driver.proxy.ReplaceProxyOperation;
 import io.tarantool.driver.proxy.SelectProxyOperation;
 import io.tarantool.driver.proxy.UpdateProxyOperation;
 import io.tarantool.driver.proxy.UpsertProxyOperation;
-import org.msgpack.value.ArrayValue;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -57,15 +52,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return delete(conditions, defaultTupleResultMapper());
     }
 
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
-                                                            ValueConverter<ArrayValue, T> tupleConverter,
-                                                            Class<? extends TarantoolResult<T>> resultClass)
-            throws TarantoolClientException {
-
-        return delete(conditions, withTupleConverter(tupleConverter, resultClass));
-    }
-
     private <T> CompletableFuture<TarantoolResult<T>> delete(
             Conditions conditions,
             CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
@@ -89,14 +75,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return insert(tuple, defaultTupleResultMapper());
     }
 
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
-                                                            ValueConverter<ArrayValue, T> tupleConverter,
-                                                            Class<? extends TarantoolResult<T>> resultClass)
-            throws TarantoolClientException {
-        return insert(tuple, withTupleConverter(tupleConverter, resultClass));
-    }
-
     private <T> CompletableFuture<TarantoolResult<T>> insert(
             TarantoolTuple tuple,
             CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
@@ -118,14 +96,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return replace(tuple, defaultTupleResultMapper());
     }
 
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
-                                                             ValueConverter<ArrayValue, T> tupleConverter,
-                                                             Class<? extends TarantoolResult<T>> resultClass)
-            throws TarantoolClientException {
-        return replace(tuple, withTupleConverter(tupleConverter, resultClass));
-    }
-
     private <T> CompletableFuture<TarantoolResult<T>> replace(
             TarantoolTuple tuple,
             CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
@@ -145,23 +115,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
     public CompletableFuture<TarantoolResult<TarantoolTuple>> select(Conditions conditions)
             throws TarantoolClientException {
         return select(conditions, defaultTupleResultMapper());
-    }
-
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                            Class<T> tupleClass) throws TarantoolClientException {
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> mapper =
-                mapperFactoryFactory.singleValueTarantoolResultMapperFactory(tupleClass)
-                .withTarantoolResultConverter(getConverter(tupleClass));
-        return select(conditions, mapper);
-    }
-
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> select(Conditions conditions,
-                                                            ValueConverter<ArrayValue, T> tupleConverter,
-                                                            Class<? extends TarantoolResult<T>> resultClass)
-            throws TarantoolClientException {
-        return select(conditions, withTupleConverter(tupleConverter, resultClass));
     }
 
     private <T> CompletableFuture<T> select(
@@ -192,14 +145,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return update(conditions, operations, defaultTupleResultMapper());
     }
 
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
-                                                            TupleOperations operations,
-                                                            ValueConverter<ArrayValue, T> tupleConverter,
-                                                            Class<? extends TarantoolResult<T>> resultClass) {
-        return update(conditions, operations, withTupleConverter(tupleConverter, resultClass));
-    }
-
     private <T> CompletableFuture<TarantoolResult<T>> update(
             Conditions conditions,
             TupleOperations operations,
@@ -225,15 +170,6 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return upsert(conditions, tuple, operations, defaultTupleResultMapper());
     }
 
-    @Override
-    public <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
-                                                            TarantoolTuple tuple,
-                                                            TupleOperations operations,
-                                                            ValueConverter<ArrayValue, T> tupleConverter,
-                                                            Class<? extends TarantoolResult<T>> resultClass) {
-        return upsert(conditions, tuple, operations, withTupleConverter(tupleConverter, resultClass));
-    }
-
     private <T> CompletableFuture<TarantoolResult<T>> upsert(
             Conditions conditions,
             TarantoolTuple tuple,
@@ -252,34 +188,10 @@ public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
         return executeOperation(operation);
     }
 
-    @SuppressWarnings("unchecked")
-    private
-    <T> CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
-    withTupleConverter(ValueConverter<ArrayValue, T> tupleConverter, Class<? extends TarantoolResult<T>> resultClass) {
-        return ((SingleValueTarantoolResultMapperFactory<T>)
-                mapperFactoryFactory.singleValueTarantoolResultMapperFactory())
-                .withTarantoolResultConverter(tupleConverter);
-    }
-
     private CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     defaultTupleResultMapper() {
         return mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
                 .withDefaultTupleValueConverter(client.getConfig().getMessagePackMapper(), spaceMetadata);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> ValueConverter<ArrayValue, T> getConverter(Class<T> tupleClass) {
-        if (TarantoolTuple.class.isAssignableFrom(tupleClass)) {
-            return (ValueConverter<ArrayValue, T>)
-                    new DefaultTarantoolTupleValueConverter(client.getConfig().getMessagePackMapper(), spaceMetadata);
-        } else {
-            Optional<ValueConverter<ArrayValue, T>> converter =
-                    client.getConfig().getMessagePackMapper().getValueConverter(ArrayValue.class, tupleClass);
-            if (!converter.isPresent()) {
-                throw new TarantoolClientException("No ArrayValue converter for type " + tupleClass + " is present");
-            }
-            return converter.get();
-        }
     }
 
     private <T> CompletableFuture<T> executeOperation(ProxyOperation<T> operation) {
