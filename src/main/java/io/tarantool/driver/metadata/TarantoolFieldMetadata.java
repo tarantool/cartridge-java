@@ -33,6 +33,7 @@ public class TarantoolFieldMetadata {
      * @param fieldName field name
      * @param fieldType field type (from the set of field types supported by the server)
      * @param fieldPosition field position in tuple starting from 0
+     * @param isNullable is field nullable
      */
     public TarantoolFieldMetadata(String fieldName, String fieldType, int fieldPosition, boolean isNullable) {
         this.fieldName = fieldName;
