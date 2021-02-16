@@ -4,12 +4,14 @@ package io.tarantool.driver.metadata;
  * Tarantool space field format metadata
  *
  * @author Sergey Volgin
+ * @author Artyom Dubinin
  */
 public class TarantoolFieldMetadata {
 
     private final String fieldName;
     private final String fieldType;
     private final int fieldPosition;
+    private final boolean isNullable;
 
     /**
      * Basic constructor.
@@ -22,12 +24,27 @@ public class TarantoolFieldMetadata {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldPosition = fieldPosition;
+        this.isNullable = false;
+    }
+
+    /**
+     * Basic constructor with isNullable parameter.
+     *
+     * @param fieldName field name
+     * @param fieldType field type (from the set of field types supported by the server)
+     * @param fieldPosition field position in tuple starting from 0
+     */
+    public TarantoolFieldMetadata(String fieldName, String fieldType, int fieldPosition, boolean isNullable) {
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
+        this.fieldPosition = fieldPosition;
+        this.isNullable = isNullable;
     }
 
     /**
      * Get field name
      *
-     * @return fiend name
+     * @return field name
      */
     public String getFieldName() {
         return fieldName;
@@ -49,5 +66,14 @@ public class TarantoolFieldMetadata {
      */
     public int getFieldPosition() {
         return fieldPosition;
+    }
+
+    /**
+     * Get isNullable parameter
+     *
+     * @return is_nullable parameter
+     */
+    public boolean getIsNullable() {
+        return isNullable;
     }
 }
