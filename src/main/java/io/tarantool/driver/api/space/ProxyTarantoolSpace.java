@@ -1,12 +1,11 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.ProxyTarantoolClient;
+import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
@@ -15,186 +14,202 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.proxy.DeleteProxyOperation;
 import io.tarantool.driver.proxy.InsertProxyOperation;
 import io.tarantool.driver.proxy.ProxyOperation;
+import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.proxy.ReplaceProxyOperation;
 import io.tarantool.driver.proxy.SelectProxyOperation;
 import io.tarantool.driver.proxy.UpdateProxyOperation;
 import io.tarantool.driver.proxy.UpsertProxyOperation;
+import org.msgpack.value.ArrayValue;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Represents a proxy {@link TarantoolSpaceOperations} implementation, which uses calls to API functions defined in
+ * Ифышс proxy {@link TarantoolSpaceOperations} implementation, which uses calls to API functions defined in
  * Tarantool instance for performing CRUD operations on a space
  *
  * @author Sergey Volgin
+ * @author Alexey Kuzin
  */
-public class ProxyTarantoolSpace implements TarantoolSpaceOperations {
+public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collection<T>>
+        implements TarantoolSpaceOperations<T, R> {
 
     private final String spaceName;
-    private final ProxyTarantoolClient client;
+    private final TarantoolClientConfig config;
+    private final TarantoolCallOperations client;
     private final TarantoolMetadataOperations metadataOperations;
+    private final ProxyOperationsMappingConfig operationsMapping;
     private final TarantoolSpaceMetadata spaceMetadata;
 
-    private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
-
-    public ProxyTarantoolSpace(ProxyTarantoolClient client,
+    public ProxyTarantoolSpace(TarantoolClientConfig config,
+                               TarantoolCallOperations client,
+                               ProxyOperationsMappingConfig operationsMapping,
+                               TarantoolMetadataOperations metadata,
                                TarantoolSpaceMetadata spaceMetadata) {
+        this.config = config;
         this.client = client;
+        this.operationsMapping = operationsMapping;
+        this.metadataOperations = metadata;
         this.spaceMetadata = spaceMetadata;
         this.spaceName = spaceMetadata.getSpaceName();
-        this.metadataOperations = client.metadata();
-        this.mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
-            throws TarantoolClientException {
-        return delete(conditions, defaultTupleResultMapper());
+    public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
+        return delete(conditions, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> delete(
-            Conditions conditions,
-            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+    private CompletableFuture<R> delete(Conditions conditions,
+                                        CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
             throws TarantoolClientException {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
-        DeleteProxyOperation<TarantoolResult<T>> operation = new DeleteProxyOperation.Builder<TarantoolResult<T>>()
+        DeleteProxyOperation<R> operation = new DeleteProxyOperation.Builder<R>()
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getDeleteFunctionName())
+                .withFunctionName(operationsMapping.getDeleteFunctionName())
                 .withIndexQuery(indexQuery)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple)
-            throws TarantoolClientException {
-        return insert(tuple, defaultTupleResultMapper());
+    public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
+        return insert(tuple, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> insert(
-            TarantoolTuple tuple,
-            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+    private CompletableFuture<R> insert(T tuple, CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
             throws TarantoolClientException {
-        InsertProxyOperation<TarantoolResult<T>> operation = new InsertProxyOperation.Builder<TarantoolResult<T>>()
+        InsertProxyOperation<T, R> operation = new InsertProxyOperation.Builder<T, R>()
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getInsertFunctionName())
+                .withFunctionName(operationsMapping.getInsertFunctionName())
                 .withTuple(tuple)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple)
-            throws TarantoolClientException {
-        return replace(tuple, defaultTupleResultMapper());
+    public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
+        return replace(tuple, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> replace(
-            TarantoolTuple tuple,
-            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+    private CompletableFuture<R> replace(T tuple,
+                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
             throws TarantoolClientException {
-        ReplaceProxyOperation<TarantoolResult<T>> operation = new ReplaceProxyOperation.Builder<TarantoolResult<T>>()
+        ReplaceProxyOperation<T, R> operation = new ReplaceProxyOperation.Builder<T, R>()
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getReplaceFunctionName())
+                .withFunctionName(operationsMapping.getReplaceFunctionName())
                 .withTuple(tuple)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(Conditions conditions)
-            throws TarantoolClientException {
-        return select(conditions, defaultTupleResultMapper());
+    public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
+        return select(conditions, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<T> select(
-            Conditions conditions,
-            CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+    private CompletableFuture<R> select(Conditions conditions,
+                                        CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
             throws TarantoolClientException {
 
-        SelectProxyOperation<T> operation = new SelectProxyOperation.Builder<T>(metadataOperations, spaceMetadata)
+        SelectProxyOperation<R> operation = new SelectProxyOperation.Builder<R>(metadataOperations, spaceMetadata)
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getSelectFunctionName())
+                .withFunctionName(operationsMapping.getSelectFunctionName())
                 .withConditions(conditions)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
-                                                                     TarantoolTuple tuple) {
-        return update(conditions, TupleOperations.fromTarantoolTuple(tuple), defaultTupleResultMapper());
+    public CompletableFuture<R> update(Conditions conditions, T tuple) {
+        return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper());
     }
+
+    /**
+     * Create a {@link TupleOperations} instance from the given tuple of type {@code T}
+     *
+     * @param tuple tuple of the specified type
+     * @return new {@link TupleOperations} instance
+     */
+    protected abstract TupleOperations makeOperationsFromTuple(T tuple);
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
-                                                                     TupleOperations operations) {
-        return update(conditions, operations, defaultTupleResultMapper());
+    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
+        return update(conditions, operations, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> update(
-            Conditions conditions,
-            TupleOperations operations,
-            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper) {
+    private CompletableFuture<R> update(Conditions conditions,
+                                        TupleOperations operations,
+                                        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
-        UpdateProxyOperation<TarantoolResult<T>> operation = new UpdateProxyOperation.Builder<TarantoolResult<T>>()
+        UpdateProxyOperation<R> operation = new UpdateProxyOperation.Builder<R>()
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getUpdateFunctionName())
+                .withFunctionName(operationsMapping.getUpdateFunctionName())
                 .withIndexQuery(indexQuery)
                 .withTupleOperation(operations)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(Conditions conditions,
-                                                                     TarantoolTuple tuple,
-                                                                     TupleOperations operations) {
-        return upsert(conditions, tuple, operations, defaultTupleResultMapper());
+    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
+        return upsert(conditions, tuple, operations, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> upsert(
-            Conditions conditions,
-            TarantoolTuple tuple,
-            TupleOperations operations,
-            CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper) {
+    private CompletableFuture<R> upsert(Conditions conditions,
+                                        T tuple,
+                                        TupleOperations operations,
+                                        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
 
-        UpsertProxyOperation<TarantoolResult<T>> operation = new UpsertProxyOperation.Builder<TarantoolResult<T>>()
+        UpsertProxyOperation<T, R> operation = new UpsertProxyOperation.Builder<T, R>()
                 .withClient(client)
                 .withSpaceName(spaceName)
-                .withFunctionName(client.getUpsertFunctionName())
+                .withFunctionName(operationsMapping.getUpsertFunctionName())
                 .withTuple(tuple)
                 .withTupleOperation(operations)
+                .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
                 .build();
 
         return executeOperation(operation);
     }
 
-    private CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-    defaultTupleResultMapper() {
-        return mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
-                .withDefaultTupleValueConverter(client.getConfig().getMessagePackMapper(), spaceMetadata);
-    }
+    /**
+     * MessagePack value mapper configured with an ArrayValue to tuple converter corresponding to the selected
+     * tuple type
+     *
+     * @return configured mapper with {@link ArrayValue} to {@code T} converter
+     */
+    protected abstract CallResultMapper<R, SingleValueCallResult<R>> tupleResultMapper();
 
-    private <T> CompletableFuture<T> executeOperation(ProxyOperation<T> operation) {
+    private CompletableFuture<R> executeOperation(ProxyOperation<R> operation) {
         return operation.execute();
     }
 

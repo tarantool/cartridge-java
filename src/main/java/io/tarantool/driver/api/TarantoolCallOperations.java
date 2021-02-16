@@ -4,6 +4,7 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -364,4 +365,11 @@ public interface TarantoolCallOperations {
             String functionName,
             CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
             throws TarantoolClientException;
+
+    /**
+     * Get the default factory for result mapper factory instances
+     *
+     * @return result mapper factory instances factory instance
+     */
+    ResultMapperFactoryFactory getResultMapperFactoryFactory();
 }

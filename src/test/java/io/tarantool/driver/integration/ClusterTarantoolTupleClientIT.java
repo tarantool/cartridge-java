@@ -1,7 +1,7 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.StandaloneTarantoolClient;
+import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
@@ -37,16 +37,16 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
-public class StandaloneTarantoolClientIT {
+public class ClusterTarantoolTupleClientIT {
 
     private static final String TEST_SPACE_NAME = "test_space";
-    private static final Logger log = LoggerFactory.getLogger(StandaloneTarantoolClientIT.class);
+    private static final Logger log = LoggerFactory.getLogger(ClusterTarantoolTupleClientIT.class);
 
     @Container
     private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
             .withScriptFileName("org/testcontainers/containers/server.lua");
 
-    private static TarantoolClient client;
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
@@ -75,14 +75,16 @@ public class StandaloneTarantoolClientIT {
                 .build();
 
         log.info("Attempting connect to Tarantool");
-        client = new StandaloneTarantoolClient(config, serverAddress);
+        client = new ClusterTarantoolTupleClient(config, serverAddress);
         log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     //TODO: reset space before each test
     @Test
     public void insertAndSelectRequests() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
+
         //make select request
         Conditions conditions = Conditions.any();
         TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
@@ -128,7 +130,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void replaceRequest() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> arrayValue = Arrays.asList(200, "a200",
                 "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
@@ -165,7 +168,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void deleteRequest() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
         int deletedId = 2;
 
         //select request
@@ -192,7 +196,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateOperationsTest() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(123, "a123", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -235,7 +240,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateOperationByUniqueIndexTest() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(166, "a166", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -267,7 +273,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void updateByFieldName() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> newValues =
                 Arrays.asList(105534, "a120654", "The Jungle Book", "Sir Joseph Rudyard Kipling", 1893);
@@ -283,7 +290,8 @@ public class StandaloneTarantoolClientIT {
 
     @Test
     public void upsertTest() throws Exception {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(255, "q255", "Animal Farm: A Fairy Story", "George Orwell", 1945);
 

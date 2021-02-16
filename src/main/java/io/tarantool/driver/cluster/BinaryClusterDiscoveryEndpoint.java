@@ -1,7 +1,7 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.utils.Assert;
 
 /**
@@ -11,8 +11,8 @@ import io.tarantool.driver.utils.Assert;
  */
 public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEndpoint {
 
-    private TarantoolServerAddress serverAddress;
-    private TarantoolCredentials credentials;
+    private TarantoolClusterAddressProvider endpointProvider;
+    private TarantoolClientConfig clientConfig = TarantoolClientConfig.builder().build();
     private String discoveryFunction;
 
     /**
@@ -24,35 +24,36 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
     }
 
     /**
-     * Get discovery endpoint address
-     * @return discovery endpoint address
+     * Get service discovery endpoint provider
+     * @return tarantool server address provider instance
      */
-    public TarantoolServerAddress getServerAddress() {
-        return serverAddress;
+    public TarantoolClusterAddressProvider getEndpointProvider() {
+        return endpointProvider;
     }
 
     /**
-     * Set discovery endpoint address
-     * @param serverAddress discovery endpoint address
+     * Set service discovery endpoint provider
+     * @param endpointProvider a tarantool address provider instance
      */
-    public void setServerAddress(TarantoolServerAddress serverAddress) {
-        this.serverAddress = serverAddress;
+    public void setEndpointProvider(TarantoolClusterAddressProvider endpointProvider) {
+        this.endpointProvider = endpointProvider;
     }
 
     /**
-     * Get discovery endpoint address
-     * @return discovery endpoint address
+     * Get client configuration for connecting to the set of the discovery endpoints
+     * @return tarantool client configuration
      */
-    public TarantoolCredentials getCredentials() {
-        return credentials;
+    public TarantoolClientConfig getClientConfig() {
+        return clientConfig;
     }
 
     /**
-     * Set discovery endpoint credentials
-     * @param credentials discovery endpoint credentials
+     * Set client configuration for connecting to the set of the discovery endpoints. The same configuration will be
+     * used for each endpoint.
+     * @param clientConfig tarantool client configuration
      */
-    public void setCredentials(TarantoolCredentials credentials) {
-        this.credentials = credentials;
+    public void setClientConfig(TarantoolClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
     }
 
     /**
@@ -98,23 +99,26 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
         }
 
         /**
-         * Specify the discovery endpoint address
-         * @param serverAddress Tarantool server address, should not be null
+         * Specify address provider for the discovery endpoints
+         * @param endpointProvider discovery endpoint address privider, should not be null
          * @return this builder instance
+         * @see BinaryClusterDiscoveryEndpoint#setEndpointProvider(TarantoolClusterAddressProvider)
          */
-        public Builder withServerAddress(TarantoolServerAddress serverAddress) {
-            Assert.notNull(serverAddress, "Discovery endpoint address should not be null");
-            this.endpoint.setServerAddress(serverAddress);
+        public Builder withEndpointProvider(TarantoolClusterAddressProvider endpointProvider) {
+            Assert.notNull(endpointProvider, "Discovery endpoint address provider should not be null");
+            this.endpoint.setEndpointProvider(endpointProvider);
             return this;
         }
 
         /**
-         * Specify the discovery endpoint credentials
-         * @param credentials Tarantool server credentials
+         * Specify the client configuration for connecting to the discovery endpoints. The same configuration will be
+         * used for all endpoints
+         * @param clientConfig tarantool client configuration
          * @return this builder instance
          */
-        public Builder withCredentials(TarantoolCredentials credentials) {
-            this.endpoint.setCredentials(credentials);
+        public Builder withClientConfig(TarantoolClientConfig clientConfig) {
+            Assert.notNull(clientConfig, "Client config should not be null");
+            this.endpoint.setClientConfig(clientConfig);
             return this;
         }
 

@@ -1,11 +1,8 @@
 package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
@@ -13,60 +10,53 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.protocol.Packable;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.protocol.requests.TarantoolDeleteRequest;
 import io.tarantool.driver.protocol.requests.TarantoolInsertRequest;
 import io.tarantool.driver.protocol.requests.TarantoolReplaceRequest;
 import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpdateRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
+import org.msgpack.value.ArrayValue;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Basic Tarantool space operations implementation for standalone server
+ * Basic implementation for working with spaces via Tarantool protocol requests
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpace implements TarantoolSpaceOperations {
+public abstract class StandaloneTarantoolSpace<T extends Packable, R extends Collection<T>>
+        implements TarantoolSpaceOperations<T, R> {
 
     private final int spaceId;
     private final TarantoolClientConfig config;
     private final TarantoolConnectionManager connectionManager;
     private final TarantoolSpaceMetadata spaceMetadata;
     private final TarantoolMetadataOperations metadataOperations;
-    private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
 
-    /**
-     * Basic constructor.
-     * @param config client config
-     * @param connectionManager Tarantool server connection manager
-     * @param spaceMetadata metadata for this space
-     * @param metadataOperations metadata operations implementation
-     */
-    public TarantoolSpace(TarantoolClientConfig config,
-                          TarantoolConnectionManager connectionManager,
-                          TarantoolSpaceMetadata spaceMetadata,
-                          TarantoolMetadataOperations metadataOperations) {
+    public StandaloneTarantoolSpace(TarantoolClientConfig config,
+                                    TarantoolConnectionManager connectionManager,
+                                    TarantoolMetadataOperations metadataOperations,
+                                    TarantoolSpaceMetadata spaceMetadata) {
         this.spaceId = spaceMetadata.getSpaceId();
         this.config = config;
         this.connectionManager = connectionManager;
         this.spaceMetadata = spaceMetadata;
         this.metadataOperations = metadataOperations;
-        this.mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
-            throws TarantoolClientException {
-        return delete(conditions, defaultTupleResultMapper());
+    public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
+        return delete(conditions, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> delete(Conditions conditions,
-                                                             MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> delete(Conditions conditions, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -84,13 +74,11 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple)
-            throws TarantoolClientException {
-        return insert(tuple, defaultTupleResultMapper());
+    public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
+        return insert(tuple, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> insert(TarantoolTuple tuple,
-                                                            MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> insert(T tuple, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
@@ -105,13 +93,11 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple)
-            throws TarantoolClientException {
-        return replace(tuple, defaultTupleResultMapper());
+    public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
+        return replace(tuple, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> replace(TarantoolTuple tuple,
-                                                             MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> replace(T tuple, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
@@ -126,12 +112,11 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> select(Conditions conditions)
-            throws TarantoolClientException {
-        return select(conditions, defaultTupleResultMapper());
+    public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
+        return select(conditions, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<T> select(Conditions conditions, MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> select(Conditions conditions, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -151,19 +136,26 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TarantoolTuple tuple) {
-        return update(conditions, TupleOperations.fromTarantoolTuple(tuple), defaultTupleResultMapper());
+    public CompletableFuture<R> update(Conditions conditions, T tuple) {
+        return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper());
     }
+
+    /**
+     * Create a {@link TupleOperations} instance from the given tuple of type {@code T}
+     *
+     * @param tuple tuple of the specified type
+     * @return new {@link TupleOperations} instance
+     */
+    protected abstract TupleOperations makeOperationsFromTuple(T tuple);
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions,
-                                                                     TupleOperations operations) {
-        return update(conditions, operations, defaultTupleResultMapper());
+    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
+        return update(conditions, operations, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> update(Conditions conditions,
-                                                             TupleOperations operations,
-                                                             MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> update(Conditions conditions,
+                                        TupleOperations operations,
+                                        MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -189,16 +181,14 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
     }
 
     @Override
-    public CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(Conditions conditions,
-                                                                     TarantoolTuple tuple,
-                                                                     TupleOperations operations) {
-        return upsert(conditions, tuple, operations, defaultTupleResultMapper());
+    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
+        return upsert(conditions, tuple, operations, tupleResultMapper());
     }
 
-    private <T> CompletableFuture<TarantoolResult<T>> upsert(Conditions conditions,
-                                                             TarantoolTuple tuple,
-                                                             TupleOperations operations,
-                                                             MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> upsert(Conditions conditions,
+                                        T tuple,
+                                        TupleOperations operations,
+                                        MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -216,12 +206,15 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
         }
     }
 
-    private MessagePackValueMapper defaultTupleResultMapper() {
-        return mapperFactoryFactory.defaultTupleResultMapperFactory().withDefaultTupleValueConverter(
-                config.getMessagePackMapper(), spaceMetadata);
-    }
+    /**
+     * MessagePack value mapper configured with an ArrayValue to tuple converter corresponding to the selected
+     * tuple type
+     *
+     * @return configured mapper with {@link ArrayValue} to {@code T} converter
+     */
+    protected abstract MessagePackValueMapper tupleResultMapper();
 
-    private <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
+    private CompletableFuture<R> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
         try {
             return connectionManager.getConnection().sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -236,6 +229,7 @@ public class TarantoolSpace implements TarantoolSpaceOperations {
 
     @Override
     public String toString() {
-        return String.format("TarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
+        return String.format(
+                "StandaloneTarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
     }
 }

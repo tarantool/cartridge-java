@@ -2,9 +2,7 @@ package io.tarantool.driver.cluster;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.tarantool.driver.StandaloneTarantoolClient;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
@@ -80,20 +78,14 @@ import java.util.stream.Collectors;
 public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClusterAddressProvider {
 
     private final BinaryClusterDiscoveryEndpoint endpoint;
-    private final TarantoolClient client;
+    private final ClusterTarantoolTupleClient client;
     private final ObjectMapper objectMapper;
 
     public BinaryDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig discoveryConfig) {
         super(discoveryConfig);
         this.endpoint = (BinaryClusterDiscoveryEndpoint) discoveryConfig.getEndpoint();
 
-        TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(endpoint.getCredentials())
-                .withConnectTimeout(discoveryConfig.getConnectTimeout())
-                .withReadTimeout(discoveryConfig.getReadTimeout())
-                .build();
-
-        this.client = new StandaloneTarantoolClient(config, endpoint.getServerAddress());
+        this.client = new ClusterTarantoolTupleClient(endpoint.getClientConfig(), endpoint.getEndpointProvider());
         this.objectMapper = new ObjectMapper();
         startDiscoveryTask();
     }

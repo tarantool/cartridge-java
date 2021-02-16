@@ -2,10 +2,9 @@ package io.tarantool.driver;
 
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolTupleFactory;
-import io.tarantool.driver.api.space.ProxyTarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -22,10 +21,12 @@ import io.tarantool.driver.metadata.TarantoolMetadata;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.proxy.ProxyOperationsMapping;
+import io.tarantool.driver.protocol.Packable;
+import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -36,8 +37,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * instance's <code>call</code> method to the proxy functions defined on the Tarantool instance(s).
  *
  * Proxy functions to be called can be specified by overriding the methods of the implemented
- * {@link ProxyOperationsMapping} interface. These functions must be public API functions available on the Tarantool
- * instance for the connected API user.
+ * {@link ProxyOperationsMappingConfig} interface. These functions must be public API functions available on the
+ * Tarantool instance for the connected API user.
  *
  * It is recommended to use this client with the CRUD module (<a href="https://github.com/tarantool/crud">
  * https://github.com/tarantool/crud</a>) installed on the target Tarantool instance. Be sure that the server instances
@@ -51,24 +52,40 @@ import java.util.concurrent.atomic.AtomicReference;
  * See <a href="https://github.com/tarantool/examples/blob/master/profile-storage/README.md">
  *     https://github.com/tarantool/examples/blob/master/profile-storage/README.md</a>
  *
+ * @param <T> target tuple type
+ * @param <R> target tuple collection type
  * @author Alexey Kuzin
  * @author Sergey Volgin
  */
-public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMapping {
+public abstract class ProxyTarantoolClient<T extends Packable, R extends Collection<T>>
+        implements TarantoolClient<T, R> {
 
-    private final TarantoolClient client;
+    private final TarantoolClientConfig config;
+    private final TarantoolClient<T, R> client;
+    private final ProxyOperationsMappingConfig mappingConfig;
     private final ProxyMetadataProvider metadataProvider;
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
 
-    public ProxyTarantoolClient(TarantoolClient decoratedClient) {
+    /**
+     * Basic constructor
+     *
+     * @param decoratedClient configured Tarantool client
+     * @param mappingConfig config for proxy operations mapping
+     */
+    public ProxyTarantoolClient(TarantoolClient<T, R> decoratedClient, ProxyOperationsMappingConfig mappingConfig) {
+        Assert.notNull(decoratedClient, "Decorated client must not be null");
+        Assert.notNull(mappingConfig, "Proxy operations mapping config must not be null");
+
         this.client = decoratedClient;
+        this.config = decoratedClient.getConfig();
+        this.mappingConfig = mappingConfig;
         this.client.getListeners().clear();
-        this.metadataProvider = new ProxyMetadataProvider(client, getGetSchemaFunctionName(),
+        this.metadataProvider = new ProxyMetadataProvider(client, mappingConfig.getGetSchemaFunctionName(),
                 new DDLTarantoolSpaceMetadataConverter(), DDLMetadataContainerResult.class);
     }
 
     @Override
-    public TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException {
+    public TarantoolSpaceOperations<T, R> space(int spaceId) throws TarantoolClientException {
         Assert.state(spaceId > 0, "Space ID must be greater than 0");
 
         TarantoolMetadataOperations metadata = this.metadata();
@@ -77,8 +94,37 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
             throw new TarantoolSpaceNotFoundException(spaceId);
         }
 
-        return new ProxyTarantoolSpace(this, meta.get());
+        return spaceOperations(config, this, mappingConfig, metadata, meta.get());
     }
+
+    @Override
+    public TarantoolSpaceOperations<T, R> space(String spaceName) {
+        Assert.hasText(spaceName, "Space name must not be null or empty");
+
+        TarantoolMetadataOperations metadata = this.metadata();
+        Optional<TarantoolSpaceMetadata> meta = metadata.getSpaceByName(spaceName);
+        if (!meta.isPresent()) {
+            throw new TarantoolSpaceNotFoundException(spaceName);
+        }
+
+        return spaceOperations(config, this, mappingConfig, metadata, meta.get());
+    }
+
+    /**
+     * Creates a space API implementation instance for the specified space
+     *
+     * @param config Tarantool client configuration
+     * @param client configured client instance
+     * @param mappingConfig proxy operations mapping configuration
+     * @param metadata metadata operations
+     * @param spaceMetadata current space metadata
+     * @return space API implementation instance
+     */
+    protected abstract TarantoolSpaceOperations<T, R> spaceOperations(TarantoolClientConfig config,
+                                                                      TarantoolCallOperations client,
+                                                                      ProxyOperationsMappingConfig mappingConfig,
+                                                                      TarantoolMetadataOperations metadata,
+                                                                      TarantoolSpaceMetadata spaceMetadata);
 
     @Override
     public TarantoolMetadataOperations metadata() throws TarantoolClientException {
@@ -104,26 +150,8 @@ public class ProxyTarantoolClient implements TarantoolClient, ProxyOperationsMap
     }
 
     @Override
-    public TarantoolSpaceOperations space(String spaceName) {
-        Assert.hasText(spaceName, "Space name must not be null or empty");
-
-        TarantoolMetadataOperations metadata = this.metadata();
-        Optional<TarantoolSpaceMetadata> meta = metadata.getSpaceByName(spaceName);
-        if (!meta.isPresent()) {
-            throw new TarantoolSpaceNotFoundException(spaceName);
-        }
-
-        return new ProxyTarantoolSpace(this, meta.get());
-    }
-
-    @Override
     public TarantoolConnectionListeners getListeners() {
         return this.client.getListeners();
-    }
-
-    @Override
-    public TarantoolTupleFactory getTarantoolTupleFactory() {
-        return this.client.getTarantoolTupleFactory();
     }
 
     @Override

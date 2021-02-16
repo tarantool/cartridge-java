@@ -1,12 +1,11 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.utils.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,28 +18,31 @@ import java.util.List;
  */
 public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
-    UpdateProxyOperation(TarantoolClient client,
+    UpdateProxyOperation(TarantoolCallOperations client,
                          String functionName,
                          List<?> arguments,
+                         MessagePackObjectMapper argumentsMapper,
                          CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
-        super(client, functionName, arguments, resultMapper);
+        super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
     /**
      * The builder for this class.
      */
     public static final class Builder<T> {
-        private TarantoolClient client;
+        private TarantoolCallOperations client;
         private String spaceName;
         private String functionName;
         private TarantoolIndexQuery indexQuery;
         private TupleOperations operations;
+        private MessagePackObjectMapper argumentsMapper;
         private CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
+        private int requestTimeout;
 
         public Builder() {
         }
 
-        public Builder<T> withClient(TarantoolClient client) {
+        public Builder<T> withClient(TarantoolCallOperations client) {
             this.client = client;
             return this;
         }
@@ -65,30 +67,31 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
             return this;
         }
 
+        public Builder<T> withArgumentsMapper(MessagePackObjectMapper argumentsMapper) {
+            this.argumentsMapper = argumentsMapper;
+            return this;
+        }
+
         public Builder<T> withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
             this.resultMapper = resultMapper;
             return this;
         }
 
-        public UpdateProxyOperation<T> build() {
-            Assert.notNull(client, "Tarantool client should not be null");
-            Assert.notNull(spaceName, "Tarantool spaceName should not be null");
-            Assert.notNull(functionName, "Proxy delete function name should not be null");
-            Assert.notNull(indexQuery, "Tarantool indexQuery should not be null");
-            Assert.notNull(operations, "Tarantool tuple operations should not be null");
-            Assert.notNull(resultMapper, "Result tuple mapper should not be null");
+        public Builder<T> withRequestTimeout(int requestTimeout) {
+            this.requestTimeout = requestTimeout;
+            return this;
+        }
 
-            TarantoolClientConfig config = client.getConfig();
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
-                    .withTimeout(config.getRequestTimeout())
-                    .build();
+        public UpdateProxyOperation<T> build() {
+            CRUDOperationOptions options = CRUDOperationOptions.builder().withTimeout(requestTimeout).build();
 
             List<?> arguments = Arrays.asList(spaceName,
                     indexQuery.getKeyValues(),
                     operations.asProxyOperationList(),
                     options.asMap());
 
-            return new UpdateProxyOperation<>(this.client, this.functionName, arguments, this.resultMapper);
+            return new UpdateProxyOperation<>(
+                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

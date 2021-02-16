@@ -1,30 +1,31 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.protocol.Packable;
 
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Tarantool space operations interface (create, insert, replace, delete...)
  *
+ * @param <T> tuple type
+ * @param <R> tuple collection type
  * @author Alexey Kuzin
  */
-public interface TarantoolSpaceOperations {
+public interface TarantoolSpaceOperations<T extends Packable, R extends Collection<T>> {
 
     /**
-     * Delete a tuple
+     * Delete a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> delete(Conditions conditions)
-            throws TarantoolClientException;
+    CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException;
 
     /**
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
@@ -33,7 +34,7 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> insert(TarantoolTuple tuple) throws TarantoolClientException;
+    CompletableFuture<R> insert(T tuple) throws TarantoolClientException;
 
     /**
      * Insert a tuple into the space or replace an existing one.
@@ -42,7 +43,7 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> replace(TarantoolTuple tuple) throws TarantoolClientException;
+    CompletableFuture<R> replace(T tuple) throws TarantoolClientException;
 
     /**
      * Select tuples matching the specified query with options.
@@ -51,30 +52,31 @@ public interface TarantoolSpaceOperations {
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> select(Conditions conditions) throws TarantoolClientException;
+    CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException;
 
     /**
-     * Update a tuple
+     * Update a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
      * @param tuple tuple with new field values
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TarantoolTuple tuple);
+    CompletableFuture<R> update(Conditions conditions, T tuple);
 
     /**
-     * Update a tuple
+     * Update a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
      * @param operations the list update operations
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> update(Conditions conditions, TupleOperations operations);
+    CompletableFuture<R> update(Conditions conditions, TupleOperations operations);
 
     /**
-     * Update tuple if it would be found elsewhere try to insert tuple. Always use primary index for key.
+     * Update tuple if it would be found elsewhere try to insert tuple. Only a single primary index value condition
+     * is supported.
      *
      * @param conditions query with options
      * @param tuple new data that will be insert if tuple will be not found
@@ -82,9 +84,7 @@ public interface TarantoolSpaceOperations {
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */
-    CompletableFuture<TarantoolResult<TarantoolTuple>> upsert(Conditions conditions,
-                                                              TarantoolTuple tuple,
-                                                              TupleOperations operations);
+    CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations);
 
     /**
      * Get metadata associated with this space

@@ -3,19 +3,21 @@ package io.tarantool.driver.api;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
+import io.tarantool.driver.protocol.Packable;
+
+import java.util.Collection;
 
 /**
  * Basic Tarantool client interface
  *
  * @author Alexey Kuzin
  */
-public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations, TarantoolEvalOperations {
+public interface TarantoolClient<T extends Packable, R extends Collection<T>>
+        extends AutoCloseable, TarantoolCallOperations, TarantoolEvalOperations {
     /**
      * Provides implementation of retrieving the metadata for spaces and instances from Tarantool servers
      *
@@ -42,7 +44,7 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
      * @return Tarantool space operations interface
      * @throws TarantoolClientException if the client is not connected
      */
-    TarantoolSpaceOperations space(String spaceName) throws TarantoolClientException;
+    TarantoolSpaceOperations<T, R> space(String spaceName) throws TarantoolClientException;
 
     /**
      * Provides CRUD and other operations for a Tarantool space
@@ -50,7 +52,7 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
      * @return Tarantool space operations implementation
      * @throws TarantoolClientException if the client is not connected
      */
-    TarantoolSpaceOperations space(int spaceId) throws TarantoolClientException;
+    TarantoolSpaceOperations<T, R> space(int spaceId) throws TarantoolClientException;
 
     /**
      * Provides operations for Tarantool spaces and indexes metadata
@@ -66,18 +68,4 @@ public interface TarantoolClient extends AutoCloseable, TarantoolCallOperations,
      * @return connection listeners
      */
     TarantoolConnectionListeners getListeners();
-
-    /**
-     * Get the default factory for {@link TarantoolTuple} instances
-     *
-     * @return tuple factory instance
-     */
-    TarantoolTupleFactory getTarantoolTupleFactory();
-
-    /**
-     * Get the default factory for result mapper factory instances
-     *
-     * @return result mapper factory instances factory instance
-     */
-    ResultMapperFactoryFactory getResultMapperFactoryFactory();
 }
