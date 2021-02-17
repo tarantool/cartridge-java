@@ -1,11 +1,19 @@
 package io.tarantool.driver.integration;
 
 
+import io.tarantool.driver.*;
 import io.tarantool.driver.api.TarantoolCursor;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
+import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
+import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,23 +29,28 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
-public class StandaloneClientCursorIT extends SharedStandaloneContainer {
+public class StartAfterCursorIT extends SharedCartridgeContainer {
 
     private static final String TEST_SPACE_NAME = "cursor_test_space";
-    private static final String TEST_MULTIPART_KEY_SPACE_NAME = "cursor_test_space_multi_part_key";
 
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static ProxyTarantoolClient client;
+
+    public static String USER_NAME;
+    public static String PASSWORD;
+    private static final int DEFAULT_TIMEOUT = 5 * 1000;
+
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
-        SharedStandaloneContainer.setUp();
+        startCluster();
+        USER_NAME = container.getUsername();
+        PASSWORD = container.getPassword();
+        initClient();
 
         try {
             insertToTestSpace(TEST_SPACE_NAME, 100,
                     i -> Arrays.asList(i, i + "abc", i * 10)
-            );
-            insertToTestSpace(TEST_MULTIPART_KEY_SPACE_NAME, 50,
-                    i -> Arrays.asList(i / 10, i + "abc", i * 10)
             );
         } catch (ExecutionException | InterruptedException ignored) {
             fail();
@@ -46,6 +59,42 @@ public class StandaloneClientCursorIT extends SharedStandaloneContainer {
 
     public static void tearDown() throws Exception {
         SharedStandaloneContainer.tearDown();
+    }
+
+    private static TarantoolClusterAddressProvider getClusterAddressProvider() {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
+        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+                .withCredentials(credentials)
+                .withEntryFunction("get_routers")
+                .withServerAddress(new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort()))
+                .build();
+
+        TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
+                .withEndpoint(endpoint)
+                .withReadTimeout(DEFAULT_TIMEOUT)
+                .withConnectTimeout(DEFAULT_TIMEOUT)
+                .withDelay(1)
+                .build();
+
+        return new TestWrappedClusterAddressProvider(
+                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
+                container);
+    }
+
+    public static void initClient() {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
+
+        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
+                .withCredentials(credentials)
+                .withConnectTimeout(DEFAULT_TIMEOUT)
+                .withReadTimeout(DEFAULT_TIMEOUT)
+                .withRequestTimeout(DEFAULT_TIMEOUT)
+                .build();
+
+        ClusterTarantoolClient clusterClient =
+                new ClusterTarantoolClient(config, getClusterAddressProvider(),
+                        TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+        client = new TestProxyTarantoolClient(clusterClient);
     }
 
     private interface ElementGenerator {
@@ -217,26 +266,5 @@ public class StandaloneClientCursorIT extends SharedStandaloneContainer {
         } while (cursor.next());
 
         assertEquals(100, countTotal);
-    }
-
-    @Test
-    public void getTupleByPartialKey() {
-        TarantoolSpaceOperations testSpace = client.space(TEST_MULTIPART_KEY_SPACE_NAME);
-
-        Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(3));
-        TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 2);
-
-        assertTrue(cursor.next());
-        int countTotal = 0;
-        boolean hasNext;
-        do {
-            countTotal++;
-            TarantoolTuple t = cursor.get();
-            hasNext = cursor.next();
-        } while (hasNext);
-
-        assertEquals(10, countTotal);
-
-        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
     }
 }
