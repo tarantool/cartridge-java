@@ -31,7 +31,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Alexey Kuzin
  */
-public abstract class StandaloneTarantoolSpace<T extends Packable, R extends Collection<T>>
+public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>>
         implements TarantoolSpaceOperations<T, R> {
 
     private final int spaceId;
@@ -40,10 +40,10 @@ public abstract class StandaloneTarantoolSpace<T extends Packable, R extends Col
     private final TarantoolSpaceMetadata spaceMetadata;
     private final TarantoolMetadataOperations metadataOperations;
 
-    public StandaloneTarantoolSpace(TarantoolClientConfig config,
-                                    TarantoolConnectionManager connectionManager,
-                                    TarantoolMetadataOperations metadataOperations,
-                                    TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolSpace(TarantoolClientConfig config,
+                          TarantoolConnectionManager connectionManager,
+                          TarantoolMetadataOperations metadataOperations,
+                          TarantoolSpaceMetadata spaceMetadata) {
         this.spaceId = spaceMetadata.getSpaceId();
         this.config = config;
         this.connectionManager = connectionManager;
