@@ -1,7 +1,7 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.space.StandaloneTarantoolTupleSpace;
+import io.tarantool.driver.api.space.TarantoolTupleSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
@@ -142,6 +142,6 @@ public class ClusterTarantoolTupleClient
     TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>>
     spaceOperations(TarantoolClientConfig config, TarantoolConnectionManager connectionManager,
                     TarantoolMetadataOperations metadata, TarantoolSpaceMetadata spaceMetadata) {
-        return new StandaloneTarantoolTupleSpace(this, config, connectionManager, metadata, spaceMetadata);
+        return new TarantoolTupleSpace(this, config, connectionManager, metadata, spaceMetadata);
     }
 }

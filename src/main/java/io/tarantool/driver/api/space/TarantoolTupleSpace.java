@@ -11,21 +11,29 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 
 /**
- * {@link StandaloneTarantoolSpace} implementation for working with default tuples
+ * {@link TarantoolSpace} implementation for working with default tuples
  *
  * @author Alexey Kuzin
  */
-public class StandaloneTarantoolTupleSpace extends
-        StandaloneTarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+public class TarantoolTupleSpace extends
+        TarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 
     private final TarantoolCallOperations client;
     private final TarantoolClientConfig config;
 
-    public StandaloneTarantoolTupleSpace(TarantoolCallOperations client,
-                                         TarantoolClientConfig config,
-                                         TarantoolConnectionManager connectionManager,
-                                         TarantoolMetadataOperations metadataOperations,
-                                         TarantoolSpaceMetadata spaceMetadata) {
+    /**
+     * Basic constructor
+     *
+     * @param client client that provides connection to tarantool server
+     * @param config client config
+     * @param connectionManager Tarantool server connection manager
+     * @param spaceMetadata metadata for this space
+     * @param metadataOperations metadata operations implementation
+     */    public TarantoolTupleSpace(TarantoolCallOperations client,
+                                      TarantoolClientConfig config,
+                                      TarantoolConnectionManager connectionManager,
+                                      TarantoolMetadataOperations metadataOperations,
+                                      TarantoolSpaceMetadata spaceMetadata) {
         super(config, connectionManager, metadataOperations, spaceMetadata);
         this.client = client;
         this.config = config;
@@ -40,5 +48,10 @@ public class StandaloneTarantoolTupleSpace extends
     protected MessagePackValueMapper tupleResultMapper() {
         return client.getResultMapperFactoryFactory().defaultTupleResultMapperFactory()
                 .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("TarantoolSpace %s [%d]", getMetadata().getSpaceName(), getMetadata().getSpaceId());
     }
 }
