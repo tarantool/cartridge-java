@@ -1,8 +1,7 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.api.TarantoolCursor;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
@@ -95,7 +94,6 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      */
     TarantoolSpaceMetadata getMetadata();
 
-
     /**
      * Perform a batch 'select' request.
      * Select will fetch tuples matching the specified query.
@@ -103,10 +101,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      *
      * @param conditions query with options
      * @param batchSize  size of a batch of single client request
-     * @param tupleClass target tuple class
-     * @param <R>        target tuple type
      * @return a cursor that will contain all corresponding tuples
      */
-    <R> TarantoolCursor<R> cursor(Conditions conditions, int batchSize, Class<T> tupleClass);
-
+    TarantoolCursor<T> cursor(Conditions conditions, int batchSize);
 }

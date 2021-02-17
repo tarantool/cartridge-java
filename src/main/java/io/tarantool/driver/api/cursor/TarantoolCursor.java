@@ -1,7 +1,10 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.api.cursor;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+import io.tarantool.driver.protocol.Packable;
+
+import java.util.Collection;
 
 /**
  * Basic cursor interface which allows forward-only iteration
@@ -11,7 +14,7 @@ import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
  *
  * @author Vladimir Rogach
  */
-public interface TarantoolCursor<T> {
+public interface TarantoolCursor<T extends Packable> {
 
     /**
      * Fetch next element.
@@ -22,9 +25,8 @@ public interface TarantoolCursor<T> {
     boolean next() throws TarantoolClientException;
 
     /**
-     * @return current element
-     * @throws TarantoolSpaceOperationException if cursor is invalid,
-     *                                          for example {@link TarantoolCursor#next()} was not called.
+     * @return current element or null if cursor is not initialized
+     * @throws TarantoolSpaceOperationException when no data is available
      */
     T get() throws TarantoolSpaceOperationException;
 }
