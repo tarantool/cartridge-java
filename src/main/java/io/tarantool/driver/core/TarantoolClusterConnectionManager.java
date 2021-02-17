@@ -1,6 +1,5 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
@@ -20,16 +19,14 @@ public class TarantoolClusterConnectionManager extends AbstractTarantoolConnecti
      *
      * @param config client configuration
      * @param connectionFactory manages instantiation of Tarantool server connections
-     * @param selectStrategyFactory manages selection of the next connection from available ones
      * @param listeners are invoked after connection is established
      * @param addressProvider provides Tarantool server nodes addresses
      */
     public TarantoolClusterConnectionManager(TarantoolClientConfig config,
                                              TarantoolConnectionFactory connectionFactory,
-                                             ConnectionSelectionStrategyFactory selectStrategyFactory,
                                              TarantoolConnectionListeners listeners,
                                              TarantoolClusterAddressProvider addressProvider) {
-        super(config, connectionFactory, selectStrategyFactory, listeners);
+        super(config, connectionFactory, listeners);
         this.addressProvider = addressProvider;
     }
 

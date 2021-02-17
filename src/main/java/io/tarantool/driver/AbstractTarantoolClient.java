@@ -70,17 +70,32 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
      * @param config the client configuration
      * @see TarantoolClientConfig
      */
-    protected AbstractTarantoolClient(TarantoolClientConfig config) {
+    public AbstractTarantoolClient(TarantoolClientConfig config) {
         this(config, new TarantoolConnectionListeners());
     }
 
     /**
      * Create a client, specifying the connection established event listeners.
-     * @param listeners connection established event listeners
+     * @deprecated
      * @param config the client configuration
+     * @param selectionStrategyFactory instantiates strategies which provide the algorithm of selecting connections
+     *                                 from the connection pool for performing the next request
+     * @param listeners connection established event listeners
      * @see TarantoolClientConfig
      */
-    protected AbstractTarantoolClient(TarantoolClientConfig config, TarantoolConnectionListeners listeners) {
+    protected AbstractTarantoolClient(TarantoolClientConfig config,
+                                      ConnectionSelectionStrategyFactory selectionStrategyFactory,
+                                      TarantoolConnectionListeners listeners) {
+        this(config, listeners);
+    }
+
+    /**
+     * Create a client, specifying the connection established event listeners.
+     * @param config the client configuration
+     * @param listeners connection established event listeners
+     * @see TarantoolClientConfig
+     */
+    public AbstractTarantoolClient(TarantoolClientConfig config, TarantoolConnectionListeners listeners) {
         Assert.notNull(config, "Tarantool client config must not be null");
         Assert.notNull(listeners, "Tarantool connection listeners must not be null");
 
@@ -94,7 +109,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
-        this.connectionFactory = new TarantoolConnectionFactory(config, getBootstrap());
+        this.connectionFactory = new TarantoolConnectionFactory(config, this.bootstrap);
         this.listeners = listeners;
         this.metadataProvider = new SpacesMetadataProvider(this, config.getMessagePackMapper());
     }

@@ -63,10 +63,9 @@ public class ClusterTarantoolTupleClient
      */
     public ClusterTarantoolTupleClient(TarantoolCredentials credentials, TarantoolServerAddress address) {
         this(TarantoolClientConfig.builder()
-                        .withCredentials(credentials)
-                        .build(),
-                () -> Collections.singletonList(address),
-                ParallelRoundRobinStrategyFactory.INSTANCE);
+                .withCredentials(credentials)
+                .build(),
+            address);
     }
 
     /**
@@ -79,7 +78,7 @@ public class ClusterTarantoolTupleClient
      * @see TarantoolServerAddress
      */
     public ClusterTarantoolTupleClient(TarantoolClientConfig config, TarantoolServerAddress address) {
-        this(config, () -> Collections.singletonList(address), ParallelRoundRobinStrategyFactory.INSTANCE);
+        this(config, () -> Collections.singletonList(address));
     }
 
     /**
@@ -93,10 +92,10 @@ public class ClusterTarantoolTupleClient
      */
     public ClusterTarantoolTupleClient(TarantoolCredentials credentials, Collection<TarantoolServerAddress> addresses) {
         this(TarantoolClientConfig.builder()
-                        .withCredentials(credentials)
-                        .build(),
-                () -> addresses,
-                ParallelRoundRobinStrategyFactory.INSTANCE);
+                .withCredentials(credentials)
+                .withConnectionSelectionStrategyFactory(ParallelRoundRobinStrategyFactory.INSTANCE)
+                .build(),
+            () -> addresses);
     }
 
     /**
@@ -108,7 +107,7 @@ public class ClusterTarantoolTupleClient
      * @see TarantoolServerAddress
      */
     public ClusterTarantoolTupleClient(TarantoolClientConfig config, Collection<TarantoolServerAddress> addresses) {
-        this(config, () -> addresses, ParallelRoundRobinStrategyFactory.INSTANCE);
+        this(config, () -> addresses);
     }
 
     /**
@@ -119,22 +118,7 @@ public class ClusterTarantoolTupleClient
      * @see TarantoolClientConfig
      */
     public ClusterTarantoolTupleClient(TarantoolClientConfig config, TarantoolClusterAddressProvider addressProvider) {
-        this(config, addressProvider, ParallelRoundRobinStrategyFactory.INSTANCE);
-    }
-
-    /**
-     * Create a client. Connect using the list of Tarantool servers returned by the specified server address provider.
-     *
-     * @param config                the client configuration
-     * @param addressProvider       provides Tarantool server address for connection
-     * @param selectStrategyFactory instantiates strategies which provide the algorithm of selecting connections
-     *                              from the connection pool for performing the next request
-     * @see TarantoolClientConfig
-     */
-    public ClusterTarantoolTupleClient(TarantoolClientConfig config,
-                                       TarantoolClusterAddressProvider addressProvider,
-                                       ConnectionSelectionStrategyFactory selectStrategyFactory) {
-        super(config, addressProvider, selectStrategyFactory);
+        super(config, addressProvider);
     }
 
     @Override

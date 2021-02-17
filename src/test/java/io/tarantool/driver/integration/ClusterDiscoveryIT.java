@@ -12,7 +12,6 @@ import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -111,8 +110,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
                 config,
-                new TestWrappedClusterAddressProvider(getBinaryProvider(), container),
-                TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+                new TestWrappedClusterAddressProvider(getBinaryProvider(), container));
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");
@@ -129,8 +127,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
                 config,
-                new TestWrappedClusterAddressProvider(getHttpProvider(), container),
-                TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE);
+                new TestWrappedClusterAddressProvider(getHttpProvider(), container));
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");

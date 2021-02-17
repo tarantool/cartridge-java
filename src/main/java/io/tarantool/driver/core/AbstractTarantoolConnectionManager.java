@@ -47,13 +47,33 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final Phaser initPhaser = new Phaser(0);
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
+    /**
+     * Constructor
+     * @deprecated
+     * @param config Tarantool client config
+     * @param connectionFactory connection factory
+     * @param selectionStrategyFactory connection selection strategy factory
+     * @param connectionListeners connection listeners
+     */
+    protected AbstractTarantoolConnectionManager(TarantoolClientConfig config,
+                                                 TarantoolConnectionFactory connectionFactory,
+                                                 ConnectionSelectionStrategyFactory selectionStrategyFactory,
+                                                 TarantoolConnectionListeners connectionListeners) {
+        this(config, connectionFactory, connectionListeners);
+    }
+
+    /**
+     * Basic constructor
+     * @param config Tarantool client config
+     * @param connectionFactory connection factory
+     * @param connectionListeners connection listeners
+     */
     public AbstractTarantoolConnectionManager(TarantoolClientConfig config,
                                               TarantoolConnectionFactory connectionFactory,
-                                              ConnectionSelectionStrategyFactory selectStrategyFactory,
                                               TarantoolConnectionListeners connectionListeners) {
         this.config = config;
         this.connectionFactory = connectionFactory;
-        this.selectStrategyFactory = selectStrategyFactory;
+        this.selectStrategyFactory = config.getConnectionSelectionStrategyFactory();
         this.connectionSelectStrategy.set(selectStrategyFactory.create(config, Collections.emptyList()));
         this.connectionListeners = connectionListeners;
     }
