@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class ProxyTarantoolSpaceCursor<T> implements TarantoolCursor<T> {
+public class StartAfterCursor<T> implements TarantoolCursor<T> {
 
     private final ProxyTarantoolSpace space;
     private final ValueConverter<ArrayValue, T> valueConverter;
@@ -34,11 +34,11 @@ public class ProxyTarantoolSpaceCursor<T> implements TarantoolCursor<T> {
 
     private TarantoolResult<T> result;
 
-    public ProxyTarantoolSpaceCursor(ProxyTarantoolSpace space,
-                                     Conditions conditions,
-                                     int batchSize,
-                                     ValueConverter<ArrayValue, T> valueConverter,
-                                     ObjectConverter<T, ArrayValue> tupleConverter) {
+    public StartAfterCursor(ProxyTarantoolSpace space,
+                            Conditions conditions,
+                            int batchSize,
+                            ValueConverter<ArrayValue, T> valueConverter,
+                            ObjectConverter<T, ArrayValue> tupleConverter) {
         this.space = space;
         this.initConditions = conditions;
         this.valueConverter = valueConverter;

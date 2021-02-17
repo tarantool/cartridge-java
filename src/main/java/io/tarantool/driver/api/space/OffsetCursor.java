@@ -19,9 +19,9 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class StandaloneTarantoolSpaceCursor<T> implements TarantoolCursor<T> {
+public class OffsetCursor<T> implements TarantoolCursor<T> {
 
-    private final StandaloneTarantoolSpace space;
+    private final TarantoolSpaceOperations space;
     private final Class<T> tupleClass;
     private final Conditions initConditions;
 
@@ -34,10 +34,10 @@ public class StandaloneTarantoolSpaceCursor<T> implements TarantoolCursor<T> {
 
     private TarantoolResult<T> result;
 
-    public StandaloneTarantoolSpaceCursor(StandaloneTarantoolSpace space,
-                                          Conditions conditions,
-                                          int batchSize,
-                                          Class<T> tupleClass) {
+    public OffsetCursor(TarantoolSpaceOperations space,
+                        Conditions conditions,
+                        int batchSize,
+                        Class<T> tupleClass) {
         this.space = space;
         this.initConditions = conditions;
         this.tupleClass = tupleClass;
