@@ -22,34 +22,27 @@ import java.util.Collection;
 public abstract class ClusterTarantoolClient<T extends Packable, R extends Collection<T>>
         extends AbstractTarantoolClient<T, R> {
 
-    private final ConnectionSelectionStrategyFactory selectStrategyFactory;
     private final TarantoolClusterAddressProvider addressProvider;
 
     /**
      * Create a client. The server address for connecting to the server is specified by the passed address provider.
      * @param config the client configuration
      * @param addressProvider provides Tarantool server address for connection
-     * @param selectStrategyFactory instantiates strategies which provide the algorithm of selecting connections
-     *                              from the connection pool for performing the next request
      * @see TarantoolClientConfig
      */
     public ClusterTarantoolClient(TarantoolClientConfig config,
-                                  TarantoolClusterAddressProvider addressProvider,
-                                  ConnectionSelectionStrategyFactory selectStrategyFactory) {
+                                  TarantoolClusterAddressProvider addressProvider) {
         super(config);
 
         Assert.notNull(addressProvider, "Address provider must not be null");
-        Assert.notNull(selectStrategyFactory, "Connection selection strategy factory must not be null");
 
         this.addressProvider = addressProvider;
-        this.selectStrategyFactory = selectStrategyFactory;
     }
 
     @Override
     protected TarantoolConnectionManager connectionManager(TarantoolClientConfig config,
                                                            TarantoolConnectionFactory connectionFactory,
                                                            TarantoolConnectionListeners listeners) {
-        return new TarantoolClusterConnectionManager(
-                config, connectionFactory, selectStrategyFactory, listeners, addressProvider);
+        return new TarantoolClusterConnectionManager(config, connectionFactory, listeners, addressProvider);
     }
 }

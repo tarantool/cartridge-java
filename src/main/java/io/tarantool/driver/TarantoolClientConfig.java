@@ -3,6 +3,7 @@ package io.tarantool.driver;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.utils.Assert;
@@ -29,6 +30,8 @@ public class TarantoolClientConfig {
     private int connections = DEFAULT_CONNECTIONS;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+    private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
+            TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE;
 
     /**
      * Basic constructor.
@@ -135,6 +138,24 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * Get factory implementation for collection selection strategy instances
+     * @return connection selection strategy factory instance
+     */
+    public ConnectionSelectionStrategyFactory getConnectionSelectionStrategyFactory() {
+        return connectionSelectionStrategyFactory;
+    }
+
+    /**
+     * Set factory implementation for collection selection strategy instances, for example, an instance of
+     * {@link io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory}
+     * @param connectionSelectionStrategyFactory connection selection strategy factory instance
+     */
+    public void setConnectionSelectionStrategyFactory(
+            ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory) {
+        this.connectionSelectionStrategyFactory = connectionSelectionStrategyFactory;
+    }
+
+    /**
      * Create a builder instance.
      *
      * @return a builder
@@ -226,6 +247,18 @@ public class TarantoolClientConfig {
         public Builder withConnections(int connections) {
             Assert.state(connections > 1, "The number of server connections must be greater than 0");
             config.connections = connections;
+            return this;
+        }
+
+        /**
+         * Set the implementation of a factory which instantiates a strategy instance providing the algorithm of
+         * selecting the next connection from a connection pool for performing the next request
+         * @param factory connection selection strategy factory instance
+         * @return builder
+         */
+        public Builder withConnectionSelectionStrategyFactory(ConnectionSelectionStrategyFactory factory) {
+            Assert.notNull(factory, "Connection selection strategy factory must not be null");
+            config.setConnectionSelectionStrategyFactory(factory);
             return this;
         }
 

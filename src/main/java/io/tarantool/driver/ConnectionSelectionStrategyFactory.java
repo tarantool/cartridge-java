@@ -5,7 +5,8 @@ import io.tarantool.driver.core.TarantoolConnection;
 import java.util.Collection;
 
 /**
- * Manages instantiation of connection selection strategies
+ * Manages instantiation of connection selection strategies. A strategy contains the algorithm of selecting connections
+ * from the connection pool for performing the next request
  *
  * @see ConnectionSelectionStrategy
  * @author Alexey Kuzin
