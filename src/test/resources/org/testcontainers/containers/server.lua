@@ -40,6 +40,32 @@ s:insert{1, 'a1', 'Don Quixote', 'Miguel de Cervantes', 1605}
 s:insert{2, 'a2', 'The Great Gatsby', 'F. Scott Fitzgerald', 1925}
 s:insert{3, 'a3', 'War and Peace', 'Leo Tolstoy', 1869}
 
+-- cursor test spaces
+c = box.schema.space.create('cursor_test_space')
+c:format({
+    { name = 'id', type = 'unsigned' },
+    { name = 'name', type = 'string' },
+    { name = 'year', type = 'unsigned' },
+});
+c:create_index('primary', {
+    type = 'tree',
+    parts = {'id'}
+})
+
+m = box.schema.space.create('cursor_test_space_multi_part_key')
+m:format({
+    { name = 'id', type = 'unsigned' },
+    { name = 'name', type = 'string' },
+    { name = 'year', type = 'unsigned' },
+});
+
+m:create_index('primary', {
+    type = 'tree',
+    parts = {'id', 'name'}
+})
+
+--functions
+
 function user_function_no_param()
     return 5;
 end
