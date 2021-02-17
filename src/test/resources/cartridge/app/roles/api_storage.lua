@@ -47,6 +47,48 @@ local function init_space()
 
     test_space_to_join:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space_to_join:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
+
+    -- cursor test spaces
+    local cursor_test_space = box.schema.space.create('cursor_test_space', { if_not_exists = true })
+    cursor_test_space:format({
+        { name = 'id', type = 'unsigned' },
+        { name = 'name', type = 'string' },
+        { name = 'year', type = 'unsigned' },
+        { name = 'bucket_id', type = 'unsigned' },
+    });
+    cursor_test_space:create_index('primary', {
+        type = 'tree',
+        parts = {'id'},
+        if_not_exists = true,
+    })
+    cursor_test_space:create_index('bucket_id', {
+        parts = { 'bucket_id' },
+        unique = false,
+        if_not_exists = true,
+        type = 'TREE'
+    })
+
+    local cursor_test_space_multi_part_key = box.schema.space.create(
+            'cursor_test_space_multi_part_key', { if_not_exists = true })
+    cursor_test_space_multi_part_key:format({
+        { name = 'id', type = 'unsigned' },
+        { name = 'name', type = 'string' },
+        { name = 'year', type = 'unsigned' },
+        { name = 'bucket_id', type = 'unsigned' },
+    });
+    cursor_test_space_multi_part_key:create_index('primary', {
+        type = 'tree',
+        parts = {'id', 'name'},
+        if_not_exists = true,
+    })
+    cursor_test_space_multi_part_key:create_index('bucket_id', {
+        parts = { 'bucket_id' },
+        unique = false,
+        if_not_exists = true,
+        type = 'TREE'
+    })
+
 end
 
 local function get_composite_data(id)

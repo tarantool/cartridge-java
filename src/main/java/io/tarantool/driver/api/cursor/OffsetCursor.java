@@ -1,12 +1,14 @@
-package io.tarantool.driver.api.space;
+package io.tarantool.driver.api.cursor;
 
-import io.tarantool.driver.api.TarantoolCursor;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+import io.tarantool.driver.protocol.Packable;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -19,30 +21,24 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class OffsetCursor<T> implements TarantoolCursor<T> {
+public class OffsetCursor<T extends Packable, R extends Collection<T>> implements TarantoolCursor<T> {
 
-    private final TarantoolSpaceOperations space;
-    private final Class<T> tupleClass;
+    private final TarantoolSpaceOperations<T, R> space;
     private final Conditions initConditions;
 
     // size of a batch for single invocation of client
     private final long batchSize;
-    // current offset in batch
-    private int batchOffset;
-    // global offset in space
     private long spaceOffset;
 
-    private TarantoolResult<T> result;
+    private Iterator<T> resultIter = Collections.emptyIterator();
+    private T currentValue;
 
-    public OffsetCursor(TarantoolSpaceOperations space,
+    public OffsetCursor(TarantoolSpaceOperations<T, R> space,
                         Conditions conditions,
-                        int batchSize,
-                        Class<T> tupleClass) {
+                        int batchSize) {
         this.space = space;
         this.initConditions = conditions;
-        this.tupleClass = tupleClass;
         this.spaceOffset = 0;
-        this.batchOffset = 0;
         this.batchSize = batchSize;
     }
 
@@ -72,39 +68,50 @@ public class OffsetCursor<T> implements TarantoolCursor<T> {
      */
     private void fetchNextTuples() throws TarantoolClientException {
         long limit = calcLimit(initConditions.getLimit(), batchSize, spaceOffset);
+
+        if (limit <= 0) {
+            return;
+        }
+
         Conditions conditions = new Conditions(initConditions)
                 .withLimit(limit)
                 .withOffset(spaceOffset);
 
         try {
-            result = space.select(conditions, tupleClass).get();
+            resultIter = space
+                    .select(conditions)
+                    .get()
+                    .iterator();
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);
         }
+    }
 
-        spaceOffset = spaceOffset + result.size();
+    public boolean advanceIterator() {
+        if (resultIter.hasNext()) {
+            currentValue = resultIter.next();
+            spaceOffset += 1;
+            return true;
+        }
+        currentValue = null;
+        return false;
     }
 
     @Override
     public boolean next() throws TarantoolClientException {
-
-        if (result != null && result.size() > batchOffset + 1) {
-            batchOffset += 1;
-            return true;
+        if (!advanceIterator()) {
+            fetchNextTuples();
+            return advanceIterator();
         }
-
-        fetchNextTuples();
-        batchOffset = 0;
-
-        return result.size() > 0;
+        return true;
     }
 
     @Override
-    public T get() throws TarantoolException {
-        if (result != null && result.size() > batchOffset) {
-            return result.get(batchOffset);
+    public T get() throws TarantoolSpaceOperationException {
+        if (currentValue == null) {
+            throw new TarantoolSpaceOperationException("Can't get data in this cursor state.");
         }
-        throw new TarantoolSpaceOperationException("Batch does not contain elements.");
+        return currentValue;
     }
 
 }

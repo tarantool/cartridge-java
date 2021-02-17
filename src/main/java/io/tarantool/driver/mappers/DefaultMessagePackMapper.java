@@ -186,6 +186,20 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         }
     }
 
+    /**
+     * Check if the specified converter can convert to the specified object type
+     */
+    private boolean checkObjectConverterByTargetType(ObjectConverter<?, ? extends Value> converter,
+                                                     Class<?> targetClass) {
+        try {
+            return objectConvertersByTarget.get(targetClass.getTypeName()) == converter ||
+                    getInterfaceParameterClass(converter, converter.getClass(), 1)
+                            .isAssignableFrom(targetClass);
+        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
+            return false;
+        }
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<V> entityClass,
@@ -245,6 +259,18 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                 objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new LinkedList<>());
         converters.add(0, converter);
         objectConvertersByTarget.put(valueClass.getTypeName(), converter);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(Class<O> objectClass,
+                                                                                   Class<V> valueClass) {
+        Function<String, Optional<ObjectConverter<O, V>>> getter =
+                typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
+                        .filter(c -> checkObjectConverterByTargetType(c, valueClass))
+                        .map(c -> (ObjectConverter<O, V>) c)
+                        .findFirst();
+        return findConverter(objectClass, getter);
     }
 
     /**

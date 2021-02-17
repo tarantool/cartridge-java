@@ -2,6 +2,8 @@ package io.tarantool.driver.mappers;
 
 import org.msgpack.value.Value;
 
+import java.util.Optional;
+
 /**
  * Basic interface for generic converters between Java objects and MessagePack entities.
  * Object converters must be added using the {@link #registerObjectConverter(Class, Class, ObjectConverter)} method
@@ -30,4 +32,6 @@ public interface MessagePackObjectMapper extends Cloneable {
      */
     <V extends Value, O> void registerObjectConverter(Class<O> objectClass, Class<V> valueClass,
                                                       ObjectConverter<O, V> converter);
+
+    <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(Class<O> objectClass, Class<V> valueClass);
 }

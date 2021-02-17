@@ -2,7 +2,10 @@ package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.cursor.OffsetCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.TarantoolConnectionManager;
@@ -53,5 +56,10 @@ public class TarantoolTupleSpace extends
     @Override
     public String toString() {
         return String.format("TarantoolSpace %s [%d]", getMetadata().getSpaceName(), getMetadata().getSpaceId());
+    }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions, int batchSize) {
+        return new OffsetCursor<>(this, conditions, batchSize);
     }
 }

@@ -44,6 +44,7 @@ public final class Conditions {
     private final List<Condition> conditions = new LinkedList<>();
 
     private boolean descending;
+    //FIXME VR - write a comment why MAX_LIMIT is set as initial value ?
     private long limit = MAX_LIMIT; // 0 is unlimited
     private long offset; // 0 is no offset
     private Packable startTuple;
