@@ -52,6 +52,13 @@ public final class Conditions {
         this.descending = descending;
     }
 
+    public Conditions(Conditions conditions) {
+        this.descending = conditions.descending;
+        this.limit = conditions.limit;
+        this.offset = conditions.offset;
+        this.startTuple = conditions.startTuple;
+        this.conditions.addAll(conditions.conditions);
+    }
     private Conditions(Condition condition) {
         conditions.add(condition);
     }
