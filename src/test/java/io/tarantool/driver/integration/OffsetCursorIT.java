@@ -14,6 +14,7 @@ import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -120,7 +121,7 @@ public class OffsetCursorIT  {
         assertEquals(10, tuple.getInteger(2));
 
         assertFalse(cursor.next());
-        assertNull(cursor.get());
+        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
     }
 
     @Test
@@ -146,7 +147,7 @@ public class OffsetCursorIT  {
 
         assertEquals(13, countTotal);
         assertEquals(Arrays.asList(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24), tupleIds);
-        assertNull(cursor.get());
+        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
     }
 
     @Test
@@ -172,7 +173,7 @@ public class OffsetCursorIT  {
 
         assertEquals(14, countTotal);
         assertEquals(Arrays.asList(52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39), tupleIds);
-        assertNull(cursor.get());
+        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
     }
 
     @Test
@@ -275,6 +276,6 @@ public class OffsetCursorIT  {
         } while (hasNext);
 
         assertEquals(10, countTotal);
-        assertNull(cursor.get());
+        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
     }
 }
