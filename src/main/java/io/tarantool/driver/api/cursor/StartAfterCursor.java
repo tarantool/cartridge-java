@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class StartAfterCursor<T extends Packable, R extends Collection<T>> extends TarantoolCursorBase<T,R> {
+public class StartAfterCursor<T extends Packable, R extends Collection<T>> extends TarantoolCursorBase<T, R> {
 
     private final TarantoolSpaceOperations<T, R> space;
     private final Conditions initConditions;
@@ -48,7 +48,6 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> exten
         this.spaceOffset = 0;
         this.mapper = mapper;
     }
-
 
     @Override
     protected void fetchNextTuples() throws TarantoolClientException {

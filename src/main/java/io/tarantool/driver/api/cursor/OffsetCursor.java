@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class OffsetCursor<T extends Packable, R extends Collection<T>> extends TarantoolCursorBase<T,R> {
+public class OffsetCursor<T extends Packable, R extends Collection<T>> extends TarantoolCursorBase<T, R> {
 
     private final TarantoolSpaceOperations<T, R> space;
     private final Conditions initConditions;
