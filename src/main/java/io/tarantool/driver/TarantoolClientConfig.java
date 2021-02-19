@@ -20,6 +20,7 @@ public class TarantoolClientConfig {
     private static final int DEFAULT_READ_TIMEOUT = 1000; // milliseconds
     private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
     private static final int DEFAULT_CONNECTIONS = 1;
+    private static final int DEFAULT_CURSOR_BATCH_SIZE = 100;
 
     private TarantoolCredentials credentials;
     private int connectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -248,5 +249,14 @@ public class TarantoolClientConfig {
             config = new TarantoolClientConfig();
             return this;
         }
+
+        /**
+         * How many items will be fetched from server per cursor request.
+         * @return default size of a batch for a cursor.
+         */
+    }
+
+    public int getCursorBatchSize() {
+        return DEFAULT_CURSOR_BATCH_SIZE;
     }
 }

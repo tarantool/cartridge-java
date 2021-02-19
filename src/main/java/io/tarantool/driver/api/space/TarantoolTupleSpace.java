@@ -62,4 +62,9 @@ public class TarantoolTupleSpace extends
     public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions, int batchSize) {
         return new OffsetCursor<>(this, conditions, batchSize);
     }
+
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions) {
+        return cursor(conditions, config.getCursorBatchSize());
+    }
 }

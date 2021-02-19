@@ -3,13 +3,13 @@ package io.tarantool.driver.api.space;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.StartAfterCursor;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.exceptions.TarantoolMapperConfigurationException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.ObjectConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
@@ -30,10 +30,10 @@ public class ProxyTarantoolTupleSpace extends ProxyTarantoolSpace<TarantoolTuple
     /**
      * Basic constructor
      *
-     * @param config Tarantool client config
-     * @param client configured Tarantool client
-     * @param mappingConfig proxy operation mapping config
-     * @param spaceMetadata current space metadata
+     * @param config             Tarantool client config
+     * @param client             configured Tarantool client
+     * @param mappingConfig      proxy operation mapping config
+     * @param spaceMetadata      current space metadata
      * @param metadataOperations metadata operations
      */
     public ProxyTarantoolTupleSpace(TarantoolClientConfig config,
@@ -52,8 +52,7 @@ public class ProxyTarantoolTupleSpace extends ProxyTarantoolSpace<TarantoolTuple
     }
 
     @Override
-    protected
-    CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
+    protected CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     tupleResultMapper() {
         return client.getResultMapperFactoryFactory().defaultTupleSingleResultMapperFactory()
                 .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
@@ -66,10 +65,11 @@ public class ProxyTarantoolTupleSpace extends ProxyTarantoolSpace<TarantoolTuple
 
     @Override
     public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions, int batchSize) {
-        ObjectConverter<TarantoolTuple, ArrayValue> converter = config
-                .getMessagePackMapper().getObjectConverter(TarantoolTuple.class, ArrayValue.class)
-                .orElseThrow(() -> new TarantoolMapperConfigurationException("TarantoolTuple->ArrayValue"));
+        return new StartAfterCursor<>(this, conditions, batchSize, config.getMessagePackMapper());
+    }
 
-        return new StartAfterCursor<>(this, conditions, batchSize, converter);
+    @Override
+    public TarantoolCursor<TarantoolTuple> cursor(Conditions conditions) {
+        return cursor(conditions, config.getCursorBatchSize());
     }
 }
