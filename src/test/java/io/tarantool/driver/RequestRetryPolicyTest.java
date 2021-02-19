@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -113,6 +114,19 @@ class RequestRetryPolicyTest {
         }
     }
 
+    @Test
+    void testAttemptsBoundRetryPolicy_retryTimeouts() throws ExecutionException, InterruptedException {
+        RequestRetryPolicy policy = new TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy<>(
+                4, 10, throwable -> throwable instanceof TimeoutException);
+        AtomicReference<Integer> retries = new AtomicReference<>(3);
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
+                () -> {
+                    retries.set(retries.get() - 1);
+                    return sleepIfAvailableRetriesFuture(retries.get(), 20);
+                }, executor);
+        assertTrue(wrappedFuture.get());
+    }
+
     private CompletableFuture<Boolean> simpleSuccessFuture() {
         return CompletableFuture.completedFuture(true);
     }
@@ -130,6 +144,19 @@ class RequestRetryPolicyTest {
         } else {
             result.complete(true);
         }
+        return result;
+    }
+
+    private CompletableFuture<Boolean> sleepIfAvailableRetriesFuture(int retries, long timeout) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        if (retries > 0) {
+            try {
+                Thread.sleep(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        result.complete(true);
         return result;
     }
 }
