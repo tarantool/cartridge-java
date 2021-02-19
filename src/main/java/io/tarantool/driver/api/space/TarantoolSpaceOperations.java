@@ -94,24 +94,26 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      */
     TarantoolSpaceMetadata getMetadata();
 
-
     /**
      * Cursor is an iterator-like object that is able to scroll through
      * results of a query. Unlike a single cursor loads new tuples
-     * dinamically issuing requests to server.
+     * dynamically issuing requests to server.
      *
      * Select will fetch tuples matching the specified query.
      * Each request to server will fetch no more than 'batch size' tuples.
      *
      * @param conditions query with options
      * @param batchSize  size of a batch of single client request
-     * @return a cursor that can iterate through all corresponding tuples.
+     * @return cursor that can iterate through all corresponding tuples
      */
     TarantoolCursor<T> cursor(Conditions conditions, int batchSize);
 
     /**
      * Same as {@link TarantoolSpaceOperations#cursor(Conditions, int)}
-     * but uses default batch size.
+     * but uses the default batch size.
+     *
+     * @param conditions query with options
+     * @return cursor that can iterate through all corresponding tuples
      */
     TarantoolCursor<T> cursor(Conditions conditions);
 }

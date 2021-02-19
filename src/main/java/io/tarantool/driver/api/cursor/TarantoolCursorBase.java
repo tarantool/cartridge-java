@@ -1,15 +1,10 @@
 package io.tarantool.driver.api.cursor;
 
-import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Generic cursor imlementation that performs client calls
@@ -20,9 +15,9 @@ import java.util.concurrent.ExecutionException;
 public abstract class TarantoolCursorBase<T extends Packable, R extends Collection<T>>
         implements TarantoolCursor<T> {
 
-    abstract protected void fetchNextTuples();
-    abstract protected boolean advanceIterator();
-    abstract protected T getCurrentValue();
+    protected abstract void fetchNextTuples();
+    protected abstract boolean advanceIterator();
+    protected abstract T getCurrentValue();
 
     /**
      * If batchSize is less than condition limit
