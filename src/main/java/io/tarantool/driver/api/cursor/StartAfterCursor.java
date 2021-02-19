@@ -2,8 +2,10 @@ package io.tarantool.driver.api.cursor;
 
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.ObjectConverter;
 import io.tarantool.driver.protocol.Packable;
 import org.msgpack.value.ArrayValue;
@@ -21,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Vladimir Rogach
  */
-public class StartAfterCursor<T extends Packable, R extends Collection<T>> implements TarantoolCursor<T> {
+public class StartAfterCursor<T extends Packable, R extends Collection<T>> extends TarantoolCursorBase<T,R> {
 
     private final TarantoolSpaceOperations<T, R> space;
     private final Conditions initConditions;
@@ -30,7 +32,7 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> imple
     private final long batchSize;
     private long spaceOffset;
 
-    private final ObjectConverter<T, ArrayValue> tupleConverter;
+    private final MessagePackMapper mapper;
 
     private Iterator<T> resultIter = Collections.emptyIterator();
     private T currentValue;
@@ -39,34 +41,17 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> imple
     public StartAfterCursor(TarantoolSpaceOperations<T, R> space,
                             Conditions conditions,
                             int batchSize,
-                            ObjectConverter<T, ArrayValue> tupleConverter) {
+                            MessagePackMapper mapper) {
         this.space = space;
         this.initConditions = conditions;
-        this.tupleConverter = tupleConverter;
         this.batchSize = batchSize;
         this.spaceOffset = 0;
+        this.mapper = mapper;
     }
 
-    /**
-     * If batchSize is less than condition limit
-     * we need to recalculate limit for each batch.
-     *
-     * @param conditionLimit initial limit (specified in condition)
-     * @param batchSize      size of a batch
-     * @param spaceOffset    current count of fetched elements
-     * @return effective limit for the current batch
-     */
-    private static long calcLimit(long conditionLimit, long batchSize, long spaceOffset) {
-        if (conditionLimit > 0) {
-            long tuplesToFetchLeft = conditionLimit - spaceOffset;
-            if (tuplesToFetchLeft < batchSize) {
-                return tuplesToFetchLeft;
-            }
-        }
-        return batchSize;
-    }
 
-    private void fetchNextTuples() throws TarantoolClientException {
+    @Override
+    protected void fetchNextTuples() throws TarantoolClientException {
         long limit = calcLimit(initConditions.getLimit(), batchSize, spaceOffset);
         if (limit <= 0) {
             return;
@@ -76,7 +61,7 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> imple
                 .withLimit(limit);
 
         if (lastTuple != null) {
-            conditions.startAfter(lastTuple, tupleConverter);
+            conditions.startAfter(lastTuple, mapper::toValue);
         }
 
         try {
@@ -89,7 +74,8 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> imple
         }
     }
 
-    public boolean advanceIterator() {
+    @Override
+    protected boolean advanceIterator() {
         if (resultIter.hasNext()) {
             currentValue = resultIter.next();
             spaceOffset += 1;
@@ -103,19 +89,8 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> imple
     }
 
     @Override
-    public boolean next() throws TarantoolClientException {
-        if (!advanceIterator()) {
-            fetchNextTuples();
-            return advanceIterator();
-        }
-        return true;
-    }
-
-    @Override
-    public T get() throws TarantoolSpaceOperationException {
-        if (currentValue == null) {
-            throw new TarantoolSpaceOperationException("Can't get data in this cursor state.");
-        }
+    protected T getCurrentValue() {
         return currentValue;
     }
+
 }
