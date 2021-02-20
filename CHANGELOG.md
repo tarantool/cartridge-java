@@ -8,10 +8,10 @@
  field types introduced in 2.x: UUID, decimal, double
  - Customizable mapping between the protocol primitives (MsgPack) into POJOs
  - Default TarantoolTuple object with field access API
- - Seamless working with standalone and cluster Tarantool installations
- via StandaloneTarantoolCLient and ClusterTarantoolClient respectively.
- Cluster support is working via a proxy using via customizable API
- functions exposed on Tarantool router.
+ - Seamless working with standalone and Cartridge cluster Tarantool instances.
+ Cluster support is available via a proxy using the customizable API functions exposed on Tarantool router.
  - Built-in support for CRUD API (https://github.com/tarantool/crud)
- - Support for external server nodes discovery for cluster client with
- HTTP or binary discovery endpoint
+ - Schema fetching support for built-in spaces formats and DDL metadata (https://github.com/tarantool/ddl)
+ - Built-in examples for external server nodes discovery with HTTP or binary discovery endpoints
+ - Customizable request retry policies for reliable communication
+ - Automatic reconnects on connection failure
