@@ -32,6 +32,11 @@ end
 enabled on all router instances in your cluster to which the driver will be connected to:
 
 ```lua
+...
+
+-- Add the following variables
+local cartridge_pool = require('cartridge.pool')
+local cartridge_rpc = require('cartridge.rpc')
 
 ...
 
