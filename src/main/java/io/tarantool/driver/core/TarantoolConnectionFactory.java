@@ -47,10 +47,9 @@ public class TarantoolConnectionFactory {
                 .handler(new TarantoolChannelInitializer(config, requestManager, versionHolder, connectionFuture))
                 .remoteAddress(serverAddress).connect();
         future.addListener((ChannelFutureListener) f -> {
-            //TODO reconnect when failed
             if (!f.isSuccess()) {
                 connectionFuture.completeExceptionally(new TarantoolClientException(
-                        "Failed to connect to the Tarantool server", f.cause()));
+                        String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
             }
         });
         return connectionFuture.thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
