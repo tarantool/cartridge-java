@@ -5,8 +5,6 @@ local cartridge_rpc = require('cartridge.rpc')
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
         return cartridge_rpc.call('app.roles.api_storage', 'get_schema', nil, { uri = instance_uri })
-        -- local conn = cartridge_pool.connect(instance_uri)
-        -- return conn:call('ddl.get_schema', {})
     end
 end
 
