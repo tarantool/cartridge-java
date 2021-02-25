@@ -107,7 +107,6 @@ local function init(opts)
         init_space()
     end
 
-    rawset(_G, 'ddl', { get_schema = require('ddl').get_schema })
     rawset(_G, 'get_composite_data', get_composite_data)
 
     return true
@@ -117,6 +116,7 @@ return {
     role_name = 'app.roles.api_storage',
     init = init,
     get_composite_data = get_composite_data,
+    get_schema = require('ddl').get_schema,
     dependencies = {
         'cartridge.roles.crud-storage'
     }
