@@ -57,7 +57,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
     public static String PASSWORD;
 
     private static final String TEST_SPACE_NAME = "test__profile";
-    private static final int DEFAULT_TIMEOUT = 10 * 1000;
+    private static final int DEFAULT_TIMEOUT = 5 * 1000;
 
     @BeforeAll
     public static void setUp() throws Exception {
