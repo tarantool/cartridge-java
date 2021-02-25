@@ -8,7 +8,8 @@ package io.tarantool.driver.core;
 public interface TarantoolConnectionFailureListener {
     /**
      * This method is invoked when the connection has been broken. The possible exception can be handled appropriately
-     * @param e the disconnection cause
+     * @param connection    connection that was disconnected
+     * @param e             disconnection cause
      */
-    void onConnectionFailure(Throwable e);
+    void onConnectionFailure(TarantoolConnection connection, Throwable e);
 }

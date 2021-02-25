@@ -30,7 +30,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
         channel.closeFuture().addListener(f -> {
            if (connected.compareAndSet(true, false)) {
                for (TarantoolConnectionFailureListener listener : failureListeners) {
-                   listener.onConnectionFailure(f.cause());
+                   listener.onConnectionFailure(this, f.cause());
                }
            }
         });
@@ -38,9 +38,6 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
 
     @Override
     public InetSocketAddress getRemoteAddress() throws TarantoolClientException {
-        if (!isConnected()) {
-            throw new TarantoolClientException("Not connected to Tarantool server");
-        }
         return (InetSocketAddress) channel.remoteAddress();
     }
 

@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Phaser;
@@ -200,21 +201,26 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
             .multiConnection(serverAddress.getSocketAddress(), config.getConnections()).stream()
             .peek(cf -> cf.thenApply(conn -> {
-                if (conn.isConnected()) {
-                    logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
-                }
-                conn.addConnectionFailureListener(ex -> {
-                    logger.error("Disconnected from Tarantool server", ex);
-                    // Connection lost, signal the next thread coming for connection to start the init sequence
-                    connectionMode.set(true);
-                });
-                return conn;
-            }))
+                    if (conn.isConnected()) {
+                        logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
+                    }
+                    conn.addConnectionFailureListener((c, ex) -> {
+                        logger.error("Disconnected from {}", c.getRemoteAddress(), ex);
+                        // Connection lost, signal the next thread coming for connection to start the init sequence
+                        connectionMode.set(true);
+                    });
+                    return conn;
+                }).exceptionally(ex -> {
+                    logger.error("Connection failed: ", ex);
+                    return null;
+                })
+            )
             .collect(Collectors.toList());
         return CompletableFuture
                 .allOf(connections.toArray(new CompletableFuture[0]))
                 .thenApply(v -> connections.parallelStream()
                     .map(CompletableFuture::join)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList()));
     }
 
