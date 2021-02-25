@@ -13,4 +13,9 @@ public class NoAvailableConnectionsException extends TarantoolClientException {
     public NoAvailableConnectionsException() {
         super("No available connections");
     }
+
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+        return this;
+    }
 }
