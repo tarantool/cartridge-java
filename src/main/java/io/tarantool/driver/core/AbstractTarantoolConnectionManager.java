@@ -4,6 +4,7 @@ import io.tarantool.driver.ConnectionSelectionStrategy;
 import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolClientNotConnectedException;
 import io.tarantool.driver.exceptions.TarantoolException;
@@ -98,6 +99,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         } catch (InterruptedException | TimeoutException e) {
             throw new TarantoolClientException(e);
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof NoAvailableConnectionsException) {
+                connectionMode.set(true);
+            }
             if (e.getCause() instanceof TarantoolException) {
                 throw (TarantoolException) e.getCause();
             }
@@ -226,7 +230,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     @Override
     public void close() {
-        initPhaser.awaitAdvance(0);
+        initPhaser.awaitAdvance(initPhaser.getPhase());
         connectionRegistry.get().values().stream()
             .flatMap(Collection::stream)
             .forEach(conn -> {
