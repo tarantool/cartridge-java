@@ -18,14 +18,19 @@ dependencies in the [`rockspec`](https://www.tarantool.io/en/doc/latest/book/car
 file of your application.
 
 2. Add the following lines into any [storage role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
-enabled on all storage instances in your cluster:
+enabled on all storage instances in your cluster. The lines go into role API declaration section; in other words, into the returned table
 
 ```lua
-local function init(opts)
+return {
+    role_name = 'app.roles.api_storage',
+    init = init,
     ...
-    rawset(_G, 'ddl', { get_schema = require('ddl').get_schema }) -- Add this line
+    get_schema = require('ddl').get_schema,
     ...
-end
+    dependencies = {
+        'cartridge.roles.crud-storage'
+    }
+}
 ```
 
 3. Add the following lines into any [router role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
@@ -43,8 +48,7 @@ local cartridge_rpc = require('cartridge.rpc')
 -- Add the following function
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
-        local conn = cartridge_pool.connect(instance_uri)
-        return conn:call('ddl.get_schema', {})
+        return cartridge_rpc.call('app.roles.api_storage', 'get_schema', nil, { uri = instance_uri })
     end
 end
 
