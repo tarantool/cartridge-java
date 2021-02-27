@@ -58,7 +58,7 @@ public interface RequestRetryPolicy {
             if (ex == null) {
                 return value;
             } else {
-                do {
+                while (this.canRetryRequest(ex)) {
                     try {
                         return operation.get().get(getOperationTimeout(), TimeUnit.MILLISECONDS);
                     } catch (InterruptedException | TimeoutException e) {
@@ -67,7 +67,6 @@ public interface RequestRetryPolicy {
                         ex = e.getCause();
                     }
                 }
-                while (this.canRetryRequest(ex));
                 throw new CompletionException(ex);
             }
         });

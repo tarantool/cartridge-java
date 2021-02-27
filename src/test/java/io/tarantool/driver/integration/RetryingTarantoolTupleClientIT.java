@@ -43,7 +43,8 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
         return new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies.byNumberOfAttempts(
-                retries, e -> e.getMessage().contains("Unsuccessful attempt")));
+                    retries, e -> e.getMessage().contains("Unsuccessful attempt")
+                ).build());
     }
 
     @Test
