@@ -181,18 +181,27 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 new ArrayList<>(addresses.size());
         for (TarantoolServerAddress serverAddress : addresses) {
             List<TarantoolConnection> aliveConnections = getAliveConnections(serverAddress);
-            if (aliveConnections.size() != config.getConnections()) {
+            if (aliveConnections.size() < config.getConnections()) {
+                CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>> connectionFuture =
+                        establishConnectionsToEndpoint(serverAddress, config.getConnections() - aliveConnections.size())
+                                .thenApply(connections -> {
+                                    connections.addAll(aliveConnections);
+                                    return new AbstractMap.SimpleEntry<>(serverAddress, connections);
+                                });
+                endpointConnections.add(connectionFuture);
+            } else if (aliveConnections.size() > config.getConnections()) {
+                int count = config.getConnections() - aliveConnections.size();
                 for (TarantoolConnection aliveConnection : aliveConnections) {
-                    try {
-                        aliveConnection.close();
-                    } catch (Exception e) {
-                        logger.error("Failed to close the connection", e);
+                    if (count-- > 0) {
+                        try {
+                            aliveConnection.close();
+                        } catch (Exception e) {
+                            logger.error("Failed to close the connection", e);
+                        }
+                    } else {
+                        break;
                     }
                 }
-                CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>> connectionFuture =
-                        establishConnectionsToEndpoint(serverAddress)
-                            .thenApply(connections -> new AbstractMap.SimpleEntry<>(serverAddress, connections));
-                endpointConnections.add(connectionFuture);
             } else {
                 endpointConnections.add(CompletableFuture.completedFuture(
                         new AbstractMap.SimpleEntry<>(serverAddress, aliveConnections)));
@@ -207,9 +216,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     }
 
     private CompletableFuture<List<TarantoolConnection>> establishConnectionsToEndpoint(
-            TarantoolServerAddress serverAddress) {
+            TarantoolServerAddress serverAddress, int connectionCount) {
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
-            .multiConnection(serverAddress.getSocketAddress(), config.getConnections()).stream()
+            .multiConnection(serverAddress.getSocketAddress(), connectionCount).stream()
             .peek(cf -> cf.thenApply(conn -> {
                     if (conn.isConnected()) {
                         logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
