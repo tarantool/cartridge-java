@@ -15,11 +15,11 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +39,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final TarantoolConnectionFactory connectionFactory;
     private final ConnectionSelectionStrategyFactory selectStrategyFactory;
     private final TarantoolConnectionListeners connectionListeners;
-    private final Map<TarantoolServerAddress, List<TarantoolConnection>> connectionRegistry =
-            new ConcurrentHashMap<>();
+    private final AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> connectionRegistry =
+            new AtomicReference<>(new HashMap<>());
     private final AtomicReference<ConnectionSelectionStrategy> connectionSelectStrategy = new AtomicReference<>();
     // connection init sequence state
     private final AtomicReference<ConnectionMode> connectionMode = new AtomicReference<>(ConnectionMode.FULL);
@@ -123,7 +123,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                     if (currentMode == ConnectionMode.PARTIAL) {
                         initPhaser.register();
                     }
-                    connectionRegistry.putAll(registry);
+                    // Add all alive connections
+                    connectionRegistry.set(registry);
                     ConnectionSelectionStrategy strategy =
                             selectStrategyFactory.create(config, registry.values().stream()
                                     .flatMap(Collection::stream)
@@ -211,7 +212,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     }
 
     private List<TarantoolConnection> getAliveConnections(TarantoolServerAddress serverAddress) {
-        List<TarantoolConnection> connections = connectionRegistry.getOrDefault(serverAddress, Collections.emptyList());
+        List<TarantoolConnection> connections = connectionRegistry.get()
+                .getOrDefault(serverAddress, Collections.emptyList());
         return connections.stream().filter(TarantoolConnection::isConnected).collect(Collectors.toList());
     }
 
@@ -246,7 +248,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     @Override
     public void close() {
         initPhaser.awaitAdvance(initPhaser.getPhase());
-        connectionRegistry.values().stream()
+        connectionRegistry.get().values().stream()
             .flatMap(Collection::stream)
             .forEach(conn -> {
                 try {
