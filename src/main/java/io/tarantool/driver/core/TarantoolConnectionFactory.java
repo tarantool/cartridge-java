@@ -7,9 +7,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,6 +26,7 @@ public class TarantoolConnectionFactory {
 
     private final TarantoolClientConfig config;
     private final Bootstrap bootstrap;
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**
      * Basic constructor.
@@ -52,7 +56,15 @@ public class TarantoolConnectionFactory {
                         String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
             }
         });
-        return connectionFuture.thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
+        return connectionFuture
+                .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch))
+                .handle((v, ex) -> {
+                    if (ex != null) {
+                        logger.error("Connection failed: ", ex);
+                        return null;
+                    }
+                    return v;
+                });
     }
 
     /**

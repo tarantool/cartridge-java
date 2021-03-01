@@ -1,6 +1,7 @@
 local vshard = require('vshard')
 local cartridge_pool = require('cartridge.pool')
 local cartridge_rpc = require('cartridge.rpc')
+local fiber = require('fiber')
 
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
@@ -34,7 +35,28 @@ local function get_composite_data(id)
     return data
 end
 
+local function reset_request_counters()
+    box.space.request_counters:replace({1, 0})
+end
+
+local function long_running_function(seconds_to_sleep)
+    require('log').info('Executing long-running function')
+    box.space.request_counters:update(1, {{'+', 'count', 1}})
+    if seconds_to_sleep then fiber.sleep(seconds_to_sleep) end
+    return true
+end
+
+local function get_request_count()
+    return box.space.request_counters:get(1)[2]
+end
+
 local function init(opts)
+
+    box.schema.space.create('request_counters', {
+        format = {{'id', 'unsigned'}, {'count', 'unsigned'}},
+        if_not_exists = true
+    })
+    box.space.request_counters:create_index('primary', {parts = {'id'}, if_not_exists = true})
 
     rawset(_G, 'truncate_space', truncate_space)
 
@@ -42,6 +64,10 @@ local function init(opts)
     rawset(_G, 'get_composite_data', get_composite_data)
     rawset(_G, 'setup_retrying_function', setup_retrying_function)
     rawset(_G, 'retrying_function', retrying_function)
+
+    rawset(_G, 'reset_request_counters', reset_request_counters)
+    rawset(_G, 'long_running_function', long_running_function)
+    rawset(_G, 'get_request_count', get_request_count)
 
     return true
 end
