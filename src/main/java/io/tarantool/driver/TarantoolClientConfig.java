@@ -31,7 +31,7 @@ public class TarantoolClientConfig {
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
-            TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory.INSTANCE;
+            TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE;
 
     /**
      * Basic constructor.

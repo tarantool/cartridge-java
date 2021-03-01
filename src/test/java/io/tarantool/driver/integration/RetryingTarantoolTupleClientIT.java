@@ -31,8 +31,8 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     private ProxyTarantoolTupleClient setupClient() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
                 .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                .withConnectTimeout(100000)
-                .withReadTimeout(100000)
+                .withConnectTimeout(1000)
+                .withReadTimeout(1000)
                 .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(

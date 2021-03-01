@@ -142,7 +142,7 @@ public class ConnectionIT {
                 tarantoolContainer.getUsername(), "incorrect");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
                 tarantoolContainer.getHost(), tarantoolContainer.getPort());
-        assertThrows(TarantoolServerException.class, () -> {
+        assertThrows(NoAvailableConnectionsException.class, () -> {
             try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
                 // Connection is actually performed here
                 client.getVersion();

@@ -231,9 +231,6 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         connectionMode.set(ConnectionMode.PARTIAL);
                     });
                     return conn;
-                }).exceptionally(ex -> {
-                    logger.error("Connection failed: ", ex);
-                    return null;
                 })
             )
             .collect(Collectors.toList());
