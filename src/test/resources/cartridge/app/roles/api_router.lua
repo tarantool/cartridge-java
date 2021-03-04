@@ -40,8 +40,8 @@ local function reset_request_counters()
 end
 
 local function long_running_function(seconds_to_sleep)
-    require('log').info('Executing long-running function')
     box.space.request_counters:update(1, {{'+', 'count', 1}})
+    require('log').info('Executing long-running function' .. ' ' .. tostring(box.space.request_counters:get(1)[2]))
     if seconds_to_sleep then fiber.sleep(seconds_to_sleep) end
     return true
 end

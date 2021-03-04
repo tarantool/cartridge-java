@@ -245,7 +245,7 @@ public class TarantoolClientConfig {
          * @return builder
          */
         public Builder withConnections(int connections) {
-            Assert.state(connections > 1, "The number of server connections must be greater than 0");
+            Assert.state(connections > 0, "The number of server connections must be greater than 0");
             config.connections = connections;
             return this;
         }
