@@ -98,7 +98,7 @@ public class ConnectionIT {
 
     @Test
     public void testIncorrectHostname_shouldThrowException() {
-        assertThrows(TarantoolSocketException.class, () -> {
+        assertThrows(TarantoolClientException.class, () -> {
             TarantoolCredentials credentials = new SimpleTarantoolCredentials(
                     tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
             TarantoolServerAddress serverAddress = new TarantoolServerAddress(
@@ -142,7 +142,7 @@ public class ConnectionIT {
                 tarantoolContainer.getUsername(), "incorrect");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
                 tarantoolContainer.getHost(), tarantoolContainer.getPort());
-        assertThrows(NoAvailableConnectionsException.class, () -> {
+        assertThrows(TarantoolClientException.class, () -> {
             try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
                 // Connection is actually performed here
                 client.getVersion();

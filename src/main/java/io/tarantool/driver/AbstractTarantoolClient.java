@@ -14,6 +14,7 @@ import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
+import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
@@ -46,6 +47,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -67,6 +70,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
     private final SpacesMetadataProvider metadataProvider;
+    private final ScheduledExecutorService timeoutScheduler;
 
     /**
      * Create a client.
@@ -112,7 +116,9 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
-        this.connectionFactory = new TarantoolConnectionFactory(config, this.bootstrap);
+        this.timeoutScheduler =
+                Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-timeout"));
+        this.connectionFactory = new TarantoolConnectionFactory(config, this.bootstrap, this.timeoutScheduler);
         this.listeners = listeners;
         this.metadataProvider = new SpacesMetadataProvider(this, config.getMessagePackMapper());
     }

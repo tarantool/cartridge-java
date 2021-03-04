@@ -3,11 +3,12 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -18,18 +19,19 @@ import java.util.concurrent.TimeoutException;
  * @author Alexey Kuzin
  */
 public class RequestFutureManager implements AutoCloseable {
-    private Map<Long, TarantoolRequestMetadata> requestFutures;
-    private ScheduledExecutorService timeoutScheduler =
-            Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-timeout"));
-    private TarantoolClientConfig config;
+    private final ScheduledExecutorService timeoutScheduler;
+    private final TarantoolClientConfig config;
+    private final Map<Long, TarantoolRequestMetadata> requestFutures = new ConcurrentHashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(RequestFutureManager.class);
 
     /**
      * Basic constructor.
      * @param config tarantool client configuration
      */
-    public RequestFutureManager(TarantoolClientConfig config) {
+    public RequestFutureManager(TarantoolClientConfig config, ScheduledExecutorService timeoutScheduler) {
         this.config = config;
-        this.requestFutures = new ConcurrentHashMap<>();
+        this.timeoutScheduler = timeoutScheduler;
     }
 
     /**
@@ -53,11 +55,20 @@ public class RequestFutureManager implements AutoCloseable {
      * @param <T> target response body type
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request, int requestTimeout,
+    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request,
+                                                  int requestTimeout,
                                                   MessagePackValueMapper resultMapper) {
         CompletableFuture<T> requestFuture = new CompletableFuture<>();
         long requestId = request.getHeader().getSync();
-        requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
+        requestFuture.whenComplete((r, e) -> {
+            String message = "Request {} is completed {}";
+            if (e != null) {
+                logger.debug(message, requestId, "exceptionally");
+            } else {
+                logger.debug(message, requestId, "normally");
+            }
+            requestFutures.remove(requestId);
+        });
         requestFutures.put(requestId, new TarantoolRequestMetadata(requestFuture, resultMapper));
         timeoutScheduler.schedule(() -> {
             if (!requestFuture.isDone()) {
@@ -65,6 +76,7 @@ public class RequestFutureManager implements AutoCloseable {
                         "Failed to get response for request %d within %d ms", requestId, requestTimeout)));
             }
         }, requestTimeout, TimeUnit.MILLISECONDS);
+        logger.debug("Submitted request {}", requestId);
         return requestFuture;
     }
 

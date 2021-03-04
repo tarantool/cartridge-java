@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,16 +28,21 @@ public class TarantoolConnectionFactory {
 
     private final TarantoolClientConfig config;
     private final Bootstrap bootstrap;
+    private final ScheduledExecutorService timeoutScheduler;
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**
      * Basic constructor.
      * @param config Tarantool client config
      * @param bootstrap prepared Netty's bootstrap
+     * @param timeoutScheduler scheduled executor for limiting the connection tasks by timeout
      */
-    public TarantoolConnectionFactory(TarantoolClientConfig config, Bootstrap bootstrap) {
+    public TarantoolConnectionFactory(TarantoolClientConfig config,
+                                      Bootstrap bootstrap,
+                                      ScheduledExecutorService timeoutScheduler) {
         this.config = config;
         this.bootstrap = bootstrap;
+        this.timeoutScheduler = timeoutScheduler;
     }
 
     /**
@@ -45,7 +52,7 @@ public class TarantoolConnectionFactory {
      */
     public CompletableFuture<TarantoolConnection> singleConnection(InetSocketAddress serverAddress) {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
-        RequestFutureManager requestManager = new RequestFutureManager(config);
+        RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
         ChannelFuture future = bootstrap.clone()
                 .handler(new TarantoolChannelInitializer(config, requestManager, versionHolder, connectionFuture))
@@ -56,6 +63,13 @@ public class TarantoolConnectionFactory {
                         String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
             }
         });
+        timeoutScheduler.schedule(() -> {
+            if (!connectionFuture.isDone()) {
+                connectionFuture.completeExceptionally(new TimeoutException(
+                        String.format("Failed to to the Tarantool server at %s within %d ms",
+                                serverAddress, config.getConnectTimeout())));
+            }
+        }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);
         return connectionFuture
                 .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch))
                 .handle((v, ex) -> {
