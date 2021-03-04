@@ -10,6 +10,7 @@ import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.core.TarantoolConnectionFactory;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.core.TarantoolConnectionManager;
@@ -17,7 +18,6 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
-import io.tarantool.driver.mappers.InterfaceParameterClassNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -136,7 +137,13 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     @Override
     public TarantoolVersion getVersion() throws TarantoolClientException {
-        return connectionManager().getConnection().getVersion();
+        try {
+            return connectionManager().getConnection().thenApply(TarantoolConnection::getVersion).get();
+        } catch (InterruptedException e) {
+            throw new TarantoolClientException(e);
+        } catch (ExecutionException e) {
+            throw new TarantoolClientException(e.getCause());
+        }
     }
 
     @Override
@@ -395,7 +402,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             }
 
             TarantoolCallRequest request = builder.build(argumentsMapper);
-            return connectionManager().getConnection().sendRequest(request, resultMapper);
+            return connectionManager().getConnection().thenCompose(c -> c.sendRequest(request, resultMapper));
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -473,7 +480,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                     .withExpression(expression)
                     .withArguments(arguments)
                     .build(argumentsMapper);
-            return connectionManager().getConnection().sendRequest(request, resultMapper);
+            return connectionManager().getConnection().thenCompose(c -> c.sendRequest(request, resultMapper));
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

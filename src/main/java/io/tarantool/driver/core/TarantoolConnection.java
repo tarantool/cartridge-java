@@ -3,7 +3,6 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.net.InetSocketAddress;
@@ -36,11 +35,8 @@ public interface TarantoolConnection extends AutoCloseable {
      * @param resultMapper the mapper for response body
      * @param <T> result type
      * @return result future
-     * @throws TarantoolProtocolException if the client is not connected or an error has occurred while
-     * sending the request
      */
-    <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper)
-            throws TarantoolProtocolException;
+    <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper);
 
     /**
      * Add a listener which is invoked when the connection is broken from the server side (e.g. server closed

@@ -69,6 +69,6 @@ public interface RequestRetryPolicy {
                 }
                 throw new CompletionException(ex);
             }
-        });
+        }, executor);
     }
 }
