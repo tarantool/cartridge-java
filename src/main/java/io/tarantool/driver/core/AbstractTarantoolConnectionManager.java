@@ -6,8 +6,6 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolClientNotConnectedException;
-import io.tarantool.driver.exceptions.TarantoolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Phaser;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -87,25 +83,16 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     protected abstract Collection<TarantoolServerAddress> getAddresses();
 
     @Override
-    public TarantoolConnection getConnection() {
-        try {
-            TarantoolConnection connection = getConnectionInternal()
-                    .get(config.getConnectTimeout(), TimeUnit.MILLISECONDS);
-            if (!connection.isConnected()) {
-                throw new TarantoolClientNotConnectedException();
+    public CompletableFuture<TarantoolConnection> getConnection() {
+        return getConnectionInternal().handle((connection, ex) -> {
+            if (ex != null) {
+                if (ex instanceof NoAvailableConnectionsException) {
+                    connectionMode.set(ConnectionMode.FULL);
+                }
+                throw new CompletionException(ex);
             }
             return connection;
-        } catch (InterruptedException | TimeoutException e) {
-            throw new TarantoolClientException(e);
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof NoAvailableConnectionsException) {
-                connectionMode.set(ConnectionMode.FULL);
-            }
-            if (e.getCause() instanceof TarantoolException) {
-                throw (TarantoolException) e.getCause();
-            }
-            throw new TarantoolClientException(e);
-        }
+        });
     }
 
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {

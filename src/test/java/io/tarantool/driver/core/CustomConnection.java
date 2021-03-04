@@ -3,7 +3,6 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.net.InetSocketAddress;
@@ -62,8 +61,7 @@ final class CustomConnection implements TarantoolConnection {
     }
 
     @Override
-    public <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper)
-            throws TarantoolProtocolException {
+    public <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
         return null;
     }
 
