@@ -19,6 +19,151 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
+     * Retry policy that performs unbounded number of attempts.
+     * If the exception check passes, the policy returns {@code true}.
+     *
+     * @param <T> exception checking callback function type
+     */
+    public static final class InfiniteRetryPolicy<T extends Function<Throwable, Boolean>>
+            implements RequestRetryPolicy {
+
+        private final long timeout; //ms
+        private final long delay; //ms
+        private final T callback;
+
+        /**
+         * Basic constructor
+         *
+         * @param timeout   timeout for one retry attempt, in milliseconds
+         * @param delay     delay between attempts, in milliseconds
+         * @param callback  function checking whether the given exception may be retried
+         */
+        public InfiniteRetryPolicy(long timeout, long delay, T callback) {
+            Assert.state(timeout >= 0, "Timeout must be greater or equal than 0!");
+            Assert.state(delay >= 0, "Timeout must be greater or equal than 0!");
+            Assert.notNull(callback, "Callback must not be null!");
+
+            this.timeout = timeout;
+            this.delay = delay;
+            this.callback = callback;
+        }
+
+        @Override
+        public boolean canRetryRequest(Throwable throwable) {
+            if (callback.apply(throwable)) {
+                if (delay > 0) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(delay);
+                    } catch (InterruptedException e) {
+                        throw new TarantoolClientException("Request retry delay has been interrupted");
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public long getOperationTimeout() {
+            return timeout;
+        }
+    }
+
+    /**
+     * Factory for {@link InfiniteRetryPolicy}
+     *
+     * @param <T> exception checking callback function type
+     */
+    public static final class InfiniteRetryPolicyFactory<T extends Function<Throwable, Boolean>>
+            implements RequestRetryPolicyFactory {
+
+        private final T callback;
+        private final long delay; //ms
+        private final long timeout; //ms
+
+        /**
+         * Basic constructor with timeout and delay
+         *
+         * @param timeout           timeout for one retry attempt, in milliseconds
+         * @param delay             delay between retry attempts, in milliseconds
+         * @param callback          function checking whether the given exception may be retried
+         */
+        public InfiniteRetryPolicyFactory(long timeout, long delay, T callback) {
+            this.callback = callback;
+            this.delay = delay;
+            this.timeout = timeout;
+        }
+
+        /**
+         * Create a builder for this factory
+         *
+         * @param callback  function checking whether the given exception may be retried
+         * @param <T>       exception checking callback function type
+         * @return new builder instance
+         */
+        public static <T extends Function<Throwable, Boolean>> Builder<T> builder(T callback) {
+            return new Builder<>(callback);
+        }
+
+        @Override
+        public RequestRetryPolicy create() {
+            return new InfiniteRetryPolicy<>(timeout, delay, callback);
+        }
+
+        /**
+         * Builder for {@link InfiniteRetryPolicyFactory}
+         *
+         * @param <T> exception checking callback function type
+         */
+        public static class Builder<T extends Function<Throwable, Boolean>> {
+
+            private long timeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long delay; //ms
+            private final T callback;
+
+            /**
+             * Basic constructor
+             *
+             * @param callback function checking whether the given exception may be retried
+             */
+            public Builder(T callback) {
+                this.callback = callback;
+            }
+
+            /**
+             * Set timeout for each attempt
+             *
+             * @param timeout   task timeout, in milliseconds
+             * @return this builder instance
+             */
+            public Builder<T> withTimeout(long timeout) {
+                this.timeout = timeout;
+                return this;
+            }
+
+            /**
+             * Set delay between attempts
+             *
+             * @param delay   task delay, in milliseconds
+             * @return this builder instance
+             */
+            public Builder<T> withDelay(long delay) {
+                this.delay = delay;
+                return this;
+            }
+
+            /**
+             * Create new factory instance
+             *
+             * @return new factory instance
+             */
+            public InfiniteRetryPolicyFactory<T> build() {
+                return new InfiniteRetryPolicyFactory<>(timeout, delay, callback);
+            }
+        }
+    }
+
+    /**
      * Retry policy that accepts a maximum number of attempts and an exception checking callback.
      * If the exception check passes and there are any attempts left, the policy returns {@code true}.
      *
@@ -127,7 +272,7 @@ public final class TarantoolRequestRetryPolicies {
         public static class Builder<T extends Function<Throwable, Boolean>> {
             private final int numberOfAttempts;
             private long timeout = TimeUnit.HOURS.toMillis(1); //ms
-            private long delay = 0; //ms
+            private long delay; //ms
             private final T callback;
 
             /**
@@ -183,7 +328,7 @@ public final class TarantoolRequestRetryPolicies {
     public static
     AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>
     byNumberOfAttempts(int numberOfAttempts) {
-        return AttemptsBoundRetryPolicyFactory.builder(numberOfAttempts, retryAll);
+        return byNumberOfAttempts(numberOfAttempts, retryAll);
     }
 
     /**
@@ -198,5 +343,31 @@ public final class TarantoolRequestRetryPolicies {
     <T extends Function<Throwable, Boolean>> AttemptsBoundRetryPolicyFactory.Builder<T>
     byNumberOfAttempts(int numberOfAttempts, T exceptionCheck) {
         return AttemptsBoundRetryPolicyFactory.builder(numberOfAttempts, exceptionCheck);
+    }
+
+    /**
+     * Create a factory for retry policy with unbounded number of attempts
+     *
+     * @param <T> exception checking callback function type
+     * @return new factory instance
+     */
+    @SuppressWarnings("unchecked")
+    public static
+    <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T>
+    unbound() {
+        return unbound((T) retryAll);
+    }
+
+    /**
+     * Create a factory for retry policy with unbounded number of attempts
+     *
+     * @param exceptionCheck    function callback, checking the given exception whether the request may be retried
+     * @param <T> exception checking callback function type
+     * @return new factory instance
+     */
+    public static
+    <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T>
+    unbound(T exceptionCheck) {
+        return InfiniteRetryPolicyFactory.builder(exceptionCheck);
     }
 }

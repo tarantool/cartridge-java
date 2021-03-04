@@ -58,6 +58,18 @@ class RequestRetryPolicyTest {
     }
 
     @Test
+    void testUnboundRetryPolicy_returnSuccessAfterFailsWithDelay() throws ExecutionException, InterruptedException {
+        AtomicReference<Integer> retries = new AtomicReference<>(3);
+        RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound().withDelay(10).build().create();
+        Instant now = Instant.now();
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
+                () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
+        assertTrue(wrappedFuture.get());
+        long diff = Instant.now().toEpochMilli() - now.toEpochMilli();
+        assertTrue(diff >= 30);
+    }
+
+    @Test
     void testAttemptsBoundRetryPolicy_returnSuccessAfterFails() throws ExecutionException, InterruptedException {
         AtomicReference<Integer> retries = new AtomicReference<>(3);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build().create();
