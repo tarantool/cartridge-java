@@ -12,12 +12,13 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 ## Quickstart
 
 1. Set up your [Cartridge cluster](https://tarantool.io/cartridge). Use an existing Cartridge application or create
-a new one from the available [examples](https://github.com/tarantool/examples). Add the
-[tarantool/crud](https://github.com/tarantool/crud) and [tarantool/ddl](https://github.com/tarantool/ddl) modules to the
-dependencies in the [`rockspec`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#creating-a-project)
+a new one from the available [examples](https://github.com/tarantool/examples). 
+   
+2. Add the [tarantool/crud](https://github.com/tarantool/crud) and [tarantool/ddl](https://github.com/tarantool/ddl)
+modules to the dependencies in the [`rockspec`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#creating-a-project)
 file of your application.
 
-2. Add the following lines into any [storage role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
+3. Add the following lines into any [storage role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
 enabled on all storage instances in your cluster. The lines go into role API declaration section; in other words, into the returned table
 
 ```lua
@@ -33,7 +34,7 @@ return {
 }
 ```
 
-3. Add the following lines into any [router role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
+4. Add the following lines into any [router role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
 enabled on all router instances in your cluster to which the driver will be connected to:
 
 ```lua
@@ -61,25 +62,25 @@ local function init(opts)
 end
 ```
 
-4. Check that at least one role enabled on the storage instances depends on the [`crud-storage`](https://github.com/tarantool/crud#api)
+5. Check that at least one role enabled on the storage instances depends on the [`crud-storage`](https://github.com/tarantool/crud#api)
 role from the `tarantool/crud` module and at least one role enabled on the router instances the driver will be connected
 to depends on the [`crud-router`](https://github.com/tarantool/crud#api) role.
 
-5. Start your Cartridge cluster. You may use [`cartridge start`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_cli/)
+6. Start your Cartridge cluster. You may use [`cartridge start`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_cli/)
 for starting it manually or the [Testcontainers for Tarantool](https://github.com/tarantool/cartridge-testcontainers)
 library for starting it automatically in tests.
 
-6. Add the following dependency into your project:
+7. Add the following dependency into your project:
 
 ```xml
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.4.0</version>
+  <version>0.4.1</version>
 </dependency>
 ```
 
-7. Create a new `TarantoolClient` instance:
+8. Create a new `TarantoolClient` instance:
 
 ```java
 private ProxyTarantoolTupleClient setupClient() {
@@ -93,7 +94,7 @@ private ProxyTarantoolTupleClient setupClient() {
 }
 ```
 
-8. Use the API provided by the Tarantool client, for example:
+9. Use the API provided by the Tarantool client, for example:
 
 ```java
     TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -120,7 +121,8 @@ these variants or create your own discovery provider implementation. In real env
 requirements it is recommended to use an external configuration provider (like etcd), DNS or a balancing proxy for
 connecting to the Tarantool server.
 
-The next example is showing the instantiation of the `ClusterTarantoolClient` with stored function discovery provider:
+The next example is showing the instantiation of the `ClusterTarantoolTupleClient` with stored function discovery 
+provider:
 
 ```java
 class Scratch {
@@ -292,9 +294,15 @@ Java 1.8 or higher is required for building and using this driver.
 
 ## Building
 
-Docker accessible to the current user is required for running integration tests.
-Use `./mvnw verify` to run unit tests and `./mvnw test -Pintegration` to run integration tests.
-Use `./mvnw install` for installing the artifact locally.
+1. Docker accessible to the current user is required for running integration tests.
+2. Set up the right user for running Tarantool with in the container:
+```bash
+export TARANTOOL_SERVER_USER=<current user>
+export TARANTOOL_SERVER_GROUP=<current group>
+```
+Substitute the user and group in these commands with the user and group under which the tests will run.
+3. Use `./mvnw verify` to run unit tests and `./mvnw test -Pintegration` to run integration tests.
+4. Use `./mvnw install` for installing the artifact locally.
 
 ## Contributing
 
