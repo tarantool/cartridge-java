@@ -3,8 +3,6 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -22,8 +20,6 @@ public class RequestFutureManager implements AutoCloseable {
     private final ScheduledExecutorService timeoutScheduler;
     private final TarantoolClientConfig config;
     private final Map<Long, TarantoolRequestMetadata> requestFutures = new ConcurrentHashMap<>();
-
-    private static final Logger logger = LoggerFactory.getLogger(RequestFutureManager.class);
 
     /**
      * Basic constructor.
@@ -61,15 +57,7 @@ public class RequestFutureManager implements AutoCloseable {
                                                   MessagePackValueMapper resultMapper) {
         CompletableFuture<T> requestFuture = new CompletableFuture<>();
         long requestId = request.getHeader().getSync();
-        requestFuture.whenComplete((r, e) -> {
-            String message = "Request {} is completed {}";
-            if (e != null) {
-                logger.debug(message, requestId, "exceptionally");
-            } else {
-                logger.debug(message, requestId, "normally");
-            }
-            requestFutures.remove(requestId);
-        });
+        requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
         requestFutures.put(requestId, new TarantoolRequestMetadata(requestFuture, resultMapper));
         timeoutScheduler.schedule(() -> {
             if (!requestFuture.isDone()) {
@@ -77,7 +65,6 @@ public class RequestFutureManager implements AutoCloseable {
                         "Failed to get response for request %d within %d ms", requestId, requestTimeout)));
             }
         }, requestTimeout, TimeUnit.MILLISECONDS);
-        logger.debug("Submitted request {}", requestId);
         return requestFuture;
     }
 
