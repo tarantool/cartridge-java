@@ -58,6 +58,9 @@ public interface RequestRetryPolicy {
             if (ex == null) {
                 return value;
             } else {
+                if (ex instanceof ExecutionException) {
+                    ex = ex.getCause();
+                }
                 while (this.canRetryRequest(ex)) {
                     try {
                         return operation.get().get(getOperationTimeout(), TimeUnit.MILLISECONDS);

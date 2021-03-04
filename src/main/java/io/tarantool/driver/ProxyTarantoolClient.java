@@ -79,7 +79,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
         this.client = decoratedClient;
         this.config = decoratedClient.getConfig();
         this.mappingConfig = mappingConfig;
-        this.client.getListeners().clear();
+        this.client.getConnectionListeners().clear();
         this.metadataProvider = new ProxyMetadataProvider(client, mappingConfig.getGetSchemaFunctionName(),
                 new DDLTarantoolSpaceMetadataConverter(), DDLMetadataContainerResult.class);
     }
@@ -150,8 +150,8 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public TarantoolConnectionListeners getListeners() {
-        return this.client.getListeners();
+    public TarantoolConnectionListeners getConnectionListeners() {
+        return this.client.getConnectionListeners();
     }
 
     @Override

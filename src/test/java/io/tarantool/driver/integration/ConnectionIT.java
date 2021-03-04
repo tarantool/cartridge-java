@@ -11,7 +11,6 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolServerException;
-import io.tarantool.driver.exceptions.TarantoolSocketException;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -204,5 +203,17 @@ public class ConnectionIT {
                         .get(1000, TimeUnit.MILLISECONDS);
             }
         });
+    }
+
+    @Test
+    public void testClientClosing_clientWithoutConnectionsShouldNotHang() throws Exception {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+
+        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
+        client.close();
     }
 }

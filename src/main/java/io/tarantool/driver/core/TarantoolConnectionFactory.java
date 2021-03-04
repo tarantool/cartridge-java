@@ -48,9 +48,11 @@ public class TarantoolConnectionFactory {
     /**
      * Create single connection and return connection future
      * @param serverAddress Tarantool server address to connect
+     * @param connectionListeners listeners for the event of establishing the connection
      * @return connection future
      */
-    public CompletableFuture<TarantoolConnection> singleConnection(InetSocketAddress serverAddress) {
+    public CompletableFuture<TarantoolConnection> singleConnection(InetSocketAddress serverAddress,
+                                                                   TarantoolConnectionListeners connectionListeners) {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
         RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
@@ -70,11 +72,14 @@ public class TarantoolConnectionFactory {
                                 serverAddress, config.getConnectTimeout())));
             }
         }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);
-        return connectionFuture
-                .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch))
-                .handle((v, ex) -> {
+        CompletableFuture<TarantoolConnection> result = connectionFuture
+                .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
+        for (TarantoolConnectionListener listener : connectionListeners.all()) {
+            result = result.thenCompose(listener::onConnection);
+        }
+        return result.handle((v, ex) -> {
                     if (ex != null) {
-                        logger.error("Connection failed: ", ex);
+                        logger.warn("Connection failed: {}", ex.getMessage());
                         return null;
                     }
                     return v;
@@ -85,12 +90,15 @@ public class TarantoolConnectionFactory {
      * Create several connections and return their futures
      * @param serverAddress Tarantool server address to connect
      * @param connections number of connections to create
+     * @param connectionListeners listeners for the event of establishing the connection
      * @return a collection with specified number of connection futures
      */
-    public Collection<CompletableFuture<TarantoolConnection>> multiConnection(InetSocketAddress serverAddress,
-                                                                              int connections) {
+    public Collection<CompletableFuture<TarantoolConnection>> multiConnection(
+            InetSocketAddress serverAddress,
+            int connections,
+            TarantoolConnectionListeners connectionListeners) {
         return Stream.generate(() -> serverAddress)
-                .map(this::singleConnection)
+                .map(address -> singleConnection(address, connectionListeners))
                 .limit(connections)
                 .collect(Collectors.toList());
     }

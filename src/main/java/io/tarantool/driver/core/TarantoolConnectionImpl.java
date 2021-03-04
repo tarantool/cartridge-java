@@ -15,11 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TarantoolConnectionImpl implements TarantoolConnection {
 
-    private final TarantoolVersionHolder versionHolder;
-    private final RequestFutureManager requestManager;
-    private final Channel channel;
+    protected final TarantoolVersionHolder versionHolder;
+    protected final RequestFutureManager requestManager;
+    protected final Channel channel;
     private final AtomicBoolean connected = new AtomicBoolean(true);
     private final List<TarantoolConnectionFailureListener> failureListeners = new ArrayList<>();
+    private final List<TarantoolConnectionCloseListener> closeListeners = new ArrayList<>();
 
     public TarantoolConnectionImpl(RequestFutureManager requestManager,
                                    TarantoolVersionHolder versionHolder,
@@ -72,13 +73,26 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     }
 
     @Override
+    public Channel getChannel() {
+        return this.channel;
+    }
+
+    @Override
     public void addConnectionFailureListener(TarantoolConnectionFailureListener listener) {
         failureListeners.add(listener);
     }
 
     @Override
+    public void addConnectionCloseListener(TarantoolConnectionCloseListener listener) {
+        closeListeners.add(listener);
+    }
+
+    @Override
     public void close() {
         connected.set(false);
+        for (TarantoolConnectionCloseListener listener : closeListeners) {
+            listener.onConnectionClosed(this);
+        }
         requestManager.close();
         channel.pipeline().close();
         channel.closeFuture().syncUninterruptibly();

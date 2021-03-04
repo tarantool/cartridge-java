@@ -111,8 +111,8 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public TarantoolConnectionListeners getListeners() {
-        return client.getListeners();
+    public TarantoolConnectionListeners getConnectionListeners() {
+        return client.getConnectionListeners();
     }
 
     @Override

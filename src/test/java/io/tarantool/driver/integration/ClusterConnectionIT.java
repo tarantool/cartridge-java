@@ -8,14 +8,19 @@ import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.core.TarantoolConnection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
@@ -29,6 +34,8 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
     public static String USER_NAME;
     public static String PASSWORD;
+
+    private static final Logger logger = LoggerFactory.getLogger(ClusterConnectionIT.class);
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
@@ -49,21 +56,25 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 .withReadTimeout(1000);
     }
 
-    private ProxyTarantoolTupleClient setupRouterClient(int port) {
+    private RetryingTarantoolTupleClient setupRouterClient(int port, int retries, long delay) {
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
                 prepareConfig().build(), container.getRouterHost(), container.getMappedPort(port));
 
-        return new ProxyTarantoolTupleClient(clusterClient);
+        return new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
+                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries).withDelay(delay).build());
     }
 
-    private RetryingTarantoolTupleClient setupRetryingClient(TarantoolClientConfig config,
-                                                             TarantoolClusterAddressProvider addressProvider,
-                                                             int retries, long delay) {
+    private RetryingTarantoolTupleClient setupClusterClient(TarantoolClientConfig config,
+                                                            TarantoolClusterAddressProvider addressProvider,
+                                                            int retries, long delay) {
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(config, addressProvider);
 
         ProxyTarantoolTupleClient client = new ProxyTarantoolTupleClient(clusterClient);
         return new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries).withDelay(delay).build());
+                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> {
+                    logger.info("Retrying exception {}", e.getMessage());
+                    return true;
+                }).withDelay(delay).build());
     }
 
     @Test
@@ -73,7 +84,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
                 new TarantoolServerAddress(container.getRouterHost(), 33399));
 
-        RetryingTarantoolTupleClient client = setupRetryingClient(prepareConfig().build(), addressProvider, 1, 0);
+        RetryingTarantoolTupleClient client = setupClusterClient(prepareConfig().build(), addressProvider, 1, 0);
 
         assertDoesNotThrow(() -> client.call("reset_request_counters").get());
         assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
@@ -81,11 +92,11 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         client.close();
     }
 
-    void testMultipleRoutersReconnect_retryableRequestShouldNotFail()
-            throws Exception {
-        ProxyTarantoolTupleClient routerClient1 = setupRouterClient(3301);
+    @Test
+    void testMultipleRoutersReconnect_retryableRequestShouldNotFail() throws Exception {
+        RetryingTarantoolTupleClient routerClient1 = setupRouterClient(3301, 3, 10);
         routerClient1.call("reset_request_counters").get();
-        ProxyTarantoolTupleClient routerClient2 = setupRouterClient(3311);
+        RetryingTarantoolTupleClient routerClient2 = setupRouterClient(3311, 3, 10);
         routerClient2.call("reset_request_counters").get();
 
         // create retrying client with two routers
@@ -93,7 +104,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)));
 
-        RetryingTarantoolTupleClient client = setupRetryingClient(
+        RetryingTarantoolTupleClient client = setupClusterClient(
                 prepareConfig().withConnectTimeout(1000).build(), addressProvider, 10, 0);
 
         // initiate two long-running requests
@@ -118,9 +129,11 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         // shutdown the first router and startup both
         result = container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "router");
         assertEquals(0, result.getExitCode(), result.getStderr());
-        result = container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "router");
+        result = container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "router");
         assertEquals(0, result.getExitCode(), result.getStderr());
-        result = container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "second-router");
+        result = container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "second-router");
         assertEquals(0, result.getExitCode(), result.getStderr());
 
         // get the request attempts -- for one of them they must be greater than 1, for another -- 1
@@ -129,8 +142,6 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         assertEquals(1, routerClient2.callForSingleResult("get_request_count", Integer.class).get());
 
         // initiate two requests
-//        routerClient1.call("reset_request_counters").get();
-//        routerClient2.call("reset_request_counters").get();
         assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
         assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
 
@@ -143,14 +154,59 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         client.close();
     }
 
-    void testMultipleConnectionsReconnect_retryableRequestShouldNotFail() {
+    @Test
+    void testMultipleConnectionsReconnect_retryableRequestShouldNotFail() throws Exception {
+        RetryingTarantoolTupleClient routerClient1 = setupRouterClient(3301, 3, 10);
+        routerClient1.call("reset_request_counters").get();
+
         // create retrying client with one router and two connections
+        TarantoolClusterAddressProvider addressProvider = () -> Collections.singletonList(
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)));
+        RetryingTarantoolTupleClient client = setupClusterClient(
+                prepareConfig().withConnections(2).build(), addressProvider, 10, 10);
+
+        List<TarantoolConnection> connections = Collections.synchronizedList(new ArrayList<>());
+        client.getConnectionListeners().add(conn -> {
+            CustomConnection custom = new CustomConnection(conn);
+            connections.add(custom);
+            return CompletableFuture.completedFuture(custom);
+        });
+
         // initiate two long-running requests
+        CompletableFuture<Boolean> request1 = client.callForSingleResult(
+                "long_running_function", Collections.singletonList(0.5), Boolean.class);
+        CompletableFuture<Boolean> request2 = client.callForSingleResult(
+                "long_running_function", Collections.singletonList(0.5), Boolean.class);
+
         // close one connection
-        // calculate the retry attempts -- for one of them they must be greater than 0, for another -- 0
+        connections.get(0).close();
+
         // both requests should return normally (alive connection selection effect)
-        // close the second connection
-        // initiate two requests
-        // check that they completed normally without retries and fell onto different connections (reconnection effect)
+        assertTrue(request1.get());
+        assertTrue(request2.get());
+
+        // get the request attempts -- there will be at least one retry
+        assertTrue(routerClient1.callForSingleResult("get_request_count", Integer.class).get() >= 3);
+
+        // initiate another long-running request
+        request1 = client.callForSingleResult("long_running_function", Collections.singletonList(0.5), Boolean.class);
+
+        // partial disconnect -> one connection is restored
+        assertEquals(3, connections.size());
+
+        // close remaining connections
+        for (int i = 1; i < 3; i++) {
+            connections.get(i).close();
+        }
+
+        // the request should return normally (reconnection effect)
+        assertTrue(request1.get());
+
+        // initiate next two requests and check that they completed normally
+        assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
+        assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
+
+        // check that two connections restored (2 initial + 1 after partial dc + 2 after full dc)
+        assertEquals(5, connections.size());
     }
 }

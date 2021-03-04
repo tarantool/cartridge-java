@@ -67,5 +67,5 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
      *
      * @return connection listeners
      */
-    TarantoolConnectionListeners getListeners();
+    TarantoolConnectionListeners getConnectionListeners();
 }

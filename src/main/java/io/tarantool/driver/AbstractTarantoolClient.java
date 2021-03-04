@@ -505,6 +505,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     public void close() throws Exception {
         try {
             connectionManager().close();
+            timeoutScheduler.shutdownNow();
         } finally {
             try {
                 eventLoopGroup.shutdownGracefully().sync();
@@ -515,7 +516,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public TarantoolConnectionListeners getListeners() {
+    public TarantoolConnectionListeners getConnectionListeners() {
         return listeners;
     }
 
