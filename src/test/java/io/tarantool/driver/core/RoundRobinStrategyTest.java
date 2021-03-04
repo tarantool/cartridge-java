@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -85,10 +86,7 @@ public class RoundRobinStrategyTest {
 
     @Test
     public void testNoAvailableConnectionException() {
-        List<TarantoolConnection> connections = IntStream.range(1, 11)
-                .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
-                .peek(c -> c.setConnected(false))
-                .collect(Collectors.toList());
+        List<TarantoolConnection> connections = Collections.emptyList();
 
         TarantoolClientConfig config = new TarantoolClientConfig();
         ConnectionSelectionStrategy strategy = RoundRobinStrategyFactory.INSTANCE.create(config, connections);

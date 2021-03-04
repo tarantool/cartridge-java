@@ -6,6 +6,7 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,10 +87,13 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     public CompletableFuture<TarantoolConnection> getConnection() {
         return getConnectionInternal().handle((connection, ex) -> {
             if (ex != null) {
+                if (ex instanceof CompletionException) {
+                    ex = ex.getCause();
+                }
                 if (ex instanceof NoAvailableConnectionsException) {
                     connectionMode.set(ConnectionMode.FULL);
                 }
-                throw new CompletionException(ex);
+                throw new TarantoolConnectionException(ex);
             }
             return connection;
         });
@@ -128,20 +132,22 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                     // Connection init sequence completed, release all waiting threads and lower the barrier
                     initPhaser.arriveAndDeregister();
                 });
-            for (TarantoolConnectionListener connectionListener : connectionListeners.all()) {
-                result = result.thenCompose(connectionListener::onConnection);
-            }
         } else {
             // Wait until a thread finishes the init sequence and lowers the barrier. Once the barrier is lowered, the
             // phaser advances to the next phase.
             // As soon as all parties have arrived (register() is called once, so a single thread), all threads blocked
-            // on awaitAdvance() continue running. getPhase() in thiss case returns the last phase value before
+            // on awaitAdvance() continue running. getPhase() in this case returns the last phase value before
             // the termination.
             initPhaser.awaitAdvance(initPhaser.getPhase());
             // This call may produce NoAvailableConnectionsException if the connection attempt failed in all threads
             // that waited for the init sequence completion on the line above.
             // In this case the calling code may perform the request again.
-            result = CompletableFuture.completedFuture(connectionSelectStrategy.get().next());
+            result = new CompletableFuture<>();
+            try {
+                result.complete(connectionSelectStrategy.get().next());
+            } catch (Throwable t) {
+                result.completeExceptionally(t);
+            }
         }
         return result;
     }
@@ -184,7 +190,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         try {
                             aliveConnection.close();
                         } catch (Exception e) {
-                            logger.error("Failed to close the connection", e);
+                            logger.info("Failed to close the connection: {}", e.getMessage());
                         }
                     } else {
                         break;
@@ -207,16 +213,21 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private CompletableFuture<List<TarantoolConnection>> establishConnectionsToEndpoint(
             TarantoolServerAddress serverAddress, int connectionCount) {
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
-            .multiConnection(serverAddress.getSocketAddress(), connectionCount).stream()
+            .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners).stream()
             .peek(cf -> cf.thenApply(conn -> {
                     if (conn.isConnected()) {
                         logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
                     }
                     conn.addConnectionFailureListener((c, ex) -> {
-                        logger.error("Disconnected from {}", c.getRemoteAddress(), ex);
                         // Connection lost, signal the next thread coming for connection to start the init sequence
                         connectionMode.set(ConnectionMode.PARTIAL);
+                        try {
+                            c.close();
+                        } catch (Exception e) {
+                            logger.info("Failed to close the connection: {}", e.getMessage());
+                        }
                     });
+                    conn.addConnectionCloseListener(c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
                     return conn;
                 })
             )
@@ -231,14 +242,16 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     @Override
     public void close() {
-        initPhaser.awaitAdvance(initPhaser.getPhase());
+        if (initPhaser.getRegisteredParties() > 0) {
+            initPhaser.awaitAdvance(initPhaser.getPhase());
+        }
         connectionRegistry.get().values().stream()
             .flatMap(Collection::stream)
             .forEach(conn -> {
                 try {
                     conn.close();
                 } catch (Exception e) {
-                    logger.error("Failed to close connection", e);
+                    logger.warn("Failed to close connection: {}", e.getMessage());
                 }
             });
     }

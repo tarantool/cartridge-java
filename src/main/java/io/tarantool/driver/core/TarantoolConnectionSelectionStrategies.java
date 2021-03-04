@@ -36,18 +36,19 @@ public final class TarantoolConnectionSelectionStrategies {
     static final class RoundRobinStrategy implements ConnectionSelectionStrategy {
 
         private final TarantoolConnectionIterator connectionIterator;
-        private final int maxAttempts;
+        private final AtomicInteger available;
 
         RoundRobinStrategy(Collection<TarantoolConnection> connections) {
-            this.connectionIterator = new TarantoolConnectionIterator(connections);
-            this.maxAttempts = connections.size();
+            this.available = new AtomicInteger(connections.size());
+            this.connectionIterator = new TarantoolConnectionIterator(connections.stream()
+                    .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
+                    .collect(Collectors.toList()));
         }
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
-            if (connectionIterator.hasNext()) {
-                int attempts = 0;
-                while (attempts++ < maxAttempts) {
+            if (available.get() > 0) {
+                while (connectionIterator.hasNext()) {
                     TarantoolConnection connection = connectionIterator.next();
                     if (connection.isConnected()) {
                         return connection;
@@ -80,12 +81,12 @@ public final class TarantoolConnectionSelectionStrategies {
 
         private final TarantoolClientConfig config;
         private final CyclingIterator<TarantoolConnectionIterator> iteratorsIterator;
-        private final int maxAttempts;
+        private final AtomicInteger available;
 
         ParallelRoundRobinStrategy(TarantoolClientConfig config, Collection<TarantoolConnection> connections) {
             this.config = config;
+            this.available = new AtomicInteger(connections.size());
             this.iteratorsIterator = new CyclingIterator<>(populateIterators(connections));
-            this.maxAttempts = connections.size();
         }
 
         private Collection<TarantoolConnectionIterator> populateIterators(
@@ -93,6 +94,7 @@ public final class TarantoolConnectionSelectionStrategies {
             int groupSize = config.getConnections();
             AtomicInteger currentSize = new AtomicInteger(0);
             return connections.stream()
+                    .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
                     .collect(Collectors.groupingBy(
                             conn -> currentSize.getAndIncrement() / groupSize)).values().stream()
                     .map(TarantoolConnectionIterator::new)
@@ -102,9 +104,8 @@ public final class TarantoolConnectionSelectionStrategies {
 
         @Override
         public TarantoolConnection next() throws NoAvailableConnectionsException {
-            if (iteratorsIterator.hasNext()) {
-                int attempts = 0;
-                while (attempts++ < maxAttempts) {
+            if (available.get() > 0) {
+                while (iteratorsIterator.hasNext()) {
                     TarantoolConnection connection = iteratorsIterator.next().next();
                     if (connection.isConnected()) {
                         return connection;

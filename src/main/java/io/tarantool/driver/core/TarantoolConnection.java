@@ -1,5 +1,6 @@
 package io.tarantool.driver.core;
 
+import io.netty.channel.Channel;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -39,9 +40,22 @@ public interface TarantoolConnection extends AutoCloseable {
     <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper);
 
     /**
+     * Get the Netty channel baking this connection
+     * @return channel
+     */
+    Channel getChannel();
+
+    /**
      * Add a listener which is invoked when the connection is broken from the server side (e.g. server closed
      * the connection or a network failure has occurred).
      * @param listener a {@link TarantoolConnectionFailureListener} instance
      */
     void addConnectionFailureListener(TarantoolConnectionFailureListener listener);
+
+    /**
+     * Add a listener which is invoked when the connection is closed. The internal channel may probably be in an invalid
+     * state at this moment.
+     * @param listener a {@link TarantoolConnectionCloseListener} instance
+     */
+    void addConnectionCloseListener(TarantoolConnectionCloseListener listener);
 }

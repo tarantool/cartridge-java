@@ -28,6 +28,7 @@ public class RequestFutureManager implements AutoCloseable {
     /**
      * Basic constructor.
      * @param config tarantool client configuration
+     * @param timeoutScheduler scheduled executor for handling request timeouts
      */
     public RequestFutureManager(TarantoolClientConfig config, ScheduledExecutorService timeoutScheduler) {
         this.config = config;

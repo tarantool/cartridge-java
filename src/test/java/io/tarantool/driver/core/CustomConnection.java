@@ -1,5 +1,6 @@
 package io.tarantool.driver.core;
 
+import io.netty.channel.Channel;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -66,7 +67,16 @@ final class CustomConnection implements TarantoolConnection {
     }
 
     @Override
+    public Channel getChannel() {
+        return null;
+    }
+
+    @Override
     public void addConnectionFailureListener(TarantoolConnectionFailureListener listener) {
+    }
+
+    @Override
+    public void addConnectionCloseListener(TarantoolConnectionCloseListener listener) {
     }
 
     @Override
