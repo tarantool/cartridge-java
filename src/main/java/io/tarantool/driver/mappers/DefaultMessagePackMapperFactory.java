@@ -16,7 +16,7 @@ import java.util.UUID;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public class DefaultMessagePackMapperFactory {
+public final class DefaultMessagePackMapperFactory {
 
     private static final DefaultMessagePackMapperFactory instance = new DefaultMessagePackMapperFactory();
 
@@ -25,7 +25,7 @@ public class DefaultMessagePackMapperFactory {
     /**
      * Basic constructor.
      */
-    public DefaultMessagePackMapperFactory() {
+    private DefaultMessagePackMapperFactory() {
         defaultSimpleTypesMapper = new DefaultMessagePackMapper.Builder()
                 // converters for primitive values
                 .withConverter(StringValue.class, String.class, new DefaultStringConverter())
@@ -73,6 +73,23 @@ public class DefaultMessagePackMapperFactory {
         defaultComplexTypesMapper.registerObjectConverter(
                 new DefaultPackableObjectConverter(defaultComplexTypesMapper));
         return defaultComplexTypesMapper;
+    }
+
+    /**
+     * Get modification-safe instance of the given mapper (shallow copy).
+     * @param mapper configured mapper instance
+     * @return new mapper instance
+     */
+    public DefaultMessagePackMapper copyOf(DefaultMessagePackMapper mapper) {
+        return new DefaultMessagePackMapper(mapper);
+    }
+
+    /**
+     * Get new empty mapper.
+     * @return new mapper instance
+     */
+    public DefaultMessagePackMapper emptyMapper() {
+        return new DefaultMessagePackMapper();
     }
 
     /**

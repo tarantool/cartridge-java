@@ -15,6 +15,18 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 public class TarantoolTupleMultiResultMapperFactory
         extends MultiValueTarantoolResultMapperFactory<TarantoolTuple> {
 
+    /**
+     * Basic constructor
+     */
+    public TarantoolTupleMultiResultMapperFactory() {
+        super();
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper MessagePack-to-entity mapper for result contents conversion
+     */
     public TarantoolTupleMultiResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
     }

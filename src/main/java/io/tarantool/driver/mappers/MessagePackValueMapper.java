@@ -10,7 +10,7 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public interface MessagePackValueMapper extends Cloneable {
+public interface MessagePackValueMapper {
     /**
      * Create Java object out of its MessagePack representation.
      * @param v MessagePack entity

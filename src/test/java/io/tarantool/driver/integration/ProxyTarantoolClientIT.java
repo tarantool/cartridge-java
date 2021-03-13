@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -331,5 +333,41 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(999, actual.field2);
         assertEquals(true, actual.field3);
         assertEquals(123.456F, actual.field4);
+    }
+
+    @Test
+    public void differentSpacesMappersTest() throws Exception {
+        List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
+        TarantoolTuple firstTuple = tupleFactory.create(values);
+
+        values = Arrays.asList(123000, null, true, 123.456);
+        TarantoolTuple secondTuple = tupleFactory.create(values);
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<CompletableFuture<?>> futures = new ArrayList<>(10);
+        for (int i = 0; i < 10; i++) {
+            final int count = i;
+            futures.add(CompletableFuture.runAsync(() -> {
+                try {
+                    TarantoolResult<TarantoolTuple> newTuples;
+                    for (int j = 0; j < 10; j++) {
+                        if (count % 2 == 0) {
+                            newTuples = client.space("test_space").replace(firstTuple).get();
+                            assertTrue(newTuples.size() > 0);
+                            assertEquals("Jane Doe", newTuples.get(0).getString("field1"));
+                            assertEquals(999, newTuples.get(0).getInteger("field2"));
+                        } else {
+                            newTuples = client.space("test_space_to_join").replace(secondTuple).get();
+                            assertTrue(newTuples.size() > 0);
+                            assertEquals(true, newTuples.get(0).getBoolean("field3"));
+                            assertEquals(123.456F, newTuples.get(0).getFloat("field4"));
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, executor));
+        }
+        futures.forEach(CompletableFuture::join);
     }
 }

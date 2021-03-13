@@ -15,6 +15,13 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
 
     protected final MessagePackValueMapper valueMapper;
 
+    /**
+     * Basic constructor
+     *
+     * @param valueMapper MessagePack value-to-object mapper for result contents
+     * @param resultConverter converter from MessagePack result array to result type
+     * @param resultClass target result class
+     */
     public AbstractResultMapper(MessagePackValueMapper valueMapper,
                                 ValueConverter<ArrayValue, ? extends T> resultConverter,
                                 Class<? extends T> resultClass) {
