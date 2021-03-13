@@ -13,8 +13,32 @@ import org.msgpack.value.ArrayValue;
  */
 public class MultiValueTarantoolResultMapperFactory<T> extends MultiValueResultMapperFactory<T, TarantoolResult<T>> {
 
+    /**
+     * Basic constructor
+     */
+    public MultiValueTarantoolResultMapperFactory() {
+        super();
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper MessagePack-to-entity mapper for result contents conversion
+     */
     public MultiValueTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
+    }
+
+    /**
+     * Get {@link TarantoolResult} mapper for the Lua function call with single result
+     *
+     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param valueConverter the result content converter
+     * @return call result mapper
+     */
+    public CallResultMapper<TarantoolResult<T>, MultiValueCallResult<T, TarantoolResult<T>>>
+    withTarantoolResultConverter(MessagePackValueMapper valueMapper, ValueConverter<ArrayValue, T> valueConverter) {
+        return withMultiValueResultConverter(valueMapper, new TarantoolResultConverter<>(valueConverter));
     }
 
     /**
@@ -26,6 +50,22 @@ public class MultiValueTarantoolResultMapperFactory<T> extends MultiValueResultM
     public CallResultMapper<TarantoolResult<T>, MultiValueCallResult<T, TarantoolResult<T>>>
     withTarantoolResultConverter(ValueConverter<ArrayValue, T> valueConverter) {
         return withMultiValueResultConverter(new TarantoolResultConverter<>(valueConverter));
+    }
+
+    /**
+     * Get {@link TarantoolResult} mapper for the Lua function call with single result
+     *
+     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param valueConverter the result content converter
+     * @param resultClass full result type class
+     * @return call result mapper
+     */
+    public CallResultMapper<TarantoolResult<T>, MultiValueCallResult<T, TarantoolResult<T>>>
+    withTarantoolResultConverter(MessagePackValueMapper valueMapper,
+                                 ValueConverter<ArrayValue, T> valueConverter,
+                                 Class<? extends MultiValueCallResult<T, TarantoolResult<T>>> resultClass) {
+        return withMultiValueResultConverter(
+                valueMapper, new TarantoolResultConverter<>(valueConverter), resultClass);
     }
 
     /**

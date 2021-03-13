@@ -2,7 +2,6 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MultiValueCallResult;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.Value;
 
 import java.util.List;
 
@@ -15,8 +14,36 @@ import java.util.List;
 public class MultiValueResultMapperFactory<T, R extends List<T>> extends
         TarantoolCallResultMapperFactory<R, MultiValueCallResult<T, R>> {
 
+    private final MessagePackMapper messagePackMapper;
+
+    /**
+     * Basic constructor
+     */
+    public MultiValueResultMapperFactory() {
+        this(DefaultMessagePackMapperFactory.getInstance().emptyMapper());
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper MessagePack-to-entity mapper for result contents conversion
+     */
     public MultiValueResultMapperFactory(MessagePackMapper messagePackMapper) {
-        super(messagePackMapper);
+        super();
+        this.messagePackMapper = messagePackMapper;
+    }
+
+    /**
+     * Get result mapper for the Lua function call with multi-return result
+     *
+     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param itemsConverter the result list converter
+     * @return call result mapper
+     */
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+            MessagePackValueMapper valueMapper,
+            ValueConverter<ArrayValue, R> itemsConverter) {
+        return withConverter(valueMapper, new MultiValueCallResultConverter<>(itemsConverter));
     }
 
     /**
@@ -27,7 +54,22 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
      */
     public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
             ValueConverter<ArrayValue, R> itemsConverter) {
-        return withConverter(new MultiValueCallResultConverter<>(itemsConverter));
+        return withConverter(messagePackMapper.copy(), new MultiValueCallResultConverter<>(itemsConverter));
+    }
+
+    /**
+     * Get result mapper for the Lua function call with multi-return result
+     *
+     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param itemsConverter result list converter
+     * @param resultClass full result type class
+     * @return call result mapper
+     */
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+            MessagePackValueMapper valueMapper,
+            ValueConverter<ArrayValue, R> itemsConverter,
+            Class<? extends MultiValueCallResult<T, R>> resultClass) {
+        return withConverter(valueMapper, new MultiValueCallResultConverter<>(itemsConverter), resultClass);
     }
 
     /**
@@ -40,6 +82,7 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
     public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
             ValueConverter<ArrayValue, R> itemsConverter,
             Class<? extends MultiValueCallResult<T, R>> resultClass) {
-        return withConverter(resultClass, new MultiValueCallResultConverter<>(itemsConverter));
+        return withConverter(
+                messagePackMapper.copy(), new MultiValueCallResultConverter<>(itemsConverter), resultClass);
     }
 }

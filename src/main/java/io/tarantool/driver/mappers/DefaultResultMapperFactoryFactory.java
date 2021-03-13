@@ -29,11 +29,9 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
      * Basic constructor.
      */
     public DefaultResultMapperFactoryFactory() {
-        this.defaultTupleResultFactory = new TarantoolTupleResultMapperFactory(new DefaultMessagePackMapper());
-        this.defaultTupleSingleResultFactory =
-                new TarantoolTupleSingleResultMapperFactory(new DefaultMessagePackMapper());
-        this.defaultTupleMultiResultFactory =
-                new TarantoolTupleMultiResultMapperFactory(new DefaultMessagePackMapper());
+        this.defaultTupleResultFactory = new TarantoolTupleResultMapperFactory();
+        this.defaultTupleSingleResultFactory = new TarantoolTupleSingleResultMapperFactory();
+        this.defaultTupleMultiResultFactory = new TarantoolTupleMultiResultMapperFactory();
     }
 
     @Override
@@ -53,31 +51,31 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
 
     @Override
     public <T> TupleResultMapperFactory<T> tupleResultMapperFactory() {
-        return new TupleResultMapperFactory<>(new DefaultMessagePackMapper());
+        return new TupleResultMapperFactory<>();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> TupleResultMapperFactory<T> tupleResultMapperFactory(Class<T> tupleClass) {
-        return (TupleResultMapperFactory<T>) tupleResultFactoryCache.computeIfAbsent(tupleClass,
-                cls -> new TupleResultMapperFactory<>(new DefaultMessagePackMapper()));
+        return (TupleResultMapperFactory<T>) tupleResultFactoryCache
+                .computeIfAbsent(tupleClass, cls -> new TupleResultMapperFactory<>());
     }
 
     @Override
     public <T> SingleValueResultMapperFactory<T> singleValueResultMapperFactory() {
-        return new SingleValueResultMapperFactory<>(new DefaultMessagePackMapper());
+        return new SingleValueResultMapperFactory<>();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> SingleValueResultMapperFactory<T> singleValueResultMapperFactory(Class<T> resultClass) {
-        return (SingleValueResultMapperFactory<T>) singleResultFactoryCache.computeIfAbsent(resultClass,
-                cls -> new SingleValueResultMapperFactory<>(new DefaultMessagePackMapper()));
+        return (SingleValueResultMapperFactory<T>) singleResultFactoryCache
+                .computeIfAbsent(resultClass, cls -> new SingleValueResultMapperFactory<>());
     }
 
     @Override
     public <T> SingleValueTarantoolResultMapperFactory<T> singleValueTarantoolResultMapperFactory() {
-        return new SingleValueTarantoolResultMapperFactory<>(new DefaultMessagePackMapper());
+        return new SingleValueTarantoolResultMapperFactory<>();
     }
 
     @Override
@@ -85,27 +83,25 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
     public <T> SingleValueTarantoolResultMapperFactory<T> singleValueTarantoolResultMapperFactory(
             Class<T> tupleClass) {
         return (SingleValueTarantoolResultMapperFactory<T>) singleTarantoolResultFactoryCache
-                .computeIfAbsent(tupleClass,
-                        cls -> new SingleValueTarantoolResultMapperFactory<>(new DefaultMessagePackMapper()));
+                .computeIfAbsent(tupleClass, cls -> new SingleValueTarantoolResultMapperFactory<>());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T, R extends List<T>> MultiValueResultMapperFactory<T, R> multiValueResultMapperFactory() {
-        return new MultiValueResultMapperFactory<>(new DefaultMessagePackMapper());
+        return new MultiValueResultMapperFactory<>();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T, R extends List<T>> MultiValueResultMapperFactory<T, R> multiValueResultMapperFactory(
             Class<R> resultClass) {
-        return (MultiValueResultMapperFactory<T, R>) multiResultFactoryCache.computeIfAbsent(resultClass,
-                cls -> new MultiValueResultMapperFactory<>(new DefaultMessagePackMapper()));
+        return (MultiValueResultMapperFactory<T, R>) multiResultFactoryCache
+                .computeIfAbsent(resultClass, cls -> new MultiValueResultMapperFactory<>());
     }
 
     @Override
     public <T> MultiValueTarantoolResultMapperFactory<T> multiValueTarantoolResultMapperFactory() {
-        return new MultiValueTarantoolResultMapperFactory<>(new DefaultMessagePackMapper());
+        return new MultiValueTarantoolResultMapperFactory<>();
     }
 
     @Override
@@ -113,7 +109,6 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
     public <T> MultiValueTarantoolResultMapperFactory<T> multiValueTarantoolResultMapperFactory(
             Class<? extends TarantoolResult<T>> tupleClass) {
         return (MultiValueTarantoolResultMapperFactory<T>) multiTarantoolResultFactoryCache
-                .computeIfAbsent(tupleClass,
-                        cls -> new MultiValueTarantoolResultMapperFactory<>(new DefaultMessagePackMapper()));
+                .computeIfAbsent(tupleClass, cls -> new MultiValueTarantoolResultMapperFactory<>());
     }
 }

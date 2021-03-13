@@ -11,6 +11,18 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
  */
 public class TarantoolTupleResultMapperFactory extends TupleResultMapperFactory<TarantoolTuple> {
 
+    /**
+     * Basic constructor
+     */
+    public TarantoolTupleResultMapperFactory() {
+        super();
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper MessagePack-to-object mapper for tuple contents
+     */
     public TarantoolTupleResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
     }

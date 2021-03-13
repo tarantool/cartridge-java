@@ -15,15 +15,6 @@ public class TarantoolResultMapperFactory<T> extends
 
     /**
      * Basic constructor
-     *
-     * @param messagePackMapper mapper for MessagePack entities in tuple fields to Java objects
-     */
-    public TarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
-        super(messagePackMapper);
-    }
-
-    /**
-     * Basic constructor with empty mapper
      */
     public TarantoolResultMapperFactory() {
         super();
@@ -31,8 +22,9 @@ public class TarantoolResultMapperFactory<T> extends
 
     @Override
     protected TarantoolResultMapper<T> createMapper(
+            MessagePackValueMapper valueMapper,
             ValueConverter<ArrayValue, ? extends TarantoolResult<T>> valueConverter,
             Class<? extends TarantoolResult<T>> resultClass) {
-        return new TarantoolResultMapper<>(messagePackMapper, valueConverter, resultClass);
+        return new TarantoolResultMapper<>(valueMapper, valueConverter, resultClass);
     }
 }

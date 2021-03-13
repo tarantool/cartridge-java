@@ -13,6 +13,18 @@ import org.msgpack.value.ArrayValue;
  */
 public class SingleValueTarantoolResultMapperFactory<T> extends SingleValueResultMapperFactory<TarantoolResult<T>> {
 
+    /**
+     * Basic constructor
+     */
+    public SingleValueTarantoolResultMapperFactory() {
+        super();
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper mapper for MessagePack entities in tuple fields to Java objects
+     */
     public SingleValueTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
     }

@@ -14,6 +14,18 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 public class TarantoolTupleSingleResultMapperFactory
         extends SingleValueTarantoolResultMapperFactory<TarantoolTuple> {
 
+    /**
+     * Basic constructor
+     */
+    public TarantoolTupleSingleResultMapperFactory() {
+        super();
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper mapper for MessagePack entities in tuple fields to Java objects
+     */
     public TarantoolTupleSingleResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
     }

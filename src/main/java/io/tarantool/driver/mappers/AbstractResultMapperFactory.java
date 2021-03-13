@@ -12,43 +12,35 @@ import org.msgpack.value.ArrayValue;
  */
 public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMapper<? extends O>> {
 
-    protected final MessagePackMapper messagePackMapper;
-
     /**
      * Basic constructor
-     *
-     * @param messagePackMapper mapper for MessagePack entities into Java objects and vice versa
-     */
-    public AbstractResultMapperFactory(MessagePackMapper messagePackMapper) {
-        this.messagePackMapper = messagePackMapper;
-    }
-
-    /**
-     * Basic constructor with empty mapper
      */
     public AbstractResultMapperFactory() {
-        this.messagePackMapper = new DefaultMessagePackMapper();
     }
 
     /**
      * Instantiate the mapper for result contents
      *
+     * @param valueMapper MessagePack value-to-object mapper for result contents
      * @param valueConverter converter for result contents (an array)
      * @param resultClass result type
      * @return new mapper instance
      */
-    protected abstract T createMapper(ValueConverter<ArrayValue, ? extends O> valueConverter,
+    protected abstract T createMapper(MessagePackValueMapper valueMapper,
+                                      ValueConverter<ArrayValue, ? extends O> valueConverter,
                                       Class<? extends O> resultClass);
 
     /**
      * Create {@link AbstractResultMapper} instance with the passed converter.
      *
+     * @param valueMapper MessagePack value-to-object mapper for result contents
      * @param valueConverter entity-to-object converter
      * @return a mapper instance
      */
-    public T withConverter(ValueConverter<ArrayValue, ? extends O> valueConverter) {
+    public T withConverter(MessagePackValueMapper valueMapper, ValueConverter<ArrayValue, ? extends O> valueConverter) {
         try {
-            return withConverter(MapperReflectionUtils.getConverterTargetType(valueConverter), valueConverter);
+            return withConverter(
+                    valueMapper, valueConverter, MapperReflectionUtils.getConverterTargetType(valueConverter));
         } catch (InterfaceParameterClassNotFoundException e) {
             throw new TarantoolClientException(e);
         }
@@ -57,13 +49,16 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
     /**
      * Create {@link AbstractResultMapper} instance with the passed converter.
      *
+     * @param valueMapper MessagePack value-to-object mapper for result contents
+     * @param valueConverter entity-to-object converter
      * @param resultClass target result type class. Necessary for resolving ambiguity when more than one suitable
      *        converters are present in the configured mapper
-     * @param valueConverter entity-to-object converter
      * @return a mapper instance
      */
-    public T withConverter(Class<? extends O> resultClass, ValueConverter<ArrayValue, ? extends O> valueConverter) {
-        return createMapper(valueConverter, resultClass);
+    public T withConverter(MessagePackValueMapper valueMapper,
+                           ValueConverter<ArrayValue, ? extends O> valueConverter,
+                           Class<? extends O> resultClass) {
+        return createMapper(valueMapper, valueConverter, resultClass);
     }
 
 }

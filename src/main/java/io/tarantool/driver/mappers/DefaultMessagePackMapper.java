@@ -288,6 +288,11 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         registerObjectConverter(objectClass, valueClass, converter);
     }
 
+    @Override
+    public MessagePackMapper copy() {
+        return new DefaultMessagePackMapper(this);
+    }
+
     /**
      * Builder for {@link DefaultMessagePackMapper}
      */

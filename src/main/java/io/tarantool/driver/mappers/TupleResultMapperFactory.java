@@ -10,8 +10,23 @@ import org.msgpack.value.ArrayValue;
  */
 public class TupleResultMapperFactory<T> extends TarantoolResultMapperFactory<T> {
 
+    private final MessagePackMapper messagePackMapper;
+
+    /**
+     * Basic constructor
+     */
+    public TupleResultMapperFactory() {
+        this(DefaultMessagePackMapperFactory.getInstance().emptyMapper());
+    }
+
+    /**
+     * Basic constructor with mapper
+     *
+     * @param messagePackMapper MessagePack-to-object mapper for tuple contents
+     */
     public TupleResultMapperFactory(MessagePackMapper messagePackMapper) {
-        super(messagePackMapper);
+        super();
+        this.messagePackMapper = messagePackMapper;
     }
 
     /**
@@ -21,19 +36,46 @@ public class TupleResultMapperFactory<T> extends TarantoolResultMapperFactory<T>
      * @return mapper instance
      */
     public TarantoolResultMapper<T> withTupleValueConverter(ValueConverter<ArrayValue, T> tupleConverter) {
-        return withConverter(new TarantoolResultConverter<>(tupleConverter));
+        return withConverter(messagePackMapper.copy(), new TarantoolResultConverter<>(tupleConverter));
     }
 
     /**
      * Get converter for tuples in {@link TarantoolResult}
      *
+     * @param valueMapper MessagePack-to-object mapper for tuple contents
+     * @param tupleConverter MessagePack-to-entity converter for tuples
+     * @return mapper instance
+     */
+    public TarantoolResultMapper<T> withTupleValueConverter(MessagePackValueMapper valueMapper,
+                                                            ValueConverter<ArrayValue, T> tupleConverter) {
+        return withConverter(valueMapper, new TarantoolResultConverter<>(tupleConverter));
+    }
+
+    /**
+     * Get converter for tuples in {@link TarantoolResult}
+     *
+     * @param tupleConverter MessagePack-to-entity converter for tuples
      * @param resultClass allows to specify the result type in case if it is impossible to get it via reflection
      *                    (e.g. lambda)
-     * @param tupleConverter MessagePack-to-entity converter for tuples
      * @return mapper instance
      */
     public TarantoolResultMapper<T> withTupleValueConverter(ValueConverter<ArrayValue, T> tupleConverter,
                                                             Class<? extends TarantoolResult<T>> resultClass) {
-        return withConverter(resultClass, new TarantoolResultConverter<>(tupleConverter));
+        return withConverter(messagePackMapper.copy(), new TarantoolResultConverter<>(tupleConverter), resultClass);
+    }
+
+    /**
+     * Get converter for tuples in {@link TarantoolResult}
+     *
+     * @param valueMapper MessagePack-to-object mapper for tuple contents
+     * @param tupleConverter MessagePack-to-entity converter for tuples
+     * @param resultClass allows to specify the result type in case if it is impossible to get it via reflection
+     *                    (e.g. lambda)
+     * @return mapper instance
+     */
+    public TarantoolResultMapper<T> withTupleValueConverter(MessagePackValueMapper valueMapper,
+                                                            ValueConverter<ArrayValue, T> tupleConverter,
+                                                            Class<? extends TarantoolResult<T>> resultClass) {
+        return withConverter(valueMapper, new TarantoolResultConverter<>(tupleConverter), resultClass);
     }
 }
