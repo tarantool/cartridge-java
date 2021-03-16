@@ -18,13 +18,10 @@ import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.DefaultMultiValueResultMapper;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
-import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.MultiValueListConverter;
 import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.SpacesMetadataProvider;
@@ -37,7 +34,6 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
 import io.tarantool.driver.utils.Assert;
-import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 import java.util.Arrays;
@@ -264,7 +260,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                                                           MessagePackObjectMapper argumentsMapper,
                                                           Class<T> tupleClass)
             throws TarantoolClientException {
-        return call(functionName, arguments, argumentsMapper, getCachedSingleResultMapper(tupleClass));
+        return call(functionName, arguments, argumentsMapper,
+                mapperFactoryFactory.getTarantoolResultMapper(config.getMessagePackMapper(), tupleClass));
     }
 
     @Override
@@ -313,7 +310,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             MessagePackObjectMapper argumentsMapper,
             Class<S> resultClass)
             throws TarantoolClientException {
-        return callForSingleResult(functionName, arguments, argumentsMapper, getDefaultSingleValueMapper(resultClass));
+        return callForSingleResult(functionName, arguments, argumentsMapper,
+                mapperFactoryFactory.getDefaultSingleValueMapper(config.getMessagePackMapper(), resultClass));
     }
 
     @Override
@@ -386,7 +384,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                                                                           Class<T> resultClass)
             throws TarantoolClientException {
         return callForMultiResult(functionName, arguments, argumentsMapper,
-                getDefaultMultiValueMapper(resultClass));
+                mapperFactoryFactory.getDefaultMultiValueMapper(config.getMessagePackMapper(), resultClass));
     }
 
     @Override
@@ -398,7 +396,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             ValueConverter<Value, T> valueConverter)
             throws TarantoolClientException {
         return callForMultiResult(functionName, arguments, argumentsMapper,
-                getCachedMultiResultMapper(resultContainerSupplier, valueConverter));
+                mapperFactoryFactory.getMultiValueResultMapper(resultContainerSupplier, valueConverter));
     }
 
     @Override
@@ -446,41 +444,6 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
-    }
-
-    private
-    <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
-    getCachedMultiResultMapper(Supplier<R> containerSupplier, ValueConverter<Value, T> valueConverter) {
-        return mapperFactoryFactory.<T, R>multiValueResultMapperFactory()
-                .withMultiValueResultConverter(
-                        new MultiValueListConverter<>(valueConverter, containerSupplier));
-    }
-
-    private
-    <T> CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
-    getCachedSingleResultMapper(Class<T> tupleClass) {
-        return mapperFactoryFactory.<T>singleValueTarantoolResultMapperFactory()
-                .withTarantoolResultConverter(getConverter(ArrayValue.class, tupleClass));
-    }
-
-    private
-    <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
-    getDefaultMultiValueMapper(Class<T> tupleClass) {
-        return new DefaultMultiValueResultMapper<>(config.getMessagePackMapper(), tupleClass);
-    }
-
-    private <T> CallResultMapper<T, SingleValueCallResult<T>> getDefaultSingleValueMapper(Class<T> tupleClass) {
-        return new DefaultSingleValueResultMapper<>(config.getMessagePackMapper(), tupleClass);
-    }
-
-    private <V extends Value, T> ValueConverter<V, T> getConverter(Class<V> valueClass, Class<T> tupleClass) {
-        Optional<? extends ValueConverter<V, T>> converter =
-                config.getMessagePackMapper().getValueConverter(valueClass, tupleClass);
-        if (!converter.isPresent()) {
-            throw new TarantoolClientException(
-                    "No converter for value class %s and type %s is present", valueClass, tupleClass);
-        }
-        return converter.get();
     }
 
     @Override
