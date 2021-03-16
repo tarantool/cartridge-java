@@ -12,13 +12,14 @@ import org.msgpack.value.ArrayValue;
 public class DefaultSingleValueResultMapper<T> extends CallResultMapper<T, SingleValueCallResult<T>> {
 
     /**
-     * Constructor. The converter target type is determined via reflection.
+     * Basic constructor
      *
      * @param valueMapper value mapper for result content conversion
      * @param contentClass target result content class
      */
-    public DefaultSingleValueResultMapper(MessagePackValueMapper valueMapper, Class<T> contentClass) {
-        super(valueMapper, defaultValueConverter(valueMapper), getResultClass(contentClass));
+    public DefaultSingleValueResultMapper(MessagePackMapper valueMapper, Class<T> contentClass) {
+        super(DefaultMessagePackMapperFactory.getInstance().emptyMapper(),
+                defaultValueConverter(valueMapper), getResultClass(contentClass));
     }
 
     @SuppressWarnings("unchecked")

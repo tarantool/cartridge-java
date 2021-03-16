@@ -10,8 +10,7 @@ local function get_schema()
 end
 
 local function truncate_space(space_name)
-    local storages = cartridge_rpc.get_candidates('app.roles.api_storage')
-    cartridge_pool.map_call('box.schema.space[' .. space_name .. ']:truncate', nil, {uri_list = storages})
+    crud.truncate(space_name)
 end
 
 local retries_holder = {
@@ -32,6 +31,23 @@ end
 local function get_composite_data(id)
     local data = vshard.router.callro(vshard.router.bucket_id(id), 'get_composite_data', {id})
     return data
+end
+
+local function get_rows_as_multi_result(space_name)
+    local data = crud.select(space_name).rows
+    return unpack(data, table.maxn(data))
+end
+
+local function get_array_as_multi_result(numbers)
+    return unpack(numbers)
+end
+
+local function get_array_as_single_result(numbers)
+    return numbers
+end
+
+local function returning_error(message)
+    return nil, message
 end
 
 local function reset_request_counters()
@@ -61,6 +77,10 @@ local function init(opts)
 
     rawset(_G, 'ddl', { get_schema = get_schema })
     rawset(_G, 'get_composite_data', get_composite_data)
+    rawset(_G, 'get_rows_as_multi_result', get_rows_as_multi_result)
+    rawset(_G, 'get_array_as_multi_result', get_array_as_multi_result)
+    rawset(_G, 'get_array_as_single_result', get_array_as_single_result)
+    rawset(_G, 'returning_error', returning_error)
     rawset(_G, 'setup_retrying_function', setup_retrying_function)
     rawset(_G, 'retrying_function', retrying_function)
 

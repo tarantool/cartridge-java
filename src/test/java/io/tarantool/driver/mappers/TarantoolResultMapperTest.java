@@ -2,16 +2,12 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.CustomTupleResult;
-import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolTupleResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
-import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
@@ -19,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TarantoolResultMapperTest {
     @Test
@@ -50,8 +45,7 @@ class TarantoolResultMapperTest {
         defaultMapper.registerObjectConverter(CustomTuple.class, ArrayValue.class, t ->
                 ValueFactory.newArray(ValueFactory.newInteger(t.getId()), ValueFactory.newString(t.getName())));
         DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
-        TupleResultMapperFactory<CustomTuple> mapperFactory = mapperFactoryFactory
-                .tupleResultMapperFactory(CustomTuple.class);
+        TupleResultMapperFactory<CustomTuple> mapperFactory = mapperFactoryFactory.tupleResultMapperFactory();
         TarantoolResultMapper<CustomTuple> mapper = mapperFactory.withTupleValueConverter(v -> {
                 CustomTuple tuple = new CustomTuple();
                 List<Value> values = v.list();

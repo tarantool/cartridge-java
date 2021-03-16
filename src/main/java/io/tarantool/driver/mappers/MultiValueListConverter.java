@@ -4,6 +4,7 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -11,16 +12,26 @@ import java.util.stream.Collectors;
  *
  * @author Alexey Kuzin
  */
-public class MultiValueListConverter<T> implements ValueConverter<ArrayValue, List<T>> {
+public class MultiValueListConverter<T, R extends List<T>, V extends Value> implements ValueConverter<ArrayValue, R> {
 
-    private final ValueConverter<Value, T> valueConverter;
+    private final ValueConverter<V, T> valueConverter;
+    private final Supplier<R> containerSupplier;
 
-    public MultiValueListConverter(ValueConverter<Value, T> valueConverter) {
+    /**
+     * Basic constructor
+     *
+     * @param valueConverter converter for result items
+     * @param containerSupplier supplier for an empty collection of the result type
+     */
+    public MultiValueListConverter(ValueConverter<V, T> valueConverter, Supplier<R> containerSupplier) {
         this.valueConverter = valueConverter;
+        this.containerSupplier = containerSupplier;
     }
 
     @Override
-    public List<T> fromValue(ArrayValue value) {
-        return value.list().stream().map(valueConverter::fromValue).collect(Collectors.toList());
+    public R fromValue(ArrayValue value) {
+        return value.list().stream()
+                .map(v -> valueConverter.fromValue((V) v))
+                .collect(Collectors.toCollection(containerSupplier));
     }
 }
