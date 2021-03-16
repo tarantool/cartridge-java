@@ -314,7 +314,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
 
         MessagePackValueMapper valueMapper = client.getConfig().getMessagePackMapper();
         CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>> mapper =
-                client.getResultMapperFactoryFactory().singleValueResultMapperFactory(TestComposite.class)
+                client.getResultMapperFactoryFactory().<TestComposite>singleValueResultMapperFactory()
                         .withSingleValueResultConverter(v -> {
                             Map<String, Object> valueMap = valueMapper.fromValue(v);
                             TestComposite composite = new TestComposite();

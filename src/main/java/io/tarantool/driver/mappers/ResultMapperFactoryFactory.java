@@ -45,30 +45,12 @@ public interface ResultMapperFactoryFactory {
     <T> TupleResultMapperFactory<T> tupleResultMapperFactory();
 
     /**
-     * Create a factory for mapping Tarantool server protocol result to a list of tuples as {@link TarantoolResult}
-     *
-     * @param <T> target tuple type
-     * @param tupleClass target tuple class
-     * @return new or existing factory instance
-     */
-    <T> TupleResultMapperFactory<T> tupleResultMapperFactory(Class<T> tupleClass);
-
-    /**
      * Create a factory for mapping stored function call results to {@link SingleValueCallResult}
      *
      * @param <T> target result type
      * @return new or existing factory instance
      */
     <T> SingleValueResultMapperFactory<T> singleValueResultMapperFactory();
-
-    /**
-     * Create a factory for mapping stored function call results to {@link SingleValueCallResult}
-     *
-     * @param <T> target result type
-     * @param resultClass target result class
-     * @return new or existing factory instance
-     */
-    <T> SingleValueResultMapperFactory<T> singleValueResultMapperFactory(Class<T> resultClass);
 
     /**
      * Create a factory for mapping stored function call result to {@link SingleValueCallResult} containing a list
@@ -80,16 +62,6 @@ public interface ResultMapperFactoryFactory {
     <T> SingleValueTarantoolResultMapperFactory<T> singleValueTarantoolResultMapperFactory();
 
     /**
-     * Create a factory for mapping stored function call result to {@link SingleValueCallResult} containing a list
-     * of tuples mapped to {@link TarantoolResult}
-     *
-     * @param <T> target tuple type
-     * @param tupleClass target tuple class
-     * @return new or existing factory instance
-     */
-    <T> SingleValueTarantoolResultMapperFactory<T> singleValueTarantoolResultMapperFactory(Class<T> tupleClass);
-
-    /**
      * Create a factory for mapping stored function call results to {@link MultiValueCallResult}
      *
      * @param <T> target result content type
@@ -99,16 +71,6 @@ public interface ResultMapperFactoryFactory {
     <T, R extends List<T>> MultiValueResultMapperFactory<T, R> multiValueResultMapperFactory();
 
     /**
-     * Create a factory for mapping stored function call results to {@link MultiValueCallResult}
-     *
-     * @param <T> target result type
-     * @param <R> target result type
-     * @param resultClass target result class
-     * @return new or existing factory instance
-     */
-    <T, R extends List<T>> MultiValueResultMapperFactory<T, R> multiValueResultMapperFactory(Class<R> resultClass);
-
-    /**
      * Create a factory for mapping stored function call result to {@link MultiValueCallResult} containing a list
      * of tuples mapped to {@link TarantoolResult}
      *
@@ -116,15 +78,4 @@ public interface ResultMapperFactoryFactory {
      * @return new or existing factory instance
      */
     <T> MultiValueTarantoolResultMapperFactory<T> multiValueTarantoolResultMapperFactory();
-
-    /**
-     * Create a factory for mapping stored function call result to {@link MultiValueCallResult} containing a list
-     * of tuples mapped to {@link TarantoolResult}
-     *
-     * @param <T> target tuple type
-     * @param tupleClass target tuple class
-     * @return new or existing factory instance
-     */
-    <T> MultiValueTarantoolResultMapperFactory<T> multiValueTarantoolResultMapperFactory(
-            Class<? extends TarantoolResult<T>> tupleClass);
 }

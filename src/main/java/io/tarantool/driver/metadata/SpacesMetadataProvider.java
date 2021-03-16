@@ -6,8 +6,6 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
-import io.tarantool.driver.mappers.SingleValueTarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
 
@@ -51,15 +49,13 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
         return spaces.thenCombine(indexes, SpacesTarantoolMetadataContainer::new);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> CompletableFuture<TarantoolResult<T>> select(
             String selectCmd,
             ValueConverter<ArrayValue, T> resultConverter,
             Class<? extends SingleValueCallResult<TarantoolResult<T>>> resultClass)
             throws TarantoolClientException {
         CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper =
-                ((SingleValueTarantoolResultMapperFactory<T>)
-                        client.getResultMapperFactoryFactory().singleValueTarantoolResultMapperFactory(resultClass))
+                client.getResultMapperFactoryFactory().<T>singleValueTarantoolResultMapperFactory()
                         .withTarantoolResultConverter(resultConverter, resultClass);
         return client.call(selectCmd, resultMapper);
     }

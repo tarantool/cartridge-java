@@ -7,19 +7,24 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.api.TarantoolResultImpl;
 import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.exceptions.TarantoolServerException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.DefaultTarantoolTupleValueConverter;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
@@ -28,6 +33,7 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.msgpack.value.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +45,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -306,6 +314,9 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void functionAggregateResultViaCallTest() throws ExecutionException, InterruptedException {
+        truncateSpace("test_space");
+        truncateSpace("test_space_to_join");
+
         List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
         TarantoolResult<TarantoolTuple> tuple1 = client.space("test_space").insert(tarantoolTuple).get();
@@ -316,7 +327,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         MessagePackValueMapper valueMapper = client.getConfig().getMessagePackMapper();
         CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>> mapper =
-                client.getResultMapperFactoryFactory().singleValueResultMapperFactory(TestComposite.class)
+                client.getResultMapperFactoryFactory().<TestComposite>singleValueResultMapperFactory()
                         .withSingleValueResultConverter(v -> {
                             Map<String, Object> valueMap = valueMapper.fromValue(v);
                             TestComposite composite = new TestComposite();
@@ -369,5 +380,96 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             }, executor));
         }
         futures.forEach(CompletableFuture::join);
+    }
+
+    @Test
+    public void multiResultWithConverterTest() throws Exception {
+        truncateSpace("test_space");
+
+        TarantoolSpaceMetadata metadata = client.space("test_space").getMetadata();
+        MessagePackMapper mapper = client.getConfig().getMessagePackMapper();
+
+        List<TarantoolTuple> tuples = new ArrayList<>(100);
+        for (int i = 100; i <= 200; i++) {
+            tuples.add(tupleFactory.create(Arrays.asList(123000 + i, null, "Jane Doe " + i, 999 + i)));
+        }
+        CompletableFuture.allOf(
+                tuples.stream()
+                        .map(t -> client.space("test_space").insert(t))
+                        .toArray(CompletableFuture[]::new)
+        ).thenAccept(__ -> {
+            List<TarantoolTuple> result;
+            try {
+                result = client.<TarantoolTuple, ArrayList<TarantoolTuple>>callForMultiResult(
+                        "get_rows_as_multi_result",
+                        Collections.singletonList("test_space"),
+                        ArrayList::new,
+                        v -> new TarantoolTupleImpl(v.asArrayValue(), mapper, metadata)
+                ).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            assertEquals(100, result.size());
+        });
+    }
+
+    @Test
+    public void singleResultWithClassTest() throws ExecutionException, InterruptedException {
+        List<Integer> result = client.callForSingleResult(
+                "get_array_as_single_result",
+                Collections.singletonList(Arrays.asList(1, 2, 3)),
+                (Class<List<Integer>>) (Class<?>) List.class
+        ).get();
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void singleResultWithErrorTest() throws ExecutionException, InterruptedException {
+        Exception thrown = null;
+        try {
+            client.callForSingleResult(
+                    "returning_error",
+                    Collections.singletonList("Some error"),
+                    String.class
+            ).get();
+        } catch (Exception e) {
+            if (!(e.getCause() instanceof TarantoolServerException) &&
+                    !e.getCause().getMessage().contains("Some error")) {
+                throw e;
+            }
+            thrown = e;
+        }
+        assertNotNull(thrown, "Exception was not thrown");
+    }
+
+    @Test
+    public void multiResultWithClassTest() throws ExecutionException, InterruptedException {
+        List<Integer> result = client.callForMultiResult(
+                "get_array_as_multi_result",
+                Collections.singletonList(Arrays.asList(3, 2, 1)),
+                ArrayList::new,
+                Integer.class
+        ).get();
+        assertEquals(Arrays.asList(3, 2, 1), result);
+    }
+
+    @Test
+    public void multiResultWithErrorTest() throws ExecutionException, InterruptedException {
+        Exception thrown = null;
+        try {
+            client.callForMultiResult(
+                    "returning_error",
+                    Collections.singletonList("Some error"),
+                    ArrayList::new,
+                    String.class
+            ).get();
+        } catch (Exception e) {
+            if (!(e.getCause() instanceof TarantoolServerException) &&
+                    !e.getCause().getMessage().contains("Some error")) {
+                throw e;
+            }
+            thrown = e;
+        }
+        assertNotNull(thrown, "Exception was not thrown");
     }
 }

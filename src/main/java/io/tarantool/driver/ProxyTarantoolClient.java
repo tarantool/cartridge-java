@@ -14,6 +14,7 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.DDLMetadataContainerResult;
 import io.tarantool.driver.metadata.DDLTarantoolSpaceMetadataConverter;
 import io.tarantool.driver.metadata.ProxyMetadataProvider;
@@ -24,6 +25,7 @@ import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.utils.Assert;
+import org.msgpack.value.Value;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, proxying all CRUD operations through the
@@ -281,8 +284,21 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
             String functionName,
             List<?> arguments,
             MessagePackObjectMapper argumentsMapper,
-            Class<R> resultClass) throws TarantoolClientException {
-        return client.callForMultiResult(functionName, arguments, argumentsMapper, resultClass);
+            Supplier<R> resultContainerSupplier,
+            Class<T> resultClass) throws TarantoolClientException {
+        return client.callForMultiResult(
+                functionName, arguments, argumentsMapper, resultContainerSupplier, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Supplier<R> resultContainerSupplier,
+            ValueConverter<Value, T> valueConverter) throws TarantoolClientException {
+        return client.callForMultiResult(
+                functionName, arguments, argumentsMapper, resultContainerSupplier, valueConverter);
     }
 
     @Override
@@ -297,9 +313,19 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName,
                                                                           List<?> arguments,
-                                                                          Class<R> resultClass)
+                                                                          Supplier<R> resultContainerSupplier,
+                                                                          Class<T> resultClass)
             throws TarantoolClientException {
-        return client.callForMultiResult(functionName, arguments, resultClass);
+        return client.callForMultiResult(functionName, arguments, resultContainerSupplier, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName,
+                                                                          List<?> arguments,
+                                                                          Supplier<R> resultContainerSupplier,
+                                                                          ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException {
+        return client.callForMultiResult(functionName, arguments, resultContainerSupplier, valueConverter);
     }
 
     @Override
@@ -311,9 +337,19 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName, Class<R> resultClass)
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName,
+                                                                          Supplier<R> resultContainerSupplier,
+                                                                          Class<T> resultClass)
             throws TarantoolClientException {
-        return client.callForMultiResult(functionName, resultClass);
+        return client.callForMultiResult(functionName, resultContainerSupplier, resultClass);
+    }
+
+    @Override
+    public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(String functionName,
+                                                                          Supplier<R> resultContainerSupplier,
+                                                                          ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException {
+        return client.callForMultiResult(functionName, resultContainerSupplier, valueConverter);
     }
 
     @Override

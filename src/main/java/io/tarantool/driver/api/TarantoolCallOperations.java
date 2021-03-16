@@ -5,9 +5,12 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.ValueConverter;
+import org.msgpack.value.Value;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Aggregates all call operation variants
@@ -272,6 +275,7 @@ public interface TarantoolCallOperations {
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
      * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultContainerSupplier supplier function for new empty result collection
      * @param resultClass     target result entity class
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -280,7 +284,29 @@ public interface TarantoolCallOperations {
             String functionName,
             List<?> arguments,
             MessagePackObjectMapper argumentsMapper,
-            Class<R> resultClass)
+            Supplier<R> resultContainerSupplier,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param resultContainerSupplier supplier function for new empty result collection
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            Supplier<R> resultContainerSupplier,
+            ValueConverter<Value, T> valueConverter)
             throws TarantoolClientException;
 
     /**
@@ -309,6 +335,7 @@ public interface TarantoolCallOperations {
      * @param <R>             target result type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
+     * @param resultContainerSupplier supplier function for new empty result collection
      * @param resultClass     target result entity class
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -316,7 +343,27 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
             String functionName,
             List<?> arguments,
-            Class<R> resultClass)
+            Supplier<R> resultContainerSupplier,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param resultContainerSupplier supplier function for new empty result collection
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            List<?> arguments,
+            Supplier<R> resultContainerSupplier,
+            ValueConverter<Value, T> valueConverter)
             throws TarantoolClientException;
 
     /**
@@ -342,13 +389,32 @@ public interface TarantoolCallOperations {
      * @param <T>             target result content type
      * @param <R>             target result type
      * @param functionName    function name, must not be null or empty
+     * @param resultContainerSupplier supplier function for new empty result collection
      * @param resultClass     target result entity class
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
             String functionName,
-            Class<R> resultClass)
+            Supplier<R> resultContainerSupplier,
+            Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. All multi-return result items will be put into a list
+     *
+     * @param <T>             target result content type
+     * @param <R>             target result type
+     * @param functionName    function name, must not be null or empty
+     * @param resultContainerSupplier supplier function for new empty result collection
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+            String functionName,
+            Supplier<R> resultContainerSupplier,
+            ValueConverter<Value, T> valueConverter)
             throws TarantoolClientException;
 
     /**

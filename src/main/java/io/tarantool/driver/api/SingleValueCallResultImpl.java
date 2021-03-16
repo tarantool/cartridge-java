@@ -6,13 +6,14 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 /**
- * Basic {@link SingleValueCallResult} implementation
+ * Basic {@link SingleValueCallResult} implementation. If the result array contains two values where the first is
+ * {@code null}, the second is treated as a formatted error or an error message.
  *
  * @author Alexey Kuzin
  */
 public class SingleValueCallResultImpl<T> implements SingleValueCallResult<T> {
 
-    private T value;
+    private final T value;
 
     public SingleValueCallResultImpl(ArrayValue result, ValueConverter<Value, T> valueConverter) {
         if (result == null) {

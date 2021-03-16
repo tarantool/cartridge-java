@@ -8,7 +8,8 @@ import org.msgpack.value.Value;
 import java.util.List;
 
 /**
- * Basic {@link MultiValueCallResult} implementation
+ * Basic {@link MultiValueCallResult} implementation. If the result array contains two values where the first is
+ * {@code null}, the second is treated as a formatted error or an error message.
  *
  * @author Alexey Kuzin
  */
@@ -23,7 +24,19 @@ public class MultiValueCallResultImpl<T, R extends List<T>> implements MultiValu
         if (!result.isArrayValue()) {
             throw new TarantoolFunctionCallException("Function call result is not a MessagePack array");
         }
-        this.value = valueConverter.fromValue(result.asArrayValue());
+        ArrayValue resultArray = result.asArrayValue();
+        if (resultArray.size() == 2 && (resultArray.get(0).isNilValue() && !resultArray.get(1).isNilValue())) {
+            // [nil, "Error msg..."] or [nil, {str="Error msg...", stack="..."}]
+            if (resultArray.get(1).isMapValue()) {
+                // Probably a formatted error
+                throw new TarantoolFunctionCallException(resultArray.get(1).asMapValue());
+            } else {
+                throw new TarantoolFunctionCallException(resultArray.get(1).toString());
+            }
+        } else {
+            // result
+            this.value = valueConverter.fromValue(result.asArrayValue());
+        }
     }
 
     @Override
