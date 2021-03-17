@@ -18,4 +18,12 @@ public interface TarantoolField extends Packable {
      * @return value
      */
     <O> O getValue(Class<O> targetClass, MessagePackValueMapper mapper);
+
+    /**
+     * Get the field value, possibly converted to some Java type
+     *
+     * @param mapper mapper for converting MessagePack entity to Java object
+     * @return value
+     */
+    Object getValue(MessagePackValueMapper mapper);
 }

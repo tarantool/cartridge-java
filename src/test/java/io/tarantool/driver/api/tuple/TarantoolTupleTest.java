@@ -140,9 +140,12 @@ public class TarantoolTupleTest {
         TarantoolTuple convertedTuple = new TarantoolTupleImpl(value.asArrayValue(), mapper);
 
         assertEquals("Apple", convertedTuple.getString(0));
+        assertEquals(String.class, convertedTuple.getObject(0).get().getClass());
         assertEquals(123456, convertedTuple.getInteger(1));
         assertEquals(123456L, convertedTuple.getLong(1));
+        assertEquals(Integer.class, convertedTuple.getObject(1).get().getClass());
         List<Object> resultList = convertedTuple.getList(2);
+        assertEquals(ArrayList.class, convertedTuple.getObject(2).get().getClass());
         assertEquals("lol", resultList.get(0));
         assertEquals(nestedMap, resultList.get(1));
     }

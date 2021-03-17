@@ -25,6 +25,11 @@ public final class TarantoolNullField implements TarantoolField {
     }
 
     @Override
+    public Object getValue(MessagePackValueMapper mapper) {
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

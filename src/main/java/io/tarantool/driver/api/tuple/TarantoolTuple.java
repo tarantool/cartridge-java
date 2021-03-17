@@ -38,21 +38,35 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
 
     /**
      * Get a tuple field value by its position specifying the target value type
-     * @param fieldPosition the field position from the the tuple start, starting from 0
-     * @param objectClass the target value type class
-     * @param <O> the target value type
-     * @return nullable value of a field wrapped in optional
+     * @param fieldPosition field position from the the tuple start, starting from 0
+     * @param objectClass target value type class
+     * @param <O> target value type
+     * @return nullable value of a field wrapped in Optional, possibly converted to a Java type
      */
     <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass);
 
     /**
      * Get a tuple field value by its name specifying the target value type
-     * @param fieldName the field name, should not be null
-     * @param objectClass the target value type class
-     * @param <O> the target value type
-     * @return nullable value of a field wrapped in optional
+     * @param fieldName field name, should not be null
+     * @param objectClass target value type class
+     * @param <O> target value type
+     * @return nullable value of a field wrapped in Optional, possibly converted to a Java type
      */
     <O> Optional<O> getObject(String fieldName, Class<O> objectClass);
+
+    /**
+     * Get a tuple field value as a raw object
+     * @param fieldPosition field position from the the tuple start, starting from 0
+     * @return nullable value of a field wrapped in Optional
+     */
+    Optional<?> getObject(int fieldPosition);
+
+    /**
+     * Get a tuple field value as a raw object
+     * @param fieldName field name, should not be null
+     * @return nullable value of a field wrapped in Optional
+     */
+    Optional<?> getObject(String fieldName);
 
     /**
      * Get the number of fields in this tuple

@@ -167,6 +167,18 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public Optional<?> getObject(int fieldPosition) {
+        Optional<TarantoolField> field = getField(fieldPosition);
+        return field.map(tarantoolField -> tarantoolField.getValue(mapper));
+    }
+
+    @Override
+    public Optional<?> getObject(String fieldName) {
+        Optional<TarantoolField> field = getField(fieldName);
+        return field.map(tarantoolField -> tarantoolField.getValue(mapper));
+    }
+
+    @Override
     public Iterator<TarantoolField> iterator() {
         return fields.iterator();
     }

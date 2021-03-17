@@ -66,6 +66,14 @@ public class TarantoolFieldImpl implements TarantoolField {
     }
 
     @Override
+    public Object getValue(MessagePackValueMapper mapper) {
+        if (value instanceof Value) {
+            return mapper.fromValue((Value) value);
+        }
+        return value;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
