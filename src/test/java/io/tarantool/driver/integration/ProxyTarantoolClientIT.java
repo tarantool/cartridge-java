@@ -383,6 +383,36 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     }
 
     @Test
+    public void singleResultWithConverterTest() throws Exception {
+        truncateSpace("test_space");
+
+        TarantoolSpaceMetadata metadata = client.space("test_space").getMetadata();
+        MessagePackMapper mapper = client.getConfig().getMessagePackMapper();
+
+        List<TarantoolTuple> tuples = new ArrayList<>(100);
+        for (int i = 100; i <= 200; i++) {
+            tuples.add(tupleFactory.create(Arrays.asList(123000 + i, null, "Jane Doe " + i, 999 + i)));
+        }
+        CompletableFuture.allOf(
+                tuples.stream()
+                        .map(t -> client.space("test_space").insert(t))
+                        .toArray(CompletableFuture[]::new)
+        ).thenAccept(__ -> {
+            List<Integer> result;
+            try {
+                result = client.callForSingleResult(
+                        "get_array_as_single_result",
+                        Collections.singletonList(Arrays.asList(1, 2, 3)),
+                        v -> mapper.fromValue(v.asArrayValue(), (Class<List<Integer>>) (Class<?>) List.class)
+                ).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            assertEquals(100, result.size());
+        });
+    }
+
+    @Test
     public void multiResultWithConverterTest() throws Exception {
         truncateSpace("test_space");
 

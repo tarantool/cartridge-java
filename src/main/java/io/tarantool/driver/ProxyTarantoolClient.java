@@ -247,6 +247,16 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
             String functionName,
             List<?> arguments,
             MessagePackObjectMapper argumentsMapper,
+            ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, arguments, argumentsMapper, valueConverter);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
             CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
             throws TarantoolClientException {
         return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
@@ -256,6 +266,14 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> callForSingleResult(String functionName, List<?> arguments, Class<T> resultClass)
             throws TarantoolClientException {
         return client.callForSingleResult(functionName, arguments, resultClass);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(String functionName,
+                                                        List<?> arguments,
+                                                        ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, arguments, valueConverter);
     }
 
     @Override
@@ -270,6 +288,12 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> callForSingleResult(String functionName, Class<T> resultClass)
             throws TarantoolClientException {
         return client.callForSingleResult(functionName, resultClass);
+    }
+
+    @Override
+    public <T> CompletableFuture<T> callForSingleResult(String functionName, ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException {
+        return client.callForSingleResult(functionName, valueConverter);
     }
 
     @Override

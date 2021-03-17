@@ -192,6 +192,25 @@ public interface TarantoolCallOperations {
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
      * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
+     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
      * @param resultMapper    mapper for result conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -227,6 +246,23 @@ public interface TarantoolCallOperations {
      * @param <T>             target result content type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            ValueConverter<Value, T> valueConverter)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param arguments       list of function arguments
      * @param resultMapper    mapper for result conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -250,6 +286,21 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
             String functionName,
             Class<T> resultClass)
+            throws TarantoolClientException;
+
+    /**
+     * Execute a function defined on Tarantool instance. The first item of the call result will be interpreted as a
+     * value, and the second -- as an error
+     *
+     * @param <T>             target result content type
+     * @param functionName    function name, must not be null or empty
+     * @param valueConverter  MessagePack value to entity converter for each result item
+     * @return some result
+     * @throws TarantoolClientException if the client is not connected or some other error occurred
+     */
+    <T> CompletableFuture<T> callForSingleResult(
+            String functionName,
+            ValueConverter<Value, T> valueConverter)
             throws TarantoolClientException;
 
     /**

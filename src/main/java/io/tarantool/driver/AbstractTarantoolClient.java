@@ -283,6 +283,14 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
+    public <S> CompletableFuture<S> callForSingleResult(String functionName,
+                                                        List<?> arguments,
+                                                        ValueConverter<Value, S> valueConverter)
+            throws TarantoolClientException {
+        return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), valueConverter);
+    }
+
+    @Override
     public <S> CompletableFuture<S> callForSingleResult(
             String functionName,
             List<?> arguments,
@@ -294,6 +302,12 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     public <S> CompletableFuture<S> callForSingleResult(String functionName, Class<S> resultClass)
             throws TarantoolClientException {
         return callForSingleResult(functionName, Collections.emptyList(), resultClass);
+    }
+
+    @Override
+    public <S> CompletableFuture<S> callForSingleResult(String functionName, ValueConverter<Value, S> valueConverter)
+            throws TarantoolClientException {
+        return callForSingleResult(functionName, Collections.emptyList(), valueConverter);
     }
 
     @Override
@@ -312,6 +326,17 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, argumentsMapper,
                 mapperFactoryFactory.getDefaultSingleValueMapper(config.getMessagePackMapper(), resultClass));
+    }
+
+    @Override
+    public <S> CompletableFuture<S> callForSingleResult(
+            String functionName,
+            List<?> arguments,
+            MessagePackObjectMapper argumentsMapper,
+            ValueConverter<Value, S> valueConverter)
+            throws TarantoolClientException {
+        return callForSingleResult(functionName, arguments, argumentsMapper,
+                mapperFactoryFactory.getSingleValueResultMapper(valueConverter));
     }
 
     @Override
