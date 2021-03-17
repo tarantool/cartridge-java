@@ -108,6 +108,13 @@ public class TarantoolTupleTest {
                 new TarantoolFieldImpl(ValueFactory.newString("Book 2"))));
         assertDoesNotThrow(() -> tupleWithSpaceMetadata.putObject("second", 222));
 
+        // field exists and can be converted
+        assertTrue(tupleWithSpaceMetadata.canGetObject("first", String.class));
+        // mapper does not have converter StringValue -> Integer
+        assertFalse(tupleWithSpaceMetadata.canGetObject("first", Integer.class));
+        // non-existing field
+        assertFalse(tupleWithSpaceMetadata.canGetObject("non_existing", Integer.class));
+
         assertTrue(tupleWithSpaceMetadata.getField("first").isPresent());
         assertEquals("Book 2", tupleWithSpaceMetadata.getString("first"));
 
@@ -123,7 +130,6 @@ public class TarantoolTupleTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void convertStructures() {
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         MessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
@@ -139,12 +145,19 @@ public class TarantoolTupleTest {
         Value value = tarantoolTuple.toMessagePackValue(mapper);
         TarantoolTuple convertedTuple = new TarantoolTupleImpl(value.asArrayValue(), mapper);
 
+        // field exists and can be converted
+        assertTrue(convertedTuple.canGetObject(0, String.class));
+        // mapper does not have converter StringValue -> Integer
+        assertFalse(convertedTuple.canGetObject(0, Integer.class));
+        // non-existing field
+        assertFalse(convertedTuple.canGetObject(10, Integer.class));
+
         assertEquals("Apple", convertedTuple.getString(0));
         assertEquals(String.class, convertedTuple.getObject(0).get().getClass());
         assertEquals(123456, convertedTuple.getInteger(1));
         assertEquals(123456L, convertedTuple.getLong(1));
         assertEquals(Integer.class, convertedTuple.getObject(1).get().getClass());
-        List<Object> resultList = convertedTuple.getList(2);
+        List<?> resultList = convertedTuple.getList(2);
         assertEquals(ArrayList.class, convertedTuple.getObject(2).get().getClass());
         assertEquals("lol", resultList.get(0));
         assertEquals(nestedMap, resultList.get(1));

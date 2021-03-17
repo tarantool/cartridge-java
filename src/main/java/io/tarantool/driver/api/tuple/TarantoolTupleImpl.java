@@ -29,11 +29,11 @@ import java.util.function.Consumer;
  */
 public class TarantoolTupleImpl implements TarantoolTuple {
 
-    private TarantoolSpaceMetadata spaceMetadata;
+    private final TarantoolSpaceMetadata spaceMetadata;
 
-    private List<TarantoolField> fields;
+    private final List<TarantoolField> fields;
 
-    private MessagePackMapper mapper;
+    private final MessagePackMapper mapper;
 
     /**
      * Constructor for empty tuple
@@ -72,8 +72,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * @param mapper provides conversion between MessagePack values and Java objects
      * @param metadata provides information about the target space
      */
-    public TarantoolTupleImpl(Collection<?> values, MessagePackMapper mapper,
-                              TarantoolSpaceMetadata metadata) {
+    public TarantoolTupleImpl(Collection<?> values, MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
         Assert.notNull(mapper, "MessagePack mapper should not be null");
 
         this.mapper = mapper;
@@ -161,9 +160,21 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public boolean canGetObject(int fieldPosition, Class<?> objectClass) {
+        Optional<TarantoolField> field = getField(fieldPosition);
+        return field.map(tarantoolField -> tarantoolField.canConvertValue(objectClass, mapper)).orElse(false);
+    }
+
+    @Override
     public <O> Optional<O> getObject(String fieldName, Class<O> objectClass) {
         Optional<TarantoolField> field = getField(fieldName);
         return field.map(tarantoolField -> tarantoolField.getValue(objectClass, mapper));
+    }
+
+    @Override
+    public boolean canGetObject(String fieldName, Class<?> objectClass) {
+        Optional<TarantoolField> field = getField(fieldName);
+        return field.map(tarantoolField -> tarantoolField.canConvertValue(objectClass, mapper)).orElse(false);
     }
 
     @Override
@@ -344,22 +355,22 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public List getList(int fieldPosition) {
+    public List<?> getList(int fieldPosition) {
         return getObject(fieldPosition, List.class).orElse(null);
     }
 
     @Override
-    public List getList(String fieldName) {
+    public List<?> getList(String fieldName) {
         return getObject(fieldName, List.class).orElse(null);
     }
 
     @Override
-    public Map getMap(int fieldPosition) {
+    public Map<?, ?> getMap(int fieldPosition) {
         return getObject(fieldPosition, Map.class).orElse(null);
     }
 
     @Override
-    public Map getMap(String fieldName) {
+    public Map<?, ?> getMap(String fieldName) {
         return getObject(fieldName, Map.class).orElse(null);
     }
 

@@ -30,6 +30,11 @@ public final class TarantoolNullField implements TarantoolField {
     }
 
     @Override
+    public boolean canConvertValue(Class<?> targetClass, MessagePackValueMapper mapper) {
+        return true;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

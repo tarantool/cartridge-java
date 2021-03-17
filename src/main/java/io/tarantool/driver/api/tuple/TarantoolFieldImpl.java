@@ -74,6 +74,14 @@ public class TarantoolFieldImpl implements TarantoolField {
     }
 
     @Override
+    public boolean canConvertValue(Class<?> targetClass, MessagePackValueMapper mapper) {
+        if (value instanceof Value) {
+            return mapper.getValueConverter(((Value) value).getClass(), targetClass).isPresent();
+        }
+        return true;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

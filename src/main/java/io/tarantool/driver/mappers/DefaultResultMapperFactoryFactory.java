@@ -67,14 +67,16 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
     public
     <T> CallResultMapper<T, SingleValueCallResult<T>>
     getSingleValueResultMapper(ValueConverter<Value, T> valueConverter) {
-        return this.<T>singleValueResultMapperFactory().withSingleValueResultConverter(valueConverter);
+        return this.<T>singleValueResultMapperFactory().withSingleValueResultConverter(
+                valueConverter, (Class<SingleValueCallResult<T>>) (Class<?>) SingleValueCallResult.class);
     }
 
     public
     <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
     getMultiValueResultMapper(Supplier<R> containerSupplier, ValueConverter<Value, T> valueConverter) {
-        return this.<T, R>multiValueResultMapperFactory()
-                .withMultiValueResultConverter(new MultiValueListConverter<>(valueConverter, containerSupplier));
+        return this.<T, R>multiValueResultMapperFactory().withMultiValueResultConverter(
+                new MultiValueListConverter<>(valueConverter, containerSupplier),
+                (Class<MultiValueCallResult<T, R>>) (Class<?>) MultiValueCallResult.class);
     }
 
     public
