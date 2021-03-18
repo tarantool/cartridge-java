@@ -114,6 +114,17 @@ class DefaultMessagePackMapperTest {
         complexMap.get(2).put(5, "It's Wednesday");
         complexMap.get(2).put(6, "My dudes");
         assertEquals(complexMap, mapper.fromValue(mapper.toValue(complexMap)));
+
+        // map with nil values
+        MapValue nilMap = ValueFactory.newMap(
+                ValueFactory.newString("a"), ValueFactory.newInteger(123),
+                ValueFactory.newString("b"), ValueFactory.newNil(),
+                ValueFactory.newString("c"), ValueFactory.newInteger(456)
+        );
+        Map<String, Integer> notNilMap = new HashMap<>();
+        notNilMap.put("a", 123);
+        notNilMap.put("c", 456);
+        assertEquals(notNilMap, mapper.fromValue(nilMap));
     }
 
     @Test

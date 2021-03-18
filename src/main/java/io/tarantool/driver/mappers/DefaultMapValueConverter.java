@@ -21,6 +21,7 @@ public class DefaultMapValueConverter implements ValueConverter<MapValue, Map<?,
     @Override
     public Map<?, ?> fromValue(MapValue value) {
         return value.map().entrySet().stream()
+                .filter(e -> !e.getValue().isNilValue())
                 .collect(Collectors.toMap(e -> mapper.fromValue(e.getKey()), e -> mapper.fromValue(e.getValue())));
     }
 }
