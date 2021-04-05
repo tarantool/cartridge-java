@@ -234,7 +234,7 @@
         <dependency>
             <groupId>io.tarantool</groupId>
             <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
