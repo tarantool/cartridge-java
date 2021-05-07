@@ -200,7 +200,7 @@ public class ConnectionIT {
                     }, executor));
                 }
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture<?>[]{}))
-                        .get(1000, TimeUnit.MILLISECONDS);
+                        .get(5000, TimeUnit.MILLISECONDS);
             }
         });
     }

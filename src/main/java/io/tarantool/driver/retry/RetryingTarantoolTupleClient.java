@@ -1,4 +1,4 @@
-package io.tarantool.driver;
+package io.tarantool.driver.retry;
 
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
@@ -42,8 +42,7 @@ public class RetryingTarantoolTupleClient
     }
 
     @Override
-    protected
-    RetryingTarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>>
+    protected RetryingTarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>>
     spaceOperations(TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedSpaceOperations,
                     RequestRetryPolicyFactory retryPolicyFactory, Executor executor) {
         return new RetryingTarantoolSpaceOperations<>(decoratedSpaceOperations, retryPolicyFactory, executor);

@@ -2,6 +2,7 @@ local vshard = require('vshard')
 local cartridge_pool = require('cartridge.pool')
 local cartridge_rpc = require('cartridge.rpc')
 local fiber = require('fiber')
+local log = require('log')
 
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
@@ -21,8 +22,9 @@ end
 
 local function retrying_function()
     if (retries_holder.attempts and retries_holder.attempts > 0) then
+        log.info("retrying_function attempts = " .. retries_holder.attempts)
         retries_holder.attempts = retries_holder.attempts - 1
-        return nil, "Unsuccessful attempt"
+        return nil, "Unsuccessful attempt " .. retries_holder.attempts
     else
         return "Success"
     end
@@ -50,13 +52,17 @@ local function returning_error(message)
     return nil, message
 end
 
+local function raising_error(message)
+    error("Test error: raising_error() called")
+end
+
 local function reset_request_counters()
     box.space.request_counters:replace({1, 0})
 end
 
 local function long_running_function(seconds_to_sleep)
     box.space.request_counters:update(1, {{'+', 'count', 1}})
-    require('log').info('Executing long-running function' .. ' ' .. tostring(box.space.request_counters:get(1)[2]))
+    log.info('Executing long-running function ' .. tostring(box.space.request_counters:get(1)[2]))
     if seconds_to_sleep then fiber.sleep(seconds_to_sleep) end
     return true
 end
@@ -83,6 +89,7 @@ local function init(opts)
     rawset(_G, 'returning_error', returning_error)
     rawset(_G, 'setup_retrying_function', setup_retrying_function)
     rawset(_G, 'retrying_function', retrying_function)
+    rawset(_G, 'raising_error', raising_error)
 
     rawset(_G, 'reset_request_counters', reset_request_counters)
     rawset(_G, 'long_running_function', long_running_function)

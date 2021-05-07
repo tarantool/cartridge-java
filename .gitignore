@@ -1,4 +1,6 @@
 target/
 .idea/
+.rocks/
+tmp/
 *.iml
 .DS_Store

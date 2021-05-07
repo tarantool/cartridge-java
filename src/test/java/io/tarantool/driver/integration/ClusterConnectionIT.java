@@ -2,10 +2,10 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
-import io.tarantool.driver.RetryingTarantoolTupleClient;
+import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
-import io.tarantool.driver.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.TarantoolConnection;
@@ -177,6 +177,13 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 "long_running_function", Collections.singletonList(0.5), Boolean.class);
         CompletableFuture<Boolean> request2 = client.callForSingleResult(
                 "long_running_function", Collections.singletonList(0.5), Boolean.class);
+
+        //wait until connections are created
+        int timeoutCounter = 10;
+        while (connections.size() == 0 && timeoutCounter > 0) {
+            Thread.sleep(100);
+            timeoutCounter--;
+        }
 
         // close one connection
         connections.get(0).close();

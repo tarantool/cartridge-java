@@ -1,4 +1,4 @@
-package io.tarantool.driver;
+package io.tarantool.driver.retry;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexey Kuzin
