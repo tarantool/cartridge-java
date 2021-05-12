@@ -1,6 +1,5 @@
 package io.tarantool.driver.integration;
 
-import org.junit.ClassRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
@@ -10,13 +9,12 @@ abstract class SharedCartridgeContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedCartridgeContainer.class);
 
-    @ClassRule
     protected static final TarantoolCartridgeContainer container =
             new TarantoolCartridgeContainer(
-            "cartridge/instances.yml",
-            "cartridge/topology.lua")
-            .withDirectoryBinding("cartridge")
-            .withLogConsumer(new Slf4jLogConsumer(logger));
+                    "cartridge/instances.yml",
+                    "cartridge/topology.lua")
+                    .withDirectoryBinding("cartridge")
+                    .withLogConsumer(new Slf4jLogConsumer(logger));
 
     protected static void startCluster() {
         if (!container.isRunning()) {

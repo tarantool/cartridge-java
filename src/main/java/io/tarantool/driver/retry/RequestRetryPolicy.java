@@ -34,8 +34,9 @@ public interface RequestRetryPolicy {
     boolean canRetryRequest(Throwable throwable);
 
     /**
-     * Timeout for each retry attempt.
-     * @return timeout, in milliseconds
+     * Get timeout value for one retry attempt. The default value is 1 hour.
+     *
+     * @return timeout value (ms), should be greater or equal to 0
      */
     default long getRequestTimeout() {
         return TimeUnit.HOURS.toMillis(1);
@@ -43,8 +44,9 @@ public interface RequestRetryPolicy {
 
     /**
      * Wrap a generic operation taking an arbitrary number of arguments and returning a {@link CompletableFuture}.
-     * See {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy} and
-     * {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy} for examples of implementation.
+     *
+     * Each operation attempt is limited with a timeout returned by {@link #getRequestTimeout()}.
+     * See {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy} for example of implementation.
      *
      * @param operation supplier for the operation to perform. Must return a new operation instance
      * @param executor  executor in which the retry callbacks will be scheduled

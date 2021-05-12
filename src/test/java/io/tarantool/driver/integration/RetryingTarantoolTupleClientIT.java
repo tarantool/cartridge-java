@@ -2,11 +2,11 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
-import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
+import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +54,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
         return new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies.byNumberOfAttempts(
-                    retries, e -> e.getMessage().contains("Unsuccessful attempt")
+                        retries, e -> e.getMessage().contains("Unsuccessful attempt")
                 ).build());
     }
 
@@ -110,11 +110,6 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
 
         client.call("reset_request_counters");
 
-        final int TOTAL_TIMEOUT = 1000;
-        final int PER_REQUEST_TIMEOUT = 100;
-
-        assertTrue(TOTAL_TIMEOUT > PER_REQUEST_TIMEOUT * 3);
-
         AtomicLong counter = new AtomicLong(0);
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies
@@ -122,26 +117,28 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
                             counter.incrementAndGet();
                             return !(e instanceof TarantoolFunctionCallException);
                         })
-                        .withRequestTimeout(PER_REQUEST_TIMEOUT) //requestTimeout
-                        .withOperationTimeout(TOTAL_TIMEOUT)  //operationTimeout
+                        .withRequestTimeout(10) //requestTimeout
+                        .withOperationTimeout(200)  //operationTimeout
                         .build());
 
         CompletableFuture<List<?>> f = retryingClient
-                .call("long_running_function", Collections.singletonList(20));
+                .call("long_running_function", Collections.singletonList(10));
 
-        assertThrows(TimeoutException.class, () -> f.get(500, TimeUnit.MILLISECONDS));
+        assertThrows(TimeoutException.class, () -> f.get(100, TimeUnit.MILLISECONDS));
         assertFalse(f.isDone());
 
-        long counterAfterCompletion = counter.get();
-        assertTrue(counterAfterCompletion > 1,
-                "Request was not executed by policy.");
-        Thread.sleep(1500);
+        // check that request was executed at least 2 times
+        long counterVal = counter.get();
+        assertTrue(counterVal > 1, "Request was not executed by policy.");
+
+        // check that worker continues to execute requests until operationTimeout fires
+        Thread.sleep(100);
+        assertTrue(counter.get() > counterVal, "Future completed too early");
+
         //check that all worker threads has stopped (counter remain unchanged)
-        assertTrue(counterAfterCompletion < counter.get(),
-                "Future completed too early");
-        counterAfterCompletion = counter.get();
-        Thread.sleep(500);
-        assertEquals(counterAfterCompletion, counter.get(),
+        counterVal = counter.get();
+        Thread.sleep(300);
+        assertEquals(counterVal, counter.get(),
                 "Policy continues executing request after timeout");
     }
 }

@@ -178,13 +178,6 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         CompletableFuture<Boolean> request2 = client.callForSingleResult(
                 "long_running_function", Collections.singletonList(0.5), Boolean.class);
 
-        //wait until connections are created
-        int timeoutCounter = 10;
-        while (connections.size() == 0 && timeoutCounter > 0) {
-            Thread.sleep(100);
-            timeoutCounter--;
-        }
-
         // close one connection
         connections.get(0).close();
 

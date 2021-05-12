@@ -44,19 +44,19 @@ public final class TarantoolRequestRetryPolicies {
          * @param requestTimeout   timeout for one retry attempt, in milliseconds
          * @param operationTimeout timeout for the whole operation, in milliseconds
          * @param delay            delay between attempts, in milliseconds
-         * @param callback         function checking whether the given exception may be retried
+         * @param exceptionCheck         function checking whether the given exception may be retried
          */
-        public InfiniteRetryPolicy(long requestTimeout, long operationTimeout, long delay, T callback) {
+        public InfiniteRetryPolicy(long requestTimeout, long operationTimeout, long delay, T exceptionCheck) {
             Assert.state(requestTimeout >= 0, "Timeout must be greater or equal than 0!");
             Assert.state(operationTimeout >= requestTimeout,
                     "Operation timeout must be greater or equal than requestTimeout!");
             Assert.state(delay >= 0, "Delay must be greater or equal than 0!");
-            Assert.notNull(callback, "Callback must not be null!");
+            Assert.notNull(exceptionCheck, "Exception checking callback must not be null!");
 
             this.requestTimeout = requestTimeout;
             this.operationTimeout = operationTimeout;
             this.delay = delay;
-            this.callback = callback;
+            this.callback = exceptionCheck;
         }
 
         @Override
@@ -167,7 +167,7 @@ public final class TarantoolRequestRetryPolicies {
             private long requestTimeout = TimeUnit.HOURS.toMillis(1); //ms
             private long delay; //ms
             private final T callback;
-            private long operationTimeout = TimeUnit.DAYS.toMillis(30);
+            private long operationTimeout = TimeUnit.HOURS.toMillis(1); //ms
 
             /**
              * Basic constructor
@@ -247,7 +247,7 @@ public final class TarantoolRequestRetryPolicies {
             Assert.state(attempts >= 0, "Attempts must be greater or equal than 0!");
             Assert.state(requestTimeout >= 0, "Timeout must be greater or equal than 0!");
             Assert.state(delay >= 0, "Timeout must be greater or equal than 0!");
-            Assert.notNull(exceptionCheck, "Callback must not be null!");
+            Assert.notNull(exceptionCheck, "Exception checking callback must not be null!");
 
             this.attempts = attempts;
             this.requestTimeout = requestTimeout;
