@@ -2,16 +2,27 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
-import io.tarantool.driver.RetryingTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
+import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alexey Kuzin
@@ -43,7 +54,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
         return new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies.byNumberOfAttempts(
-                    retries, e -> e.getMessage().contains("Unsuccessful attempt")
+                        retries, e -> e.getMessage().contains("Unsuccessful attempt")
                 ).build());
     }
 
@@ -53,8 +64,81 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
             // The stored function will fail 3 times
             client.call("setup_retrying_function", Collections.singletonList(3));
 
-            String result = retrying(client, 4).callForSingleResult("retrying_function", String.class).get();
+            String result = retrying(client, 3).callForSingleResult("retrying_function", String.class).get();
             assertEquals("Success", result);
         }
+    }
+
+    @Test
+    void testFailAfterSeveralRetries() throws Exception {
+        try {
+            ProxyTarantoolTupleClient client = setupClient();
+            client.call("setup_retrying_function", Collections.singletonList(3));
+            retrying(client, 2).callForSingleResult("retrying_function", String.class).get();
+            fail("Exception must be thrown after last retry attempt.");
+        } catch (Throwable e) {
+            assertTrue(e.getCause() instanceof TarantoolFunctionCallException);
+        }
+    }
+
+    @Test
+    void testNumberOfAttemptsPolicyFailAfterTimeout() throws Exception {
+        ProxyTarantoolTupleClient client = setupClient();
+
+        client.call("reset_request_counters");
+
+        RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
+                TarantoolRequestRetryPolicies
+                        .byNumberOfAttempts(0)
+                        .withRequestTimeout(1000)
+                        .build());
+
+        try {
+            retryingClient.call("long_running_function", Collections.singletonList(10)).get();
+            fail("Exception must be thrown after timeout.");
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof TimeoutException, "Unexpected exception type: " + e);
+        }
+    }
+
+    /**
+     * This test covers https://github.com/tarantool/cartridge-java/issues/83
+     */
+    @Test
+    void testUnboundPolicyFailsAfterTimeout() throws Exception {
+        ProxyTarantoolTupleClient client = setupClient();
+
+        client.call("reset_request_counters");
+
+        AtomicLong counter = new AtomicLong(0);
+        RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
+                TarantoolRequestRetryPolicies
+                        .unbound(e -> {
+                            counter.incrementAndGet();
+                            return !(e instanceof TarantoolFunctionCallException);
+                        })
+                        .withRequestTimeout(10) //requestTimeout
+                        .withOperationTimeout(200)  //operationTimeout
+                        .build());
+
+        CompletableFuture<List<?>> f = retryingClient
+                .call("long_running_function", Collections.singletonList(10));
+
+        assertThrows(TimeoutException.class, () -> f.get(100, TimeUnit.MILLISECONDS));
+        assertFalse(f.isDone());
+
+        // check that request was executed at least 2 times
+        long counterVal = counter.get();
+        assertTrue(counterVal > 1, "Request was not executed by policy.");
+
+        // check that worker continues to execute requests until operationTimeout fires
+        Thread.sleep(300);
+        assertTrue(counter.get() > counterVal, "Future completed too early");
+
+        //check that all worker threads has stopped (counter remain unchanged)
+        counterVal = counter.get();
+        Thread.sleep(100);
+        assertEquals(counterVal, counter.get(),
+                "Policy continues executing request after timeout");
     }
 }

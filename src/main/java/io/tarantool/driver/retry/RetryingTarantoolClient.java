@@ -1,5 +1,7 @@
-package io.tarantool.driver;
+package io.tarantool.driver.retry;
 
+import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
@@ -29,7 +31,7 @@ import java.util.function.Supplier;
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, allowing to specify a retry policy for
  * all requests made through this client instance.
- *
+ * <p>
  * Retry policy is applied before the possible exception is propagated to the user in the wrapping CompletableFuture.
  * Since that, the timeout specified for waiting the future result, bounds externally the overall operation time.
  *
@@ -47,8 +49,8 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     /**
      * Basic constructor. {@link Executors#newWorkStealingPool()} is used for executor by default.
      *
-     * @param decoratedClient       configured Tarantool client
-     * @param retryPolicyFactory    request retrying policy settings
+     * @param decoratedClient    configured Tarantool client
+     * @param retryPolicyFactory request retrying policy settings
      */
     public RetryingTarantoolClient(TarantoolClient<T, R> decoratedClient,
                                    RequestRetryPolicyFactory retryPolicyFactory) {
@@ -57,9 +59,10 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
 
     /**
      * Basic constructor
-     * @param decoratedClient       configured Tarantool client
-     * @param retryPolicyFactory    request retrying policy settings
-     * @param executor              executor service for retry callbacks
+     *
+     * @param decoratedClient    configured Tarantool client
+     * @param retryPolicyFactory request retrying policy settings
+     * @param executor           executor service for retry callbacks
      */
     public RetryingTarantoolClient(TarantoolClient<T, R> decoratedClient,
                                    RequestRetryPolicyFactory retryPolicyFactory,
@@ -97,9 +100,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     /**
      * Creates a space API implementation instance for the specified space
      *
-     * @param decoratedSpaceOperations  space API implementation form the decorated Tarantool client instance
-     * @param retryPolicyFactory        request retrying policy factory
-     * @param executor                  executor service for retry callbacks
+     * @param decoratedSpaceOperations space API implementation form the decorated Tarantool client instance
+     * @param retryPolicyFactory       request retrying policy factory
+     * @param executor                 executor service for retry callbacks
      * @return space API implementation instance
      */
     protected abstract RetryingTarantoolSpaceOperations<T, R> spaceOperations(

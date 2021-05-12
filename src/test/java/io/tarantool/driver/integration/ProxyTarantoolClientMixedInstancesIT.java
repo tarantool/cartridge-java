@@ -7,11 +7,12 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
@@ -25,7 +26,6 @@ import io.tarantool.driver.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.metadata.TarantoolIndexType;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -198,7 +198,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals("John Doe", tuple.getString(2));
 
-        Conditions conditions = Conditions.equals(0 , 2);
+        Conditions conditions = Conditions.equals(0, 2);
         TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(conditions).get();
 
         assertEquals(1, deleteResult.size());

@@ -1,7 +1,7 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.RequestRetryPolicy;
-import io.tarantool.driver.RequestRetryPolicyFactory;
+import io.tarantool.driver.retry.RequestRetryPolicy;
+import io.tarantool.driver.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;

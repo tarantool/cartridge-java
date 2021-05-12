@@ -1,6 +1,6 @@
-package io.tarantool.driver;
+package io.tarantool.driver.retry;
 
-import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.ConnectionSelectionStrategy;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +16,7 @@ import java.util.function.Supplier;
  * limiting the retry attempts
  *
  * @author Alexey Kuzin
+ * @author Vladimir Rogach
  */
 public interface RequestRetryPolicy {
     /**
@@ -23,7 +24,7 @@ public interface RequestRetryPolicy {
      * may be performed again (e.g. it is a timeout exception and it indicates only that the current server is
      * overloaded). This may depend not only on the exception type, but also on the other conditions like the allowed
      * number of retries or the maximum request execution time.
-     *
+     * <p>
      * Effective use of the retry policies may be achieved by combining them with multiple server connections and a
      * {@link ConnectionSelectionStrategy}.
      *
@@ -33,45 +34,43 @@ public interface RequestRetryPolicy {
     boolean canRetryRequest(Throwable throwable);
 
     /**
-     * Get timeout value for one operation attempt. The default value is 1 hour.
+     * Get timeout value for one retry attempt. The default value is 1 hour.
      *
-     * @return operation timeout, should be greater or equal to 0
+     * @return timeout value (ms), should be greater or equal to 0
      */
-    default long getOperationTimeout() {
+    default long getRequestTimeout() {
         return TimeUnit.HOURS.toMillis(1);
     }
 
     /**
      * Wrap a generic operation taking an arbitrary number of arguments and returning a {@link CompletableFuture}.
-     * Each operation attempt is limited with a timeout returned by {@link #getOperationTimeout()}
+     *
+     * Each operation attempt is limited with a timeout returned by {@link #getRequestTimeout()}.
+     * See {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy} for example of implementation.
      *
      * @param operation supplier for the operation to perform. Must return a new operation instance
-     * @param executor executor in which the retry callbacks will be scheduled
-     * @param <T> operation result type
+     * @param executor  executor in which the retry callbacks will be scheduled
+     * @param <T>       operation result type
      * @return {@link CompletableFuture} with the same type as the operation result type
      */
     default <T> CompletableFuture<T> wrapOperation(Supplier<CompletableFuture<T>> operation, Executor executor) {
         Assert.notNull(operation, "Operation must not be null");
         Assert.notNull(executor, "Executor must not be null");
 
-        return operation.get().handleAsync((value, ex) -> {
-            if (ex == null) {
-                return value;
-            } else {
-                if (ex instanceof ExecutionException) {
-                    ex = ex.getCause();
+        return CompletableFuture.supplyAsync(() -> {
+            Throwable ex;
+            do {
+                CompletableFuture<T> f = operation.get();
+                try {
+                    return f.get(getRequestTimeout(), TimeUnit.MILLISECONDS);
+                } catch (TimeoutException | InterruptedException e) {
+                    ex = e;
+                } catch (ExecutionException e) {
+                    ex = e.getCause();
                 }
-                while (this.canRetryRequest(ex)) {
-                    try {
-                        return operation.get().get(getOperationTimeout(), TimeUnit.MILLISECONDS);
-                    } catch (InterruptedException | TimeoutException e) {
-                        ex = e;
-                    } catch (ExecutionException e) {
-                        ex = e.getCause();
-                    }
-                }
-                throw new CompletionException(ex);
-            }
+
+            } while (this.canRetryRequest(ex));
+            throw new CompletionException(ex);
         }, executor);
     }
 }
