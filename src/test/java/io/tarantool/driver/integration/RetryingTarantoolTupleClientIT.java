@@ -132,12 +132,12 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         assertTrue(counterVal > 1, "Request was not executed by policy.");
 
         // check that worker continues to execute requests until operationTimeout fires
-        Thread.sleep(100);
+        Thread.sleep(300);
         assertTrue(counter.get() > counterVal, "Future completed too early");
 
         //check that all worker threads has stopped (counter remain unchanged)
         counterVal = counter.get();
-        Thread.sleep(300);
+        Thread.sleep(100);
         assertEquals(counterVal, counter.get(),
                 "Policy continues executing request after timeout");
     }
