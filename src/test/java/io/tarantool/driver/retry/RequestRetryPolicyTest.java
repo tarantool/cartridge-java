@@ -1,5 +1,6 @@
 package io.tarantool.driver.retry;
 
+import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.Test;
 
@@ -104,8 +105,10 @@ class RequestRetryPolicyTest {
             wrappedFuture.get();
         } catch (ExecutionException e) {
             thrown = e;
-            assertEquals(RuntimeException.class, e.getCause().getClass());
-            assertEquals("Should fail 1 times", e.getCause().getMessage());
+            assertEquals(TarantoolAttemptsLimitException.class, e.getCause().getClass());
+            assertEquals("Attempts limit reached: 3", e.getCause().getMessage());
+            assertEquals(RuntimeException.class, e.getCause().getCause().getClass());
+            assertEquals("Should fail 1 times", e.getCause().getCause().getMessage());
         }
         assertNotNull(thrown, "No exception has been thrown");
     }
@@ -121,8 +124,10 @@ class RequestRetryPolicyTest {
             wrappedFuture.get();
         } catch (ExecutionException e) {
             thrown = e;
-            assertEquals(RuntimeException.class, e.getCause().getClass());
-            assertEquals("Should fail 1 times", e.getCause().getMessage());
+            assertEquals(TarantoolAttemptsLimitException.class, e.getCause().getClass());
+            assertEquals("Attempts limit reached: 0", e.getCause().getMessage());
+            assertEquals(RuntimeException.class, e.getCause().getCause().getClass());
+            assertEquals("Should fail 1 times", e.getCause().getCause().getMessage());
         }
         assertNotNull(thrown, "No exception has been thrown");
     }
@@ -134,8 +139,10 @@ class RequestRetryPolicyTest {
         try {
             wrappedFuture.get();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
+            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
+            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
+            assertTrue(e.getCause().getCause() instanceof RuntimeException);
+            assertEquals("Fail", e.getCause().getCause().getMessage());
         }
     }
 
