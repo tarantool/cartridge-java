@@ -1,6 +1,8 @@
 package io.tarantool.driver.retry;
 
+import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +18,7 @@ import java.util.function.Supplier;
  * Class-container for built-in request retry policies
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public final class TarantoolRequestRetryPolicies {
 
@@ -44,7 +47,7 @@ public final class TarantoolRequestRetryPolicies {
          * @param requestTimeout   timeout for one retry attempt, in milliseconds
          * @param operationTimeout timeout for the whole operation, in milliseconds
          * @param delay            delay between attempts, in milliseconds
-         * @param exceptionCheck         function checking whether the given exception may be retried
+         * @param exceptionCheck   function checking whether the given exception may be retried
          */
         public InfiniteRetryPolicy(long requestTimeout, long operationTimeout, long delay, T exceptionCheck) {
             Assert.state(requestTimeout >= 0, "Timeout must be greater or equal than 0!");
@@ -104,7 +107,9 @@ public final class TarantoolRequestRetryPolicies {
                     }
                     timeElapsed = timeElapsed + (System.nanoTime() - tStart) / 1_000_000L;
                     if (timeElapsed >= getOperationTimeout()) {
-                        ex = new TimeoutException("Operation timeout value exceeded after " + timeElapsed + " ms");
+                        ex = new TarantoolTimeoutException(
+                                timeElapsed,
+                                ex);
                         break;
                     }
                 } while (this.canRetryRequest(ex));
@@ -226,6 +231,7 @@ public final class TarantoolRequestRetryPolicies {
             implements RequestRetryPolicy {
 
         private int attempts;
+        private final int limit;
         private final long requestTimeout; //ms
         private final long delay; //ms
         private final T exceptionCheck;
@@ -250,6 +256,7 @@ public final class TarantoolRequestRetryPolicies {
             Assert.notNull(exceptionCheck, "Exception checking callback must not be null!");
 
             this.attempts = attempts;
+            this.limit = attempts;
             this.requestTimeout = requestTimeout;
             this.delay = delay;
             this.exceptionCheck = exceptionCheck;
@@ -269,6 +276,33 @@ public final class TarantoolRequestRetryPolicies {
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public <T> CompletableFuture<T> wrapOperation(Supplier<CompletableFuture<T>> operation, Executor executor) {
+
+            Assert.notNull(operation, "Operation must not be null");
+            Assert.notNull(executor, "Executor must not be null");
+
+            return CompletableFuture.supplyAsync(() -> {
+                Throwable ex;
+                do {
+                    try {
+                        return operation.get().get(getRequestTimeout(), TimeUnit.MILLISECONDS);
+                    } catch (TimeoutException | InterruptedException e) {
+                        ex = e;
+                    } catch (ExecutionException e) {
+                        ex = e.getCause();
+                    }
+                    if (attempts == 0) {
+                        ex = new TarantoolAttemptsLimitException(
+                                limit,
+                                ex);
+                        break;
+                    }
+                } while (this.canRetryRequest(ex));
+                throw new CompletionException(ex);
+            }, executor);
         }
     }
 

@@ -1,6 +1,7 @@
 package io.tarantool.driver.retry;
 
 import io.tarantool.driver.ConnectionSelectionStrategy;
+import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
