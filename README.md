@@ -261,13 +261,21 @@ private ProxyTarantoolTupleClient setupClient() {
 private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
     return new RetryingTarantoolTupleClient(client,
             TarantoolRequestRetryPolicies.byNumberOfAttempts(
-            retries, e -> e.getMessage().contains("Unsuccessful attempt")));
+            retries, e -> e.getMessage().contains("Unsuccessful attempt")).build());
+}
+
+private RetryingTarantoolTupleClient retryingWithNetworkErrors(ProxyTarantoolTupleClient client, int retries) {
+    return new RetryingTarantoolTupleClient(client,
+            TarantoolRequestRetryPolicies.byNumberOfAttempts(
+            retries, TarantoolRequestRetryPolicies.retryNetworkErrors()).build());
 }
 
 ...
 
 try (ProxyTarantoolTupleClient client = setupClient()) {
     String result = retrying(client, 4).callForSingleResult("retrying_function", String.class).get();
+    assertEquals("Success", result);
+    result = retryingWithNetworkErrors(client, 4).callForSingleResult("retrying_function", String.class).get();
     assertEquals("Success", result);
 }
 ```
