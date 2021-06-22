@@ -525,11 +525,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             connectionManager().close();
             timeoutScheduler.shutdownNow();
         } finally {
-            try {
-                eventLoopGroup.shutdownGracefully().sync();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            eventLoopGroup.shutdownGracefully();
         }
     }
 

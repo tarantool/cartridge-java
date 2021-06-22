@@ -6,6 +6,8 @@ import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     private final AtomicBoolean connected = new AtomicBoolean(true);
     private final List<TarantoolConnectionFailureListener> failureListeners = new ArrayList<>();
     private final List<TarantoolConnectionCloseListener> closeListeners = new ArrayList<>();
+
+    private static final  Logger logger = LoggerFactory.getLogger(TarantoolConnection.class);
 
     public TarantoolConnectionImpl(RequestFutureManager requestManager,
                                    TarantoolVersionHolder versionHolder,
@@ -66,6 +70,8 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
             if (!f.isSuccess()) {
                 requestFuture.completeExceptionally(
                         new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
+            } else {
+                logger.debug("Request {} sent, status Success", request.getHeader().getSync());
             }
         });
 
