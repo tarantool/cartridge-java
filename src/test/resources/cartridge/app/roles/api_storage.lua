@@ -32,6 +32,22 @@ local function init_space()
     test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
+    local second_test_space = box.schema.space.create(
+            'second_test_space',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'bucket_id', 'unsigned' },
+                    { 'field1', 'string' },
+                    { 'field2', 'unsigned' },
+                },
+                if_not_exists = true,
+            }
+    )
+
+    second_test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    second_test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
     local test_space_to_join = box.schema.space.create(
             'test_space_to_join',
             {

@@ -37,7 +37,7 @@ end
 
 local function get_rows_as_multi_result(space_name)
     local data = crud.select(space_name).rows
-    return unpack(data, table.maxn(data))
+    return unpack(data)
 end
 
 local function get_array_as_multi_result(numbers)
