@@ -60,9 +60,31 @@ local function reset_request_counters()
     box.space.request_counters:replace({1, 0})
 end
 
-local function long_running_function(seconds_to_sleep)
+local function get_router_name()
+    return string.sub(box.cfg.custom_proc_title, 9)
+end
+
+local function long_running_function(values)
+    local seconds_to_sleep = 0
+    local disabled_router_name = ""
+    if values ~= nil then
+        if type(values) == "table" then
+            values = values or {}
+            seconds_to_sleep = values[1]
+            disabled_router_name = values[2]
+        else
+            seconds_to_sleep = values
+        end
+    end
+
     box.space.request_counters:update(1, {{'+', 'count', 1}})
-    log.info('Executing long-running function ' .. tostring(box.space.request_counters:get(1)[2]))
+    log.info('Executing long-running function ' ..
+            tostring(box.space.request_counters:get(1)[2]) ..
+            "(name: " .. disabled_router_name ..
+            "; sleep: " .. seconds_to_sleep .. ")")
+    if get_router_name() == disabled_router_name then
+        return nil, "Disabled by client; router_name = " ..  disabled_router_name
+    end
     if seconds_to_sleep then fiber.sleep(seconds_to_sleep) end
     return true
 end
@@ -92,6 +114,7 @@ local function init(opts)
     rawset(_G, 'raising_error', raising_error)
 
     rawset(_G, 'reset_request_counters', reset_request_counters)
+    rawset(_G, 'get_router_name', get_router_name)
     rawset(_G, 'long_running_function', long_running_function)
     rawset(_G, 'get_request_count', get_request_count)
 

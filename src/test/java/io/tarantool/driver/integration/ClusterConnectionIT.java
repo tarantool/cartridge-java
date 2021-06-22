@@ -11,12 +11,14 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.TarantoolConnection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.rnorth.ducttape.unreliables.Unreliables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,11 +26,13 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 @Testcontainers
 public class ClusterConnectionIT extends SharedCartridgeContainer {
@@ -72,10 +76,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
         ProxyTarantoolTupleClient client = new ProxyTarantoolTupleClient(clusterClient);
         return new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> {
-                    logger.info("Retrying exception {}", e.getMessage());
-                    return true;
-                }).withDelay(delay).build());
+                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> true).withDelay(delay).build());
     }
 
     @Test
@@ -105,49 +106,80 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)));
 
-        RetryingTarantoolTupleClient client = setupClusterClient(
-                prepareConfig().withConnectTimeout(1000).build(), addressProvider, 10, 0);
+        AtomicReference<Container.ExecResult> result = new AtomicReference<>();
+        AtomicReference<String> nextRouterName = new AtomicReference<>();
 
-        // initiate two long-running requests
-        CompletableFuture<Boolean> request1 = client.callForSingleResult(
-                "long_running_function", Collections.singletonList(0.5), Boolean.class);
-        CompletableFuture<Boolean> request2 = client.callForSingleResult(
-                "long_running_function", Collections.singletonList(0.5), Boolean.class);
+        ClusterTarantoolTupleClient clusterClient =
+                new ClusterTarantoolTupleClient(prepareConfig().withConnectTimeout(1000).build(), addressProvider);
+        ProxyTarantoolTupleClient proxyClient = new ProxyTarantoolTupleClient(clusterClient);
+        RetryingTarantoolTupleClient client = new RetryingTarantoolTupleClient(proxyClient,
+                TarantoolRequestRetryPolicies.byNumberOfAttempts(10, e -> {
+                    // after the first retry, we disconnect the router,
+                    // which we retry, so that the request goes to another connection
+                    if (e.getMessage().contains("Disabled by client")) {
+                        try {
+                            result.set(container.execInContainer(
+                                    "cartridge", "stop", "--run-dir=/tmp/run", "--force", nextRouterName.get()));
+                            assertEquals(0, result.get().getExitCode(), result.get().getStderr());
+                        } catch (IOException | InterruptedException er) {
+                            throw new RuntimeException(er);
+                        }
+                    }
+                    return true;
+                }).withDelay(0).build());
 
-        WaitingConsumer waitingConsumer = new WaitingConsumer();
-        container.followOutput(waitingConsumer);
-        waitingConsumer.waitUntil(f -> f.getUtf8String().contains("Executing long-running function"));
+        // one of router accept request
+        // get first router name in round robbin loop
+        String firstRouterName = client.callForSingleResult("get_router_name", String.class).get();
+        nextRouterName.set(firstRouterName.equals("router") ? "second-router" : "router");
 
-        // shutdown one router
-        Container.ExecResult result;
-        result = container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "--force", "second-router");
-        assertEquals(0, result.getExitCode(), result.getStderr());
+        // the router with the passed name(nextRouterName.get()) will retry endlessly
+        // after the first retry we will turn off this router
+        // and it is expected that the request will go to another router
+        assertTrue(client.callForSingleResult("long_running_function",
+                        Collections.singletonList(Arrays.asList(0.5, nextRouterName.get())), Boolean.class).get());
 
-        // both requests should return normally (alive connection selection effect)
-        assertTrue(request1.get());
-        assertTrue(request2.get());
+        // start the turned off router to get requests
+        result.set(container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", nextRouterName.get()));
+        assertEquals(0, result.get().getExitCode(), result.get().getStderr());
 
-        // shutdown the first router and startup both
-        result = container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "router");
-        assertEquals(0, result.getExitCode(), result.getStderr());
-        result = container.execInContainer(
-                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "router");
-        assertEquals(0, result.getExitCode(), result.getStderr());
-        result = container.execInContainer(
-                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "second-router");
-        assertEquals(0, result.getExitCode(), result.getStderr());
-
-        // get the request attempts -- for one of them they must be greater than 1, for another -- 1
-        // the router clients must reconnect automatically
-        assertEquals(2, routerClient1.callForSingleResult("get_request_count", Integer.class).get());
+        assertEquals(1, routerClient1.callForSingleResult("get_request_count", Integer.class).get());
         assertEquals(1, routerClient2.callForSingleResult("get_request_count", Integer.class).get());
+
+        // full reconnection
+        // this is necessary so that a client with two connections can see both routers
+        result.set(container.execInContainer(
+                "cartridge", "stop", "--run-dir=/tmp/run", "--force", "router"));
+        assertEquals(0, result.get().getExitCode(), result.get().getStderr());
+        result.set(container.execInContainer(
+                "cartridge", "stop", "--run-dir=/tmp/run", "--force", "second-router"));
+        assertEquals(0, result.get().getExitCode(), result.get().getStderr());
+        result.set(container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "router"));
+        assertEquals(0, result.get().getExitCode(), result.get().getStderr());
+        result.set(container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "second-router"));
+        assertEquals(0, result.get().getExitCode(), result.get().getStderr());
+
+        // wait until full reconnection completed
+        Unreliables.retryUntilTrue(5, TimeUnit.SECONDS, () -> {
+            List<?> isHealthyResult =
+                    routerClient1.eval("return require('cartridge').is_healthy()").get();
+            if (isHealthyResult.get(0) == null) {
+                // delay
+                Thread.sleep(500);
+                return false;
+            }
+            return (Boolean) isHealthyResult.get(0);
+        });
 
         // initiate two requests
         assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
         assertTrue(client.callForSingleResult("long_running_function", Boolean.class).get());
 
         // check that they completed normally without reties and fell onto different routers (full reconnection effect)
-        assertEquals(3, routerClient1.callForSingleResult("get_request_count", Integer.class).get());
+        assertEquals(2, routerClient1.callForSingleResult("get_request_count", Integer.class).get());
         assertEquals(2, routerClient2.callForSingleResult("get_request_count", Integer.class).get());
 
         routerClient1.close();
@@ -172,15 +204,24 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
             connections.add(custom);
             return CompletableFuture.completedFuture(custom);
         });
+        // initialize connection
+        client.getVersion();
 
         // initiate two long-running requests
         CompletableFuture<Boolean> request1 = client.callForSingleResult(
                 "long_running_function", Collections.singletonList(0.5), Boolean.class);
+        CompletableFuture<Void> closeFuture = CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(100);
+                // close one connection
+                connections.get(0).close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        request1 = closeFuture.thenCombine(request1, (o, r) -> r);
         CompletableFuture<Boolean> request2 = client.callForSingleResult(
                 "long_running_function", Collections.singletonList(0.5), Boolean.class);
-
-        // close one connection
-        connections.get(0).close();
 
         // both requests should return normally (alive connection selection effect)
         assertTrue(request1.get());
@@ -190,15 +231,21 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         assertTrue(routerClient1.callForSingleResult("get_request_count", Integer.class).get() >= 3);
 
         // initiate another long-running request
-        request1 = client.callForSingleResult("long_running_function", Collections.singletonList(0.5), Boolean.class);
+        request1 = client.callForSingleResult("long_running_function", Collections.singletonList(0.5), Boolean.class)
+        .thenApply(r -> {
+            try {
+                // partial disconnect -> one connection is restored
+                assertEquals(3, connections.size());
 
-        // partial disconnect -> one connection is restored
-        assertEquals(3, connections.size());
-
-        // close remaining connections
-        for (int i = 1; i < 3; i++) {
-            connections.get(i).close();
-        }
+                // close remaining connections
+                for (int i = 1; i < 3; i++) {
+                    connections.get(i).close();
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return r;
+        });
 
         // the request should return normally (reconnection effect)
         assertTrue(request1.get());

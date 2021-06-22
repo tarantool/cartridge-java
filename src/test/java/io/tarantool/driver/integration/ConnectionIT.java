@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -80,16 +81,23 @@ public class ConnectionIT {
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
                 tarantoolContainer.getHost(), tarantoolContainer.getPort());
 
-        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
-            return client.eval(command);
-        } catch (Exception e) {
-            throw e;
-        }
+        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
+        CompletableFuture<List<?>> future = client.eval(command);
+        CompletableFuture<Void> closeFuture = CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(100);
+                client.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        future = closeFuture.thenCombine(future, (o, r) -> r);
+        return future;
     }
 
     @Test
     public void connectAndCloseAfterFuture() throws Exception {
-        List<?> result = connectAndEval("return 1, 2").get(1000, TimeUnit.MILLISECONDS);
+        List<?> result = connectAndEval("require('fiber').sleep(0.1) return 1, 2").get(1000, TimeUnit.MILLISECONDS);
         assertEquals(2, result.size());
         assertEquals(1, result.get(0));
         assertEquals(2, result.get(1));
