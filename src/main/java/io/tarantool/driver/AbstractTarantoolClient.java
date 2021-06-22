@@ -363,9 +363,11 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
             String functionName,
-            List<?> arguments, Supplier<R> resultContainerSupplier,
+            List<?> arguments,
+            Supplier<R> resultContainerSupplier,
             ValueConverter<Value, T> valueConverter) throws TarantoolClientException {
-        return callForMultiResult(functionName, arguments, resultContainerSupplier, valueConverter);
+        return callForMultiResult(functionName, arguments, config.getMessagePackMapper(),
+                resultContainerSupplier, valueConverter);
     }
 
     @Override
