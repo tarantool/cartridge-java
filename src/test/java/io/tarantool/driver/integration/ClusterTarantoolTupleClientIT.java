@@ -22,6 +22,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.msgpack.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;

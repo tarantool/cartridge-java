@@ -7,7 +7,7 @@ import io.tarantool.driver.protocol.Packable;
 import java.util.Collection;
 
 /**
- * Generic cursor imlementation that performs client calls
+ * Generic cursor implementation that performs client calls
  * with TarantoolSpaceOperations.
  *
  * @author Vladimir Rogach
@@ -39,7 +39,7 @@ public abstract class TarantoolCursorBase<T extends Packable, R extends Collecti
     }
 
     @Override
-    public boolean next() throws TarantoolClientException {
+    public boolean hasNext() throws TarantoolClientException {
         if (!advanceIterator()) {
             fetchNextTuples();
             return advanceIterator();
@@ -48,7 +48,7 @@ public abstract class TarantoolCursorBase<T extends Packable, R extends Collecti
     }
 
     @Override
-    public T get() throws TarantoolSpaceOperationException {
+    public T next() throws TarantoolSpaceOperationException {
         if (getCurrentValue() == null) {
             throw new TarantoolSpaceOperationException(
                     "Unexpected cursor state: check that next() is called");

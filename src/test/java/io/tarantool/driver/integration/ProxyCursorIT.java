@@ -18,7 +18,6 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -146,15 +145,15 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(1));
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 10);
 
-        assertTrue(cursor.next());
-        TarantoolTuple tuple = cursor.get();
+        assertTrue(cursor.hasNext());
+        TarantoolTuple tuple = cursor.next();
 
         assertEquals(1, tuple.getInteger(0));
         assertEquals("1abc", tuple.getString(1));
         assertEquals(10, tuple.getInteger(2));
 
-        assertFalse(cursor.next());
-        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
+        assertFalse(cursor.hasNext());
+        assertThrows(TarantoolSpaceOperationException.class, cursor::next);
     }
 
     @Test
@@ -167,22 +166,22 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
         List<Integer> tupleIds = new ArrayList<>();
         int countTotal = 0;
         boolean hasNext;
         do {
             countTotal++;
-            TarantoolTuple t = cursor.get();
+            TarantoolTuple t = cursor.next();
             tupleIds.add(t.getInteger(0));
-            hasNext = cursor.next();
+            hasNext = cursor.hasNext();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
         } while (hasNext);
 
         assertEquals(13, countTotal);
         assertEquals(Arrays.asList(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24), tupleIds);
-        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
+        assertThrows(TarantoolSpaceOperationException.class, cursor::next);
     }
 
     @Test
@@ -195,22 +194,22 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
         List<Integer> tupleIds = new ArrayList<>();
         int countTotal = 0;
         boolean hasNext;
         do {
             countTotal++;
-            TarantoolTuple t = cursor.get();
+            TarantoolTuple t = cursor.next();
             tupleIds.add(t.getInteger(0));
-            hasNext = cursor.next();
+            hasNext = cursor.hasNext();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
         } while (hasNext);
 
         assertEquals(14, countTotal);
         assertEquals(Arrays.asList(52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39), tupleIds);
-        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
+        assertThrows(TarantoolSpaceOperationException.class, cursor::next);
     }
 
     @Test
@@ -219,14 +218,14 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.any();
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
         int countTotal = 0;
 
         boolean hasNext;
         do {
             countTotal++;
-            TarantoolTuple t = cursor.get();
-            hasNext = cursor.next();
+            TarantoolTuple t = cursor.next();
+            hasNext = cursor.hasNext();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
         } while (hasNext);
@@ -235,13 +234,13 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
 
         cursor = testSpace.cursor(conditions, 1);
         List<Integer> tupleIds = new ArrayList<>();
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
         countTotal = 0;
         do {
             countTotal++;
-            TarantoolTuple t = cursor.get();
+            TarantoolTuple t = cursor.next();
             tupleIds.add(t.getInteger(0));
-            hasNext = cursor.next();
+            hasNext = cursor.hasNext();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
         } while (hasNext);
@@ -255,15 +254,15 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.any();
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 10);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
 
         int countTotal = 0;
         do {
             countTotal++;
-            cursor.get();
+            cursor.next();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
-        } while (cursor.next());
+        } while (cursor.hasNext());
 
         assertEquals(100, countTotal);
     }
@@ -274,15 +273,15 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.any();
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 100);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
 
         int countTotal = 0;
         do {
             countTotal++;
-            cursor.get();
+            cursor.next();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
-        } while (cursor.next());
+        } while (cursor.hasNext());
 
         assertEquals(100, countTotal);
     }
@@ -293,15 +292,15 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.any();
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 1000);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
 
         int countTotal = 0;
         do {
             countTotal++;
-            cursor.get();
+            cursor.next();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
-        } while (cursor.next());
+        } while (cursor.hasNext());
 
         assertEquals(100, countTotal);
     }
@@ -313,18 +312,18 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.indexGreaterOrEquals("primary", Collections.singletonList(3));
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 2);
 
-        assertTrue(cursor.next());
+        assertTrue(cursor.hasNext());
         int countTotal = 0;
         boolean hasNext;
         do {
             countTotal++;
-            TarantoolTuple t = cursor.get();
-            hasNext = cursor.next();
+            TarantoolTuple t = cursor.next();
+            hasNext = cursor.hasNext();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);
         } while (hasNext);
 
         assertEquals(21, countTotal);
-        assertThrows(TarantoolSpaceOperationException.class, cursor::get);
+        assertThrows(TarantoolSpaceOperationException.class, cursor::next);
     }
 }
