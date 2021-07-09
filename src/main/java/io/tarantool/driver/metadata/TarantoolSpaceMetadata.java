@@ -1,5 +1,6 @@
 package io.tarantool.driver.metadata;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,9 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpaceMetadata {
+public class TarantoolSpaceMetadata implements Serializable {
+
+    private static final long serialVersionUID = 20200708L;
 
     private int spaceId;
     private int ownerId;

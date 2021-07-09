@@ -16,6 +16,7 @@ import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -36,8 +38,9 @@ import java.util.stream.Collectors;
  *
  * @author Alexey Kuzin
  */
-public final class Conditions {
+public final class Conditions implements Serializable {
 
+    private static final long serialVersionUID = 20200708L;
     private static final long MAX_LIMIT = 0xff_ff_ff_ffL;
     private static final long MAX_OFFSET = 0xff_ff_ff_ffL;
 
@@ -59,6 +62,7 @@ public final class Conditions {
         this.startTuple = conditions.startTuple;
         this.conditions.addAll(conditions.conditions);
     }
+
     private Conditions(Condition condition) {
         conditions.add(condition);
     }
@@ -115,6 +119,7 @@ public final class Conditions {
      * @return this {@link Conditions} instance
      */
     public Conditions withAscending() {
+        this.descending = false;
         return this;
     }
 
@@ -208,9 +213,9 @@ public final class Conditions {
     /**
      * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
      *
-     * @param tuple last tuple value from the previous result, may be null
+     * @param tuple          last tuple value from the previous result, may be null
      * @param tupleConverter converter of the specified tuple type into a MessagePack array
-     * @param <T> tuple type
+     * @param <T>            tuple type
      * @return new {@link Conditions} instance
      */
     public static <T> Conditions after(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
@@ -229,12 +234,13 @@ public final class Conditions {
         this.startTuple = tuple;
         return this;
     }
+
     /**
      * Start collecting tuples into result after the specified tuple. The tuple itself will not be added to the result.
      *
-     * @param tuple last tuple value from the previous result, may be null
+     * @param tuple          last tuple value from the previous result, may be null
      * @param tupleConverter converter of the specified tuple type into a MessagePack array
-     * @param <T> tuple type
+     * @param <T>            tuple type
      * @return new {@link Conditions} instance
      */
     public <T> Conditions startAfter(T tuple, ObjectConverter<T, ArrayValue> tupleConverter) {
@@ -256,7 +262,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -267,7 +273,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -279,7 +285,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -290,7 +296,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
@@ -302,7 +308,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index, with values greater than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -313,7 +319,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values greater than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -325,7 +331,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index, with values greater than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -336,7 +342,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values greater than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
@@ -349,7 +355,7 @@ public final class Conditions {
      * Create new Conditions instance with filter by the specified index, with values greater or equal than the
      * specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -360,7 +366,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values greater or equal than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -373,7 +379,7 @@ public final class Conditions {
      * Create new Conditions instance with filter by the specified index, with values greater or equal than the
      * specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -384,7 +390,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values greater or equal than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
@@ -396,7 +402,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index, with values less than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -407,7 +413,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values less than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -419,7 +425,7 @@ public final class Conditions {
     /**
      * Create new Conditions instance with filter by the specified index, with values less than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -430,7 +436,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values less than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
@@ -443,7 +449,7 @@ public final class Conditions {
      * Create new Conditions instance with filter by the specified index, with values less or equal than the
      * specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -454,7 +460,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values less or equal than the specified value
      *
-     * @param indexName index name
+     * @param indexName       index name
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -467,7 +473,7 @@ public final class Conditions {
      * Create new Conditions instance with filter by the specified index, with values less or equal than the
      * specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return new {@link Conditions} instance
      */
@@ -478,7 +484,7 @@ public final class Conditions {
     /**
      * Filter tuples by the specified index, with values less or equal than the specified value
      *
-     * @param indexId index id
+     * @param indexId         index id
      * @param indexPartValues index parts values
      * @return this {@link Conditions} instance
      */
@@ -491,7 +497,7 @@ public final class Conditions {
      * Filter tuples by the specified field
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return new {@link Conditions} instance
      */
     public static Conditions equals(String fieldName, Object value) {
@@ -502,7 +508,7 @@ public final class Conditions {
      * Filter tuples by the specified field
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return this {@link Conditions} instance
      */
     public Conditions andEquals(String fieldName, Object value) {
@@ -514,7 +520,7 @@ public final class Conditions {
      * Filter tuples by the specified field
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return new {@link Conditions} instance
      */
     public static Conditions equals(int fieldPosition, Object value) {
@@ -525,7 +531,7 @@ public final class Conditions {
      * Filter tuples by the specified field
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return this {@link Conditions} instance
      */
     public Conditions andEquals(int fieldPosition, Object value) {
@@ -537,7 +543,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterThan(String fieldName, Object value) {
@@ -548,7 +554,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterThan(String fieldName, Object value) {
@@ -560,7 +566,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterThan(int fieldPosition, Object value) {
@@ -571,7 +577,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterThan(int fieldPosition, Object value) {
@@ -583,7 +589,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater or equal than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterOrEquals(String fieldName, Object value) {
@@ -594,7 +600,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater or equal than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterOrEquals(String fieldName, Object value) {
@@ -606,7 +612,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater or equal than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterOrEquals(int fieldPosition, Object value) {
@@ -617,7 +623,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values greater or equal than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterOrEquals(int fieldPosition, Object value) {
@@ -629,7 +635,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return new {@link Conditions} instance
      */
     public static Conditions lessThan(String fieldName, Object value) {
@@ -640,7 +646,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return this {@link Conditions} instance
      */
     public Conditions andLessThan(String fieldName, Object value) {
@@ -652,7 +658,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return new {@link Conditions} instance
      */
     public static Conditions lessThan(int fieldPosition, Object value) {
@@ -663,7 +669,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return this {@link Conditions} instance
      */
     public Conditions andLessThan(int fieldPosition, Object value) {
@@ -675,7 +681,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less or equal than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return new {@link Conditions} instance
      */
     public static Conditions lessOrEquals(String fieldName, Object value) {
@@ -686,7 +692,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less or equal than the specified value
      *
      * @param fieldName field name
-     * @param value field value
+     * @param value     field value
      * @return this {@link Conditions} instance
      */
     public Conditions andLessOrEquals(String fieldName, Object value) {
@@ -698,7 +704,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less or equal than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return new {@link Conditions} instance
      */
     public static Conditions lessOrEquals(int fieldPosition, Object value) {
@@ -709,7 +715,7 @@ public final class Conditions {
      * Filter tuples by the specified field, with values less or equal than the specified value
      *
      * @param fieldPosition field position
-     * @param value field value
+     * @param value         field value
      * @return this {@link Conditions} instance
      */
     public Conditions andLessOrEquals(int fieldPosition, Object value) {
@@ -790,8 +796,8 @@ public final class Conditions {
     }
 
     private List<List<?>> conditionsListToLists(List<? extends Condition> conditionsList,
-                                                     TarantoolMetadataOperations operations,
-                                                     TarantoolSpaceMetadata spaceMetadata) {
+                                                TarantoolMetadataOperations operations,
+                                                TarantoolSpaceMetadata spaceMetadata) {
         return conditionsList.stream().map(c -> c.toList(operations, spaceMetadata)).collect(Collectors.toList());
     }
 
@@ -902,16 +908,17 @@ public final class Conditions {
                 .withKeyValues(fieldValues);
     }
 
-    private static Optional<TarantoolIndexMetadata> findCoveringIndex(TarantoolMetadataOperations operations,
-                                                                  TarantoolSpaceMetadata spaceMetadata,
-                                                                  Collection<TarantoolFieldMetadata> selectedFields) {
+    private static Optional<TarantoolIndexMetadata> findCoveringIndex(
+            TarantoolMetadataOperations operations,
+            TarantoolSpaceMetadata spaceMetadata,
+            Collection<TarantoolFieldMetadata> selectedFields) {
         Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
                 .orElseThrow(() -> new TarantoolClientException(
                         "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
         Optional<TarantoolIndexMetadata> coveringIndex = allIndexes.values().stream()
                 .map(metadata -> new AbstractMap.SimpleEntry<Long, TarantoolIndexMetadata>(
-                                calculateCoverage(metadata, selectedFields), metadata))
+                        calculateCoverage(metadata, selectedFields), metadata))
                 .filter(entry -> entry.getKey() > 0)
                 .max(Comparator.comparingLong(AbstractMap.SimpleEntry::getKey))
                 .map(AbstractMap.SimpleEntry::getValue);
@@ -920,7 +927,7 @@ public final class Conditions {
     }
 
     private static long calculateCoverage(TarantoolIndexMetadata metadata,
-                                         Collection<TarantoolFieldMetadata> selectedFields) {
+                                          Collection<TarantoolFieldMetadata> selectedFields) {
         AtomicBoolean firstFieldIsSet = new AtomicBoolean(false);
         long count = selectedFields.stream()
                 .map(f -> metadata.getIndexPartPositionByFieldPosition(f.getFieldPosition()))
@@ -981,5 +988,26 @@ public final class Conditions {
         public Value toMessagePackValue(MessagePackObjectMapper mapper) {
             return tupleConverter.toValue(tuple);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Conditions that = (Conditions) o;
+        return isDescending() == that.isDescending() &&
+                getLimit() == that.getLimit() &&
+                getOffset() == that.getOffset()
+                && conditions.equals(that.conditions) &&
+                Objects.equals(getStartTuple(), that.getStartTuple());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(conditions, isDescending(), getLimit(), getOffset(), getStartTuple());
     }
 }

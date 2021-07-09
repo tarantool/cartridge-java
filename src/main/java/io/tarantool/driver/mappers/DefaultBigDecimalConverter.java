@@ -2,7 +2,6 @@ package io.tarantool.driver.mappers;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
-import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.ValueFactory;
@@ -19,6 +18,8 @@ import java.nio.ByteBuffer;
  */
 public class DefaultBigDecimalConverter implements
         ValueConverter<ExtensionValue, BigDecimal>, ObjectConverter<BigDecimal, ExtensionValue> {
+
+    private static final long serialVersionUID = 20200708L;
 
     private static final byte DECIMAL_TYPE = 0x01;
     private static final int DECIMAL_MAX_DIGITS = 38;
@@ -142,7 +143,7 @@ public class DefaultBigDecimalConverter implements
             return fromBytes(value.getData());
         } catch (IOException e) {
             throw new MessagePackValueMapperException(
-                    String.format("Failed to unpack BigDecimal from MessagePack entity %s", value.toString()), e);
+                    String.format("Failed to unpack BigDecimal from MessagePack entity %s", value), e);
         }
     }
 

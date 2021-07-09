@@ -1,13 +1,19 @@
 package io.tarantool.driver.api.tuple;
 
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePackException;
+import org.msgpack.core.MessagePacker;
+import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +35,13 @@ import java.util.function.Consumer;
  */
 public class TarantoolTupleImpl implements TarantoolTuple {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final TarantoolSpaceMetadata spaceMetadata;
 
-    private final List<TarantoolField> fields;
-
     private final MessagePackMapper mapper;
+
+    private transient ArrayList<TarantoolField> fields = new ArrayList<>();
 
     /**
      * Constructor for empty tuple
@@ -79,7 +87,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         this.spaceMetadata = metadata;
 
         if (values != null) {
-            this.fields = new ArrayList<>(values.size());
+            this.fields.ensureCapacity(values.size());
             for (Object value : values) {
                 if (value == null) {
                     this.fields.add(new TarantoolNullField());
@@ -87,8 +95,6 @@ public class TarantoolTupleImpl implements TarantoolTuple {
                     this.fields.add(new TarantoolFieldImpl(value));
                 }
             }
-        } else {
-            this.fields = new ArrayList<>();
         }
     }
 
@@ -115,7 +121,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         this.spaceMetadata = spaceMetadata;
 
         if (value != null) {
-            this.fields = new ArrayList<>(value.size());
+            this.fields.ensureCapacity(value.size());
             for (Value fieldValue : value) {
                 if (fieldValue.isNilValue()) {
                     fields.add(new TarantoolNullField());
@@ -123,8 +129,6 @@ public class TarantoolTupleImpl implements TarantoolTuple {
                     fields.add(new TarantoolFieldImpl(fieldValue));
                 }
             }
-        } else {
-            this.fields = new ArrayList<>();
         }
     }
 
@@ -398,5 +402,38 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public int hashCode() {
         return Objects.hash(getFields());
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) {
+        try {
+            out.defaultWriteObject();
+
+            MessagePacker packer = MessagePack.newDefaultPacker(out);
+            packer.packValue(toMessagePackValue(mapper));
+            packer.flush();
+        } catch (IOException | MessagePackException e) {
+            throw new TarantoolClientException("Failed to serialize tuple fields", e);
+        }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) {
+        ArrayValue value;
+        try {
+            in.defaultReadObject();
+
+            MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
+            value = unpacker.unpackValue().asArrayValue();
+        } catch (IOException | MessagePackException | ClassNotFoundException e) {
+            throw new TarantoolClientException("Failed to deserialize tuple fields", e);
+        }
+
+        this.fields = new ArrayList<>(value.size());
+        for (Value fieldValue : value) {
+            if (fieldValue.isNilValue()) {
+                fields.add(new TarantoolNullField());
+            } else {
+                fields.add(new TarantoolFieldImpl(fieldValue));
+            }
+        }
     }
 }

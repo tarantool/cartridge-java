@@ -9,7 +9,10 @@ import org.msgpack.value.Value;
  * @author Alexey Kuzin
  */
 public class DefaultPackableObjectConverter implements ObjectConverter<Packable, Value> {
-    private MessagePackObjectMapper mapper;
+
+    private static final long serialVersionUID = 20200708L;
+
+    private final MessagePackObjectMapper mapper;
 
     public DefaultPackableObjectConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;

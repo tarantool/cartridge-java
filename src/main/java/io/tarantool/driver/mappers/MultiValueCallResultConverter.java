@@ -14,6 +14,8 @@ import java.util.List;
 public class MultiValueCallResultConverter<T, R extends List<T>>
         implements ValueConverter<ArrayValue, MultiValueCallResult<T, R>> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final ValueConverter<ArrayValue, R> valueConverter;
 
     /**

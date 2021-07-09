@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
  */
 public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value, TarantoolMetadataContainer> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private static final int ID_UNKNOWN = -1;
 
     private static final StringValue SPACES_KEY = ValueFactory.newString("spaces");

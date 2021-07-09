@@ -22,6 +22,8 @@ import static io.tarantool.driver.mappers.MapperReflectionUtils.getInterfacePara
  */
 public class DefaultMessagePackMapper implements MessagePackMapper {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final Map<String, List<ValueConverter<? extends Value, ?>>> valueConverters;
     private final Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
     private final Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;

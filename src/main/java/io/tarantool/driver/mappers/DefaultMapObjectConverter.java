@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
  */
 public class DefaultMapObjectConverter implements ObjectConverter<Map<?, ?>, MapValue> {
 
-    private MessagePackObjectMapper mapper;
+    private static final long serialVersionUID = 20200708L;
+
+    private final MessagePackObjectMapper mapper;
 
     public DefaultMapObjectConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;

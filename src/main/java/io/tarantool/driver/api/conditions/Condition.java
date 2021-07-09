@@ -3,6 +3,7 @@ package io.tarantool.driver.api.conditions;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  *
  * @author Alexey Kuzin
  */
-public interface Condition {
+public interface Condition extends Serializable {
     /**
      * Filtering operator (&lt;. &lt;=, =, =&gt;, &gt;)
      *

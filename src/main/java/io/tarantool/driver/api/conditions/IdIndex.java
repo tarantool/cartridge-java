@@ -6,6 +6,7 @@ import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -14,6 +15,8 @@ import java.util.Optional;
  * @author Alexey Kuzin
  */
 public class IdIndex implements FieldIdentifier<TarantoolIndexMetadata, Integer> {
+
+    private static final long serialVersionUID = 20200708L;
 
     private int position;
 
@@ -43,5 +46,22 @@ public class IdIndex implements FieldIdentifier<TarantoolIndexMetadata, Integer>
     @Override
     public Integer toIdentifier() {
         return position;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IdIndex idIndex = (IdIndex) o;
+        return position == idIndex.position;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(position);
     }
 }

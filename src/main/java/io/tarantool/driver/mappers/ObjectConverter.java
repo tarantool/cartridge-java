@@ -2,12 +2,14 @@ package io.tarantool.driver.mappers;
 
 import org.msgpack.value.Value;
 
+import java.io.Serializable;
+
 /**
  * Basic interface for converters from Java objects to MessagePack entities for a particular class
  *
  * @author Alexey Kuzin
  */
-public interface ObjectConverter<T, S extends Value> {
+public interface ObjectConverter<T, S extends Value> extends Serializable {
     /**
      * Convert Java object to a MessagePack entity
      * @param object object

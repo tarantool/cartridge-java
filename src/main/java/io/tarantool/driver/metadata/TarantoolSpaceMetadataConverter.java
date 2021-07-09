@@ -20,6 +20,8 @@ import java.util.Optional;
  */
 public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValue, TarantoolSpaceMetadata> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private static final ImmutableStringValue FORMAT_FIELD_NAME = new ImmutableStringValueImpl("name");
     private static final ImmutableStringValue FORMAT_FIELD_TYPE = new ImmutableStringValueImpl("type");
     private static final ImmutableStringValue FORMAT_FIELD_IS_NULLABLE = new ImmutableStringValueImpl("is_nullable");

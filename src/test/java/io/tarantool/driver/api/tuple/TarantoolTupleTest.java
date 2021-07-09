@@ -15,6 +15,11 @@ import org.msgpack.value.impl.ImmutableBooleanValueImpl;
 import org.msgpack.value.impl.ImmutableDoubleValueImpl;
 import org.msgpack.value.impl.ImmutableLongValueImpl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -161,5 +166,42 @@ public class TarantoolTupleTest {
         assertEquals(ArrayList.class, convertedTuple.getObject(2).get().getClass());
         assertEquals("lol", resultList.get(0));
         assertEquals(nestedMap, resultList.get(1));
+    }
+
+    @Test
+    void serializeTuple() throws IOException, ClassNotFoundException {
+        DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+        MessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
+        TarantoolMetadata testOperations = new TarantoolMetadata(new TestMetadataProvider());
+        TarantoolSpaceMetadata spaceMetadata = testOperations.getSpaceByName("test").get();
+
+        List<Object> testList = new ArrayList<>();
+        testList.add("Apple");
+        testList.add(123456);
+        Map<String, String> nestedMap = Collections.singletonMap("key", "value");
+        List<Object> nestedList = Arrays.asList("lol", nestedMap);
+        testList.add(nestedList);
+        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(testList, mapper, spaceMetadata);
+
+        byte[] buffer;
+        int len = 4096;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(len);
+             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(tarantoolTuple);
+            oos.flush();
+            buffer = bos.toByteArray();
+        }
+        TarantoolTuple serializedTuple;
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+            serializedTuple = (TarantoolTuple) ois.readObject();
+        }
+
+        assertEquals(tarantoolTuple.size(), serializedTuple.size());
+        // Here not only the fields are checked,
+        // but the presence of space metadata and the encapsulated mappers too
+        assertEquals(testList.get(0), serializedTuple.getString(0));
+        assertEquals(testList.get(1), serializedTuple.getInteger("second"));
+        assertEquals(testList.get(2), serializedTuple.getList(2));
     }
 }

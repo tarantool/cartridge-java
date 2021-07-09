@@ -10,6 +10,9 @@ import org.msgpack.value.ValueFactory;
  */
 public class DefaultBooleanConverter implements
         ValueConverter<BooleanValue, Boolean>, ObjectConverter<Boolean, BooleanValue> {
+
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public BooleanValue toValue(Boolean object) {
         return ValueFactory.newBoolean(object);

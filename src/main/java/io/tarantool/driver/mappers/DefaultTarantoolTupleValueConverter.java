@@ -12,8 +12,10 @@ import org.msgpack.value.ArrayValue;
  */
 public class DefaultTarantoolTupleValueConverter implements ValueConverter<ArrayValue, TarantoolTuple> {
 
-    private MessagePackMapper mapper;
-    private TarantoolSpaceMetadata spaceMetadata;
+    private static final long serialVersionUID = 20200708L;
+
+    private final MessagePackMapper mapper;
+    private final TarantoolSpaceMetadata spaceMetadata;
 
     public DefaultTarantoolTupleValueConverter(MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
         this.mapper = mapper;

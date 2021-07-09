@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
  */
 public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValue, TarantoolIndexMetadata> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private static final ImmutableStringValue INDEX_FIELD_KEY = new ImmutableStringValueImpl("field");
     private static final ImmutableStringValue INDEX_TYPE_KEY = new ImmutableStringValueImpl("type");
 

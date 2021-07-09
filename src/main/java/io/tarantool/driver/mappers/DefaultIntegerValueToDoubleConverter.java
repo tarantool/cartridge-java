@@ -10,6 +10,8 @@ import org.msgpack.value.IntegerValue;
  */
 public class DefaultIntegerValueToDoubleConverter implements ValueConverter<IntegerValue, Double> {
 
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public Double fromValue(IntegerValue value) {
         return value.toDouble();
