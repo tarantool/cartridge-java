@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  */
 public class DefaultListValueConverter implements ValueConverter<ArrayValue, List<?>> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private MessagePackValueMapper mapper;
 
     public DefaultListValueConverter(MessagePackValueMapper mapper) {

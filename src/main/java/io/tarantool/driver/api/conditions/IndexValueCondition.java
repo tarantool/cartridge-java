@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.conditions;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Tuple filtering condition which accepts index key parts values
@@ -8,6 +9,8 @@ import java.util.List;
  * @author Alexey Kuzin
  */
 public class IndexValueCondition extends BaseCondition {
+
+    private static final long serialVersionUID = 20200708L;
 
     private final List<?> indexValues;
 
@@ -26,5 +29,24 @@ public class IndexValueCondition extends BaseCondition {
     @Override
     public List<?> value() {
         return indexValues;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IndexValueCondition that = (IndexValueCondition) o;
+        return indexValues.equals(that.indexValues) &&
+                operator() == that.operator() &&
+                field().equals(that.field());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(indexValues, operator(), field());
     }
 }

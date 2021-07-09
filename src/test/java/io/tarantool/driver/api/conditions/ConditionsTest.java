@@ -6,6 +6,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.metadata.TarantoolMetadata;
+import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolIndexQueryFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -15,6 +16,11 @@ import io.tarantool.driver.metadata.TestMetadataProvider;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -294,5 +300,47 @@ class ConditionsTest {
                 () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("No indexes that fit the passed fields are found", ex.getMessage());
+    }
+
+    @Test
+    public void testSerialize() throws IOException, ClassNotFoundException {
+        MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
+        TarantoolMetadata testOperations = new TarantoolMetadata(new TestMetadataProvider());
+        TarantoolSpaceMetadata spaceMetadata = testOperations.getSpaceByName("test").get();
+        TarantoolTuple startTuple = factory.create(1, 2, 3);
+        Conditions conditions = Conditions
+                .greaterOrEquals("first", "abc")
+                .andGreaterOrEquals("second", 123)
+                .startAfter(startTuple)
+                .withLimit(100)
+                .withDescending();
+
+        byte[] buffer;
+        int len = 4096;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(len);
+             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(conditions);
+            oos.flush();
+            buffer = bos.toByteArray();
+        }
+        Conditions serializedConditions;
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+            serializedConditions = (Conditions) ois.readObject();
+        }
+
+        assertEquals(conditions.getOffset(), serializedConditions.getOffset());
+        assertEquals(conditions.getLimit(), serializedConditions.getLimit());
+        assertEquals(conditions.isDescending(), serializedConditions.isDescending());
+
+        TarantoolTuple serializedTuple = (TarantoolTuple) serializedConditions.getStartTuple();
+        assertEquals(startTuple.size(), serializedTuple.size());
+        assertEquals(startTuple.getInteger(0), serializedTuple.getInteger(0));
+        assertEquals(startTuple.getInteger(1), serializedTuple.getInteger(1));
+        assertEquals(startTuple.getInteger(2), serializedTuple.getInteger(2));
+
+        assertEquals(conditions.toProxyQuery(testOperations, spaceMetadata),
+                     serializedConditions.toProxyQuery(testOperations, spaceMetadata));
     }
 }

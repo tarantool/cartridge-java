@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
  */
 public class MultiValueListConverter<T, R extends List<T>, V extends Value> implements ValueConverter<ArrayValue, R> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final ValueConverter<V, T> valueConverter;
     private final Supplier<R> containerSupplier;
 

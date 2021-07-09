@@ -10,6 +10,8 @@ import org.msgpack.value.ValueFactory;
  */
 public class DefaultNilConverter implements ValueConverter<NilValue, Object>, ObjectConverter<Object, NilValue> {
 
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public Object fromValue(NilValue value) {
         return null;

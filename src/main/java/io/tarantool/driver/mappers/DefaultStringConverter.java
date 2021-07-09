@@ -10,6 +10,9 @@ import org.msgpack.value.ValueFactory;
  */
 public class DefaultStringConverter implements
         ValueConverter<StringValue, String>, ObjectConverter<String, StringValue> {
+
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public StringValue toValue(String object) {
         return ValueFactory.newString(object);

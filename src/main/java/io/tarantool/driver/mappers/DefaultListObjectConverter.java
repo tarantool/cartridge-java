@@ -15,7 +15,9 @@ import java.util.stream.Stream;
  */
 public class DefaultListObjectConverter implements ObjectConverter<List<?>, ArrayValue> {
 
-    private MessagePackObjectMapper mapper;
+    private static final long serialVersionUID = 20200708L;
+
+    private final MessagePackObjectMapper mapper;
 
     public DefaultListObjectConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;

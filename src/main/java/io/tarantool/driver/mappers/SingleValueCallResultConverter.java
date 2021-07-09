@@ -12,6 +12,8 @@ import org.msgpack.value.Value;
  */
 public class SingleValueCallResultConverter<T> implements ValueConverter<ArrayValue, SingleValueCallResult<T>> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final ValueConverter<Value, T> valueConverter;
 
     public SingleValueCallResultConverter(ValueConverter<Value, T> valueConverter) {

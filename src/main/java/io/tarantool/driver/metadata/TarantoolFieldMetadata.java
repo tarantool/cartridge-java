@@ -1,12 +1,16 @@
 package io.tarantool.driver.metadata;
 
+import java.io.Serializable;
+
 /**
  * Tarantool space field format metadata
  *
  * @author Sergey Volgin
  * @author Artyom Dubinin
  */
-public class TarantoolFieldMetadata {
+public class TarantoolFieldMetadata implements Serializable {
+
+    private static final long serialVersionUID = 20200708L;
 
     private final String fieldName;
     private final String fieldType;

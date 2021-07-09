@@ -10,6 +10,9 @@ import org.msgpack.value.ValueFactory;
  */
 public class DefaultByteArrayConverter implements
         ValueConverter<BinaryValue, byte[]>, ObjectConverter<byte[], BinaryValue> {
+
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public BinaryValue toValue(byte[] object) {
         return ValueFactory.newBinary(object);

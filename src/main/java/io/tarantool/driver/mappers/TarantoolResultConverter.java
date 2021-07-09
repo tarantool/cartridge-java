@@ -10,6 +10,8 @@ import org.msgpack.value.Value;
  */
 public class TarantoolResultConverter<V extends Value, T> implements ValueConverter<V, TarantoolResult<T>> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private final ValueConverter<ArrayValue, T> tupleConverter;
 
     public TarantoolResultConverter(ValueConverter<ArrayValue, T> tupleConverter) {

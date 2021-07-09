@@ -9,6 +9,9 @@ import org.msgpack.value.ValueFactory;
  * @author Alexey Kuzin
  */
 public class DefaultDoubleConverter implements ValueConverter<FloatValue, Double>, ObjectConverter<Double, FloatValue> {
+
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public FloatValue toValue(Double object) {
         return ValueFactory.newFloat(object);

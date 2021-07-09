@@ -10,6 +10,8 @@ import org.msgpack.value.IntegerValue;
  */
 public class DefaultIntegerValueToFloatConverter implements ValueConverter<IntegerValue, Float> {
 
+    private static final long serialVersionUID = 20200708L;
+
     @Override
     public Float fromValue(IntegerValue value) {
         return value.toFloat();

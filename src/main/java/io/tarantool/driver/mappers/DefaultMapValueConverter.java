@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  */
 public class DefaultMapValueConverter implements ValueConverter<MapValue, Map<?, ?>> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private MessagePackValueMapper mapper;
 
     public DefaultMapValueConverter(MessagePackValueMapper mapper) {

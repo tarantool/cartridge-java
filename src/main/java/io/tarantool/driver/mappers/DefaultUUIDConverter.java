@@ -14,6 +14,8 @@ import java.util.UUID;
 public class DefaultUUIDConverter implements
         ValueConverter<ExtensionValue, UUID>, ObjectConverter<UUID, ExtensionValue> {
 
+    private static final long serialVersionUID = 20200708L;
+
     private static final byte UUID_TYPE = 0x02;
 
     private byte[] toBytes(UUID value) {
