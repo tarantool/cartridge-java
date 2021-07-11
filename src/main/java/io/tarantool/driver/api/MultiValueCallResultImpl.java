@@ -1,6 +1,7 @@
 package io.tarantool.driver.api;
 
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.exceptions.errors.TarantoolErrorsParser;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -27,12 +28,7 @@ public class MultiValueCallResultImpl<T, R extends List<T>> implements MultiValu
         ArrayValue resultArray = result.asArrayValue();
         if (resultArray.size() == 2 && (resultArray.get(0).isNilValue() && !resultArray.get(1).isNilValue())) {
             // [nil, "Error msg..."] or [nil, {str="Error msg...", stack="..."}]
-            if (resultArray.get(1).isMapValue()) {
-                // Probably a formatted error
-                throw new TarantoolFunctionCallException(resultArray.get(1).asMapValue());
-            } else {
-                throw new TarantoolFunctionCallException(resultArray.get(1).toString());
-            }
+            throw TarantoolErrorsParser.parse(resultArray.get(1));
         } else {
             // result
             this.value = valueConverter.fromValue(result.asArrayValue());

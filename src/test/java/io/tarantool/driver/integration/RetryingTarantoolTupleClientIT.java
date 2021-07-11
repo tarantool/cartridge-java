@@ -7,6 +7,7 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.TarantoolServerException;
+import io.tarantool.driver.exceptions.TarantoolServerInternalException;
 import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
@@ -74,7 +75,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void testAttemptsBoundLimitReachedWithTarantoolException() throws Exception {
+    void testAttemptsBoundLimitReached_withTarantoolException() {
         try {
             ProxyTarantoolTupleClient client = setupClient();
             client.call("setup_retrying_function", Collections.singletonList(3));
@@ -83,12 +84,12 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         } catch (Throwable e) {
             assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
             assertTrue(e.getCause().getMessage().contains("Attempts limit reached:"));
-            assertTrue(e.getCause().getCause() instanceof TarantoolFunctionCallException);
+            assertTrue(e.getCause().getCause() instanceof TarantoolServerInternalException);
         }
     }
 
     @Test
-    void testAttemptsBoundLimitReachedWithTimeout() throws Exception {
+    void testAttemptsBoundLimitReached_withTimeout() throws Exception {
         ProxyTarantoolTupleClient client = setupClient();
 
         client.call("reset_request_counters");
@@ -132,7 +133,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
      * This test covers https://github.com/tarantool/cartridge-java/issues/83
      */
     @Test
-    void testInfiniteRetryContinuedAfterGetFailed() throws Exception {
+    void testInfiniteRetryContinued_afterGetFailed() throws Exception {
         ProxyTarantoolTupleClient client = setupClient();
 
         client.call("reset_request_counters");
@@ -172,7 +173,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
      * This test covers https://github.com/tarantool/cartridge-java/issues/82
      */
     @Test
-    void testInfiniteRetryTimeoutReachedWithTarantoolException() throws Exception {
+    void testInfiniteRetryTimeoutReached_withTarantoolException() throws Exception {
         ProxyTarantoolTupleClient client = setupClient();
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
@@ -197,7 +198,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void testInfiniteRetryTimeoutReachedWithTimeout() throws Exception {
+    void testInfiniteRetryTimeoutReached_withTimeout() throws Exception {
         ProxyTarantoolTupleClient client = setupClient();
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,

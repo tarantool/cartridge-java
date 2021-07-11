@@ -1,7 +1,7 @@
 package io.tarantool.driver.exceptions;
 
 /**
- * Basic exception returned by Tarantool server for unsuccessful operations.
+ * Represents exception returned by Tarantool server for unsuccessful operations on the protocol level
  *
  * @author Alexey Kuzin
  */
