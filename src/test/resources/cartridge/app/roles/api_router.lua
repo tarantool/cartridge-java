@@ -93,6 +93,23 @@ local function get_request_count()
     return box.space.request_counters:get(1)[2]
 end
 
+-- it's like vshard error throwing
+local function box_error_unpack_no_connection()
+    return nil, box.error.new(box.error.NO_CONNECTION):unpack()
+end
+
+local function box_error_unpack_timeout()
+    return nil, box.error.new(box.error.TIMEOUT):unpack()
+end
+
+local function box_error_non_network_error()
+    return nil, box.error.new(box.error.WAL_IO):unpack()
+end
+
+local function crud_error_timeout()
+    return crud.get("test_space", ('x'):rep(2^27))
+end
+
 local function init(opts)
 
     box.schema.space.create('request_counters', {
@@ -117,6 +134,10 @@ local function init(opts)
     rawset(_G, 'get_router_name', get_router_name)
     rawset(_G, 'long_running_function', long_running_function)
     rawset(_G, 'get_request_count', get_request_count)
+    rawset(_G, 'box_error_unpack_no_connection', box_error_unpack_no_connection)
+    rawset(_G, 'box_error_unpack_timeout', box_error_unpack_timeout)
+    rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
+    rawset(_G, 'crud_error_timeout', crud_error_timeout)
 
     return true
 end

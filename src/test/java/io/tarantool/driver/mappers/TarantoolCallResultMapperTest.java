@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.exceptions.TarantoolServerInternalException;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class TarantoolCallResultMapperTest {
 
         //[nil, message]
         ArrayValue errorResult = ValueFactory.newArray(ValueFactory.newNil(), ValueFactory.newString("ERROR"));
-        assertThrows(TarantoolFunctionCallException.class, () -> mapper.fromValue(errorResult));
+        assertThrows(TarantoolServerInternalException.class, () -> mapper.fromValue(errorResult));
 
         //[nil, {str=message, stack=stacktrace}]
         MapValue error = ValueFactory.newMap(
@@ -63,7 +64,7 @@ public class TarantoolCallResultMapperTest {
                 ValueFactory.newString("stacktrace")
         );
         ArrayValue errorResult1 = ValueFactory.newArray(ValueFactory.newNil(), error);
-        assertThrows(TarantoolFunctionCallException.class, () -> mapper.fromValue(errorResult1));
+        assertThrows(TarantoolServerInternalException.class, () -> mapper.fromValue(errorResult1));
 
         //[[[],...]]
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
@@ -128,7 +129,7 @@ public class TarantoolCallResultMapperTest {
                 ValueFactory.newNil(), ValueFactory.newString("Error message from server")
         );
 
-        TarantoolFunctionCallException e = assertThrows(TarantoolFunctionCallException.class,
+        TarantoolServerInternalException e = assertThrows(TarantoolServerInternalException.class,
                 () -> defaultResultMapper.fromValue(resultWithError));
         assertEquals("Error message from server", e.getMessage());
     }
