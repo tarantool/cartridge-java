@@ -10,26 +10,41 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  tests-ce:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        tarantool-version: [ "1.10", "2.8" ]
+      fail-fast: false
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+
+    - name: Cache docker images
+      uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true
+      with:
+        key: ${{ runner.os }}-docker-layer-cache-${{ matrix.tarantool-version }}
+        restore-keys: |
+          ${{ runner.os }}-docker-layer-cache-
+
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
+
     - name: Run integration tests
       env:
+        TARANTOOL_VERSION: ${{ matrix.tarantool-version }}
         TARANTOOL_SERVER_USER: root
         TARANTOOL_SERVER_GROUP: root
       run: mvn -B test -P integration --file pom.xml
