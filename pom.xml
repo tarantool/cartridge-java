@@ -210,7 +210,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.7.0-M1</version>
+            <version>5.7.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -222,19 +222,19 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.15.1</version>
+            <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.15.1</version>
+            <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.tarantool</groupId>
             <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>0.4.2</version>
+            <version>0.4.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
