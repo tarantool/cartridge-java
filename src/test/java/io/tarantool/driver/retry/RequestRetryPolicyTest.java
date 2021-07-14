@@ -3,6 +3,7 @@ package io.tarantool.driver.retry;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
+import io.tarantool.driver.exceptions.TarantoolServerInternalNetworkException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -194,6 +195,24 @@ class RequestRetryPolicyTest {
     }
 
     @Test
+    void testWithNetworkErrors_retryWhileTarantoolServerInternalNetworkError() {
+        RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(4,
+                TarantoolRequestRetryPolicies.retryNetworkErrors()
+        ).build().create();
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
+                this::TarantoolServerInternalNetworkExceptionFailingFuture, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException | InterruptedException e) {
+            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
+            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
+            assertTrue(e.getCause().getCause() instanceof TarantoolServerInternalNetworkException);
+            assertEquals("code: 77",
+                    e.getCause().getCause().getMessage());
+        }
+    }
+
+    @Test
     void testWithNetworkErrors_notNetworkError() {
         AtomicReference<Integer> retries = new AtomicReference<>(3);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(3,
@@ -229,6 +248,12 @@ class RequestRetryPolicyTest {
     private CompletableFuture<Boolean> TarantoolConnectionExceptionFailingFuture() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         result.completeExceptionally(new TarantoolConnectionException(new RuntimeException()));
+        return result;
+    }
+
+    private CompletableFuture<Boolean> TarantoolServerInternalNetworkExceptionFailingFuture() {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        result.completeExceptionally(new TarantoolServerInternalNetworkException("code: 77"));
         return result;
     }
 
