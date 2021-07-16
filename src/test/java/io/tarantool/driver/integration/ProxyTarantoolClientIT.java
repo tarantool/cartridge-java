@@ -19,7 +19,7 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.exceptions.TarantoolServerException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
@@ -436,7 +436,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                     String.class
             ).get();
         } catch (Exception e) {
-            if (!(e.getCause() instanceof TarantoolServerException) &&
+            if (!(e.getCause() instanceof TarantoolInternalException) &&
                     !e.getCause().getMessage().contains("Some error")) {
                 throw e;
             }
@@ -467,7 +467,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                     String.class
             ).get();
         } catch (Exception e) {
-            if (!(e.getCause() instanceof TarantoolServerException) &&
+            if (!(e.getCause() instanceof TarantoolInternalException) &&
                     !e.getCause().getMessage().contains("Some error")) {
                 throw e;
             }

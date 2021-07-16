@@ -10,7 +10,7 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolServerException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -20,7 +20,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -168,7 +167,7 @@ public class ConnectionIT {
                 // Connection is actually performed here
                 try {
                     client.getVersion();
-                } catch (TarantoolServerException e) {
+                } catch (TarantoolInternalException e) {
                     log.error("Caught exception", e);
                 }
                 // the second request should not hang, but should throw the exception
@@ -200,7 +199,7 @@ public class ConnectionIT {
                             CompletableFuture<TarantoolResult<TarantoolTuple>> result =
                                     client.space("_vspace").select(Conditions.any());
                             result.get(100, TimeUnit.MILLISECONDS);
-                        } catch (TarantoolServerException | NoAvailableConnectionsException e) {
+                        } catch (TarantoolInternalException | NoAvailableConnectionsException e) {
                             log.error("Caught exception {}", e.getMessage());
                         } catch (InterruptedException | ExecutionException | TimeoutException e) {
                             throw new RuntimeException(e);

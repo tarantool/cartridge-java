@@ -4,9 +4,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.DecoderException;
 import io.tarantool.driver.exceptions.TarantoolDecoderException;
-import io.tarantool.driver.exceptions.TarantoolServerException;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolRequestMetadata;
+import io.tarantool.driver.exceptions.errors.TarantoolErrors;
 import io.tarantool.driver.protocol.TarantoolErrorResult;
 import io.tarantool.driver.protocol.TarantoolOkResult;
 import io.tarantool.driver.protocol.TarantoolResponse;
@@ -23,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 public class TarantoolResponseHandler extends SimpleChannelInboundHandler<TarantoolResponse> {
 
     private final Logger log = LoggerFactory.getLogger(TarantoolResponseHandler.class);
+    private final TarantoolErrors.TarantoolBoxErrorFactory boxErrorFactory
+            = new TarantoolErrors.TarantoolBoxErrorFactory();
     private RequestFutureManager futureManager;
 
     public TarantoolResponseHandler(RequestFutureManager futureManager) {
@@ -40,9 +42,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
                     case IPROTO_NOT_OK:
                         TarantoolErrorResult errorResult = new TarantoolErrorResult(tarantoolResponse.getSyncId(),
                                 tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
-                        //TODO different error types based on codes (factory)
-                        requestFuture.completeExceptionally(
-                            new TarantoolServerException(errorResult.getErrorCode(), errorResult.getErrorMessage()));
+                        requestFuture.completeExceptionally(boxErrorFactory.create(errorResult));
                         break;
                     case IPROTO_OK:
                         try {
