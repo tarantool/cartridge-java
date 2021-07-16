@@ -4,8 +4,8 @@ import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.exceptions.TarantoolServerInternalException;
-import io.tarantool.driver.exceptions.TarantoolServerInternalNetworkException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
+import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,14 +51,14 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void testNetworkError_noConnection() {
+    void testNetworkError_boxErrorUnpackNoConnection() {
         try {
             ProxyTarantoolTupleClient client = setupClient();
 
             client.callForSingleResult("box_error_unpack_no_connection", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
-            assertTrue(e.getCause() instanceof TarantoolServerInternalNetworkException);
+            assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
             assertTrue(e.getCause().getMessage().contains(
                 "code: 77\n" +
                 "message: Connection is not established\n" +
@@ -70,7 +70,7 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void testNetworkError_timeout() {
+    void testNetworkError_boxErrorUnpackTimeout() {
         try {
             ProxyTarantoolTupleClient client = setupClient();
 
@@ -80,13 +80,33 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
                     String.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
-            assertTrue(e.getCause() instanceof TarantoolServerInternalNetworkException);
+            assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
             assertTrue(e.getCause().getMessage().contains(
                 "code: 78\n" +
                 "message: Timeout exceeded\n" +
                 "base_type: ClientError\n" +
                 "type: ClientError\n" +
                 "trace:")
+            );
+        }
+    }
+
+    @Test
+    void testNetworkError_boxErrorTimeout() {
+        try {
+            ProxyTarantoolTupleClient client = setupClient();
+
+            client.callForMultiResult("box_error_timeout",
+                    Collections.singletonList("Some error"),
+                    ArrayList::new,
+                    String.class).get();
+            fail("Exception must be thrown after last retry attempt.");
+        } catch (Throwable e) {
+            assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
+            assertTrue(e.getCause().getMessage().contains(
+                     "InnerErrorMessage:\n" +
+                     "code: 78\n" +
+                     "message: Timeout exceeded")
             );
         }
     }
@@ -99,7 +119,7 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             client.callForSingleResult("crud_error_timeout", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
-            assertTrue(e.getCause() instanceof TarantoolServerInternalNetworkException);
+            assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
             assertTrue(e.getCause().getMessage().contains(
                     "Function returned an error: {\"code\":78," +
                             "\"base_type\":\"ClientError\"," +
@@ -110,15 +130,15 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void testNonNetworkError() {
+    void testNonNetworkError_boxErrorUnpack() {
         try {
             ProxyTarantoolTupleClient client = setupClient();
 
             client.callForSingleResult("box_error_non_network_error", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
-            assertTrue(e.getCause() instanceof TarantoolServerInternalException);
-            assertFalse(e.getCause() instanceof TarantoolServerInternalNetworkException);
+            assertTrue(e.getCause() instanceof TarantoolInternalException);
+            assertFalse(e.getCause() instanceof TarantoolInternalNetworkException);
             assertTrue(e.getCause().getMessage().contains(
                 "code: 40\n" +
                 "message: Failed to write to disk\n" +
@@ -128,4 +148,22 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             );
         }
     }
+
+        @Test
+        void testNonNetworkError_boxError() {
+            try {
+                ProxyTarantoolTupleClient client = setupClient();
+
+                client.callForSingleResult("raising_error", HashMap.class).get();
+                fail("Exception must be thrown after last retry attempt.");
+            } catch (Throwable e) {
+                assertTrue(e.getCause() instanceof TarantoolInternalException);
+                assertFalse(e.getCause() instanceof TarantoolInternalNetworkException);
+                assertTrue(e.getCause().getMessage().contains(
+                        "InnerErrorMessage:\n" +
+                        "code: 32\n" +
+                        "message:")
+                );
+            }
+        }
 }

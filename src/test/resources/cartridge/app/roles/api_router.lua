@@ -102,6 +102,10 @@ local function box_error_unpack_timeout()
     return nil, box.error.new(box.error.TIMEOUT):unpack()
 end
 
+local function box_error_timeout()
+    return box.error(box.error.TIMEOUT)
+end
+
 local function box_error_non_network_error()
     return nil, box.error.new(box.error.WAL_IO):unpack()
 end
@@ -136,6 +140,7 @@ local function init(opts)
     rawset(_G, 'get_request_count', get_request_count)
     rawset(_G, 'box_error_unpack_no_connection', box_error_unpack_no_connection)
     rawset(_G, 'box_error_unpack_timeout', box_error_unpack_timeout)
+    rawset(_G, 'box_error_timeout', box_error_timeout)
     rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
     rawset(_G, 'crud_error_timeout', crud_error_timeout)
 

@@ -3,7 +3,7 @@ package io.tarantool.driver.retry;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
-import io.tarantool.driver.exceptions.TarantoolServerInternalNetworkException;
+import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -206,7 +206,7 @@ class RequestRetryPolicyTest {
         } catch (ExecutionException | InterruptedException e) {
             assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
             assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
-            assertTrue(e.getCause().getCause() instanceof TarantoolServerInternalNetworkException);
+            assertTrue(e.getCause().getCause() instanceof TarantoolInternalNetworkException);
             assertEquals("code: 77",
                     e.getCause().getCause().getMessage());
         }
@@ -253,7 +253,7 @@ class RequestRetryPolicyTest {
 
     private CompletableFuture<Boolean> TarantoolServerInternalNetworkExceptionFailingFuture() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        result.completeExceptionally(new TarantoolServerInternalNetworkException("code: 77"));
+        result.completeExceptionally(new TarantoolInternalNetworkException("code: 77"));
         return result;
     }
 

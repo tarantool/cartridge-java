@@ -1,8 +1,9 @@
 package io.tarantool.driver.exceptions.errors;
 
 import io.tarantool.driver.exceptions.TarantoolException;
-import io.tarantool.driver.exceptions.TarantoolServerInternalException;
-import io.tarantool.driver.exceptions.TarantoolServerInternalNetworkException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
+import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
+import io.tarantool.driver.protocol.TarantoolErrorResult;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
@@ -35,7 +36,7 @@ public class TarantoolErrors {
     private static final String CLIENT_ERROR = "ClientError";
 
     /**
-     * Produces {@link TarantoolServerInternalException} subclasses
+     * Produces {@link TarantoolInternalException} subclasses
      * from the serialized representation in the format of <code>require('errors').new_class("NewError")</code>,
      * @see <a href="https://github.com/tarantool/errors">tarantool/errors</a>
      *
@@ -96,9 +97,9 @@ public class TarantoolErrors {
             }
 
             if (isNetworkError(err)) {
-                return Optional.of(new TarantoolServerInternalNetworkException(exceptionMessage));
+                return Optional.of(new TarantoolInternalNetworkException(exceptionMessage));
             }
-            return Optional.of(new TarantoolServerInternalException(exceptionMessage));
+            return Optional.of(new TarantoolInternalException(exceptionMessage));
         }
 
         /**
@@ -130,7 +131,7 @@ public class TarantoolErrors {
     }
 
     /**
-     * Produces {@link TarantoolServerInternalException} subclasses from the serialized representation
+     * Produces {@link TarantoolInternalException} subclasses from the serialized representation
      * in the format of <code>box.error:unpack</code>,
      * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/error/">box_error</a>
      *
@@ -141,6 +142,7 @@ public class TarantoolErrors {
         private static final StringValue TYPE = ValueFactory.newString("type");
         private static final StringValue MESSAGE = ValueFactory.newString("message");
         private static final StringValue TRACE = ValueFactory.newString("trace");
+        private static final Long ERROR_INDICATOR_OFFSET = 32768L;
 
         public TarantoolBoxErrorFactory() {
         }
@@ -182,15 +184,33 @@ public class TarantoolErrors {
             }
 
             if (isNetworkError(code, type)) {
-                return Optional.of(new TarantoolServerInternalNetworkException(exceptionMessage));
+                return Optional.of(new TarantoolInternalNetworkException(exceptionMessage));
             }
-            return Optional.of(new TarantoolServerInternalException(exceptionMessage));
+            return Optional.of(new TarantoolInternalException(exceptionMessage));
+        }
+
+        public TarantoolException create(TarantoolErrorResult error) {
+            Long code = error.getErrorCode() - ERROR_INDICATOR_OFFSET;
+            String message = error.getErrorMessage();
+
+            StringBuilder sb = new StringBuilder("InnerErrorMessage:");
+            sb.append("\n").append(CODE).append(": ").append(code);
+            if (message != null) {
+                sb.append("\n").append(MESSAGE).append(": ").append(message);
+            }
+            String exceptionMessage = sb.toString();
+
+            if (isNetworkError(code.toString())) {
+                return new TarantoolInternalNetworkException(exceptionMessage);
+            }
+            return new TarantoolInternalException(exceptionMessage);
         }
 
         /**
          * Check code from box.error is network code or not
          *
          * @param code code from box.error
+         * @param type type from box.error
          * @return an {@link Boolean}
          */
         private Boolean isNetworkError(String code, String type) {
@@ -199,6 +219,18 @@ public class TarantoolErrors {
                     code.equals(ErrorsCodes.TIMEOUT.getCode())) &&
                     type != null &&
                     type.equals(CLIENT_ERROR);
+        }
+
+        /**
+         * Check code from box.error is network code or not
+         *
+         * @param code code from box.error
+         * @return an {@link Boolean}
+         */
+        private Boolean isNetworkError(String code) {
+            // 77 or 78 code
+            return code.equals(ErrorsCodes.NO_CONNECTION.getCode()) ||
+                    code.equals(ErrorsCodes.TIMEOUT.getCode());
         }
 
         /**
@@ -216,7 +248,7 @@ public class TarantoolErrors {
     /**
      * The factory is finalizing, i.e. errors passed into
      * it will always be introverted as appropriate for the given factory
-     * The error is generated in a message that is passed to {@link TarantoolServerInternalException}
+     * The error is generated in a message that is passed to {@link TarantoolInternalException}
      *
      */
     public static class TarantoolUnrecognizedErrorFactory implements TarantoolErrorFactory {
@@ -226,7 +258,7 @@ public class TarantoolErrors {
         @Override
         public Optional<TarantoolException> create(Value error) {
             String exceptionMessage = String.valueOf(error);
-            return Optional.of(new TarantoolServerInternalException(exceptionMessage));
+            return Optional.of(new TarantoolInternalException(exceptionMessage));
         }
     }
 }

@@ -6,8 +6,7 @@ import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
-import io.tarantool.driver.exceptions.TarantoolServerException;
-import io.tarantool.driver.exceptions.TarantoolServerInternalException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
@@ -84,7 +83,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         } catch (Throwable e) {
             assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
             assertTrue(e.getCause().getMessage().contains("Attempts limit reached:"));
-            assertTrue(e.getCause().getCause() instanceof TarantoolServerInternalException);
+            assertTrue(e.getCause().getCause() instanceof TarantoolInternalException);
         }
     }
 
@@ -192,8 +191,11 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
             assertEquals(ExecutionException.class, e.getClass());
             assertEquals(TarantoolTimeoutException.class, e.getCause().getClass());
             assertTrue(e.getCause().getMessage().contains("Operation timeout value exceeded after"));
-            assertEquals(TarantoolServerException.class, e.getCause().getCause().getClass());
-            assertTrue(e.getCause().getCause().getMessage().contains("Test error: raising_error() called"));
+            assertEquals(TarantoolInternalException.class, e.getCause().getCause().getClass());
+            assertTrue(e.getCause().getCause().getMessage().contains(
+                    "InnerErrorMessage:\n" +
+                    "code: 32\n" +
+                    "message:"));
         }
     }
 

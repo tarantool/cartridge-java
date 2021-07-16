@@ -3,7 +3,7 @@ package io.tarantool.driver.handlers;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.tarantool.driver.exceptions.TarantoolServerException;
+import io.tarantool.driver.exceptions.errors.TarantoolErrors;
 import io.tarantool.driver.protocol.TarantoolErrorResult;
 import io.tarantool.driver.protocol.TarantoolResponse;
 
@@ -18,7 +18,8 @@ import java.util.concurrent.CompletableFuture;
 public class TarantoolAuthenticationResponseHandler extends SimpleChannelInboundHandler<TarantoolResponse> {
 
     private final CompletableFuture<Channel> connectionFuture;
-
+    private final TarantoolErrors.TarantoolBoxErrorFactory boxErrorFactory
+            = new TarantoolErrors.TarantoolBoxErrorFactory();
     public TarantoolAuthenticationResponseHandler(CompletableFuture<Channel> connectionFuture) {
         super();
         this.connectionFuture = connectionFuture;
@@ -31,8 +32,7 @@ public class TarantoolAuthenticationResponseHandler extends SimpleChannelInbound
                 case IPROTO_NOT_OK:
                     TarantoolErrorResult errorResult = new TarantoolErrorResult(tarantoolResponse.getSyncId(),
                             tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
-                    connectionFuture.completeExceptionally(
-                        new TarantoolServerException(errorResult.getErrorCode(), errorResult.getErrorMessage()));
+                    connectionFuture.completeExceptionally(boxErrorFactory.create(errorResult));
                     break;
                 case IPROTO_OK:
                     connectionFuture.complete(ctx.channel());

@@ -7,8 +7,8 @@ package io.tarantool.driver.exceptions;
  *
  * @author Artyom Dubinin
  */
-public class TarantoolServerInternalNetworkException extends TarantoolServerInternalException {
-    public TarantoolServerInternalNetworkException(String errorMessage) {
+public class TarantoolInternalNetworkException extends TarantoolInternalException {
+    public TarantoolInternalNetworkException(String errorMessage) {
         super(errorMessage);
     }
 }
