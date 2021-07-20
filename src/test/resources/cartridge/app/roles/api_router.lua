@@ -1,5 +1,4 @@
 local vshard = require('vshard')
-local cartridge_pool = require('cartridge.pool')
 local cartridge_rpc = require('cartridge.rpc')
 local fiber = require('fiber')
 local log = require('log')
@@ -31,7 +30,7 @@ local function retrying_function()
 end
 
 local function get_composite_data(id)
-    local data = vshard.router.callro(vshard.router.bucket_id(id), 'get_composite_data', {id})
+    local data = vshard.router.callro(vshard.router.bucket_id(id), 'get_composite_data', { id })
     return data
 end
 
@@ -57,7 +56,7 @@ local function raising_error(message)
 end
 
 local function reset_request_counters()
-    box.space.request_counters:replace({1, 0})
+    box.space.request_counters:replace({ 1, 0 })
 end
 
 local function get_router_name()
@@ -77,15 +76,18 @@ local function long_running_function(values)
         end
     end
 
-    box.space.request_counters:update(1, {{'+', 'count', 1}})
+    -- need using number instead field name as string in update function for compatibility with tarantool 1.10
+    box.space.request_counters:update(1, { { '+', 2, 1 } })
     log.info('Executing long-running function ' ..
             tostring(box.space.request_counters:get(1)[2]) ..
             "(name: " .. disabled_router_name ..
             "; sleep: " .. seconds_to_sleep .. ")")
     if get_router_name() == disabled_router_name then
-        return nil, "Disabled by client; router_name = " ..  disabled_router_name
+        return nil, "Disabled by client; router_name = " .. disabled_router_name
     end
-    if seconds_to_sleep then fiber.sleep(seconds_to_sleep) end
+    if seconds_to_sleep then
+        fiber.sleep(seconds_to_sleep)
+    end
     return true
 end
 
@@ -117,10 +119,10 @@ end
 local function init(opts)
 
     box.schema.space.create('request_counters', {
-        format = {{'id', 'unsigned'}, {'count', 'unsigned'}},
+        format = { { 'id', 'unsigned' }, { 'count', 'unsigned' } },
         if_not_exists = true
     })
-    box.space.request_counters:create_index('primary', {parts = {'id'}, if_not_exists = true})
+    box.space.request_counters:create_index('id', { parts = { 'id' }, if_not_exists = true })
 
     rawset(_G, 'truncate_space', truncate_space)
 
