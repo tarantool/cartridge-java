@@ -1,6 +1,7 @@
 local vshard = require('vshard')
 local cartridge_rpc = require('cartridge.rpc')
 local fiber = require('fiber')
+local crud = require('crud')
 local log = require('log')
 
 local function get_schema()
@@ -113,7 +114,10 @@ local function box_error_non_network_error()
 end
 
 local function crud_error_timeout()
-    return crud.get("test_space", ('x'):rep(2^27))
+    return nil, { class_name = 'SelectError',
+                  err = 'Failed to get next object: GetTupleError: Failed to get tuples from storages: UpdateTuplesError: Failed to select tuples from storages: Call: Failed for 07d14fec-f32b-4b90-aa72-e6755273ad56: Function returned an error: {\"code\":78,\"base_type\":\"ClientError\",\"type\":\"ClientError\",\"message\":\"Timeout exceeded\",\"trace\":[{\"file\":\"builtin\\/box\\/net_box.lua\",\"line\":419}]}',
+                  str = 'SelectError: Failed to get next object: GetTupleError: Failed to get tuples from storages: UpdateTuplesError: Failed to select tuples from storages: Call: Failed for 07d14fec-f32b-4b90-aa72-e6755273ad56: Function returned an error: {\"code\":78,\"base_type\":\"ClientError\",\"type\":\"ClientError\",\"message\":\"Timeout exceeded\",\"trace\":[{\"file\":\"builtin\\/box\\/net_box.lua\",\"line\":419}]}'
+    }
 end
 
 local function init(opts)

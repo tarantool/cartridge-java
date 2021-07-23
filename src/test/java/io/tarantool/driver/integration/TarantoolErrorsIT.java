@@ -46,8 +46,8 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
     private RetryingTarantoolTupleClient setupRetryingClient(int retries) {
         ProxyTarantoolTupleClient client = setupClient();
         return new RetryingTarantoolTupleClient(client,
-                        TarantoolRequestRetryPolicies
-                            .byNumberOfAttempts(retries).build());
+                TarantoolRequestRetryPolicies
+                        .byNumberOfAttempts(retries).build());
     }
 
     @Test
@@ -58,14 +58,13 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             client.callForSingleResult("box_error_unpack_no_connection", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
             assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
-            assertTrue(e.getCause().getMessage().contains(
-                "code: 77\n" +
-                "message: Connection is not established\n" +
-                "base_type: ClientError\n" +
-                "type: ClientError\n" +
-                "trace:")
-            );
+            assertTrue(message.contains("code: 77"));
+            assertTrue(message.contains("message: Connection is not established"));
+            assertTrue(message.contains("type: ClientError"));
+            assertTrue(message.contains("trace:"));
         }
     }
 
@@ -80,14 +79,13 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
                     String.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
             assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
-            assertTrue(e.getCause().getMessage().contains(
-                "code: 78\n" +
-                "message: Timeout exceeded\n" +
-                "base_type: ClientError\n" +
-                "type: ClientError\n" +
-                "trace:")
-            );
+            assertTrue(message.contains("code: 78"));
+            assertTrue(message.contains("message: Timeout exceeded"));
+            assertTrue(message.contains("type: ClientError"));
+            assertTrue(message.contains("trace:"));
         }
     }
 
@@ -102,12 +100,11 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
                     String.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
             assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
-            assertTrue(e.getCause().getMessage().contains(
-                     "InnerErrorMessage:\n" +
-                     "code: 78\n" +
-                     "message: Timeout exceeded")
-            );
+            assertTrue(message.contains("code: 78"));
+            assertTrue(message.contains("message: Timeout exceeded"));
         }
     }
 
@@ -119,13 +116,13 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             client.callForSingleResult("crud_error_timeout", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
             assertTrue(e.getCause() instanceof TarantoolInternalNetworkException);
-            assertTrue(e.getCause().getMessage().contains(
-                    "Function returned an error: {\"code\":78," +
-                            "\"base_type\":\"ClientError\"," +
-                            "\"type\":\"ClientError\"," +
-                            "\"message\":\"Timeout exceeded\","
-            ));
+            assertTrue(message.contains("\"code\":78"));
+            assertTrue(message.contains("\"type\":\"ClientError\""));
+            assertTrue(message.contains("\"message\":\"Timeout exceeded\""));
+            assertTrue(message.contains("\"trace\":"));
         }
     }
 
@@ -137,33 +134,32 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             client.callForSingleResult("box_error_non_network_error", HashMap.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
             assertTrue(e.getCause() instanceof TarantoolInternalException);
             assertFalse(e.getCause() instanceof TarantoolInternalNetworkException);
-            assertTrue(e.getCause().getMessage().contains(
-                "code: 40\n" +
-                "message: Failed to write to disk\n" +
-                "base_type: ClientError\n" +
-                "type: ClientError\n" +
-                "trace:")
-            );
+            assertTrue(message.contains("code: 40"));
+            assertTrue(message.contains("message: Failed to write to disk"));
+            assertTrue(message.contains("type: ClientError"));
+            assertTrue(message.contains("trace:"));
         }
     }
 
-        @Test
-        void testNonNetworkError_boxError() {
-            try {
-                ProxyTarantoolTupleClient client = setupClient();
+    @Test
+    void testNonNetworkError_boxError() {
+        try {
+            ProxyTarantoolTupleClient client = setupClient();
 
-                client.callForSingleResult("raising_error", HashMap.class).get();
-                fail("Exception must be thrown after last retry attempt.");
-            } catch (Throwable e) {
-                assertTrue(e.getCause() instanceof TarantoolInternalException);
-                assertFalse(e.getCause() instanceof TarantoolInternalNetworkException);
-                assertTrue(e.getCause().getMessage().contains(
-                        "InnerErrorMessage:\n" +
-                        "code: 32\n" +
-                        "message:")
-                );
-            }
+            client.callForSingleResult("raising_error", HashMap.class).get();
+            fail("Exception must be thrown after last retry attempt.");
+        } catch (Throwable e) {
+            String message = e.getCause().getMessage();
+
+            assertTrue(e.getCause() instanceof TarantoolInternalException);
+            assertFalse(e.getCause() instanceof TarantoolInternalNetworkException);
+            assertTrue(message.contains("InnerErrorMessage:"));
+            assertTrue(message.contains("code: 32"));
+            assertTrue(message.contains("message:"));
         }
+    }
 }
