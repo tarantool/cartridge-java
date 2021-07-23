@@ -26,20 +26,23 @@ public class TarantoolErrors {
     private enum ErrorsCodes {
         NO_CONNECTION("77"), TIMEOUT("78");
         private final String code;
+
         ErrorsCodes(String code) {
             this.code = code;
         }
+
         public String getCode() {
             return code;
         }
     }
+
     private static final String CLIENT_ERROR = "ClientError";
 
     /**
      * Produces {@link TarantoolInternalException} subclasses
      * from the serialized representation in the format of <code>require('errors').new_class("NewError")</code>,
-     * @see <a href="https://github.com/tarantool/errors">tarantool/errors</a>
      *
+     * @see <a href="https://github.com/tarantool/errors">tarantool/errors</a>
      */
     public static class TarantoolErrorsErrorFactory implements TarantoolErrorFactory {
         private static final StringValue LINE = ValueFactory.newString("line");
@@ -49,12 +52,10 @@ public class TarantoolErrors {
         private static final StringValue ERROR_MESSAGE = ValueFactory.newString("str");
         private static final StringValue STACKTRACE = ValueFactory.newString("stack");
         private static final Pattern NETWORK_ERROR_PATTERN = Pattern.compile(
-                ".*" +
-                "\"code\":" +
-                "[" + ErrorsCodes.NO_CONNECTION.getCode() + "|" + ErrorsCodes.TIMEOUT.getCode() + "]" +
-                ".*" +
-                "\"type\":\"" + CLIENT_ERROR + "\"" +
-                ".*", Pattern.DOTALL);
+                "(?=.*\"type\":\"" + CLIENT_ERROR + "\")"
+                        + "(?=.*\"code\":"
+                        + "[" + ErrorsCodes.NO_CONNECTION.getCode() + "|" + ErrorsCodes.TIMEOUT.getCode() + "])",
+                Pattern.DOTALL);
 
         public TarantoolErrorsErrorFactory() {
         }
@@ -67,7 +68,7 @@ public class TarantoolErrors {
             Map<Value, Value> map = error.asMapValue().map();
 
             String exceptionMessage = "";
-            String errorMessage =  map.containsKey(ERROR_MESSAGE) ? map.get(ERROR_MESSAGE).toString() : null;
+            String errorMessage = map.containsKey(ERROR_MESSAGE) ? map.get(ERROR_MESSAGE).toString() : null;
             String err = map.containsKey(ERR) ? map.get(ERR).toString() : null;
             String line = map.containsKey(LINE) ? map.get(LINE).toString() : null;
             String className = map.containsKey(CLASS_NAME) ? map.get(CLASS_NAME).toString() : null;
@@ -133,8 +134,8 @@ public class TarantoolErrors {
     /**
      * Produces {@link TarantoolInternalException} subclasses from the serialized representation
      * in the format of <code>box.error:unpack</code>,
-     * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/error/">box_error</a>
      *
+     * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/error/">box_error</a>
      */
     public static class TarantoolBoxErrorFactory implements TarantoolErrorFactory {
         private static final StringValue CODE = ValueFactory.newString("code");
@@ -236,7 +237,7 @@ public class TarantoolErrors {
         /**
          * Check the error message contains fields of code and message
          *
-         * @param code code from box.error
+         * @param code    code from box.error
          * @param message string message from box.error
          * @return an {@link Boolean}
          */
@@ -249,7 +250,6 @@ public class TarantoolErrors {
      * The factory is finalizing, i.e. errors passed into
      * it will always be introverted as appropriate for the given factory
      * The error is generated in a message that is passed to {@link TarantoolInternalException}
-     *
      */
     public static class TarantoolUnrecognizedErrorFactory implements TarantoolErrorFactory {
         public TarantoolUnrecognizedErrorFactory() {
