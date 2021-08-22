@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DefaultMessagePackMapperTest {
 
@@ -41,6 +43,8 @@ class DefaultMessagePackMapperTest {
         assertEquals(Long.valueOf(111L), mapper.fromValue(ValueFactory.newInteger(111), Long.class));
         assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111L), Integer.class));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0F)));
+        assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000f), Integer.class));
+        assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000d), Integer.class));
         assertEquals(Double.valueOf(Float.MAX_VALUE * 10D),
                 mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
         assertThrows(ClassCastException.class, () -> {

@@ -58,6 +58,7 @@ public class DefaultBigDecimalConverter implements
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         packer.packInt(scale);
         packer.writePayload(bcd);
+        packer.close();
         return packer.toByteArray();
     }
 
@@ -68,6 +69,7 @@ public class DefaultBigDecimalConverter implements
         ByteBuffer buffer = ByteBuffer.wrap(data);
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(buffer);
         int scale = unpacker.unpackInt();
+        unpacker.close();
         if (scale > DECIMAL_MAX_DIGITS || scale < -DECIMAL_MAX_DIGITS) {
             throw new IOException(
                     String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));

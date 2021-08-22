@@ -3,6 +3,9 @@ package io.tarantool.driver.mappers;
 import org.msgpack.value.FloatValue;
 import org.msgpack.value.ValueFactory;
 
+import static java.lang.Float.MAX_VALUE;
+import static java.lang.Float.MIN_VALUE;
+
 /**
  * Default {@code Float} to {@link FloatValue} converter
  *
@@ -10,7 +13,7 @@ import org.msgpack.value.ValueFactory;
  */
 public class DefaultFloatConverter implements ValueConverter<FloatValue, Float>, ObjectConverter<Float, FloatValue> {
 
-    private static final long serialVersionUID = 20200708L;
+    private static final long serialVersionUID = 20210819L;
 
     @Override
     public FloatValue toValue(Float object) {
@@ -24,6 +27,11 @@ public class DefaultFloatConverter implements ValueConverter<FloatValue, Float>,
 
     @Override
     public boolean canConvertValue(FloatValue value) {
-        return value.toDouble() <= Float.MAX_VALUE;
+        double aDouble = value.toDouble();
+        return aDouble <= 0.0D ? isInAcceptableRange(0.0D - aDouble) : isInAcceptableRange(aDouble);
+    }
+
+    private boolean isInAcceptableRange(double aDouble) {
+        return MIN_VALUE <= aDouble && aDouble <= MAX_VALUE;
     }
 }
