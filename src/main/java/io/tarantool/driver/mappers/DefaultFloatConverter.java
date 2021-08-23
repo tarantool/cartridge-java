@@ -32,6 +32,6 @@ public class DefaultFloatConverter implements ValueConverter<FloatValue, Float>,
     }
 
     private boolean isInAcceptableRange(double aDouble) {
-        return MIN_VALUE <= aDouble && aDouble <= MAX_VALUE;
+        return (MIN_VALUE <= aDouble && aDouble <= MAX_VALUE) || aDouble == 0;
     }
 }
