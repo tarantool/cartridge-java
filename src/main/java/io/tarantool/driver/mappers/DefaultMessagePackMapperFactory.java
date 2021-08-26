@@ -33,6 +33,8 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(IntegerValue.class, Double.class, new DefaultIntegerValueToDoubleConverter())
                 .withConverter(IntegerValue.class, Long.class, new DefaultLongConverter())
                 .withConverter(IntegerValue.class, Integer.class, new DefaultIntegerConverter())
+                //TODO: add this when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
+                // .withConverter(IntegerValue.class, Short.class, new DefaultShortConverter())
                 .withConverter(BinaryValue.class, byte[].class, new DefaultByteArrayConverter())
                 .withConverter(BooleanValue.class, Boolean.class, new DefaultBooleanConverter())
                 .withValueConverter(FloatValue.class, Long.class, new DefaultFloatValueToLongConverter())

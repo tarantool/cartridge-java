@@ -104,6 +104,9 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
         Assertions.assertEquals(1D, tuple.getDouble("number_field"));
         Assertions.assertEquals(1, tuple.getInteger("number_field"));
         Assertions.assertEquals(1F, tuple.getFloat("number_field"));
+
+        Assertions.assertEquals(Integer.valueOf("1"), tuple.getObject("double_field", Integer.class).get());
+        Assertions.assertEquals(Long.valueOf("1"), tuple.getObject("double_field", Long.class).get());
     }
 
     private ProxyTarantoolTupleClient setupClient() {
