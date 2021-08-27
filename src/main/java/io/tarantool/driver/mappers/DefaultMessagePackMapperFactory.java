@@ -33,8 +33,13 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(IntegerValue.class, Double.class, new DefaultIntegerValueToDoubleConverter())
                 .withConverter(IntegerValue.class, Long.class, new DefaultLongConverter())
                 .withConverter(IntegerValue.class, Integer.class, new DefaultIntegerConverter())
+                //TODO: add this when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
+                // .withConverter(IntegerValue.class, Short.class, new DefaultShortConverter())
                 .withConverter(BinaryValue.class, byte[].class, new DefaultByteArrayConverter())
                 .withConverter(BooleanValue.class, Boolean.class, new DefaultBooleanConverter())
+                .withValueConverter(FloatValue.class, Long.class, new DefaultFloatValueToLongConverter())
+                .withValueConverter(FloatValue.class, Integer.class, new DefaultFloatValueToIntegerConverter())
+                .withValueConverter(FloatValue.class, Short.class, new DefaultFloatValueToShortConverter())
                 .withConverter(FloatValue.class, Double.class, new DefaultDoubleConverter())
                 .withConverter(FloatValue.class, Float.class, new DefaultFloatConverter())
                 .withConverter(ExtensionValue.class, UUID.class, new DefaultUUIDConverter())
@@ -45,6 +50,7 @@ public final class DefaultMessagePackMapperFactory {
 
     /**
      * Get modification-safe instance of the mapper. The instance already contains converters for simple types
+     *
      * @return {@link DefaultMessagePackMapper} instance
      */
     public DefaultMessagePackMapper defaultSimpleTypeMapper() {
@@ -58,16 +64,17 @@ public final class DefaultMessagePackMapperFactory {
     /**
      * Get modification-safe instance of the mapper. The instance contains converters for simple types and complex types
      * {@link java.util.Map} and {@link java.util.List}
+     *
      * @return {@link DefaultMessagePackMapper} instance
      */
     public DefaultMessagePackMapper defaultComplexTypesMapper() {
         DefaultMessagePackMapper defaultComplexTypesMapper =
                 new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
-                .withDefaultListObjectConverter()
-                .withDefaultArrayValueConverter()
-                .withDefaultMapObjectConverter()
-                .withDefaultMapValueConverter()
-                .build();
+                        .withDefaultListObjectConverter()
+                        .withDefaultArrayValueConverter()
+                        .withDefaultMapObjectConverter()
+                        .withDefaultMapValueConverter()
+                        .build();
 
         // internal types converter
         defaultComplexTypesMapper.registerObjectConverter(
@@ -77,6 +84,7 @@ public final class DefaultMessagePackMapperFactory {
 
     /**
      * Get modification-safe instance of the given mapper (shallow copy).
+     *
      * @param mapper configured mapper instance
      * @return new mapper instance
      */
@@ -86,6 +94,7 @@ public final class DefaultMessagePackMapperFactory {
 
     /**
      * Get new empty mapper.
+     *
      * @return new mapper instance
      */
     public DefaultMessagePackMapper emptyMapper() {
@@ -94,6 +103,7 @@ public final class DefaultMessagePackMapperFactory {
 
     /**
      * Get factory instance.
+     *
      * @return factory instance
      */
     public static DefaultMessagePackMapperFactory getInstance() {

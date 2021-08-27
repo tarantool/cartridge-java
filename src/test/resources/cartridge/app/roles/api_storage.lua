@@ -64,6 +64,22 @@ local function init_space()
     test_space_to_join:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space_to_join:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
+    -- test space for check double (cdata) field in it
+    local test_space_with_double_field = box.schema.space.create(
+            'test_space_with_double_field',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'bucket_id', 'unsigned' },
+                    { 'double_field', get_field_type_by_version() },
+                    { 'number_field', 'number' },
+                },
+                if_not_exists = true,
+            }
+    )
+
+    test_space_with_double_field:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    test_space_with_double_field:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     -- cursor test spaces
     local cursor_test_space = box.schema.space.create('cursor_test_space', { if_not_exists = true })
@@ -75,7 +91,7 @@ local function init_space()
     });
     cursor_test_space:create_index('primary', {
         type = 'tree',
-        parts = {'id'},
+        parts = { 'id' },
         if_not_exists = true,
     })
     cursor_test_space:create_index('bucket_id', {
@@ -95,7 +111,7 @@ local function init_space()
     });
     cursor_test_space_multi_part_key:create_index('primary', {
         type = 'tree',
-        parts = {'id', 'name'},
+        parts = { 'id', 'name' },
         if_not_exists = true,
     })
     cursor_test_space_multi_part_key:create_index('bucket_id', {
@@ -116,6 +132,18 @@ local function get_composite_data(id)
     composite.field3 = data2.field3
     composite.field4 = data2.field4
     return composite
+end
+
+function get_field_type_by_version()
+    local tarantoolVersion = box.info.version
+    --todo: change this solution for more generic cases like for 10+ versions
+    local version = tonumber(string.sub(tarantoolVersion, 1, 3))
+
+    if version >= 2.3 then
+        return 'double'
+    end
+
+    return 'number'
 end
 
 local function init(opts)

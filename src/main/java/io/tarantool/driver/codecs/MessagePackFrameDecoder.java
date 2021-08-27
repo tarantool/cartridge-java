@@ -34,6 +34,7 @@ public class MessagePackFrameDecoder extends ReplayingDecoder<MessagePackFrameDe
                     try (ByteBufInputStream in = new ByteBufInputStream(lenBuf)) {
                         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
                         size = unpacker.unpackInt();
+                        unpacker.close();
                         checkpoint(DecoderState.BODY);
                     }
                     lenBuf.release();
@@ -46,6 +47,7 @@ public class MessagePackFrameDecoder extends ReplayingDecoder<MessagePackFrameDe
                         try (ByteBufInputStream in = new ByteBufInputStream(bodyBuf)) {
                             MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
                             list.add(TarantoolResponse.fromMessagePack(unpacker));
+                            unpacker.close();
                             size = 0;
                         }
                         bodyBuf.release();
