@@ -1,8 +1,9 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
+import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.MapValue;
@@ -11,7 +12,6 @@ import org.msgpack.value.ValueFactory;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DefaultMessagePackMapperTest {
+
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final TarantoolTupleFactory tupleFactory =
+            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     @Test
     void getDefaultConverter() throws MessagePackValueMapperException {
@@ -169,17 +173,18 @@ class DefaultMessagePackMapperTest {
         assertEquals(testValue, mapper.toValue(testTuple).asMapValue().map());
     }
 
-    @Test
-    void should_getObject_returnShort_ifParameterObjectClassIsShort() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue(Short.MAX_VALUE);
-
-        assertEquals(Short.class, tuple.getObject(0, Short.class).get().getClass());
-        assertEquals(Short.MAX_VALUE, tuple.getObject(0, Short.class).get());
-    }
+    //TODO: add this test when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
+//    @Test
+//    void should_getObject_returnShort_ifParameterObjectClassIsShort() {
+//        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger(Short.MAX_VALUE));
+//
+//        assertEquals(Short.class, tuple.getObject(0, Short.class).get().getClass());
+//        assertEquals(Short.MAX_VALUE, tuple.getObject(0, Short.class).get());
+//    }
 
     @Test
     void should_getObject_returnInteger_ifParameterObjectClassIsIntegerAndValueGreaterThanShort() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue(Short.MAX_VALUE + 1);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger(Short.MAX_VALUE + 1));
 
         assertEquals(Integer.class, tuple.getObject(0, Integer.class).get().getClass());
         assertEquals(Short.MAX_VALUE + 1, tuple.getObject(0, Integer.class).get());
@@ -187,7 +192,7 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_returnInteger_ifParameterObjectClassIsInteger() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue((int) Short.MAX_VALUE);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger((int) Short.MAX_VALUE));
 
         assertEquals(Integer.class, tuple.getObject(0, Integer.class).get().getClass());
         assertEquals(Integer.valueOf(Short.MAX_VALUE), tuple.getObject(0, Integer.class).get());
@@ -195,14 +200,14 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_throwUnsupportedOperationException_ifGetShortFromValueWithMoreThanMaxShortValue() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue(Integer.valueOf(String.valueOf(Short.MAX_VALUE + 1)));
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger(Short.MAX_VALUE + 1));
 
-        assertThrows(UnsupportedOperationException.class, () -> tuple.getObject(0, Short.class).get());
+        assertThrows(MessagePackValueMapperException.class, () -> tuple.getObject(0, Short.class).get());
     }
 
     @Test
     void should_getObject_returnInteger() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue(1);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger(1));
 
         assertEquals(Integer.class, tuple.getObject(0, Integer.class).get().getClass());
         assertEquals(1, tuple.getObject(0, Integer.class).get());
@@ -210,7 +215,7 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_returnLong_ifValueGreaterThanIntegerMaxValue() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue((long) Integer.MAX_VALUE + 1);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger((long) Integer.MAX_VALUE + 1));
 
         assertEquals(Long.class, tuple.getObject(0, Long.class).get().getClass());
         assertEquals((long) Integer.MAX_VALUE + 1, tuple.getObject(0, Long.class).get());
@@ -218,7 +223,7 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_returnLong() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue((long) 1);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger((long) 1));
 
         assertEquals(Long.class, tuple.getObject(0, Long.class).get().getClass());
         assertEquals(1, tuple.getObject(0, Long.class).get());
@@ -226,13 +231,8 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_throwUnsupportedOperationException_ifValueGreaterThanIntegerMaxValue() {
-        TarantoolTuple tuple = makeTarantoolTupleWithSingleValue((long) Integer.MAX_VALUE + 1);
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger((long) Integer.MAX_VALUE + 1));
 
-        assertThrows(UnsupportedOperationException.class, () -> tuple.getObject(0, Integer.class).get());
-    }
-
-    private TarantoolTuple makeTarantoolTupleWithSingleValue(Object value) {
-        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultSimpleTypeMapper();
-        return new TarantoolTupleImpl(Collections.singletonList(value), mapper);
+        assertThrows(MessagePackValueMapperException.class, () -> tuple.getObject(0, Integer.class).get());
     }
 }
