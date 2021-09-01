@@ -8,5 +8,5 @@ public class TestComposite {
     public String field1;
     public Integer field2;
     public Boolean field3;
-    public Float field4;
+    public Double field4;
 }

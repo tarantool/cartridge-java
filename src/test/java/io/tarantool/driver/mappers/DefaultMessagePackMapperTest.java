@@ -49,14 +49,11 @@ class DefaultMessagePackMapperTest {
         });
         assertEquals(Long.valueOf(111L), mapper.fromValue(ValueFactory.newInteger(111), Long.class));
         assertEquals(Integer.valueOf(111), mapper.fromValue(ValueFactory.newInteger(111L), Integer.class));
-        assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0F)));
+        assertEquals(111.0, mapper.fromValue(ValueFactory.newFloat(111.0F)));
         assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000f), Integer.class));
         assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000d), Integer.class));
         assertEquals(Double.valueOf(Float.MAX_VALUE * 10D),
                 mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
-        assertThrows(ClassCastException.class, () -> {
-            Double result = mapper.fromValue(ValueFactory.newFloat(111.0D));
-        });
         assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newFloat(111.0F), Double.class));
         assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newInteger(111L), Double.class));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0D), Float.class));

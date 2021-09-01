@@ -28,6 +28,9 @@ import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -371,7 +374,10 @@ public class ClusterTarantoolTupleClientIT {
         List<?> result = client.eval("return 2.2 + 2, nil").get();
 
         assertEquals(2, result.size());
-        assertEquals(4.2f, result.get(0));
+
+        MathContext mathContext = new MathContext(1, RoundingMode.HALF_UP);
+        assertEquals(0, new BigDecimal("4.2", mathContext)
+                .compareTo(new BigDecimal(String.valueOf(result.get(0)), mathContext)));
     }
 
     @Test

@@ -8,7 +8,8 @@ import org.msgpack.value.ValueFactory;
  *
  * @author Oleg Kuznetsov
  */
-public class DefaultShortConverter implements ValueConverter<IntegerValue, Short>, ObjectConverter<Short, IntegerValue> {
+public class DefaultShortConverter implements ValueConverter<IntegerValue, Short>,
+        ObjectConverter<Short, IntegerValue> {
 
     @Override
     public Short fromValue(IntegerValue value) {
