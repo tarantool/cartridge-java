@@ -371,7 +371,7 @@ public class ClusterTarantoolTupleClientIT {
         List<?> result = client.eval("return 2.2 + 2, nil").get();
 
         assertEquals(2, result.size());
-        assertEquals(4.2f, result.get(0));
+        assertEquals(4.2, result.get(0));
     }
 
     @Test

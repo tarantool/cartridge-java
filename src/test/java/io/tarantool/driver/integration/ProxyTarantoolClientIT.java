@@ -315,11 +315,11 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
-        TarantoolResult<TarantoolTuple> tuple1 = client.space("test_space").insert(tarantoolTuple).get();
+        client.space("test_space").insert(tarantoolTuple).get();
 
         values = Arrays.asList(123000, null, true, 123.456);
         tarantoolTuple = tupleFactory.create(values);
-        TarantoolResult<TarantoolTuple> tuple2 = client.space("test_space_to_join").insert(tarantoolTuple).get();
+        client.space("test_space_to_join").insert(tarantoolTuple).get();
 
         MessagePackValueMapper valueMapper = client.getConfig().getMessagePackMapper();
         CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>> mapper =
@@ -330,7 +330,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                             composite.field1 = (String) valueMap.get("field1");
                             composite.field2 = (Integer) valueMap.get("field2");
                             composite.field3 = (Boolean) valueMap.get("field3");
-                            composite.field4 = (Float) valueMap.get("field4");
+                            composite.field4 = (Double) valueMap.get("field4");
                             return composite;
                         }, TestCompositeCallResult.class);
         TestComposite actual =
@@ -339,7 +339,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals("Jane Doe", actual.field1);
         assertEquals(999, actual.field2);
         assertEquals(true, actual.field3);
-        assertEquals(123.456F, actual.field4);
+        assertEquals(123.456, actual.field4);
     }
 
     @Test

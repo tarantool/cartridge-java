@@ -280,6 +280,36 @@ try (ProxyTarantoolTupleClient client = setupClient()) {
 }
 ```
 
+### TarantoolTuple
+You can use TarantoolTuple for creating tuple which can be sent to the Tarantool instance
+or can be returned from default "crud" functions.
+You can create TarantoolTuple like new instance of this class: `new TarantoolTupleImpl()`,
+passing required parameters. Or you can use this factory `TarantoolTupleFactory`, that solution is more right.
+See an example below:
+
+```java
+// default mapper factory 
+DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+// default tarantool tuple factory
+TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+
+// this line create for you tuple in form [1,2.0,'3',4]
+TarantoolTuple tarantoolTuple = tupleFactory.create(1, 2.0, "3", new BigDecimal("4"));
+
+Optional<?> object = tarantoolTuple.getObject(0);
+Optional<Integer> integer = tarantoolTuple.getObject(0, Integer.class);
+
+// expected double, because 2.0 (on the first index in tuple) is a value with floating point
+// and double preferable in java by default (we support this precedence above float)
+Optional<?> doubleValue = tarantoolTuple.getObject(1);
+// if you want get float, you should specify this in second parameter
+Optional<?> floatValue = tarantoolTuple.getObject(1, Float.class);
+
+Optional<?> stringValue = tarantoolTuple.getObject(2);
+
+Optional<?> bigDecimalValue = tarantoolTuple.getObject(3);
+```
+
 ## Documentation
 
 The Java Docs are available at [Github pages](https://tarantool.github.io/cartridge-java/).
