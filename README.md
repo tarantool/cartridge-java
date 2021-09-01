@@ -280,29 +280,27 @@ try (ProxyTarantoolTupleClient client = setupClient()) {
 }
 ```
 
-### TarantoolTuple
+### TarantoolTuple usage
 You can use TarantoolTuple for creating tuple which can be sent to the Tarantool instance
 or can be returned from default "crud" functions.
-You can create TarantoolTuple like new instance of this class: `new TarantoolTupleImpl()`,
-passing required parameters. Or you can use this factory `TarantoolTupleFactory`, that solution is more right.
+You can create TarantoolTuple with this factory `TarantoolTupleFactory`.
 See an example below:
 
 ```java
-// default mapper factory 
+// Create a mapper factory  
 DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
-// default tarantool tuple factory
+// Create a tuple factory
 TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
-// this line create for you tuple in form [1,2.0,'3',4]
+// Create a tuple from listed values: [1,2.0,'3',4]
 TarantoolTuple tarantoolTuple = tupleFactory.create(1, 2.0, "3", new BigDecimal("4"));
 
 Optional<?> object = tarantoolTuple.getObject(0);
 Optional<Integer> integer = tarantoolTuple.getObject(0, Integer.class);
 
-// expected double, because 2.0 (on the first index in tuple) is a value with floating point
-// and double preferable in java by default (we support this precedence above float)
+// Returned value will have 'double' type (it is used by default). 
 Optional<?> doubleValue = tarantoolTuple.getObject(1);
-// if you want get float, you should specify this in second parameter
+// To get 'float' value we must explicitly define the target type.
 Optional<?> floatValue = tarantoolTuple.getObject(1, Float.class);
 
 Optional<?> stringValue = tarantoolTuple.getObject(2);
