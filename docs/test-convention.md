@@ -1,11 +1,11 @@
-Tests names should be correspond the next pattern:
+Tests names should correspond the pattern:
 
 **test_[methodName/scenarioName]_should[Action]_if[Condition]**
 
 **[methodName/scenarioName]_ - is optional.**
 **if[Condition] - is optional. You can omit this if the execution is straightforward.**
 
-Also, inside the body of the test there should be comments of the following format:
+Also, it's nice to include additional comments of the following format:
 ```   
     //given
     [some code that defines conditions]
@@ -24,7 +24,7 @@ If we have method like this:
     }
 ```
 
-Test for this method:
+Test for this method can look like:
 ```java
     @Test
     public void test_hello_shouldReturnHelloWithName() {
@@ -64,8 +64,8 @@ Test for this method can be like this:
     }
 ```
 
-It's good when this pattern can be included into test method name, but it's not always possible.
-When the description is too large then test case can contain additional info in comment.
+It's not always possible to use the above pattern for each test method name.
+When the description is too large then test it's good to describe test scenario in comment.
 Also consider this points:
 
 - Name of test method must not violate linter rules and generate compiler warnings (must not contain special characters, be longer than 120 chars etc).
