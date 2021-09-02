@@ -343,3 +343,4 @@ Substitute the user and group in these commands with the user and group under wh
 ## Contributing
 
 Contributions to this project are always welcome and highly encouraged.
+[See conventions for tests](docs/test-convention.md)
