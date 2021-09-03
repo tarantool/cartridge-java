@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.RetryingTarantoolSpaceOperations;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.clientbuilder.TarantoolRetryingClientBuilder;
 
 import java.util.concurrent.Executor;
 
@@ -39,6 +40,10 @@ public class RetryingTarantoolTupleClient
             RequestRetryPolicyFactory retryPolicyFactory,
             Executor executor) {
         super(decoratedClient, retryPolicyFactory, executor);
+    }
+
+    public static TarantoolRetryingClientBuilder builder(){
+        return TarantoolRetryingClientBuilder.INSTANCE;
     }
 
     @Override
