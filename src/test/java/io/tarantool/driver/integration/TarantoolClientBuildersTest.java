@@ -3,18 +3,19 @@ package io.tarantool.driver.integration;
 import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.clientbuilder.TarantoolClusterClientBuilder;
 import io.tarantool.driver.clientbuilder.TarantoolProxyClientBuilder;
 import io.tarantool.driver.clientbuilder.TarantoolRetryingClientBuilder;
+import io.tarantool.driver.clientfactory.TarantoolClientFactory;
+import io.tarantool.driver.clientfactory.TarantoolClusterClientBuilderDecorator;
+import io.tarantool.driver.clientfactory.TarantoolRetryingClientBuilderDecorator;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TarantoolClientBuildersTest {
 
@@ -27,12 +28,13 @@ public class TarantoolClientBuildersTest {
                 .withRetryPolicyFactory(TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build());
 
         TarantoolRetryingClientBuilder thirdStep = secondStep
+                .withDecoratedClient(ClusterTarantoolTupleClient.builder().build())
                 .withAddress("127.0.0.1", 3301);
 
         TarantoolRetryingClientBuilder fourthStep = thirdStep
                 .withAddress(new TarantoolServerAddress("127.0.0.1", 3301));
 
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = fourthStep.build();
+        RetryingTarantoolTupleClient client = fourthStep.build();
 
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
         assertEquals(fourthStep, firstStep);
@@ -81,5 +83,48 @@ public class TarantoolClientBuildersTest {
         assertEquals(ClusterTarantoolTupleClient.class, client.getClass());
         assertEquals(thirdStep, firstStep);
         assertEquals(thirdStep, secondStep);
+    }
+
+    @Test
+    void name() {
+        TarantoolClusterClientBuilderDecorator decorator = TarantoolClientFactory.getInstance().createClient();
+
+        TarantoolClusterClientBuilderDecorator decorator2 = decorator
+                .withAddress(new TarantoolServerAddress("127.0.0.2", 3302));
+
+        ClusterTarantoolTupleClient client = decorator2.build();
+
+        assertNotNull(client);
+    }
+
+    @Test
+    void name2() {
+        TarantoolClusterClientBuilderDecorator decorator = TarantoolClientFactory.getInstance().createClient();
+
+        TarantoolRetryingClientBuilderDecorator decorator2 = decorator
+                .withRetryPolicyFactory(TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build());
+
+        TarantoolClusterClientBuilderDecorator decorator3 = decorator2
+                .withDecoratedClient(ClusterTarantoolTupleClient.builder().build())
+                .withAddress(new TarantoolServerAddress("127.0.0.2", 3302));
+
+
+        ClusterTarantoolTupleClient client = decorator3.build();
+
+        assertNotNull(client);
+    }
+
+    @Test
+    void name3() {
+        RetryingTarantoolTupleClient client = TarantoolClientFactory.getInstance().createClient()
+                .withCredentials("Test", "test")
+                .withMappingConfig(ProxyOperationsMappingConfig.builder()
+                        .withDeleteFunctionName("delete")
+                        .build())
+                .withAddress(new TarantoolServerAddress("127.0.0.2", 3302))
+                .withRetryPolicyFactory(TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build())
+                .build();
+
+        assertNotNull(client);
     }
 }

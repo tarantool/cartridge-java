@@ -1,8 +1,12 @@
 package io.tarantool.driver.clientfactory;
 
-import io.tarantool.driver.clientbuilder.AbstractTarantoolClientBuilder;
-
 public interface TarantoolClientFactory {
 
-    AbstractTarantoolClientBuilder createClient();
+    TarantoolClientFactory INSTANCE = new TarantoolClientFactoryImpl();
+
+    static TarantoolClientFactory getInstance() {
+        return INSTANCE;
+    }
+
+    TarantoolClusterClientBuilderDecorator createClient();
 }
