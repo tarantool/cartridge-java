@@ -23,6 +23,13 @@ public interface TarantoolAuthenticator<T extends TarantoolCredentials> {
     boolean canAuthenticateWith(T credentials);
 
     /**
+     * Сheck if we can connect to the Tarantool without authentication
+     * @param credentials Tarantool user credentials
+     * @return {@code true} if the credentials are suitable so as not to use them for authentication
+     */
+    boolean canSkipAuth(T credentials);
+
+    /**
      * Takes the server auth data returned in response for the connect request and user auth data, performs
      * the necessary transformations and writes the serialized authentication data to a byte array
      * @param serverAuthData bytes with auth data from the Tarantool server greeting

@@ -36,7 +36,17 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
      */
     @Override
     public boolean canAuthenticateWith(SimpleTarantoolCredentials credentials) {
-        return !credentials.isEmpty();
+        return credentials.isValid();
+    }
+
+    /**
+     * Check if the passed instance of {@link SimpleTarantoolCredentials} can be used for authentication
+     * @param credentials Tarantool user credentials
+     * @return true, if the guest is implicit
+     */
+    @Override
+    public boolean canSkipAuth(SimpleTarantoolCredentials credentials) {
+        return credentials.isGuest();
     }
 
     /**

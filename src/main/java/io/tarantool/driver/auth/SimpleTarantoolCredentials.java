@@ -21,7 +21,7 @@ public class SimpleTarantoolCredentials implements TarantoolCredentials {
      * @param password non-null password
      */
     public SimpleTarantoolCredentials(String user, String password) {
-        Assert.hasText(user, "User must not be empty");
+        Assert.notNull(user, "User must not be null");
         Assert.notNull(password, "Password must not be null");
 
         this.user = user;
@@ -45,7 +45,11 @@ public class SimpleTarantoolCredentials implements TarantoolCredentials {
         return password;
     }
 
-    public boolean isEmpty() {
-        return user.isEmpty() || password.isEmpty();
+    public boolean isValid() {
+        return !user.isEmpty();
+    }
+
+    public boolean isGuest() {
+        return (user.isEmpty() || user.equals(DEFAULT_USER)) && password.isEmpty();
     }
 }
