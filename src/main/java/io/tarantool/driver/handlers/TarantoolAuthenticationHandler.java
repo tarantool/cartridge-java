@@ -7,6 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.tarantool.driver.auth.TarantoolAuthenticator;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.TarantoolVersionHolder;
+import io.tarantool.driver.exceptions.TarantoolBadCredentialsException;
 import io.tarantool.driver.protocol.requests.TarantoolAuthRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,11 +71,13 @@ public class TarantoolAuthenticationHandler<S extends TarantoolCredentials, T ex
                             new RuntimeException("Failed to write the auth request to channel", f.cause()));
                 }
             });
-        } else {
+        } else if (authenticator.canSkipAuth(credentials)) {
             log.info("Cannot authenticate with provided credentials, skipping authentication");
             connectionFuture.complete(ctx.channel());
             // remove response handler as well, because no auth response is expected
             ctx.pipeline().remove(TarantoolAuthenticationResponseHandler.class);
+        } else {
+            throw new TarantoolBadCredentialsException();
         }
         ctx.pipeline().remove(this); // authorize once per channel
     }

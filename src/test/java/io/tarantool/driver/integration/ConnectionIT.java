@@ -10,6 +10,7 @@ import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Testcontainers
 public class ConnectionIT {
     private static final String TEST_SPACE_NAME = "test_space";
+    private static final String GUEST_USER = "guest";
+    private static final String EXISTING_USER_WITHOUT_PASSWORD = "empty_password_user";
     private static final Logger log = LoggerFactory.getLogger(ConnectionIT.class);
 
     @Container
@@ -100,6 +103,102 @@ public class ConnectionIT {
         assertEquals(2, result.size());
         assertEquals(1, result.get(0));
         assertEquals(2, result.get(1));
+    }
+
+    @Test
+    public void testGuestExplicit() throws Exception {
+        // withName
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                GUEST_USER, "");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            List<?> resultList = client.eval("return box.session.user()").get();
+            String sessionUser = (String) resultList.get(0);
+            assertEquals(GUEST_USER, sessionUser);
+        }
+    }
+
+    @Test
+    public void testGuestExplicitWithPassword_shouldThrowException() throws Exception {
+        // withName
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                GUEST_USER, "abcd");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            ExecutionException e = assertThrows(ExecutionException.class, () -> {
+                client.eval("return box.session.user()").get();
+            });
+            // In the logs:
+            // .TarantoolInternalException: InnerErrorMessage:
+            // code: 47
+            // message: Incorrect password supplied for user 'guest'
+            assertTrue(e.getCause() instanceof TarantoolConnectionException);
+        }
+    }
+
+    @Test
+    public void testGuestImplicit() throws Exception {
+        // withoutName
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                "", "");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            List<?> resultList = client.eval("return box.session.user()").get();
+            String sessionUser = (String) resultList.get(0);
+            assertEquals(GUEST_USER, sessionUser);
+        }
+    }
+
+    @Test
+    public void testGuestImplicitWithPassword_shouldThrowException() throws Exception {
+        // withoutName
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                "", "abcd");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            ExecutionException e = assertThrows(ExecutionException.class, () -> {
+                List<?> resultList = client.eval("return box.session.user()").get();
+                String sessionUser = (String) resultList.get(0);
+                assertEquals(GUEST_USER, sessionUser);
+            });
+            // In the logs:
+            // TarantoolBadCredentialsException: Bad credentials
+            assertTrue(e.getCause() instanceof TarantoolConnectionException);
+        }
+    }
+
+    @Test
+    public void testExistingUserWithoutPassword() throws Exception {
+        // The EXISTING_USER_WITHOUT_PASSWORD was specially created for this test in a lua script
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                EXISTING_USER_WITHOUT_PASSWORD, "");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            List<?> resultList = client.eval("return box.session.user()").get();
+            String sessionUser = (String) resultList.get(0);
+            assertEquals(EXISTING_USER_WITHOUT_PASSWORD, sessionUser);
+        }
+    }
+
+    @Test
+    public void testRandomNameUserWithoutPassword_shouldThrowException() throws Exception {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                "RandomUserName", "");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+        try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
+            ExecutionException e = assertThrows(ExecutionException.class, () -> {
+                client.eval("return box.session.user()").get();
+            });
+            // In the logs we see an inner tarantool error message
+            // "User 'RandomUserName' is not found"
+            assertTrue(e.getCause() instanceof TarantoolConnectionException);
+        }
     }
 
     @Test
