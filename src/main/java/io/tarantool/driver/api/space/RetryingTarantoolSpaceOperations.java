@@ -82,6 +82,11 @@ public class RetryingTarantoolSpaceOperations<T extends Packable, R extends Coll
     }
 
     @Override
+    public CompletableFuture<Void> truncate() throws TarantoolClientException {
+        return wrapVoidOperation(spaceOperations::truncate);
+    }
+
+    @Override
     public TarantoolSpaceMetadata getMetadata() {
         return spaceOperations.getMetadata();
     }
@@ -97,6 +102,11 @@ public class RetryingTarantoolSpaceOperations<T extends Packable, R extends Coll
     }
 
     private CompletableFuture<R> wrapOperation(Supplier<CompletableFuture<R>> operation) {
+        RequestRetryPolicy retryPolicy = retryPolicyFactory.create();
+        return retryPolicy.wrapOperation(operation, executor);
+    }
+
+    private CompletableFuture<Void> wrapVoidOperation(Supplier<CompletableFuture<Void>> operation) {
         RequestRetryPolicy retryPolicy = retryPolicyFactory.create();
         return retryPolicy.wrapOperation(operation, executor);
     }

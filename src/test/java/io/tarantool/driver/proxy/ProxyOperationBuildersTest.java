@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProxyOperationBuildersTest {
 
@@ -210,5 +209,26 @@ public class ProxyOperationBuildersTest {
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
                 operation.getArguments());
         assertEquals(defaultResultMapper, operation.getResultMapper());
+    }
+
+    @Test
+    public void test_truncateOperationBuilder_shouldReturnTruncateOperationObjectsWithAllProperties() {
+        // build truncateOperation
+        TruncateProxyOperation truncateOperation =
+                TruncateProxyOperation.builder()
+                        .withClient(client)
+                        .withSpaceName("space1")
+                        .withFunctionName("function1")
+                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .build();
+
+        // when prepare HashMap with options
+        Map<String, Object> options = new HashMap<>();
+        options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+
+        // then data is prepared check that is equals that we submitted to the builder
+        assertEquals(client, truncateOperation.getClient());
+        assertEquals("function1", truncateOperation.getFunctionName());
+        assertEquals(Arrays.asList("space1", options), truncateOperation.getArguments());
     }
 }

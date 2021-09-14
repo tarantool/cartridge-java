@@ -69,7 +69,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
     }
 
     private static void truncateSpace(String spaceName) {
-        client.call("truncate_space", spaceName);
+        client.space(spaceName).truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {

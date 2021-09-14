@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space;
 
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolVoidResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.TarantoolConnectionManager;
@@ -20,6 +21,7 @@ import io.tarantool.driver.protocol.requests.TarantoolReplaceRequest;
 import io.tarantool.driver.protocol.requests.TarantoolSelectRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpdateRequest;
 import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
+import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
@@ -201,6 +203,25 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                     .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
+        } catch (TarantoolProtocolException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<Void> truncate() throws TarantoolClientException {
+        return truncate(tupleResultMapper());
+    }
+
+    private CompletableFuture<Void> truncate(MessagePackValueMapper resultMapper)
+            throws TarantoolClientException {
+        try {
+            String spaceName = spaceMetadata.getSpaceName();
+            TarantoolCallRequest request = new TarantoolCallRequest.Builder()
+                    .withFunctionName("box.space." + spaceName + ":truncate")
+                    .build(config.getMessagePackMapper());
+            return sendRequest(request, resultMapper)
+                    .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }

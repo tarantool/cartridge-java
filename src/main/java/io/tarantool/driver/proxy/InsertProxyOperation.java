@@ -14,6 +14,7 @@ import java.util.List;
  * Proxy operation for insert
  *
  * @param <T> result type
+ * @param <R> result collection type
  * @author Sergey Volgin
  */
 public final class InsertProxyOperation<T extends Packable, R extends Collection<T>> extends AbstractProxyOperation<R> {

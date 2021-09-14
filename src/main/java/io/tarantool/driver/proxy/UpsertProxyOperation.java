@@ -15,6 +15,7 @@ import java.util.List;
  * Proxy operation for upsert
  *
  * @param <T> result type
+ * @param <R> result collection type
  * @author Sergey Volgin
  */
 public final class UpsertProxyOperation<T extends Packable, R extends Collection<T>> extends AbstractProxyOperation<R> {

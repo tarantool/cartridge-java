@@ -16,6 +16,7 @@ public final class ProxyOperationsMappingConfig {
     public static final String SELECT_FUNCTION = CRUD_PREFIX + "select";
     public static final String UPDATE_FUNCTION = CRUD_PREFIX + "update";
     public static final String UPSERT_FUNCTION = CRUD_PREFIX + "upsert";
+    public static final String TRUNCATE_FUNCTION = CRUD_PREFIX + "truncate";
 
     private final String schemaFunctionName;
     private final String deleteFunctionName;
@@ -24,6 +25,7 @@ public final class ProxyOperationsMappingConfig {
     private final String updateFunctionName;
     private final String upsertFunctionName;
     private final String selectFunctionName;
+    private final String truncateFunctionName;
 
     /**
      * Get API function name for getting the spaces and indexes schema. The default value is
@@ -92,10 +94,19 @@ public final class ProxyOperationsMappingConfig {
         return selectFunctionName;
     }
 
+    /**
+     * Get API function name for performing the select operation. The default value is <code>crud.truncate</code>.
+     *
+     * @return a callable API function name
+     */
+    public String getTruncateFunctionName() {
+        return truncateFunctionName;
+    }
+
     private ProxyOperationsMappingConfig(String schemaFunctionName, String deleteFunctionName,
                                          String insertFunctionName, String replaceFunctionName,
                                          String updateFunctionName, String upsertFunctionName,
-                                         String selectFunctionName) {
+                                         String selectFunctionName, String truncateFunctionName) {
         this.schemaFunctionName = schemaFunctionName;
         this.deleteFunctionName = deleteFunctionName;
         this.insertFunctionName = insertFunctionName;
@@ -103,6 +114,7 @@ public final class ProxyOperationsMappingConfig {
         this.updateFunctionName = updateFunctionName;
         this.upsertFunctionName = upsertFunctionName;
         this.selectFunctionName = selectFunctionName;
+        this.truncateFunctionName = truncateFunctionName;
     }
 
     /**
@@ -126,6 +138,7 @@ public final class ProxyOperationsMappingConfig {
         private String updateFunctionName = UPDATE_FUNCTION;
         private String upsertFunctionName = UPSERT_FUNCTION;
         private String selectFunctionName = SELECT_FUNCTION;
+        private String truncateFunctionName = TRUNCATE_FUNCTION;
 
         /**
          * Set API function name for getting the spaces and indexes schema.
@@ -208,13 +221,25 @@ public final class ProxyOperationsMappingConfig {
         }
 
         /**
+         * Get API function name for performing the truncate operation
+         *
+         * @param truncateFunctionName name for stored function performing select operation
+         * @return a callable API function name
+         */
+        public Builder withTruncateFunctionName(String truncateFunctionName) {
+            this.truncateFunctionName = truncateFunctionName;
+            return this;
+        }
+
+        /**
          * Build a new {@link ProxyOperationsMappingConfig} instance
          *
          * @return new config instance
          */
         public ProxyOperationsMappingConfig build() {
             return new ProxyOperationsMappingConfig(schemaFunctionName, deleteFunctionName, insertFunctionName,
-                    replaceFunctionName, updateFunctionName, upsertFunctionName, selectFunctionName);
+                    replaceFunctionName, updateFunctionName, upsertFunctionName, selectFunctionName,
+                    truncateFunctionName);
         }
     }
 }

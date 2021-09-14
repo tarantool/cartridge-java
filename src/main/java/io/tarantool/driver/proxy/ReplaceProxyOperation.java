@@ -14,6 +14,7 @@ import java.util.List;
  * Proxy operation for replace
  *
  * @param <T> result type
+ * @param <R> result collection type
  * @author Sergey Volgin
  */
 public final class ReplaceProxyOperation<T extends Packable, R extends Collection<T>>
