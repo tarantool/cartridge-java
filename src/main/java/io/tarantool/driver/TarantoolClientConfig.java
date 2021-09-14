@@ -156,6 +156,14 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * How many items will be fetched from server per cursor request.
+     * @return default size of a batch for a cursor.
+     */
+    public int getCursorBatchSize() {
+        return DEFAULT_CURSOR_BATCH_SIZE;
+    }
+
+    /**
      * Create a builder instance.
      *
      * @return a builder
@@ -282,14 +290,5 @@ public class TarantoolClientConfig {
             config = new TarantoolClientConfig();
             return this;
         }
-
-        /**
-         * How many items will be fetched from server per cursor request.
-         * @return default size of a batch for a cursor.
-         */
-    }
-
-    public int getCursorBatchSize() {
-        return DEFAULT_CURSOR_BATCH_SIZE;
     }
 }
