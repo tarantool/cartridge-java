@@ -3,20 +3,21 @@ package io.tarantool.driver.api.space;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.protocol.Packable;
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
+import io.tarantool.driver.protocol.Packable;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.proxy.DeleteProxyOperation;
 import io.tarantool.driver.proxy.InsertProxyOperation;
 import io.tarantool.driver.proxy.ProxyOperation;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.proxy.ReplaceProxyOperation;
 import io.tarantool.driver.proxy.SelectProxyOperation;
+import io.tarantool.driver.proxy.TruncateProxyOperation;
 import io.tarantool.driver.proxy.UpdateProxyOperation;
 import io.tarantool.driver.proxy.UpsertProxyOperation;
 import org.msgpack.value.ArrayValue;
@@ -25,7 +26,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Ифышс proxy {@link TarantoolSpaceOperations} implementation, which uses calls to API functions defined in
+ * Basic proxy {@link TarantoolSpaceOperations} implementation, which uses calls to API functions defined in
  * Tarantool instance for performing CRUD operations on a space
  *
  * @author Sergey Volgin
@@ -201,6 +202,20 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         return executeOperation(operation);
     }
 
+    @Override
+    public CompletableFuture<Void> truncate() throws TarantoolClientException {
+        try {
+            return executeVoidOperation(TruncateProxyOperation.<Void>builder()
+                    .withClient(client)
+                    .withSpaceName(spaceName)
+                    .withFunctionName(operationsMapping.getTruncateFunctionName())
+                    .withRequestTimeout(config.getRequestTimeout())
+                    .build()
+            );
+        } catch (TarantoolClientException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
     /**
      * MessagePack value mapper configured with an ArrayValue to tuple converter corresponding to the selected
      * tuple type
@@ -210,6 +225,10 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     protected abstract CallResultMapper<R, SingleValueCallResult<R>> tupleResultMapper();
 
     private CompletableFuture<R> executeOperation(ProxyOperation<R> operation) {
+        return operation.execute();
+    }
+
+    private CompletableFuture<Void> executeVoidOperation(ProxyOperation<Void> operation) {
         return operation.execute();
     }
 

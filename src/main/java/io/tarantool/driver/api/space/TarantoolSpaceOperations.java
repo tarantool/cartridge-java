@@ -88,6 +88,14 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
     CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations);
 
     /**
+     * Truncate space if space would be found. Otherwise, throw space not found error.
+     *
+     * @return a future that will contain void.
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<Void> truncate() throws TarantoolClientException;
+
+    /**
      * Get metadata associated with this space
      *
      * @return space metadata

@@ -75,7 +75,9 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     }
 
     private static void truncateSpace(String spaceName) {
-        client.call("truncate_space", spaceName);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(spaceName);
+        testSpace.truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {

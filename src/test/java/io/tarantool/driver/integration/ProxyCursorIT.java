@@ -72,8 +72,8 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         }
     }
 
-    private static void truncateSpace(String spaceName) throws ExecutionException, InterruptedException {
-        client.call("truncate_space", spaceName).get();
+    private static void truncateSpace(String spaceName) {
+        client.space(spaceName).truncate().join();
     }
 
     public static void tearDown() throws Exception {
