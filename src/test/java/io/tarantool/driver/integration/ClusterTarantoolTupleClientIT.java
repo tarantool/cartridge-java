@@ -136,7 +136,7 @@ public class ClusterTarantoolTupleClientIT {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
                 client.space(TEST_SPACE_NAME);
 
-        List<Object> arrayValue = Arrays.asList(200, "a200",
+        List<Object> arrayValue = Arrays.asList(200, 'a',
                 "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
         DefaultMessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(arrayValue, mapper);
@@ -144,12 +144,13 @@ public class ClusterTarantoolTupleClientIT {
 
         assertEquals(1, insertTuples.size());
         assertEquals(5, insertTuples.get(0).size());
+        assertEquals('a', insertTuples.get(0).getCharacter(1));
         assertEquals("J. K. Rowling", insertTuples.get(0).getString(3));
 
         //repeat insert same data
         assertDoesNotThrow(() -> testSpace.replace(tarantoolTuple).get());
 
-        List<Object> newValues = Arrays.asList(200, "a200", "Jane Eyre", "Charlotte Brontë", 1847);
+        List<Object> newValues = Arrays.asList(200, 'a', "Jane Eyre", "Charlotte Brontë", 1847);
         TarantoolTuple newTupleWithSameId = new TarantoolTupleImpl(newValues, mapper);
 
         testSpace.replace(newTupleWithSameId);
@@ -164,6 +165,7 @@ public class ClusterTarantoolTupleClientIT {
         assertTrue(value.isPresent());
 
         assertEquals(200, value.get().getInteger(0));
+        assertEquals('a', insertTuples.get(0).getCharacter("unique_key"));
         assertEquals("Jane Eyre", value.get().getString(2));
         assertEquals("Charlotte Brontë", value.get().getString(3));
         assertEquals(1847, value.get().getInteger(4));

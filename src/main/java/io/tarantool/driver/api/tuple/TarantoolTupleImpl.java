@@ -339,6 +339,16 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public Character getCharacter(int fieldPosition) {
+        return getObject(fieldPosition, Character.class).orElse(null);
+    }
+
+    @Override
+    public Character getCharacter(String fieldName) {
+        return getObject(fieldName, Character.class).orElse(null);
+    }
+
+    @Override
     public UUID getUUID(int fieldPosition) {
         return getObject(fieldPosition, UUID.class).orElse(null);
     }
