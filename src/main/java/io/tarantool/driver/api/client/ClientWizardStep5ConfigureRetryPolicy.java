@@ -5,22 +5,20 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
-public class TarantoolClientBuilderFourthStepImpl implements TarantoolClientBuilderFourthStep {
+public class ClientWizardStep5ConfigureRetryPolicy {
 
     private final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
 
-    public TarantoolClientBuilderFourthStepImpl(TarantoolClient<TarantoolTuple,
+    public ClientWizardStep5ConfigureRetryPolicy(TarantoolClient<TarantoolTuple,
             TarantoolResult<TarantoolTuple>> tarantoolClient) {
         this.tarantoolClient = tarantoolClient;
     }
 
-    @Override
-    public TarantoolClientBuilderRetryingFirstStep withRetryAttemptsInAmount(int amountOfAttempts) {
-        return new TarantoolClientBuilderRetryingFirstStepImpl(this.tarantoolClient,
+    public ClientWizardStep6ConfigureRetryDelay withRetryAttemptsInAmount(int amountOfAttempts) {
+        return new ClientWizardStep6ConfigureRetryDelay(this.tarantoolClient,
                 TarantoolRequestRetryPolicies.byNumberOfAttempts(5));
     }
 
-    @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
         return tarantoolClient;
     }

@@ -8,27 +8,24 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 
-public class TarantoolClientBuilderSecondStepImpl implements TarantoolClientBuilderSecondStep {
+public class ClientWizardStep3ConfigureConnectionStrategy {
 
     private final SimpleTarantoolCredentials credentials;
     private final TarantoolClusterAddressProvider addressProvider;
 
-    public TarantoolClientBuilderSecondStepImpl(SimpleTarantoolCredentials credentials,
-                                                TarantoolClusterAddressProvider addressProvider) {
+    public ClientWizardStep3ConfigureConnectionStrategy(SimpleTarantoolCredentials credentials,
+                                                        TarantoolClusterAddressProvider addressProvider) {
         this.credentials = credentials;
         this.addressProvider = addressProvider;
     }
 
-
-    @Override
-    public TarantoolClientBuilderThirdStep withDefaultConnectionSelectionStrategy() {
+    public ClientWizardStep4ConfigureOperationsMapping withDefaultConnectionSelectionStrategy() {
         return withConnectionSelectionStrategy(ConnectionSelectionStrategyType.defaultType());
     }
 
-    @Override
-    public TarantoolClientBuilderThirdStep withConnectionSelectionStrategy(
+    public ClientWizardStep4ConfigureOperationsMapping withConnectionSelectionStrategy(
             ConnectionSelectionStrategyType selectionStrategyType) {
-        return new TarantoolClientBuilderThirdStepImpl(makeBaseClient(selectionStrategyType));
+        return new ClientWizardStep4ConfigureOperationsMapping(makeBaseClient(selectionStrategyType));
     }
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> makeBaseClient(

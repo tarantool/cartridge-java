@@ -8,24 +8,22 @@ import io.tarantool.driver.retry.TarantoolRequestRetryPolicies.AttemptsBoundRetr
 
 import java.util.function.Function;
 
-public class TarantoolClientBuilderRetryingFirstStepImpl implements TarantoolClientBuilderRetryingFirstStep {
+public class ClientWizardStep6ConfigureRetryDelay {
 
     private final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
     private final Builder<Function<Throwable, Boolean>> retryPolicyBuilder;
 
-    public TarantoolClientBuilderRetryingFirstStepImpl(TarantoolClient<TarantoolTuple,
+    public ClientWizardStep6ConfigureRetryDelay(TarantoolClient<TarantoolTuple,
             TarantoolResult<TarantoolTuple>> tarantoolClient, Builder<Function<Throwable, Boolean>> builder) {
         this.tarantoolClient = tarantoolClient;
         this.retryPolicyBuilder = builder;
     }
 
-    @Override
-    public TarantoolClientBuilderRetryingSecondStep withDelay(long delayMs) {
+    public ClientWizardStep7ConfigureRequestTimeout withDelay(long delayMs) {
         this.retryPolicyBuilder.withDelay(delayMs);
-        return new TarantoolClientBuilderRetryingSecondStepImpl(tarantoolClient, retryPolicyBuilder);
+        return new ClientWizardStep7ConfigureRequestTimeout(tarantoolClient, retryPolicyBuilder);
     }
 
-    @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
         return new RetryingTarantoolTupleClient(tarantoolClient, retryPolicyBuilder.build());
     }

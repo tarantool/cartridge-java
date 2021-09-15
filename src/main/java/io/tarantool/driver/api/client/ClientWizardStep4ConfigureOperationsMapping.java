@@ -8,36 +8,33 @@ import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 
 import java.util.function.UnaryOperator;
 
-public class TarantoolClientBuilderThirdStepImpl implements TarantoolClientBuilderThirdStep {
+public class ClientWizardStep4ConfigureOperationsMapping {
 
     private final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
     private ProxyOperationsMappingConfig proxyOperationsMappingConfig;
 
-    public TarantoolClientBuilderThirdStepImpl(TarantoolClient<TarantoolTuple,
+    public ClientWizardStep4ConfigureOperationsMapping(TarantoolClient<TarantoolTuple,
             TarantoolResult<TarantoolTuple>> tarantoolClient) {
         this.tarantoolClient = tarantoolClient;
     }
 
-    @Override
-    public TarantoolClientBuilderFourthStep withDefaultCrudMethods() {
-        return new TarantoolClientBuilderFourthStepImpl(this.tarantoolClient);
+    public ClientWizardStep5ConfigureRetryPolicy withDefaultCrudMethods() {
+        return new ClientWizardStep5ConfigureRetryPolicy(this.tarantoolClient);
     }
 
-    @Override
-    public TarantoolClientBuilderFourthStep withMappedCrudMethods(
+    public ClientWizardStep5ConfigureRetryPolicy withMappedCrudMethods(
             UnaryOperator<ProxyOperationsMappingConfig.Builder> mappingConfigBuilderFunction) {
         this.proxyOperationsMappingConfig = mappingConfigBuilderFunction
                 .apply(ProxyOperationsMappingConfig.builder())
                 .build();
 
-        return new TarantoolClientBuilderFourthStepImpl(makeProxyClient());
+        return new ClientWizardStep5ConfigureRetryPolicy(makeProxyClient());
     }
 
     private ProxyTarantoolTupleClient makeProxyClient() {
         return new ProxyTarantoolTupleClient(this.tarantoolClient, this.proxyOperationsMappingConfig);
     }
 
-    @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
         return tarantoolClient;
     }
