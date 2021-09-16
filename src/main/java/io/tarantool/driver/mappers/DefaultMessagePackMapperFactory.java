@@ -28,6 +28,7 @@ public final class DefaultMessagePackMapperFactory {
     private DefaultMessagePackMapperFactory() {
         defaultSimpleTypesMapper = new DefaultMessagePackMapper.Builder()
                 // converters for primitive values
+                .withConverter(StringValue.class, Character.class, new DefaultCharacterConverter())
                 .withConverter(StringValue.class, String.class, new DefaultStringConverter())
                 .withValueConverter(IntegerValue.class, Float.class, new DefaultIntegerValueToFloatConverter())
                 .withValueConverter(IntegerValue.class, Double.class, new DefaultIntegerValueToDoubleConverter())

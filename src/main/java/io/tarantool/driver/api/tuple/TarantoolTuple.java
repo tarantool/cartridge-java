@@ -236,6 +236,22 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
     String getString(String fieldName);
 
     /**
+     * Get the field value converted to {@code Character}
+     *
+     * @param fieldPosition the field position from the the tuple start, starting from 0
+     * @return value
+     */
+    Character getCharacter(int fieldPosition);
+
+    /**
+     * Get the field value converted to {@code Character}
+     *
+     * @param fieldName the field name, must not be null
+     * @return value
+     */
+    Character getCharacter(String fieldName);
+
+    /**
      * Get the field value converted to {@link UUID}
      *
      * @param fieldPosition the field position from the the tuple start, starting from 0
