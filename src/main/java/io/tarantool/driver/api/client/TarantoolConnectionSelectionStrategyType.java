@@ -5,8 +5,11 @@ import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelR
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 
 /**
- * Enumeration of selection strategy type
- * It used for getting factory which setting strategy connection choosing
+ * Enumeration of selection strategy type.
+ * <p>
+ * It used for getting factory which setting strategy connection choosing.
+ *
+ * @author Oleg Kuznetsov
  */
 public enum TarantoolConnectionSelectionStrategyType {
 
@@ -32,6 +35,6 @@ public enum TarantoolConnectionSelectionStrategyType {
      * @return default strategy type
      */
     static TarantoolConnectionSelectionStrategyType defaultType() {
-        return TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
+        return TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
     }
 }

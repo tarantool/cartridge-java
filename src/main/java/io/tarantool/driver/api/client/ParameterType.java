@@ -4,27 +4,29 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parameters types for creating tarantool client
- * Used in {@link TarantoolClientBuilderImpl} for collection and sorting user parameters
+ * Parameters types for creating tarantool client.
+ * <p>
+ * Used in {@link TarantoolClientBuilderImpl} for collection and sorting user parameters.
+ *
+ * @author Oleg Kuznetsov
  */
 public enum ParameterType {
 
-    CREDENTIALS,
     ADDRESS,
-    CONNECTION_SELECTION_STRATEGY,
     PROXY_MAPPING,
     RETRY_ATTEMPTS,
     RETRY_DELAY,
     REQUEST_TIMEOUT,
-    EXCEPTION_CALLBACK;
+    EXCEPTION_CALLBACK,
+    OPERATION_TIMEOUT;
 
     /**
      * Group of {@link ParameterType} parameters
      */
     public enum ParameterGroup {
-        BASIC(CREDENTIALS, ADDRESS, CONNECTION_SELECTION_STRATEGY),
-        RETRY(RETRY_ATTEMPTS, RETRY_DELAY, REQUEST_TIMEOUT, EXCEPTION_CALLBACK),
-        PROXY(PROXY_MAPPING);
+        BASIC(ADDRESS),
+        PROXY(PROXY_MAPPING),
+        RETRY(RETRY_ATTEMPTS, RETRY_DELAY, REQUEST_TIMEOUT, EXCEPTION_CALLBACK, OPERATION_TIMEOUT);
 
         final private List<ParameterType> types;
 

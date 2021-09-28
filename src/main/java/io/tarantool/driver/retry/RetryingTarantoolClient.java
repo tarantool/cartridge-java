@@ -381,6 +381,24 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
         client.close();
     }
 
+    /**
+     * Getter for {@link RequestRetryPolicyFactory}
+     *
+     * @return {@link RequestRetryPolicyFactory}
+     */
+    public RequestRetryPolicyFactory getRetryPolicyFactory() {
+        return retryPolicyFactory;
+    }
+
+    /**
+     * Getter for decorated client
+     *
+     * @return decorated client {@link TarantoolClient}
+     */
+    public TarantoolClient<T, R> getClient() {
+        return client;
+    }
+
     private <S> CompletableFuture<S> wrapOperation(Supplier<CompletableFuture<S>> operation) {
         RequestRetryPolicy retryPolicy = retryPolicyFactory.create();
         return retryPolicy.wrapOperation(operation, executor);

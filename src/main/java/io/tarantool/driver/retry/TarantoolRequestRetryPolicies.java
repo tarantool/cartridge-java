@@ -2,9 +2,9 @@ package io.tarantool.driver.retry;
 
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
 import io.tarantool.driver.exceptions.TarantoolTimeoutException;
-import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +26,7 @@ public final class TarantoolRequestRetryPolicies {
 
     public static Function<Throwable, Boolean> retryAll = t -> true;
     public static Function<Throwable, Boolean> retryNone = t -> false;
+
     public static <T extends Function<Throwable, Boolean>> Function<Throwable, Boolean>
     withRetryingNetworkErrors(T exceptionCheck) {
         return e -> {
@@ -39,6 +40,7 @@ public final class TarantoolRequestRetryPolicies {
             return retryRequest || userExceptionCheck;
         };
     }
+
     public static Function<Throwable, Boolean> retryNetworkErrors() {
         return withRetryingNetworkErrors(retryNone);
     }
@@ -238,6 +240,42 @@ public final class TarantoolRequestRetryPolicies {
                 return new InfiniteRetryPolicyFactory<>(requestTimeout, operationTimeout, delay, callback);
             }
         }
+
+        /**
+         * Getter for exception handler
+         *
+         * @return exception handler
+         */
+        public T getCallback() {
+            return this.callback;
+        }
+
+        /**
+         * Getter for delay
+         *
+         * @return delay in milliseconds
+         */
+        public long getDelay() {
+            return this.delay;
+        }
+
+        /**
+         * Getter for request timout
+         *
+         * @return request timeout in milliseconds
+         */
+        public long getRequestTimeout() {
+            return this.requestTimeout;
+        }
+
+        /**
+         * Getter for operation timeout
+         *
+         * @return operation timeout in milliseconds
+         */
+        public long getOperationTimeout() {
+            return operationTimeout;
+        }
     }
 
     /**
@@ -425,6 +463,42 @@ public final class TarantoolRequestRetryPolicies {
             public AttemptsBoundRetryPolicyFactory<T> build() {
                 return new AttemptsBoundRetryPolicyFactory<>(numberOfAttempts, requestTimeout, delay, exceptionCheck);
             }
+        }
+
+        /**
+         * Getter for number of attempts
+         *
+         * @return number of attempts
+         */
+        public int getNumberOfAttempts() {
+            return numberOfAttempts;
+        }
+
+        /**
+         * Getter for exception handler
+         *
+         * @return exception handler
+         */
+        public T getExceptionCheck() {
+            return exceptionCheck;
+        }
+
+        /**
+         * Getter for delay
+         *
+         * @return delay in milliseconds
+         */
+        public long getDelay() {
+            return delay;
+        }
+
+        /**
+         * Getter for request timeout
+         *
+         * @return request timeout in milliseconds
+         */
+        public long getRequestTimeout() {
+            return requestTimeout;
         }
     }
 

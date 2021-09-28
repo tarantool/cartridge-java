@@ -3,13 +3,14 @@ package io.tarantool.driver.api.client;
 import io.tarantool.driver.ClusterTarantoolTupleClient;
 import io.tarantool.driver.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.client.ParameterType.ParameterGroup;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
@@ -17,69 +18,120 @@ import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
- * Tarantool client builder implementation
+ * Tarantool client builder implementation.
+ *
+ * @author Oleg Kuznetsov
  */
 public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
 
-    private final TreeMap<ParameterType, Object> parameters;
+    private final Map<ParameterType, Object> parameters;
+    private final TarantoolClientConfig.Builder configBuilder;
 
     public TarantoolClientBuilderImpl() {
-        this.parameters = new TreeMap<>();
+        this.parameters = new HashMap<>();
+        this.configBuilder = TarantoolClientConfig.builder();
     }
 
     @Override
     public TarantoolClientBuilder withAddress(TarantoolServerAddress... address) {
-        parameters.put(ParameterType.ADDRESS, Arrays.asList(address));
+        return withAddress(Arrays.asList(address));
+    }
+
+    @Override
+    public TarantoolClientBuilder withAddress(List<TarantoolServerAddress> addressList) {
+        return withAddressProvider(() -> addressList);
+    }
+
+    @Override
+    public TarantoolClientBuilder withAddressProvider(TarantoolClusterAddressProvider addressProvider) {
+        parameters.put(ParameterType.ADDRESS, addressProvider);
         return this;
     }
 
     @Override
     public TarantoolClientBuilder withCredentials(TarantoolCredentials credentials) {
-        parameters.put(ParameterType.CREDENTIALS, credentials);
+        this.configBuilder.withCredentials(credentials);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withConnections(int numberOfConnections) {
+        this.configBuilder.withConnections(numberOfConnections);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withMessagePackMapper(MessagePackMapper mapper) {
+        this.configBuilder.withMessagePackMapper(mapper);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withRequestTimeout(int requestTimeout) {
+        this.configBuilder.withRequestTimeout(requestTimeout);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withConnectTimeout(int connectTimeout) {
+        this.configBuilder.withConnectTimeout(connectTimeout);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withReadTimeout(int readTimeout) {
+        this.configBuilder.withReadTimeout(readTimeout);
         return this;
     }
 
     @Override
     public TarantoolClientBuilder withConnectionSelectionStrategy(
             TarantoolConnectionSelectionStrategyType tarantoolConnectionSelectionStrategyType) {
-        parameters.put(ParameterType.CONNECTION_SELECTION_STRATEGY, tarantoolConnectionSelectionStrategyType);
+        this.configBuilder.withConnectionSelectionStrategyFactory(tarantoolConnectionSelectionStrategyType.value());
         return this;
     }
 
     @Override
-    public TarantoolClientBuilder withProxyMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
+    public TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
         parameters.put(ParameterType.PROXY_MAPPING, builder);
         return this;
     }
 
     @Override
-    public TarantoolClientBuilder withRetryAttemptsInAmount(int numberOfAttempts) {
+    public TarantoolClientBuilder withRequestRetryAttempts(int numberOfAttempts) {
         parameters.put(ParameterType.RETRY_ATTEMPTS, numberOfAttempts);
         return this;
     }
 
     @Override
-    public TarantoolClientBuilder withRetryDelay(long delayMs) {
-        parameters.put(ParameterType.RETRY_DELAY, delayMs);
+    public TarantoolClientBuilder withRequestRetryDelay(long delay) {
+        parameters.put(ParameterType.RETRY_DELAY, delay);
         return this;
     }
 
     @Override
-    public TarantoolClientBuilder withRequestTimeout(long requestTimeoutMs) {
-        parameters.put(ParameterType.REQUEST_TIMEOUT, requestTimeoutMs);
+    public TarantoolClientBuilder withRequestRetryTimeout(long requestTimeout) {
+        parameters.put(ParameterType.REQUEST_TIMEOUT, requestTimeout);
         return this;
     }
 
     @Override
-    public TarantoolClientBuilder withExceptionCallback(Function<Throwable, Boolean> callback) {
+    public TarantoolClientBuilder withRequestRetryExceptionCallback(Function<Throwable, Boolean> callback) {
         parameters.put(ParameterType.EXCEPTION_CALLBACK, callback);
+        return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withRequestRetryOperationTimeout(long operationTimeout) {
+        parameters.put(ParameterType.OPERATION_TIMEOUT, operationTimeout);
         return this;
     }
 
@@ -87,21 +139,30 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = makeClusterClient();
 
-        for (Map.Entry<ParameterType, Object> entry : parameters.entrySet()) {
-            ParameterType type = entry.getKey();
-
-            if (ParameterGroup.PROXY.hasParameterType(type)) {
-                client = makeProxyClient(client);
-            }
-
-            if (ParameterGroup.RETRY.hasParameterType(type)) {
-                client = makeRetryingClient(client);
-            }
+        if (hasParameterInGroup(ParameterGroup.PROXY)) {
+            client = makeProxyClient(client);
+        }
+        if (hasParameterInGroup(ParameterGroup.RETRY)) {
+            client = makeRetryingClient(client);
         }
 
         return client;
     }
 
+    /**
+     * Check for user parameters belongs to group tarantool client parameters
+     *
+     * @param parameterGroup instance of {@link ParameterGroup}
+     * @return true if at least one user parameter has in group, false if not
+     */
+    private boolean hasParameterInGroup(ParameterGroup parameterGroup) {
+        for (ParameterType type : this.parameters.keySet()) {
+            if (parameterGroup.hasParameterType(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Create cluster client for tarantool with basic parameters
@@ -109,11 +170,10 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      * @return new instance of {@link ClusterTarantoolTupleClient}
      */
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> makeClusterClient() {
-        List<TarantoolServerAddress> addressList = getAddressList();
-        TarantoolCredentials credentials = getCredentials();
-        TarantoolClientConfig clientConfig = getConfig(credentials);
+        TarantoolClusterAddressProvider addressProvider = getAddressProvider();
+        TarantoolClientConfig clientConfig = this.configBuilder.build();
 
-        return new ClusterTarantoolTupleClient(clientConfig, addressList);
+        return new ClusterTarantoolTupleClient(clientConfig, addressProvider);
     }
 
     /**
@@ -142,40 +202,13 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
     }
 
     /**
-     * Credentials getter from parameters of builder
-     *
-     * @return {@link TarantoolCredentials}
-     */
-    private TarantoolCredentials getCredentials() {
-        return (TarantoolCredentials) this.parameters.getOrDefault(ParameterType.CREDENTIALS,
-                new SimpleTarantoolCredentials());
-    }
-
-    /**
      * Address list getter from parameters of builder
      *
      * @return {@link List<TarantoolServerAddress>}
      */
-    @SuppressWarnings("unchecked")
-    private List<TarantoolServerAddress> getAddressList() {
-        return (List<TarantoolServerAddress>) this.parameters.getOrDefault(ParameterType.ADDRESS,
-                Collections.singletonList(new TarantoolServerAddress()));
-    }
-
-    /**
-     * Client config getter from parameters of builder
-     *
-     * @return {@link TarantoolClientConfig}
-     */
-    private TarantoolClientConfig getConfig(TarantoolCredentials credentials) {
-        TarantoolConnectionSelectionStrategyType selectionStrategy = (TarantoolConnectionSelectionStrategyType)
-                this.parameters.getOrDefault(ParameterType.CONNECTION_SELECTION_STRATEGY,
-                        TarantoolConnectionSelectionStrategyType.defaultType());
-
-        return TarantoolClientConfig.builder()
-                .withConnectionSelectionStrategyFactory(selectionStrategy.value())
-                .withCredentials(credentials)
-                .build();
+    private TarantoolClusterAddressProvider getAddressProvider() {
+        return (TarantoolClusterAddressProvider) this.parameters.getOrDefault(ParameterType.ADDRESS,
+                (TarantoolClusterAddressProvider) () -> Collections.singletonList(new TarantoolServerAddress()));
     }
 
     /**
@@ -184,10 +217,14 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      * @return {@link RequestRetryPolicyFactory}
      */
     private RequestRetryPolicyFactory makeRetryPolicyFactory() {
-        Function<Throwable, Boolean> callback = getCallback();
-        Integer numberOfAttempts = getNumberOfAttempts();
-        Long requestTimeout = getRequestTimeout();
         Long delayMs = getDelay();
+        Integer numberOfAttempts = getNumberOfAttempts();
+        Long operationTimeout = getOperationTimeout();
+        Function<Throwable, Boolean> callback = getCallback();
+        Long requestTimeout = getRequestTimeout();
+        long infiniteRequestTimeout = requestTimeout < 0 ?
+                TimeUnit.HOURS.toMillis(1) : requestTimeout;
+
 
         if (numberOfAttempts > 0) {
             return TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
@@ -200,8 +237,14 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
         return TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory
                 .builder(callback)
                 .withDelay(delayMs)
-                .withRequestTimeout(requestTimeout)
+                .withRequestTimeout(infiniteRequestTimeout)
+                .withOperationTimeout(operationTimeout)
                 .build();
+    }
+
+    private Long getOperationTimeout() {
+        return (Long)
+                this.parameters.getOrDefault(ParameterType.OPERATION_TIMEOUT, TimeUnit.HOURS.toMillis(1));
     }
 
     /**
