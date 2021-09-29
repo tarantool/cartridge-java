@@ -119,9 +119,12 @@ public class TarantoolClientBuilderTest {
         int expectedDelayMs = 500;
         int expectedNumberOfAttempts = 5;
         int expectedRequestTimeoutMs = 230;
+        String expectedUserName = "test";
+        String expectedPassword = "passwordTest";
         Function<Throwable, Boolean> expectedCallback = (t) -> t.getMessage().equals("Test");
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withCredentials(expectedUserName, expectedPassword)
                 .withRequestRetryAttempts(expectedNumberOfAttempts)
                 .withRequestRetryDelay(expectedDelayMs)
                 .withRequestRetryTimeout(expectedRequestTimeoutMs)
@@ -133,7 +136,10 @@ public class TarantoolClientBuilderTest {
         TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
                 (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
                         ((RetryingTarantoolTupleClient) client).getRetryPolicyFactory();
+        SimpleTarantoolCredentials credentials = (SimpleTarantoolCredentials) client.getConfig().getCredentials();
 
+        assertEquals(expectedUserName, credentials.getUsername());
+        assertEquals(expectedPassword, credentials.getPassword());
         assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
         assertEquals(expectedDelayMs, retryPolicyFactory.getDelay());
         assertEquals(expectedCallback, retryPolicyFactory.getExceptionCheck());

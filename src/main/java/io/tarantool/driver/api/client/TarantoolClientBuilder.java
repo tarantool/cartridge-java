@@ -158,7 +158,6 @@ public interface TarantoolClientBuilder {
      */
     TarantoolClientBuilder withRequestRetryExceptionCallback(Function<Throwable, Boolean> callback);
 
-
     /**
      * Specify timeout for the whole operation, in milliseconds
      *
