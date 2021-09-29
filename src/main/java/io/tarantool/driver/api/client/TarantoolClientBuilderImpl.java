@@ -9,6 +9,7 @@ import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.client.ParameterType.ParameterGroup;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
@@ -21,9 +22,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+
+import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.DEFAULT_ONE_HOUR_TIMEOUT;
+import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.retryAll;
 
 /**
  * Tarantool client builder implementation.
@@ -32,28 +35,36 @@ import java.util.function.UnaryOperator;
  */
 public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
 
+    private TarantoolClusterAddressProvider addressProvider;
+
     private final Map<ParameterType, Object> parameters;
     private final TarantoolClientConfig.Builder configBuilder;
 
     public TarantoolClientBuilderImpl() {
         this.parameters = new HashMap<>();
         this.configBuilder = TarantoolClientConfig.builder();
+        this.addressProvider = () -> Collections.singleton(new TarantoolServerAddress());
     }
 
     @Override
     public TarantoolClientBuilder withAddress(TarantoolServerAddress... address) {
-        return withAddress(Arrays.asList(address));
+        return withAddresses(Arrays.asList(address));
     }
 
     @Override
-    public TarantoolClientBuilder withAddress(List<TarantoolServerAddress> addressList) {
+    public TarantoolClientBuilder withAddresses(List<TarantoolServerAddress> addressList) {
         return withAddressProvider(() -> addressList);
     }
 
     @Override
     public TarantoolClientBuilder withAddressProvider(TarantoolClusterAddressProvider addressProvider) {
-        parameters.put(ParameterType.ADDRESS, addressProvider);
+        this.addressProvider = addressProvider;
         return this;
+    }
+
+    @Override
+    public TarantoolClientBuilder withCredentials(String user, String password) {
+        return withCredentials(new SimpleTarantoolCredentials(user, password));
     }
 
     @Override
@@ -170,7 +181,7 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      * @return new instance of {@link ClusterTarantoolTupleClient}
      */
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> makeClusterClient() {
-        TarantoolClusterAddressProvider addressProvider = getAddressProvider();
+        TarantoolClusterAddressProvider addressProvider = this.addressProvider;
         TarantoolClientConfig clientConfig = this.configBuilder.build();
 
         return new ClusterTarantoolTupleClient(clientConfig, addressProvider);
@@ -202,29 +213,15 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
     }
 
     /**
-     * Address list getter from parameters of builder
-     *
-     * @return {@link List<TarantoolServerAddress>}
-     */
-    private TarantoolClusterAddressProvider getAddressProvider() {
-        return (TarantoolClusterAddressProvider) this.parameters.getOrDefault(ParameterType.ADDRESS,
-                (TarantoolClusterAddressProvider) () -> Collections.singletonList(new TarantoolServerAddress()));
-    }
-
-    /**
      * Create retry policy factory by specified parameters
      *
      * @return {@link RequestRetryPolicyFactory}
      */
     private RequestRetryPolicyFactory makeRetryPolicyFactory() {
-        Long delayMs = getDelay();
-        Integer numberOfAttempts = getNumberOfAttempts();
-        Long operationTimeout = getOperationTimeout();
         Function<Throwable, Boolean> callback = getCallback();
+        Integer numberOfAttempts = getNumberOfAttempts();
         Long requestTimeout = getRequestTimeout();
-        long infiniteRequestTimeout = requestTimeout < 0 ?
-                TimeUnit.HOURS.toMillis(1) : requestTimeout;
-
+        Long delayMs = getDelay();
 
         if (numberOfAttempts > 0) {
             return TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
@@ -237,14 +234,13 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
         return TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory
                 .builder(callback)
                 .withDelay(delayMs)
-                .withRequestTimeout(infiniteRequestTimeout)
-                .withOperationTimeout(operationTimeout)
+                .withRequestTimeout(requestTimeout)
+                .withOperationTimeout(getOperationTimeout())
                 .build();
     }
 
     private Long getOperationTimeout() {
-        return (Long)
-                this.parameters.getOrDefault(ParameterType.OPERATION_TIMEOUT, TimeUnit.HOURS.toMillis(1));
+        return (Long) this.parameters.getOrDefault(ParameterType.OPERATION_TIMEOUT, DEFAULT_ONE_HOUR_TIMEOUT);
     }
 
     /**
@@ -271,7 +267,7 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      * @return request timeout
      */
     private Long getRequestTimeout() {
-        return (Long) this.parameters.getOrDefault(ParameterType.REQUEST_TIMEOUT, 0L);
+        return (Long) this.parameters.getOrDefault(ParameterType.REQUEST_TIMEOUT, DEFAULT_ONE_HOUR_TIMEOUT);
     }
 
     /**
@@ -281,7 +277,6 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      */
     @SuppressWarnings("unchecked")
     private Function<Throwable, Boolean> getCallback() {
-        return (Function<Throwable, Boolean>) this.parameters.getOrDefault(ParameterType.EXCEPTION_CALLBACK,
-                (Function<Throwable, Boolean>) (t) -> true);
+        return (Function<Throwable, Boolean>) this.parameters.getOrDefault(ParameterType.EXCEPTION_CALLBACK, retryAll);
     }
 }

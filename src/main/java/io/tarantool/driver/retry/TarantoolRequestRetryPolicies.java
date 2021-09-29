@@ -26,6 +26,8 @@ public final class TarantoolRequestRetryPolicies {
 
     public static Function<Throwable, Boolean> retryAll = t -> true;
     public static Function<Throwable, Boolean> retryNone = t -> false;
+    public static long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
+
 
     public static <T extends Function<Throwable, Boolean>> Function<Throwable, Boolean>
     withRetryingNetworkErrors(T exceptionCheck) {
@@ -190,10 +192,10 @@ public final class TarantoolRequestRetryPolicies {
          */
         public static class Builder<T extends Function<Throwable, Boolean>> {
 
-            private long requestTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long requestTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
             private long delay; //ms
             private final T callback;
-            private long operationTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long operationTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
 
             /**
              * Basic constructor
@@ -418,7 +420,7 @@ public final class TarantoolRequestRetryPolicies {
          */
         public static class Builder<T extends Function<Throwable, Boolean>> {
             private final int numberOfAttempts;
-            private long requestTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long requestTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
             private long delay; //ms
             private final T exceptionCheck;
 

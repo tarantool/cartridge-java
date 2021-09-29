@@ -37,7 +37,7 @@ public interface TarantoolClientBuilder {
      * @param addressList list of addresses to tarantool instances
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withAddress(List<TarantoolServerAddress> addressList);
+    TarantoolClientBuilder withAddresses(List<TarantoolServerAddress> addressList);
 
     /**
      * Specify address provider to tarantool instances
@@ -54,6 +54,15 @@ public interface TarantoolClientBuilder {
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withCredentials(TarantoolCredentials tarantoolCredentials);
+
+    /**
+     * Specify user credentials
+     *
+     * @param user name for credentials
+     * @param password password for credentials
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withCredentials(String user, String password);
 
     /**
      * Specify the number of connections used for sending requests to the server. The default value is 1.

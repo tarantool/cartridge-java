@@ -12,7 +12,6 @@ import java.util.List;
  */
 public enum ParameterType {
 
-    ADDRESS,
     PROXY_MAPPING,
     RETRY_ATTEMPTS,
     RETRY_DELAY,
@@ -24,7 +23,6 @@ public enum ParameterType {
      * Group of {@link ParameterType} parameters
      */
     public enum ParameterGroup {
-        BASIC(ADDRESS),
         PROXY(PROXY_MAPPING),
         RETRY(RETRY_ATTEMPTS, RETRY_DELAY, REQUEST_TIMEOUT, EXCEPTION_CALLBACK, OPERATION_TIMEOUT);
 

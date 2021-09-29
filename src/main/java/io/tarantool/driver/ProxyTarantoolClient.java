@@ -433,7 +433,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
      *
      * @return decorated client {@link TarantoolClient}
      */
-    public TarantoolClient<T, R> getClient() {
+    TarantoolClient<T, R> getClient() {
         return client;
     }
 }

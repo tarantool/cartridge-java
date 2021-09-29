@@ -395,7 +395,7 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
      *
      * @return decorated client {@link TarantoolClient}
      */
-    public TarantoolClient<T, R> getClient() {
+    TarantoolClient<T, R> getClient() {
         return client;
     }
 
