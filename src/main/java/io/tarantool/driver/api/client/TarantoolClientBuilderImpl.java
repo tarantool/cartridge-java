@@ -17,6 +17,7 @@ import io.tarantool.driver.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +45,21 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
         this.parameters = new HashMap<>();
         this.configBuilder = TarantoolClientConfig.builder();
         this.addressProvider = () -> Collections.singleton(new TarantoolServerAddress());
+    }
+
+    @Override
+    public TarantoolClientBuilder withAddress(String host) {
+        return withAddress(new TarantoolServerAddress(host));
+    }
+
+    @Override
+    public TarantoolClientBuilder withAddress(String host, int port) {
+        return withAddress(new TarantoolServerAddress(host, port));
+    }
+
+    @Override
+    public TarantoolClientBuilder withAddress(InetSocketAddress socketAddress) {
+        return withAddress(new TarantoolServerAddress(socketAddress));
     }
 
     @Override
@@ -181,10 +197,7 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      * @return new instance of {@link ClusterTarantoolTupleClient}
      */
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> makeClusterClient() {
-        TarantoolClusterAddressProvider addressProvider = this.addressProvider;
-        TarantoolClientConfig clientConfig = this.configBuilder.build();
-
-        return new ClusterTarantoolTupleClient(clientConfig, addressProvider);
+        return new ClusterTarantoolTupleClient(this.configBuilder.build(), this.addressProvider);
     }
 
     /**

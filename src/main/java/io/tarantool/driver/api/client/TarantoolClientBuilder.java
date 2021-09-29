@@ -10,6 +10,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -22,6 +23,31 @@ import java.util.function.UnaryOperator;
  * @author Oleg Kuznetsov
  */
 public interface TarantoolClientBuilder {
+
+    /**
+     * Specify addresses to tarantool instances
+     *
+     * @param host host of tarantool instance
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withAddress(String host);
+
+    /**
+     * Specify addresses to tarantool instances
+     *
+     * @param host host of tarantool instance
+     * @param port port to tarantool instance
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withAddress(String host, int port);
+
+    /**
+     * Specify remote server address
+     *
+     * @param socketAddress remote server address
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withAddress(InetSocketAddress socketAddress);
 
     /**
      * Specify addresses to tarantool instances
@@ -58,8 +84,8 @@ public interface TarantoolClientBuilder {
     /**
      * Specify user credentials
      *
-     * @param user name for credentials
-     * @param password for credentials
+     * @param user     name for credentials
+     * @param password password for credentials
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withCredentials(String user, String password);
