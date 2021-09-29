@@ -59,7 +59,7 @@ public interface TarantoolClientBuilder {
      * Specify user credentials
      *
      * @param user name for credentials
-     * @param password password for credentials
+     * @param password for credentials
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withCredentials(String user, String password);
