@@ -83,15 +83,15 @@ library for starting it automatically in tests.
 8. Create a new `TarantoolClient` instance:
 
 ```java
-private ProxyTarantoolTupleClient setupClient() {
-    TarantoolClientConfig config = TarantoolClientConfig.builder()
+TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
+        return TarantoolClientFactory.createClient()
+            .withAddresses(ROUTER_HOST, ROUTER_PORT)
             // use the value of cluster_cookie parameter in the init.lua file in your Cartridge application
-            .withCredentials(new SimpleTarantoolCredentials("admin", "secret-cluster-cookie"))
+            .withCredentials("admin", "secret-cluster-cookie")
+            // also you can specify more settings for client such as: 
+            // timeouts, number of connections, methods names mapping, etc. 
             .build();
-
-    ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(config, ROUTER_HOST, ROUTER_PORT);
-    return new ProxyTarantoolTupleClient(clusterClient);
-}
+        }
 ```
 
 9. Use the API provided by the Tarantool client, for example:

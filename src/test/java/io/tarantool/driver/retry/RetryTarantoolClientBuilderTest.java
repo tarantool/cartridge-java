@@ -43,7 +43,7 @@ public class RetryTarantoolClientBuilderTest {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
                 TarantoolClientFactory.createClient()
-                        .withAddress(SAMPLE_ADDRESS)
+                        .withAddresses(SAMPLE_ADDRESS)
                         .withCredentials(SAMPLE_CREDENTIALS)
                         .withMessagePackMapper(SAMPLE_MAPPER)
                         .withRequestRetryAttempts(expectedNumberOfAttempts)

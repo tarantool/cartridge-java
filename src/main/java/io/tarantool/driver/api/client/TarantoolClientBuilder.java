@@ -55,7 +55,7 @@ public interface TarantoolClientBuilder {
      * @param address list of addresses to tarantool instances
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withAddress(TarantoolServerAddress... address);
+    TarantoolClientBuilder withAddresses(TarantoolServerAddress... address);
 
     /**
      * Specify addresses to tarantool instances

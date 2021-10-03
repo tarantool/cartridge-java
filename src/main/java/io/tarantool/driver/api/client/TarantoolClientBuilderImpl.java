@@ -27,7 +27,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.DEFAULT_ONE_HOUR_TIMEOUT;
-import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.retryAll;
+import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
 
 /**
  * Tarantool client builder implementation.
@@ -49,21 +49,21 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
 
     @Override
     public TarantoolClientBuilder withAddress(String host) {
-        return withAddress(new TarantoolServerAddress(host));
+        return withAddresses(new TarantoolServerAddress(host));
     }
 
     @Override
     public TarantoolClientBuilder withAddress(String host, int port) {
-        return withAddress(new TarantoolServerAddress(host, port));
+        return withAddresses(new TarantoolServerAddress(host, port));
     }
 
     @Override
     public TarantoolClientBuilder withAddress(InetSocketAddress socketAddress) {
-        return withAddress(new TarantoolServerAddress(socketAddress));
+        return withAddresses(new TarantoolServerAddress(socketAddress));
     }
 
     @Override
-    public TarantoolClientBuilder withAddress(TarantoolServerAddress... address) {
+    public TarantoolClientBuilder withAddresses(TarantoolServerAddress... address) {
         return withAddresses(Arrays.asList(address));
     }
 
@@ -290,6 +290,7 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
      */
     @SuppressWarnings("unchecked")
     private Function<Throwable, Boolean> getCallback() {
-        return (Function<Throwable, Boolean>) this.parameters.getOrDefault(ParameterType.EXCEPTION_CALLBACK, retryAll);
+        return (Function<Throwable, Boolean>)
+                this.parameters.getOrDefault(ParameterType.EXCEPTION_CALLBACK, retryNetworkErrors());
     }
 }
