@@ -24,11 +24,17 @@ import java.util.function.Supplier;
  */
 public final class TarantoolRequestRetryPolicies {
 
-    public static Function<Throwable, Boolean> retryAll = t -> true;
-    public static Function<Throwable, Boolean> retryNone = t -> false;
-    public static long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
+    public static final Function<Throwable, Boolean> RETRY_ALL = t -> true;
+    public static final Function<Throwable, Boolean> RETRY_NONE = t -> false;
+    public static final long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
 
-
+    /**
+     * Callback for check all network exceptions and user specified exceptions
+     *
+     * @param exceptionCheck specified callback for checking exceptions
+     * @param <T>            type of user specified callback for checking exceptions
+     * @return callback for checking all networks exceptions
+     */
     public static <T extends Function<Throwable, Boolean>> Function<Throwable, Boolean>
     withRetryingNetworkErrors(T exceptionCheck) {
         return e -> {
@@ -43,8 +49,13 @@ public final class TarantoolRequestRetryPolicies {
         };
     }
 
+    /**
+     * Callback for check all network exceptions
+     *
+     * @return callback for checking all network exceptions
+     */
     public static Function<Throwable, Boolean> retryNetworkErrors() {
-        return withRetryingNetworkErrors(retryNone);
+        return withRetryingNetworkErrors(RETRY_NONE);
     }
 
     private TarantoolRequestRetryPolicies() {
@@ -505,14 +516,14 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any exception.
+     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any network exceptions.
      *
      * @param numberOfAttempts maximum number of retries, zero value means no retries
      * @return new factory instance
      */
     public static AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>
     byNumberOfAttempts(int numberOfAttempts) {
-        return byNumberOfAttempts(numberOfAttempts, retryAll);
+        return byNumberOfAttempts(numberOfAttempts, retryNetworkErrors());
     }
 
     /**
@@ -530,14 +541,14 @@ public final class TarantoolRequestRetryPolicies {
 
     /**
      * Create a factory for retry policy with unbounded number of attempts
+     * By default used {@see retryNetworkErrors()} for checking exceptions
      *
      * @param <T> exception checking callback function type
      * @return new factory instance
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T>
-    unbound() {
-        return unbound((T) retryAll);
+    public static <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T> unbound() {
+        return unbound((T) retryNetworkErrors());
     }
 
     /**

@@ -52,7 +52,7 @@ class RequestRetryPolicyTest {
     }
 
     @Test
-    void testInfiniteRetryPolicy_unretryableError() throws ExecutionException, InterruptedException {
+    void testInfiniteRetryPolicy_unretryableError() throws InterruptedException {
         RequestRetryPolicy policy = throwable -> throwable instanceof TarantoolClientException;
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::simpleFailingFuture, executor);
         try {
@@ -69,7 +69,7 @@ class RequestRetryPolicyTest {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound().withDelay(10).build().create();
         Instant now = Instant.now();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
+                () -> failingWithNetworkIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         assertTrue(wrappedFuture.get());
         long diff = Instant.now().toEpochMilli() - now.toEpochMilli();
         assertTrue(diff >= 30);
@@ -80,7 +80,7 @@ class RequestRetryPolicyTest {
         AtomicReference<Integer> retries = new AtomicReference<>(3);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
+                () -> failingWithNetworkIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         assertTrue(wrappedFuture.get());
     }
 
@@ -91,7 +91,7 @@ class RequestRetryPolicyTest {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(3).withDelay(10).build().create();
         Instant now = Instant.now();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
+                () -> failingWithNetworkIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         assertTrue(wrappedFuture.get());
         long diff = Instant.now().toEpochMilli() - now.toEpochMilli();
         assertTrue(diff >= 30);
@@ -102,7 +102,7 @@ class RequestRetryPolicyTest {
         AtomicReference<Integer> retries = new AtomicReference<>(4);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(3).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
+                () -> failingWithNetworkIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         ExecutionException thrown = null;
         try {
             wrappedFuture.get();
@@ -110,14 +110,14 @@ class RequestRetryPolicyTest {
             thrown = e;
             assertEquals(TarantoolAttemptsLimitException.class, e.getCause().getClass());
             assertEquals("Attempts limit reached: 3", e.getCause().getMessage());
-            assertEquals(RuntimeException.class, e.getCause().getCause().getClass());
+            assertEquals(TarantoolInternalNetworkException.class, e.getCause().getCause().getClass());
             assertEquals("Should fail 1 times", e.getCause().getCause().getMessage());
         }
         assertNotNull(thrown, "No exception has been thrown");
     }
 
     @Test
-    void testAttemptsBoundRetryPolicy_zeroAttempts() throws ExecutionException, InterruptedException {
+    void testAttemptsBoundRetryPolicy_zeroAttempts() throws InterruptedException {
         AtomicReference<Integer> retries = new AtomicReference<>(1);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(0).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
@@ -136,9 +136,10 @@ class RequestRetryPolicyTest {
     }
 
     @Test
-    void testAttemptsBoundRetryPolicy_unretryableError() throws ExecutionException, InterruptedException {
+    void testAttemptsBoundRetryPolicy_unretryableError() throws InterruptedException {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(4).build().create();
-        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::simpleFailingFuture, executor);
+        CompletableFuture<Boolean> wrappedFuture = policy
+                .wrapOperation(this::simpleNetworkFailingFuture, executor);
         try {
             wrappedFuture.get();
         } catch (ExecutionException e) {
@@ -165,7 +166,7 @@ class RequestRetryPolicyTest {
                 TarantoolRequestRetryPolicies.retryNetworkErrors()
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture =
-        policy.wrapOperation(this::timeoutExceptionFailingFuture, executor);
+                policy.wrapOperation(this::timeoutExceptionFailingFuture, executor);
         try {
             wrappedFuture.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -182,7 +183,7 @@ class RequestRetryPolicyTest {
                 TarantoolRequestRetryPolicies.retryNetworkErrors()
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                this::TarantoolConnectionExceptionFailingFuture, executor);
+                this::tarantoolConnectionExceptionFailingFuture, executor);
         try {
             wrappedFuture.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -200,7 +201,7 @@ class RequestRetryPolicyTest {
                 TarantoolRequestRetryPolicies.retryNetworkErrors()
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
-                this::TarantoolServerInternalNetworkExceptionFailingFuture, executor);
+                this::tarantoolServerInternalNetworkExceptionFailingFuture, executor);
         try {
             wrappedFuture.get();
         } catch (ExecutionException | InterruptedException e) {
@@ -239,19 +240,25 @@ class RequestRetryPolicyTest {
         return result;
     }
 
+    private CompletableFuture<Boolean> simpleNetworkFailingFuture() {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        result.completeExceptionally(new TarantoolInternalNetworkException("Fail"));
+        return result;
+    }
+
     private CompletableFuture<Boolean> timeoutExceptionFailingFuture() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         result.completeExceptionally(new TimeoutException("Fail"));
         return result;
     }
 
-    private CompletableFuture<Boolean> TarantoolConnectionExceptionFailingFuture() {
+    private CompletableFuture<Boolean> tarantoolConnectionExceptionFailingFuture() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         result.completeExceptionally(new TarantoolConnectionException(new RuntimeException()));
         return result;
     }
 
-    private CompletableFuture<Boolean> TarantoolServerInternalNetworkExceptionFailingFuture() {
+    private CompletableFuture<Boolean> tarantoolServerInternalNetworkExceptionFailingFuture() {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         result.completeExceptionally(new TarantoolInternalNetworkException("code: 77"));
         return result;
@@ -261,6 +268,16 @@ class RequestRetryPolicyTest {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (retries > 0) {
             result.completeExceptionally(new RuntimeException("Should fail " + retries + " times"));
+        } else {
+            result.complete(true);
+        }
+        return result;
+    }
+
+    private CompletableFuture<Boolean> failingWithNetworkIfAvailableRetriesFuture(int retries) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        if (retries > 0) {
+            result.completeExceptionally(new TarantoolInternalNetworkException("Should fail " + retries + " times"));
         } else {
             result.complete(true);
         }

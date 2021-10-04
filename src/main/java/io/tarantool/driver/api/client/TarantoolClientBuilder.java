@@ -153,6 +153,13 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder);
 
     /**
+     * Specify using proxy methods
+     *
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withProxyMethodMapping();
+
+    /**
      * Specify number of attempts for requests retrying
      *
      * @param numberOfAttempts number of attempts for requests retrying

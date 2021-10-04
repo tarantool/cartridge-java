@@ -82,10 +82,26 @@ public class TarantoolClientBuilderTest {
                 .withProxyMethodMapping(builder -> builder.withDeleteFunctionName(expectedMappedFunctionName))
                 .build();
 
-
         //then
         assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
         assertDefaultBaseParameters(client);
+
+        String deleteFunctionName = ((ProxyTarantoolTupleClient) client).getMappingConfig().getDeleteFunctionName();
+        assertEquals(expectedMappedFunctionName, deleteFunctionName);
+    }
+
+    @Test
+    void test_should_createProxyClient_ifDefaultMapping() {
+        //given
+        String expectedMappedFunctionName = "crud.delete";
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withProxyMethodMapping()
+                .build();
+
+        //then
+        assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
 
         String deleteFunctionName = ((ProxyTarantoolTupleClient) client).getMappingConfig().getDeleteFunctionName();
         assertEquals(expectedMappedFunctionName, deleteFunctionName);
@@ -111,7 +127,6 @@ public class TarantoolClientBuilderTest {
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
         assertDefaultBaseParameters(client);
         assertEquals(expectedNumberOfAttempts, actualNumberOfAttempts);
-
     }
 
     @Test
@@ -121,7 +136,7 @@ public class TarantoolClientBuilderTest {
         int expectedRequestTimeoutMs = 230;
         String expectedUserName = "test";
         String expectedPassword = "passwordTest";
-        Function<Throwable, Boolean> expectedCallback = (t) -> t.getMessage().equals("Test");
+        Function<Throwable, Boolean> expectedCallback = t -> t.getMessage().equals("Test");
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
                 .withCredentials(expectedUserName, expectedPassword)

@@ -73,7 +73,7 @@ public class RetryTarantoolClientBuilderTest {
         // assert retry params
         RetryingTarantoolTupleClient retryingTarantoolTupleClient = (RetryingTarantoolTupleClient) client;
         ProxyOperationsMappingConfig actualMappingConfig = ((ProxyTarantoolTupleClient)
-                (retryingTarantoolTupleClient).getClient()).getMappingConfig();
+                retryingTarantoolTupleClient.getClient()).getMappingConfig();
 
         TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
                 (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
@@ -83,7 +83,6 @@ public class RetryTarantoolClientBuilderTest {
         assertEquals(expectedDelay, retryPolicyFactory.getDelay());
         assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
         assertEquals(expectedRequestTimeout, retryPolicyFactory.getRequestTimeout());
-
 
         // assert proxy params
         assertEquals(expectedReplaceFunctionName, actualMappingConfig.getReplaceFunctionName());

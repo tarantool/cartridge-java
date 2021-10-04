@@ -127,6 +127,11 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
     }
 
     @Override
+    public TarantoolClientBuilder withProxyMethodMapping() {
+        return withProxyMethodMapping(UnaryOperator.identity());
+    }
+
+    @Override
     public TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
         parameters.put(ParameterType.PROXY_MAPPING, builder);
         return this;

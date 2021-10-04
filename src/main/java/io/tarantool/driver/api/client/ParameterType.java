@@ -26,11 +26,11 @@ public enum ParameterType {
         PROXY(PROXY_MAPPING),
         RETRY(RETRY_ATTEMPTS, RETRY_DELAY, REQUEST_TIMEOUT, EXCEPTION_CALLBACK, OPERATION_TIMEOUT);
 
-        final private List<ParameterType> types;
-
         ParameterGroup(ParameterType... type) {
             this.types = Arrays.asList(type);
         }
+
+        private final List<ParameterType> types;
 
         /**
          * @return list of parameters types in group

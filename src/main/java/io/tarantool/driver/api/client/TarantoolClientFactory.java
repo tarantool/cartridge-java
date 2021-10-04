@@ -23,7 +23,7 @@ package io.tarantool.driver.api.client;
  *     TarantoolClientFactory.createClient()
  *                 .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *                 .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
- *                 .withProxyMethodMapping(builder -> builder.withDeleteFunctionName("createTest"))
+ *                 .withProxyMethodMapping(builder -&gt; builder.withDeleteFunctionName("createTest"))
  *                 .build();
  *
  *      // Tarantool Retrying Tuple Client
@@ -42,14 +42,14 @@ package io.tarantool.driver.api.client;
  *                 .withRequestRetryAttempts(5)
  *                 .withRequestRetryDelay(500)
  *                 .withConnectionSelectionStrategy(PARALLEL_ROUND_ROBIN)
- *                 .withProxyMethodMapping(builder -> builder.withReplaceFunctionName("hello")
+ *                 .withProxyMethodMapping(builder -&gt; builder.withReplaceFunctionName("hello")
  *                         .withTruncateFunctionName("create"))
- *                 .withRequestRetryExceptionCallback(throwable -> throwable.getMessage().equals("Hello World"))
+ *                 .withRequestRetryExceptionCallback(throwable -&gt; throwable.getMessage().equals("Hello World"))
  *                 .withRequestRetryTimeout(123)
  *                 .build();
  *
- * <code/>
- * <pre/>
+ * </code>
+ * </pre>
  *
  * @author Oleg Kuznetsov
  */

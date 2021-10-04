@@ -121,8 +121,8 @@ these variants or create your own discovery provider implementation. In real env
 requirements it is recommended to use an external configuration provider (like etcd), DNS or a balancing proxy for
 connecting to the Tarantool server.
 
-The next example is showing the instantiation of the `ClusterTarantoolTupleClient` with stored function discovery 
-provider:
+The next example is showing the instantiation of the `TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>`
+with stored function discovery provider:
 
 ```java
 class Scratch {
@@ -138,7 +138,7 @@ class Scratch {
 
         // Discovery endpoint configuration
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withConfig(config)
+                .withClientConfig(config)
                 // exposed API function from Tarantool endpoint
                 .withEntryFunction("get_routers")
                 // you may use any address provider for the discovery endpoint, even other discovery endpoint
@@ -157,25 +157,22 @@ class Scratch {
         BinaryDiscoveryClusterAddressProvider addressProvider =
                 new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
 
-        // Actual Tarantool client config
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withCredentials(USER_NAME, PASSWORD) // Credentials for connecting to the discovery endpoint
+                .withAddressProvider(addressProvider)
                 .withConnectTimeout(1000 * 5) // 5 seconds, timeout for connecting to the server
                 .withReadTimeout(1000 * 5) // 5 seconds, timeout for reading the response body from the channel
                 .withRequestTimeout(1000 * 5) // 5 seconds, timeout for receiving the server response
                 // The chosen connection selection strategy will determine how hosts and connections are selected for 
                 // performing the next request to the cluster
-                .withConnectionSelectionStrategyFactory(
-                        TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE)
+                .withConnectionSelectionStrategy(PARALLEL_ROUND_ROBIN)
                 .build();
-
-        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(config, addressProvider);
 
         // Mappers are used for converting MessagePack primitives to Java objects
         // The default mappers can be instantiated via the default mapper factory and further customized
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         // Use tuple factory for instantiating new tuples
-        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(client.getMessagePackMapper());
+        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(client.getConfig().getMessagePackMapper());
         // Space API provides CRUD operations for spaces
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace = client.space("test");
         TarantoolTuple tarantoolTuple;
@@ -186,7 +183,7 @@ class Scratch {
             // If you are inserting tuples into a space sharded with tarantool/vshard, you will have to specify the
             // bucket_id field value or leave it as null
             tarantoolTuple = tupleFactory.create(1_000_000 + i, null, "FIO", 50 + i, 100 + i);
-            allFutures.add(profileSpace.insert(tarantoolTuple));
+            allFutures.add(testSpace.insert(tarantoolTuple));
         }
         allFutures.forEach(CompletableFuture::join);
 
@@ -197,36 +194,38 @@ class Scratch {
 
 ### Proxy Tarantool client
 
-A decorator for any of the basic client types. Allows connecting to instances with CRUD interfaces defined as user-defined
+The next settings allows connecting to instances with CRUD interfaces defined as user-defined
 stored functions or Cartridge roles implementing the API similar to the one of [tarantool/crud](https://github.com/tarantool/crud).
 Works with `tarantool/crud` 0.3.0+.
 
-See an example of how to use the `ProxyTarantoolClient`:
+See an example of how to set proxy client with helps of `TarantoolClientFactory`:
 
 ```java
 class Scratch {
     public static void main(String[] args) {
 
-        // Cluster client is set up as described above
-        TarantoolClientConfig config = TarantoolClientConfig.builder()
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withAddress(ROUTER_HOST, ROUTER_PORT)
                 // use the value of cluster_cookie parameter in the init.lua file in your Cartridge application
-                .withCredentials(new SimpleTarantoolCredentials("admin", "secret-cluster-cookie"))
+                .withCredentials("admin", "secret-cluster-cookie")
+                .withProxyMethodMapping()
+                // also you can change proxy methods name specify lambda as parameter
+                .withProxyMethodMapping(builder -> builder.withSelectFunctionName("customSelect"))
                 .build();
-
-        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(config, ROUTER_HOST, ROUTER_PORT);
-        ProxyTarantoolTupleClient client = new ProxyTarantoolTupleClient(clusterClient);
+        
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace = client.space("testSpace");
 
         // Use TarantoolTupleFactory for instantiating new tuples
-        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(client.getMessagePackMapper());
+        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(client.getConfig().getMessagePackMapper());
         // Pass the field corresponding to bucket_id as null for tarantool/crud to compute it automatically
         TarantoolTuple tuple = tupleFactory.create(1_000_000, null, "profile_name");
         // Primary index key value will be determined from the tuple
         Conditions conditions = Conditions.after(tuple);
-        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, tuple).get();
+        TarantoolResult<TarantoolTuple> updateResult = testSpace.update(conditions, tuple).get();
 
         Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
         // crud.select(...) on the Cartridge router will be called internally
-        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
+        TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
 
         // Any other operations with tuples as described in the examples above
@@ -240,44 +239,35 @@ class Scratch {
 ### Retrying Tarantool client
 
 For the cases of reliable communication with a Cartridge cluster under heavy load or in a case of some failure causing
-unavailability of a part of the cluster nodes, the `RetryingTarantoolClient` class may be useful.
-
-`RetryingTarantoolClient` allows to decorate any previously configured `TarantoolClient` instance, providing the request
-retrying functionality with the specified retry policy. The request retry policy allows to specify the types of 
-exceptions which may be retried. Some retry policies are available in the `TarantoolRequestRetryPolicies` class, 
-but you may use your own implementations. See an example below:
+unavailability of a part of the cluster nodes, the methods of client builder with prefix `withRequestRetry` may be useful.
+The request retry policy allows to specify the types of exceptions which may be retried.
+<b> If you set some setting for retrying and not specified callback for checking exceptions,
+by default requests will be repeated only in cases network exceptions.
+Such as: `TimeoutException` `TarantoolConnectionException` and `TarantoolInternalNetworkException`.</b>
+Some retry policies are available in the `TarantoolRequestRetryPolicies` class, but you may use your own implementations. 
+See an example below:
 
 ```java
-private ProxyTarantoolTupleClient setupClient() {
-    TarantoolClientConfig config = TarantoolClientConfig.builder()
-            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-            .build();
 
-    ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-            config, container.getRouterHost(), container.getRouterPort());
-    return new ProxyTarantoolTupleClient(clusterClient);
+TarantoolClientBuilder setupClient() {
+    return TarantoolClientFactory.createClient()
+        .withCredentials(USER_NAME, PASSWORD)
+        .withAddress(container.getRouterHost(), container.getRouterPort())
+        .withProxyMethodMapping();
 }
 
-private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
-    return new RetryingTarantoolTupleClient(client,
-            TarantoolRequestRetryPolicies.byNumberOfAttempts(
-            retries, e -> e.getMessage().contains("Unsuccessful attempt")).build());
-}
-
-private RetryingTarantoolTupleClient retryingWithNetworkErrors(ProxyTarantoolTupleClient client, int retries) {
-    return new RetryingTarantoolTupleClient(client,
-            TarantoolRequestRetryPolicies.byNumberOfAttempts(
-            retries, TarantoolRequestRetryPolicies.retryNetworkErrors()).build());
+TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retrying(TarantoolClientBuilder clientBuilder, int retries) {
+    return clientBuilder.withRequestRetryAttempts(retries)
+        .withRequestRetryExceptionCallback(e -> e.getMessage().contains("Unsuccessful attempt"))
+        .build();
 }
 
 ...
 
-try (ProxyTarantoolTupleClient client = setupClient()) {
-    String result = retrying(client, 4).callForSingleResult("retrying_function", String.class).get();
+    String result = setupClient().withRequestRetryAttempts(4).build().callForSingleResult("retrying_function", String.class).get();
     assertEquals("Success", result);
-    result = retryingWithNetworkErrors(client, 4).callForSingleResult("retrying_function", String.class).get();
+    result = retrying(setupClient(), 4).callForSingleResult("retrying_function", String.class).get();
     assertEquals("Success", result);
-}
 ```
 
 ### TarantoolTuple usage
