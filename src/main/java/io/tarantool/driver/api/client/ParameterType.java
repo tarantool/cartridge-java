@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parameters types for creating tarantool client.
+ * Provides parameters types and groups for Tarantool client builder.
  * <p>
- * Used in {@link TarantoolClientBuilderImpl} for collection and sorting user parameters.
+ * @see TarantoolClientBuilderImpl
  *
  * @author Oleg Kuznetsov
  */
