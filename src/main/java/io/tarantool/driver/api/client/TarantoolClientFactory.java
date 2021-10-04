@@ -3,10 +3,10 @@ package io.tarantool.driver.api.client;
 /**
  * Tarantool client factory interface.
  * <p>
- * It helps to create basic clients for Tarantool instance.
+ * It provides a builder interface helping to create the basic Tarantool client types while hiding the internal client implementation details from the user. 
  *
  * <p>
- * Example of using client builder:
+ * Here are some examples of using this client factory:
  * <pre>
  * <code>
  *
