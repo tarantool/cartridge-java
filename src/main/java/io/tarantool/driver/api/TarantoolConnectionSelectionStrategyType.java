@@ -1,4 +1,4 @@
-package io.tarantool.driver.api.client;
+package io.tarantool.driver.api;
 
 import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;

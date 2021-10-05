@@ -1,11 +1,7 @@
-package io.tarantool.driver.retry;
+package io.tarantool.driver.api;
 
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersion;
-import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.RetryingTarantoolSpaceOperations;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
@@ -19,6 +15,8 @@ import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.protocol.Packable;
+import io.tarantool.driver.retry.RequestRetryPolicy;
+import io.tarantool.driver.retry.RequestRetryPolicyFactory;
 import org.msgpack.value.Value;
 
 import java.util.Collection;
@@ -386,7 +384,7 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
      *
      * @return {@link RequestRetryPolicyFactory}
      */
-    public RequestRetryPolicyFactory getRetryPolicyFactory() {
+    protected RequestRetryPolicyFactory getRetryPolicyFactory() {
         return retryPolicyFactory;
     }
 
@@ -395,7 +393,7 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
      *
      * @return decorated client {@link TarantoolClient}
      */
-    TarantoolClient<T, R> getClient() {
+    protected TarantoolClient<T, R> getClient() {
         return client;
     }
 

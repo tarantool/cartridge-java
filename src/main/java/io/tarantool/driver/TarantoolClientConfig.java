@@ -202,6 +202,13 @@ public class TarantoolClientConfig {
         }
 
         /**
+         * Basic constructor.
+         */
+        public Builder(TarantoolClientConfig config) {
+            this.config = config;
+        }
+
+        /**
          * Specify user credentials
          *
          * @param credentials the Tarantool user credentials

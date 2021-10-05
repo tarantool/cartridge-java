@@ -1,10 +1,7 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -424,7 +421,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
      *
      * @return {@link ProxyOperationsMappingConfig} instance
      */
-    public ProxyOperationsMappingConfig getMappingConfig() {
+    ProxyOperationsMappingConfig getMappingConfig() {
         return mappingConfig;
     }
 

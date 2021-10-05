@@ -1,9 +1,12 @@
-package io.tarantool.driver.api.client;
+package io.tarantool.driver.api;
+
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 
 /**
  * Tarantool client factory interface.
  * <p>
- * It provides a builder interface helping to create the basic Tarantool client types while hiding the internal client implementation details from the user. 
+ * It provides a builder interface helping to create the basic Tarantool client types while hiding the internal client
+ * implementation details from the user.
  *
  * <p>
  * Here are some examples of using this client factory:
@@ -23,7 +26,7 @@ package io.tarantool.driver.api.client;
  *     TarantoolClientFactory.createClient()
  *                 .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *                 .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
- *                 .withProxyMethodMapping(builder -&gt; builder.withDeleteFunctionName("createTest"))
+ *                 .withProxyMethodMapping(builder -&gt; builder.withDeleteFunctionName("custom_delete"))
  *                 .build();
  *
  *      // Tarantool Retrying Tuple Client
@@ -42,9 +45,9 @@ package io.tarantool.driver.api.client;
  *                 .withRequestRetryAttempts(5)
  *                 .withRequestRetryDelay(500)
  *                 .withConnectionSelectionStrategy(PARALLEL_ROUND_ROBIN)
- *                 .withProxyMethodMapping(builder -&gt; builder.withReplaceFunctionName("hello")
+ *                 .withProxyMethodMapping(builder -&gt; builder.withReplaceFunctionName("custom_replace")
  *                         .withTruncateFunctionName("create"))
- *                 .withRequestRetryExceptionCallback(throwable -&gt; throwable.getMessage().equals("Hello World"))
+ *                 .withRequestRetryExceptionCallback(throwable -&gt; throwable.getMessage().equals("Some error"))
  *                 .withRequestRetryTimeout(123)
  *                 .build();
  *
@@ -60,6 +63,14 @@ public interface TarantoolClientFactory {
      */
     static TarantoolClientBuilder createClient() {
         return new TarantoolClientBuilderImpl();
+    }
+
+    /**
+     * @return Tarantool client builder {@link TarantoolClientBuilder}
+     */
+    static TarantoolClientBuilder configureClient(
+            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
+        return new TarantoolClientBuilderImpl(client);
     }
 
 }

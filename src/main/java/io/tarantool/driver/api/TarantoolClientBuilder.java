@@ -1,14 +1,15 @@
-package io.tarantool.driver.api.client;
+package io.tarantool.driver.api;
 
+import io.tarantool.driver.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolClusterAddressProvider;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
+import io.tarantool.driver.retry.RequestRetryPolicyFactory;
+import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -33,7 +34,7 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddress(String host);
 
     /**
-     * Specify a single host and a port of a Tarantool server
+     * Specify a single host and a port of a Tarantool server.
      *
      * @param host Tarantool server host
      * @param port Tarantool server port
@@ -42,7 +43,7 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddress(String host, int port);
 
     /**
-     * Specify a Tarantool server address
+     * Specify a Tarantool server address.
      *
      * @param socketAddress remote server address
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -50,7 +51,7 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddress(InetSocketAddress socketAddress);
 
     /**
-     * Specify one or more Tarantool server addresses
+     * Specify one or more Tarantool server addresses.
      *
      * @param address list of addresses of Tarantool instances
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -58,7 +59,8 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddresses(TarantoolServerAddress... address);
 
     /**
-     * Specify a list of Tarantool server addresses. In a sharded cluster this is usually a list of router instances addresses. 
+     * Specify a list of Tarantool server addresses.
+     * In a sharded cluster this is usually a list of router instances addresses.
      *
      * @param addressList list of Tarantool instance addresses
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -66,7 +68,10 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddresses(List<TarantoolServerAddress> addressList);
 
     /**
-     * Specify a provider for Tarantool server addresses. The typical usage of a provider is dynamic retrieving of the addresses from some configuration or discovery manager like etcd, ZooKeeper, or a special Tarantool instance. The actual list of addresses will then be retrieved each time a new connection is being established.
+     * Specify a provider for Tarantool server addresses.
+     * The typical usage of a provider is dynamic retrieving of the addresses from some configuration
+     * or discovery manager like etcd, ZooKeeper, or a special Tarantool instance.
+     * The actual list of addresses will then be retrieved each time a new connection is being established.
      *
      * @param addressProvider {@link TarantoolClusterAddressProvider}
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -74,7 +79,10 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withAddressProvider(TarantoolClusterAddressProvider addressProvider);
 
     /**
-     * Specify user credentials for authentication in a Tarantool server. Important: these credentials will be used for all Tarantool server instances, which addresses are returned by a service provider or are directly specified in the client configuration, so make sure that all instances to be connected can authenticate with the specified credentials.
+     * Specify user credentials for authentication in a Tarantool server.
+     * Important: these credentials will be used for all Tarantool server instances,
+     * which addresses are returned by a service provider or are directly specified in the client configuration,
+     * so make sure that all instances to be connected can authenticate with the specified credentials.
      *
      * @param tarantoolCredentials credentials for all Tarantool server instances
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -84,11 +92,10 @@ public interface TarantoolClientBuilder {
     /**
      * Specify user credentials for password-based authentication in a Tarantool server.
      *
-     * @see #withCredentials(TarantoolCredentials tarantoolCredentials)
-     *
      * @param user     user to authenticate with
      * @param password password to authenticate with
      * @return this instance of builder {@link TarantoolClientBuilder}
+     * @see #withCredentials(TarantoolCredentials tarantoolCredentials)
      */
     TarantoolClientBuilder withCredentials(String user, String password);
 
@@ -102,7 +109,11 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withConnections(int connections);
 
     /**
-     * Specify a mapper between Java objects and MessagePack entities. The mapper contains converters for simple and complex tuple field types and for the entire tuples into custom Java objects. This mapper is used by default if a custom mapper is not passed to a specific operation. You may build and pass here your custom mapper or add some converters to a default one, see {@link DefaultMessagePackMapperFactory}.
+     * Specify a mapper between Java objects and MessagePack entities.
+     * The mapper contains converters for simple and complex tuple field types and for the entire tuples into custom
+     * Java objects. This mapper is used by default if a custom mapper is not passed to a specific operation.
+     * You may build and pass here your custom mapper or add some converters to a default one,
+     * see {@link io.tarantool.driver.mappers.DefaultMessagePackMapperFactory}.
      *
      * @param mapper configured {@link MessagePackMapper} instance
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -138,16 +149,28 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withReadTimeout(int readTimeout);
 
     /**
-     * Specify connection selection strategy
+     * Specify connection selection strategy.
      *
-     * @param tarantoolConnectionSelectionStrategyType type of connection selection strategy
+     * @param connectionSelectionStrategy strategy of connection selection
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
-            TarantoolConnectionSelectionStrategyType tarantoolConnectionSelectionStrategyType);
+            ConnectionSelectionStrategyFactory connectionSelectionStrategy);
 
     /**
-     * Specify a builder provider for operations proxy configuration. This configuration allows specifying custom Lua function names callable on the Tarantool server, for replacing the default space operations with these functions calls. This allows, for example, replacing the default schema retrieving method or writing a custom "insert" implementation.
+     * Specify connection selection strategy.
+     *
+     * @param connectionSelectionStrategyType strategy of connection selection type
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withConnectionSelectionStrategy(
+            TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
+
+    /**
+     * Specify a builder provider for operations proxy configuration.
+     * This configuration allows specifying custom Lua function names callable on the Tarantool server,
+     * for replacing the default space operations with these functions calls. This allows, for example,
+     * replacing the default schema retrieving method or writing a custom "insert" implementation.
      *
      * @param builder builder provider instance, e.g. a lambda function taking the builder
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -155,51 +178,78 @@ public interface TarantoolClientBuilder {
     TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder);
 
     /**
-     * Specify using proxy methods
+     * Specify using proxy methods.
      *
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withProxyMethodMapping();
 
     /**
-     * Specify the number of retry attempts for each request
+     * Specify retry attempts bound.
+     * By default all requests with network exceptions will be retry.
      *
-     * @param numberOfAttempts number of retry attempts for each request
+     * @param numberOfAttempts the number of retry attempts for each request
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withRequestRetryAttempts(int numberOfAttempts);
+    TarantoolClientBuilder withRetryingByNumberOfAttempts(int numberOfAttempts);
 
     /**
-     * Specify a delay between consequent retries of the same request
+     * Specify provider for attempts bound retry policy.
+     * By default all requests with network exceptions will be retry.
      *
-     * @param delay delay in milliseconds
+     * @param numberOfAttempts the number of retry attempts for each request
+     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *                         e.g. a lambda function taking the builder
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withRequestRetryDelay(long delay);
+    TarantoolClientBuilder withRetryingByNumberOfAttempts(
+            int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
+            .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy);
 
     /**
-     * Specify a timeout for each request retry attempt
+     * Specify provider for attempts bound retry policy.
      *
-     * @param requestTimeout request retry timeout, in milliseconds
+     * @param numberOfAttempts the number of retry attempts for each request
+     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *                         e.g. a lambda function taking the builder
+     * @param <T>              callback type for exceptions check
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withRequestRetryTimeout(long requestTimeout);
+    <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingByNumberOfAttempts(
+            int numberOfAttempts, T exceptionsCheck,
+            UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
 
     /**
-     * Specify an exception handler for determining the necessity of retrying the request. If the exception callback is not specified, the default behavior is retrying only the network exceptions (see TarantoolRequestRetryPolicies#retryNetworkErrors()).
+     * Specify provider for infinite retry policy.
+     * By default all requests with network exceptions will be retry.
      *
-     * @param callback exception callback, returns {@code true} if the request must be retried
+     * @param policy builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *               e.g. a lambda function taking the builder
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withRequestRetryExceptionCallback(Function<Throwable, Boolean> callback);
+    TarantoolClientBuilder withRetryingIndefinitely(
+            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
+                    <Function<Throwable, Boolean>>> policy);
 
     /**
-     * Specify an overall timeout for all request retry attempts. Allows to not count the necessary number of retries, but limit the maximum time allowed for an operation.
+     * Specify provider for infinite retry policy.
      *
-     * @param operationTimeout timeout for the whole operation, in milliseconds
+     * @param policy builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *               e.g. a lambda function taking the builder
+     * @param <T>    callback type for exceptions check
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
-    TarantoolClientBuilder withRequestRetryOperationTimeout(long operationTimeout);
+    <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingIndefinitely(
+            T callback,
+            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
+
+    /**
+     * Specify request retry policy factory.
+     *
+     * @param factory {@link RequestRetryPolicyFactory}
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withRetrying(RequestRetryPolicyFactory factory);
 
     /**
      * Build the configured Tarantool client instance. Call this when you have specified all necessary settings.

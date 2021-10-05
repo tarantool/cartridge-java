@@ -1,7 +1,7 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolTupleClient;
-import io.tarantool.driver.ProxyTarantoolTupleClient;
+import io.tarantool.driver.api.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolInternalException;

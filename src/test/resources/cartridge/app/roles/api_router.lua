@@ -52,6 +52,10 @@ local function returning_error(message)
     return nil, message
 end
 
+local function custom_crud_select(space_name)
+    return crud.select(space_name)
+end
+
 local function raising_error(message)
     error("Test error: raising_error() called")
 end
@@ -149,6 +153,7 @@ local function init(opts)
     rawset(_G, 'box_error_timeout', box_error_timeout)
     rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
     rawset(_G, 'crud_error_timeout', crud_error_timeout)
+    rawset(_G, 'custom_crud_select', custom_crud_select)
 
     return true
 end

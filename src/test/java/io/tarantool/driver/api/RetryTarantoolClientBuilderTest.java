@@ -1,11 +1,7 @@
-package io.tarantool.driver.api.client;
+package io.tarantool.driver.api;
 
-import io.tarantool.driver.ClusterTarantoolTupleClient;
-import io.tarantool.driver.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
@@ -17,16 +13,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static io.tarantool.driver.api.client.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
+import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
+import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
-/**
- * Unit tests for client builder {@link TarantoolClientBuilder}
- *
- * @author Oleg Kuznetsov
- */
-public class TarantoolClientBuilderTest {
+public class RetryTarantoolClientBuilderTest {
 
     private final TarantoolServerAddress SAMPLE_ADDRESS =
             new TarantoolServerAddress("123.123.123.123", 32323);
@@ -38,73 +29,56 @@ public class TarantoolClientBuilderTest {
             new DefaultMessagePackMapper.Builder().build();
 
     @Test
-    void test_should_createClient() {
+    void test_should_createProxyRetryingClient() {
         //given
-        int expectedConnections = 3;
-        int expectedConnectTimeout = 5000;
-        int expectedRequestTimeout = 400;
-        int expectedReadTimeout = 4999;
+        int expectedNumberOfAttempts = 5;
+        int expectedDelay = 500;
+        int expectedRequestTimeout = 123;
+        String expectedReplaceFunctionName = "hello";
+        String expectedTruncateFunctionName = "create";
+        Function<Throwable, Boolean> expectedCallback =
+                throwable -> throwable.getMessage().equals("Hello World");
 
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withAddresses(SAMPLE_ADDRESS)
-                .withCredentials(SAMPLE_CREDENTIALS)
-                .withMessagePackMapper(SAMPLE_MAPPER)
-                .withConnections(expectedConnections)
-                .withConnectTimeout(expectedConnectTimeout)
-                .withRequestTimeout(expectedRequestTimeout)
-                .withReadTimeout(expectedReadTimeout)
-                .build();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withAddresses(SAMPLE_ADDRESS)
+                        .withCredentials(SAMPLE_CREDENTIALS)
+                        .withMessagePackMapper(SAMPLE_MAPPER)
+                        .withConnectionSelectionStrategy(ROUND_ROBIN)
+                        .withProxyMethodMapping(builder -> builder
+                                .withReplaceFunctionName(expectedReplaceFunctionName)
+                                .withTruncateFunctionName(expectedTruncateFunctionName)
+                        )
+                        .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedCallback,
+                                policy -> policy.withRequestTimeout(expectedRequestTimeout)
+                                        .withDelay(expectedDelay))
+                        .build();
 
         //then
-        assertEquals(ClusterTarantoolTupleClient.class, client.getClass());
-        TarantoolClientConfig config = client.getConfig();
+        assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
 
+        // assert base params
+        TarantoolClientConfig config = client.getConfig();
+        assertEquals(1, config.getConnections());
+        assertEquals(1000, config.getReadTimeout());
+        assertEquals(1000, config.getConnectTimeout());
+        assertEquals(2000, config.getRequestTimeout());
         assertEquals(SAMPLE_CREDENTIALS, config.getCredentials());
         assertEquals(SAMPLE_MAPPER, config.getMessagePackMapper());
-        assertEquals(expectedConnections, config.getConnections());
-        assertEquals(expectedReadTimeout, config.getReadTimeout());
-        assertEquals(expectedRequestTimeout, config.getRequestTimeout());
-        assertEquals(expectedConnectTimeout, config.getConnectTimeout());
-        assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
-    }
+        assertEquals(ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
 
-    @Test
-    void test_should_createProxyClient() {
-        //given
-        String expectedMappedFunctionName = "mappedFunctionName";
+        // assert retry params
+        RetryingTarantoolTupleClient retryingTarantoolTupleClient = (RetryingTarantoolTupleClient) client;
 
-        //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withAddresses(SAMPLE_ADDRESS)
-                .withCredentials(SAMPLE_CREDENTIALS)
-                .withMessagePackMapper(SAMPLE_MAPPER)
-                .withProxyMethodMapping(builder -> builder.withDeleteFunctionName(expectedMappedFunctionName))
-                .build();
+        TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
+                (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
+                        retryingTarantoolTupleClient.getRetryPolicyFactory();
 
-        //then
-        assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
-        assertDefaultBaseParameters(client);
-
-        String deleteFunctionName = ((ProxyTarantoolTupleClient) client).getMappingConfig().getDeleteFunctionName();
-        assertEquals(expectedMappedFunctionName, deleteFunctionName);
-    }
-
-    @Test
-    void test_should_createProxyClient_ifDefaultMapping() {
-        //given
-        String expectedMappedFunctionName = "crud.delete";
-
-        //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withProxyMethodMapping()
-                .build();
-
-        //then
-        assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
-
-        String deleteFunctionName = ((ProxyTarantoolTupleClient) client).getMappingConfig().getDeleteFunctionName();
-        assertEquals(expectedMappedFunctionName, deleteFunctionName);
+        assertEquals(expectedCallback, retryPolicyFactory.getExceptionCheck());
+        assertEquals(expectedDelay, retryPolicyFactory.getDelay());
+        assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
+        assertEquals(expectedRequestTimeout, retryPolicyFactory.getRequestTimeout());
     }
 
     @Test
@@ -117,7 +91,7 @@ public class TarantoolClientBuilderTest {
                 .withAddresses(SAMPLE_ADDRESS)
                 .withCredentials(SAMPLE_CREDENTIALS)
                 .withMessagePackMapper(SAMPLE_MAPPER)
-                .withRequestRetryAttempts(expectedNumberOfAttempts)
+                .withRetryingByNumberOfAttempts(expectedNumberOfAttempts)
                 .build();
 
         int actualNumberOfAttempts = ((TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
@@ -125,7 +99,15 @@ public class TarantoolClientBuilderTest {
 
         //then
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
-        assertDefaultBaseParameters(client);
+        TarantoolClientConfig config = client.getConfig();
+
+        assertEquals(1, config.getConnections());
+        assertEquals(1000, config.getReadTimeout());
+        assertEquals(1000, config.getConnectTimeout());
+        assertEquals(2000, config.getRequestTimeout());
+        assertEquals(SAMPLE_CREDENTIALS, config.getCredentials());
+        assertEquals(SAMPLE_MAPPER, config.getMessagePackMapper());
+        assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
         assertEquals(expectedNumberOfAttempts, actualNumberOfAttempts);
     }
 
@@ -140,10 +122,8 @@ public class TarantoolClientBuilderTest {
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
                 .withCredentials(expectedUserName, expectedPassword)
-                .withRequestRetryAttempts(expectedNumberOfAttempts)
-                .withRequestRetryDelay(expectedDelayMs)
-                .withRequestRetryTimeout(expectedRequestTimeoutMs)
-                .withRequestRetryExceptionCallback(expectedCallback)
+                .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedCallback,
+                        policy -> policy.withDelay(expectedDelayMs).withRequestTimeout(expectedRequestTimeoutMs))
                 .build();
 
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
@@ -170,9 +150,9 @@ public class TarantoolClientBuilderTest {
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withRequestRetryDelay(expectedRetryDelay)
-                .withRequestRetryTimeout(expectedRetryTimeout)
-                .withRequestRetryOperationTimeout(expectedOperationTimeout)
+                .withRetryingIndefinitely(policy -> policy.withDelay(expectedRetryDelay)
+                        .withRequestTimeout(expectedRetryTimeout)
+                        .withOperationTimeout(expectedOperationTimeout))
                 .build();
 
         //then
@@ -186,17 +166,5 @@ public class TarantoolClientBuilderTest {
         assertEquals(expectedRetryDelay, retryPolicyFactory.getDelay());
         assertEquals(expectedRetryTimeout, retryPolicyFactory.getRequestTimeout());
         assertEquals(expectedOperationTimeout, retryPolicyFactory.getOperationTimeout());
-    }
-
-    private void assertDefaultBaseParameters(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        TarantoolClientConfig config = client.getConfig();
-
-        assertEquals(1, config.getConnections());
-        assertEquals(1000, config.getReadTimeout());
-        assertEquals(1000, config.getConnectTimeout());
-        assertEquals(2000, config.getRequestTimeout());
-        assertEquals(SAMPLE_CREDENTIALS, config.getCredentials());
-        assertEquals(SAMPLE_MAPPER, config.getMessagePackMapper());
-        assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
     }
 }
