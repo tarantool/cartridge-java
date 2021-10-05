@@ -5,9 +5,9 @@ import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelR
 import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 
 /**
- * Enumeration of selection strategy type.
+ * Enumeration of the default types of connection selection strategies.
  * <p>
- * It used for getting factory which setting strategy connection choosing.
+ * Provides shortcuts for the built-in connection selection strategy factory types.
  *
  * @author Oleg Kuznetsov
  */
