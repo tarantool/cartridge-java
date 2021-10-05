@@ -167,4 +167,109 @@ public class RetryTarantoolClientBuilderTest {
         assertEquals(expectedRetryTimeout, retryPolicyFactory.getRequestTimeout());
         assertEquals(expectedOperationTimeout, retryPolicyFactory.getOperationTimeout());
     }
+
+    @Test
+    void test_should_configureRetryingClient_ifClientIsProxy() {
+        //given
+        String expectedMappedFunctionName = "crud.delete";
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withProxyMethodMapping()
+                        .build();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
+                TarantoolClientFactory.configureClient(client)
+                        .withRetryingByNumberOfAttempts(10)
+                        .build();
+
+        //then
+        assertEquals(RetryingTarantoolTupleClient.class, configuredClient.getClass());
+
+        ProxyTarantoolTupleClient proxyClient =
+                (ProxyTarantoolTupleClient) ((RetryingTarantoolTupleClient) configuredClient).getClient();
+        String deleteFunctionName = proxyClient.getMappingConfig().getDeleteFunctionName();
+        assertEquals(expectedMappedFunctionName, deleteFunctionName);
+    }
+
+    @Test
+    void test_should_configureRetryingClientWithMoreSettings_ifClientIsProxy() {
+        //given
+        int expectedTimeout = 3;
+        int expectedDelay = 100;
+        int expectedNumberOfAttempts = 10;
+        String expectedMappedFunctionName = "crud.delete";
+        Function<Throwable, Boolean> expectedExceptionCheck = t -> true;
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withProxyMethodMapping()
+                        .build();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
+                TarantoolClientFactory.configureClient(client)
+                        .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedExceptionCheck,
+                                policy -> policy.withDelay(expectedDelay)
+                                        .withRequestTimeout(expectedTimeout)
+                        )
+                        .build();
+
+        //then
+        assertEquals(RetryingTarantoolTupleClient.class, configuredClient.getClass());
+
+        RetryingTarantoolTupleClient retryingClient = (RetryingTarantoolTupleClient) configuredClient;
+        ProxyTarantoolTupleClient proxyClient = (ProxyTarantoolTupleClient) retryingClient.getClient();
+        String deleteFunctionName = proxyClient.getMappingConfig().getDeleteFunctionName();
+        TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
+                (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
+                        retryingClient.getRetryPolicyFactory();
+
+        assertEquals(expectedMappedFunctionName, deleteFunctionName);
+        assertEquals(expectedTimeout, retryPolicyFactory.getRequestTimeout());
+        assertEquals(expectedDelay, retryPolicyFactory.getDelay());
+        assertEquals(expectedExceptionCheck, retryPolicyFactory.getExceptionCheck());
+        assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
+    }
+
+    @Test
+    void test_should_configureRetryingClientWithMoreSettings_ifClientIsCluster() {
+        //given
+        int expectedTimeout = 3;
+        int expectedDelay = 100;
+        int expectedRequestTimeout = 10;
+        int expectedNumberOfAttempts = 10;
+        Function<Throwable, Boolean> expectedExceptionCheck = t -> true;
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withRequestTimeout(expectedRequestTimeout)
+                        .withConnectionSelectionStrategy(ROUND_ROBIN)
+                        .build();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
+                TarantoolClientFactory.configureClient(client)
+                        .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedExceptionCheck,
+                                policy -> policy.withDelay(expectedDelay)
+                                        .withRequestTimeout(expectedTimeout)
+                        )
+                        .build();
+
+        //then
+        assertEquals(RetryingTarantoolTupleClient.class, configuredClient.getClass());
+
+        RetryingTarantoolTupleClient retryingClient = (RetryingTarantoolTupleClient) configuredClient;
+        TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
+                (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
+                        retryingClient.getRetryPolicyFactory();
+
+        assertEquals(ROUND_ROBIN.value(), configuredClient.getConfig().getConnectionSelectionStrategyFactory());
+        assertEquals(expectedRequestTimeout, configuredClient.getConfig().getRequestTimeout());
+        assertEquals(expectedTimeout, retryPolicyFactory.getRequestTimeout());
+        assertEquals(expectedDelay, retryPolicyFactory.getDelay());
+        assertEquals(expectedExceptionCheck, retryPolicyFactory.getExceptionCheck());
+        assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
+    }
 }

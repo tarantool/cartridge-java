@@ -146,6 +146,29 @@ public class ProxyTarantoolClientBuilderTest {
     }
 
     @Test
+    void test_should_configureProxyClient_ifDefaultMapping() {
+        //given
+        String expectedMappedFunctionName = "custom_delete";
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withProxyMethodMapping()
+                        .build();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
+                TarantoolClientFactory.configureClient(client)
+                        .withProxyMethodMapping(mapping -> mapping.withDeleteFunctionName(expectedMappedFunctionName))
+                        .build();
+
+        //then
+        assertEquals(ProxyTarantoolTupleClient.class, configuredClient.getClass());
+
+        String deleteFunctionName = ((ProxyTarantoolTupleClient) configuredClient).getMappingConfig().getDeleteFunctionName();
+        assertEquals(expectedMappedFunctionName, deleteFunctionName);
+    }
+
+    @Test
     void test_should_createProxyRetryingClient() {
         //given
         int expectedNumberOfAttempts = 5;
