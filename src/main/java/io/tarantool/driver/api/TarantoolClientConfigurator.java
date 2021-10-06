@@ -8,6 +8,13 @@ import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+/**
+ * Tarantool client configurator interface.
+ * <p>
+ * Provides a single entry point for configuring all types of Tarantool clients.
+ *
+ * @author Oleg Kuznetsov
+ */
 public interface TarantoolClientConfigurator {
 
     /**

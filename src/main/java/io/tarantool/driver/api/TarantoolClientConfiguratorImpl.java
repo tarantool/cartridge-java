@@ -11,9 +11,15 @@ import java.util.function.UnaryOperator;
 
 import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
 
+/**
+ * Tarantool client configurator implementation.
+ *
+ * @author Oleg Kuznetsov
+ */
 public class TarantoolClientConfiguratorImpl implements TarantoolClientConfigurator {
 
-    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
+    private final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
+
     protected RequestRetryPolicyFactory retryPolicyFactory;
     protected ProxyOperationsMappingConfig mappingConfig;
 
@@ -22,6 +28,7 @@ public class TarantoolClientConfiguratorImpl implements TarantoolClientConfigura
     }
 
     protected TarantoolClientConfiguratorImpl() {
+        this.client = new ClusterTarantoolTupleClient();
     }
 
     @Override
@@ -30,7 +37,8 @@ public class TarantoolClientConfiguratorImpl implements TarantoolClientConfigura
     }
 
     @Override
-    public TarantoolClientConfigurator withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
+    public TarantoolClientConfigurator withProxyMethodMapping(
+            UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
         this.mappingConfig = builder.apply(ProxyOperationsMappingConfig.builder()).build();
         return this;
     }
@@ -79,6 +87,13 @@ public class TarantoolClientConfiguratorImpl implements TarantoolClientConfigura
         return decorate(this.client);
     }
 
+    /**
+     * Decorates provided client by user specified parameters.
+     *
+     * @param client Tarantool client for decorating
+     * @return decorated client or the same client
+     * if parameters for decorating in {@link TarantoolClientConfigurator} have not been provided
+     */
     protected TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>
     decorate(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
 

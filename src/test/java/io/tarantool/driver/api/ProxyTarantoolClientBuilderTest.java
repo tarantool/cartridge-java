@@ -160,7 +160,8 @@ public class ProxyTarantoolClientBuilderTest {
         //then
         assertEquals(ProxyTarantoolTupleClient.class, configuredClient.getClass());
 
-        String deleteFunctionName = ((ProxyTarantoolTupleClient) configuredClient).getMappingConfig().getDeleteFunctionName();
+        String deleteFunctionName = ((ProxyTarantoolTupleClient) configuredClient)
+                .getMappingConfig().getDeleteFunctionName();
         assertEquals(expectedMappedFunctionName, deleteFunctionName);
     }
 

@@ -239,34 +239,42 @@ class Scratch {
 ### Retrying Tarantool client
 
 For the cases of reliable communication with a Cartridge cluster under heavy load or in a case of some failure causing
-unavailability of a part of the cluster nodes, the methods of client builder with prefix `withRequestRetry` may be useful.
+unavailability of a part of the cluster nodes, the methods of client builder with prefix `withRetrying` may be useful.
 The request retry policy allows to specify the types of exceptions which may be retried.
 <b> If you set some setting for retrying and not specified callback for checking exceptions,
 by default requests will be repeated only in cases network exceptions.
 Such as: `TimeoutException` `TarantoolConnectionException` and `TarantoolInternalNetworkException`.</b>
 Some retry policies are available in the `TarantoolRequestRetryPolicies` class, but you may use your own implementations. 
+Also you can configure already created client with method `configureClient(client)` in `TarantoolClientFactory` 
+for individual requests that need to be repeated. 
 See an example below:
 
 ```java
 
-TarantoolClientBuilder setupClient() {
+TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
     return TarantoolClientFactory.createClient()
         .withCredentials(USER_NAME, PASSWORD)
         .withAddress(container.getRouterHost(), container.getRouterPort())
-        .withProxyMethodMapping();
-}
-
-TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retrying(TarantoolClientBuilder clientBuilder, int retries) {
-    return clientBuilder.withRequestRetryAttempts(retries)
-        .withRequestRetryExceptionCallback(e -> e.getMessage().contains("Unsuccessful attempt"))
+        .withProxyMethodMapping()
         .build();
 }
 
+TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retrying(
+    TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client, int retries, long delay) {
+        return TarantoolClientFactory.configureClient(client)
+                    .withRetryingByNumberOfAttempts(
+                        retries,
+                        e -> e.getMessage().contains("Unsuccessful attempt"),
+                        policy -> policy.withDelay(delay))
+                    .build();
+        }
+
 ...
 
-    String result = setupClient().withRequestRetryAttempts(4).build().callForSingleResult("retrying_function", String.class).get();
+    TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
+    String result = retrying(client, 4, 500).callForSingleResult("retrying_function", String.class).get();
     assertEquals("Success", result);
-    result = retrying(setupClient(), 4).callForSingleResult("retrying_function", String.class).get();
+    result = retrying(client, 2, 1000).callForSingleResult("retrying_function", String.class).get();
     assertEquals("Success", result);
 ```
 

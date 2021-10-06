@@ -541,7 +541,7 @@ public final class TarantoolRequestRetryPolicies {
 
     /**
      * Create a factory for retry policy with unbounded number of attempts
-     * By default used {@see retryNetworkErrors()} for checking exceptions
+     * By default used {@link #retryNetworkErrors} for checking exceptions
      *
      * @param <T> exception checking callback function type
      * @return new factory instance
