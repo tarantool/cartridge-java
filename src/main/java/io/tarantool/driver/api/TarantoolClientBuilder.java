@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
  *
  * @author Oleg Kuznetsov
  */
-public interface TarantoolClientBuilder {
+public interface TarantoolClientBuilder extends TarantoolClientConfigurator {
 
     /**
      * Specify a single host of a Tarantool server. The default port 3301 will be used.

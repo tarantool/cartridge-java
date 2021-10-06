@@ -102,12 +102,8 @@ public class ProxyTarantoolClientBuilderTest {
                 .withProxyMethodMapping(builder -> builder.withDeleteFunctionName(expectedMappedFunctionName))
                 .build();
 
-        DefaultMessagePackMapper expectedMapper = new DefaultMessagePackMapper.Builder().build();
-        SimpleTarantoolCredentials expectedUser = new SimpleTarantoolCredentials("user", "1234");
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
                 TarantoolClientFactory.configureClient(client)
-                        .withCredentials(expectedUser)
-                        .withMessagePackMapper(expectedMapper)
                         .withProxyMethodMapping()
                         .build();
 
@@ -119,8 +115,8 @@ public class ProxyTarantoolClientBuilderTest {
         assertEquals(1000, config.getReadTimeout());
         assertEquals(1000, config.getConnectTimeout());
         assertEquals(2000, config.getRequestTimeout());
-        assertEquals(expectedUser, config.getCredentials());
-        assertEquals(expectedMapper, config.getMessagePackMapper());
+        assertEquals(SAMPLE_CREDENTIALS, config.getCredentials());
+        assertEquals(SAMPLE_MAPPER, config.getMessagePackMapper());
         assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
 
         String deleteFunctionName = ((ProxyTarantoolTupleClient) configuredClient)

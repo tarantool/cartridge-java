@@ -59,6 +59,8 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 public interface TarantoolClientFactory {
 
     /**
+     * Provides interface for Tarantool client building
+     *
      * @return Tarantool client builder {@link TarantoolClientBuilder}
      */
     static TarantoolClientBuilder createClient() {
@@ -66,11 +68,13 @@ public interface TarantoolClientFactory {
     }
 
     /**
-     * @return Tarantool client builder {@link TarantoolClientBuilder}
+     * Provides interface for Tarantool client configuring
+     *
+     * @return Tarantool client configurator {@link TarantoolClientConfigurator}
      */
-    static TarantoolClientBuilder configureClient(
+    static TarantoolClientConfigurator configureClient(
             TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        return new TarantoolClientBuilderImpl(client);
+        return new TarantoolClientConfiguratorImpl(client);
     }
 
 }

@@ -7,11 +7,9 @@ import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.exceptions.TarantoolBadClientTypeException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
 import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.net.InetSocketAddress;
@@ -21,35 +19,19 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static io.tarantool.driver.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
-
 /**
  * Tarantool client builder implementation.
  *
  * @author Oleg Kuznetsov
  */
-public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
+public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl implements TarantoolClientBuilder {
 
     private final TarantoolClientConfig.Builder configBuilder;
-
     private TarantoolClusterAddressProvider addressProvider;
-    private RequestRetryPolicyFactory retryPolicyFactory;
-    private ProxyOperationsMappingConfig mappingConfig;
 
     public TarantoolClientBuilderImpl() {
         this.configBuilder = TarantoolClientConfig.builder();
         this.addressProvider = () -> Collections.singleton(new TarantoolServerAddress());
-    }
-
-    public TarantoolClientBuilderImpl(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        this.configBuilder = new TarantoolClientConfig.Builder(client.getConfig());
-        this.addressProvider = unpackClusterTarantoolTupleClient(client).getAddressProvider();
-
-        try {
-            this.mappingConfig = unpackProxyTarantoolTupleClient(client).getMappingConfig();
-            this.retryPolicyFactory = unpackRetryingTarantoolTupleClient(client).getRetryPolicyFactory();
-        } catch (TarantoolBadClientTypeException ignored) {
-        }
     }
 
     @Override
@@ -139,102 +121,60 @@ public class TarantoolClientBuilderImpl implements TarantoolClientBuilder {
 
     @Override
     public TarantoolClientBuilder withProxyMethodMapping() {
-        return withProxyMethodMapping(UnaryOperator.identity());
+        super.withProxyMethodMapping();
+        return this;
     }
 
     @Override
     public TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
-        this.mappingConfig = builder.apply(ProxyOperationsMappingConfig.builder()).build();
+        super.withProxyMethodMapping(builder);
         return this;
     }
 
     @Override
     public TarantoolClientBuilder withRetryingByNumberOfAttempts(int numberOfAttempts) {
-        return withRetryingByNumberOfAttempts(numberOfAttempts, UnaryOperator.identity());
+        super.withRetryingByNumberOfAttempts(numberOfAttempts);
+        return this;
     }
 
     @Override
     public TarantoolClientBuilder withRetryingByNumberOfAttempts(
             int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
             .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
-        return withRetryingByNumberOfAttempts(numberOfAttempts, retryNetworkErrors(), policy);
+        super.withRetryingByNumberOfAttempts(numberOfAttempts, policy);
+        return this;
     }
 
     @Override
     public <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingByNumberOfAttempts(
             int numberOfAttempts, T exceptionsCheck,
             UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
-        return withRetrying(policy.apply(TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
-                .builder(numberOfAttempts, exceptionsCheck)).build());
+        super.withRetryingByNumberOfAttempts(numberOfAttempts, exceptionsCheck, policy);
+        return this;
     }
 
     @Override
     public TarantoolClientBuilder withRetryingIndefinitely(UnaryOperator<TarantoolRequestRetryPolicies
             .InfiniteRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
-        return withRetryingIndefinitely(retryNetworkErrors(), policy);
+        super.withRetryingIndefinitely(policy);
+        return this;
     }
 
     @Override
     public <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingIndefinitely(
             T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy) {
-        return withRetrying(policy.apply(TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.builder(callback))
-                .build());
+        super.withRetryingIndefinitely(callback, policy);
+        return this;
     }
 
     @Override
     public TarantoolClientBuilder withRetrying(RequestRetryPolicyFactory factory) {
-        this.retryPolicyFactory = factory;
+        super.withRetrying(factory);
         return this;
     }
 
     @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                new ClusterTarantoolTupleClient(this.configBuilder.build(), this.addressProvider);
-
-        if (mappingConfig != null) {
-            client = new ProxyTarantoolTupleClient(client, mappingConfig);
-        }
-        if (retryPolicyFactory != null) {
-            client = new RetryingTarantoolTupleClient(client, this.retryPolicyFactory);
-        }
-
-        return client;
-    }
-
-    private ClusterTarantoolTupleClient unpackClusterTarantoolTupleClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        if (client instanceof ClusterTarantoolTupleClient) {
-            return (ClusterTarantoolTupleClient) client;
-        }
-        if (client instanceof ProxyTarantoolTupleClient) {
-            return unpackClusterTarantoolTupleClient(((ProxyTarantoolTupleClient) client).getClient());
-        }
-        if (client instanceof RetryingTarantoolTupleClient) {
-            return unpackClusterTarantoolTupleClient(((RetryingTarantoolTupleClient) client).getClient());
-        }
-        throw new TarantoolBadClientTypeException(client.getClass());
-    }
-
-    private RetryingTarantoolTupleClient unpackRetryingTarantoolTupleClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        if (client instanceof RetryingTarantoolTupleClient) {
-            return (RetryingTarantoolTupleClient) client;
-        }
-        if (client instanceof ProxyTarantoolTupleClient) {
-            return unpackRetryingTarantoolTupleClient(((ProxyTarantoolTupleClient) client).getClient());
-        }
-        throw new TarantoolBadClientTypeException(client.getClass());
-    }
-
-    private ProxyTarantoolTupleClient unpackProxyTarantoolTupleClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        if (client instanceof ProxyTarantoolTupleClient) {
-            return (ProxyTarantoolTupleClient) client;
-        }
-        if (client instanceof RetryingTarantoolTupleClient) {
-            return unpackProxyTarantoolTupleClient(((RetryingTarantoolTupleClient) client).getClient());
-        }
-        throw new TarantoolBadClientTypeException(client.getClass());
+        return super.decorate(new ClusterTarantoolTupleClient(this.configBuilder.build(), this.addressProvider));
     }
 }
