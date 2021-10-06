@@ -15,6 +15,7 @@ import java.util.function.Function;
 import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
 import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProxyTarantoolClientBuilderTest {
 
@@ -41,7 +42,7 @@ public class ProxyTarantoolClientBuilderTest {
                 .build();
 
         //then
-        assertEquals(io.tarantool.driver.api.ProxyTarantoolTupleClient.class, client.getClass());
+        assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
         TarantoolClientConfig config = client.getConfig();
 
         assertEquals(1, config.getConnections());
@@ -135,7 +136,7 @@ public class ProxyTarantoolClientBuilderTest {
                 .build();
 
         //then
-        assertEquals(io.tarantool.driver.api.ProxyTarantoolTupleClient.class, client.getClass());
+        assertEquals(ProxyTarantoolTupleClient.class, client.getClass());
 
         String deleteFunctionName = ((ProxyTarantoolTupleClient) client).getMappingConfig().getDeleteFunctionName();
         assertEquals(expectedMappedFunctionName, deleteFunctionName);
@@ -196,6 +197,12 @@ public class ProxyTarantoolClientBuilderTest {
 
         // assert base params
         TarantoolClientConfig config = client.getConfig();
+        assertTrue(((ClusterTarantoolTupleClient) (((ProxyTarantoolTupleClient) (((RetryingTarantoolTupleClient) client)
+                .getClient())))
+                .getClient())
+                .getAddressProvider()
+                .getAddresses().contains(SAMPLE_ADDRESS));
+
         assertEquals(1, config.getConnections());
         assertEquals(1000, config.getReadTimeout());
         assertEquals(1000, config.getConnectTimeout());

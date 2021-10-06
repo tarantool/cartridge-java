@@ -16,6 +16,7 @@ import java.util.function.Function;
 import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
 import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RetryTarantoolClientBuilderTest {
 
@@ -245,6 +246,7 @@ public class RetryTarantoolClientBuilderTest {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
                 TarantoolClientFactory.createClient()
+                        .withAddresses(SAMPLE_ADDRESS)
                         .withRequestTimeout(expectedRequestTimeout)
                         .withConnectionSelectionStrategy(ROUND_ROBIN)
                         .build();
@@ -264,6 +266,10 @@ public class RetryTarantoolClientBuilderTest {
         TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?> retryPolicyFactory =
                 (TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<?>)
                         retryingClient.getRetryPolicyFactory();
+
+        assertTrue(((ClusterTarantoolTupleClient) (((RetryingTarantoolTupleClient) configuredClient).getClient()))
+                .getAddressProvider()
+                .getAddresses().contains(SAMPLE_ADDRESS));
 
         assertEquals(ROUND_ROBIN.value(), configuredClient.getConfig().getConnectionSelectionStrategyFactory());
         assertEquals(expectedRequestTimeout, configuredClient.getConfig().getRequestTimeout());
