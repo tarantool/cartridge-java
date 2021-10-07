@@ -8,23 +8,19 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
-import io.tarantool.driver.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * Tarantool client builder implementation.
  *
  * @author Oleg Kuznetsov
  */
-public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl implements TarantoolClientBuilder {
+public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<TarantoolClientBuilder>
+        implements TarantoolClientBuilder {
 
     private final TarantoolClientConfig.Builder configBuilder;
     private TarantoolClusterAddressProvider addressProvider;
@@ -116,60 +112,6 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl 
     public TarantoolClientBuilder withConnectionSelectionStrategy(
             ConnectionSelectionStrategyFactory connectionSelectionStrategy) {
         this.configBuilder.withConnectionSelectionStrategyFactory(connectionSelectionStrategy);
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withProxyMethodMapping() {
-        super.withProxyMethodMapping();
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
-        super.withProxyMethodMapping(builder);
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withRetryingByNumberOfAttempts(int numberOfAttempts) {
-        super.withRetryingByNumberOfAttempts(numberOfAttempts);
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withRetryingByNumberOfAttempts(
-            int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
-        super.withRetryingByNumberOfAttempts(numberOfAttempts, policy);
-        return this;
-    }
-
-    @Override
-    public <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingByNumberOfAttempts(
-            int numberOfAttempts, T exceptionsCheck,
-            UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
-        super.withRetryingByNumberOfAttempts(numberOfAttempts, exceptionsCheck, policy);
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withRetryingIndefinitely(UnaryOperator<TarantoolRequestRetryPolicies
-            .InfiniteRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
-        super.withRetryingIndefinitely(policy);
-        return this;
-    }
-
-    @Override
-    public <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingIndefinitely(
-            T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy) {
-        super.withRetryingIndefinitely(callback, policy);
-        return this;
-    }
-
-    @Override
-    public TarantoolClientBuilder withRetrying(RequestRetryPolicyFactory factory) {
-        super.withRetrying(factory);
         return this;
     }
 

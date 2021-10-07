@@ -516,7 +516,8 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any known network exceptions.
+     * Create a factory for retry policy bound by retry attempts.
+     * The retry will be performed on any known network exceptions.
      *
      * @param numberOfAttempts maximum number of retries, zero value means no retries
      * @return new factory instance

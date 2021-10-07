@@ -13,7 +13,8 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
  * <pre>
  * <code>
  *
- * // Create a client instance with default settings. This client can connect to a local Tarantool process listening the default port 3301 (do not forget enabling it by executing this command in console: `box.cfg{ listen = 3301 }`).
+ * // Create a client instance with default settings. This client can connect to a local Tarantool process listening the
+ * default port 3301 (do not forget enabling it by executing this command in console: `box.cfg{ listen = 3301 }`).
  * TarantoolClientFactory.createClient().build();
  *
  * // Create a client instance for a single server with custom credentials
@@ -84,9 +85,9 @@ public interface TarantoolClientFactory {
      *
      * @return Tarantool client configurator {@link TarantoolClientConfigurator}
      */
-    static TarantoolClientConfigurator configureClient(
+    @SuppressWarnings("unchecked")
+    static <T extends TarantoolClientConfigurator<T>> T configureClient(
             TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        return new TarantoolClientConfiguratorImpl(client);
+        return (T) new TarantoolClientConfiguratorImpl<>(client);
     }
-
 }

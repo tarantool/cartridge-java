@@ -7,14 +7,9 @@ import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
-import io.tarantool.driver.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * Tarantool client builder interface.
@@ -23,7 +18,7 @@ import java.util.function.UnaryOperator;
  *
  * @author Oleg Kuznetsov
  */
-public interface TarantoolClientBuilder extends TarantoolClientConfigurator {
+public interface TarantoolClientBuilder extends TarantoolClientConfigurator<TarantoolClientBuilder> {
 
     /**
      * Specify a single host of a Tarantool server. The default port 3301 will be used.
@@ -102,7 +97,9 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator {
     /**
      * Specify the number of connections per one Tarantool server. The default value is 1.
      * More connections may help if a request can stuck on the server side or if the request payloads are big.
-     * Important: the total number of open connections will be kept close to the specified number of connections times the number of server addresses. In a normal working mode, the number of connections opened to each server will be equal to this option value, however, an actual number may differ when the connections go down or up.
+     * Important: the total number of open connections will be kept close to the specified number of connections times
+     * the number of server addresses. In a normal working mode, the number of connections opened to each server will be
+     * equal to this option value, however, an actual number may differ when the connections go down or up.
      *
      * @param connections the number of connections per one server
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -150,7 +147,8 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator {
     TarantoolClientBuilder withReadTimeout(int readTimeout);
 
     /**
-     * Specify a custom connection selection strategy factory. A connection selection strategy encapsulates an algorithm of selecting the next connection from the pool of available ones for performing the next request.
+     * Specify a custom connection selection strategy factory. A connection selection strategy encapsulates an algorithm
+     * of selecting the next connection from the pool of available ones for performing the next request.
      *
      * @param connectionSelectionStrategyFactory connection selection strategy factory instance
      * @return this instance of builder {@link TarantoolClientBuilder}
@@ -159,98 +157,15 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator {
             ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory);
 
     /**
-     * Select a built-in connection selection strategy factory. The default strategy types include simple round-robin algorithms, good enough for balancing the requests between several connections with a single server (ROUND_ROBIN) or multiple servers (PARALLEL_ROUND_ROBIN). 
+     * Select a built-in connection selection strategy factory. The default strategy types include simple round-robin
+     * algorithms, good enough for balancing the requests between several connections with a single server (ROUND_ROBIN)
+     * or multiple servers (PARALLEL_ROUND_ROBIN).
      *
      * @param connectionSelectionStrategyType built-in connection selection strategy factory type
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
             TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
-
-    /**
-     * Configure a custom operations proxy configuration.
-     * This configuration allows specifying custom Lua function names callable on the Tarantool server,
-     * for replacing the default space operations with these functions calls. This allows, for example,
-     * replacing the default schema retrieving method or writing a custom "insert" implementation.
-     *
-     * @param builder builder provider instance, e.g. a lambda function taking the builder
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder);
-
-    /**
-     * Specify using the default CRUD proxy operations mapping configuration. For using the default operations mapping, make sure the tarantool/crud module is installed as a dependency and enabled in your application.
-     *
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withProxyMethodMapping();
-
-    /**
-     * Specify the number of retry attempts for each request.
-     *
-     * @param numberOfAttempts the number of retry attempts for each request
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withRetryingByNumberOfAttempts(int numberOfAttempts);
-
-    /**
-     * Configure the attempts bound request retry policy.
-     * Only the requests that failed with known network exceptions will be retried by default.
-     *
-     * @param numberOfAttempts the number of retry attempts for each request
-     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
-     *                         e.g. a lambda function taking the builder
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withRetryingByNumberOfAttempts(
-            int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy);
-
-    /**
-     * Configure the attempts bound request retry policy.
-     *
-     * @param numberOfAttempts the number of retry attempts for each request
-     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
-     *                         e.g. a lambda function taking the builder
-     * @param <T>              callback type for exceptions check
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingByNumberOfAttempts(
-            int numberOfAttempts, T exceptionsCheck,
-            UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
-
-    /**
-     * Configure the infinite request retry policy.
-     * Only the requests that failed with known network exceptions will be retried by default.
-     *
-     * @param policy builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
-     *               e.g. a lambda function taking the builder
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withRetryingIndefinitely(
-            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
-                    <Function<Throwable, Boolean>>> policy);
-
-    /**
-     * Configure the infinite request retry policy.
-     *
-     * @param policy builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
-     *               e.g. a lambda function taking the builder
-     * @param <T>    callback type for exceptions check
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    <T extends Function<Throwable, Boolean>> TarantoolClientBuilder withRetryingIndefinitely(
-            T callback,
-            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
-
-    /**
-     * Specify a custom request retry policy factory. A request retry policy encapsulates an algorhitm of checking if a particular failed request needs to be repeated. The built-in request retry policies include customizable policy variants with a bounded or unbounded number of retries.
-     *
-     * @param factory {@link RequestRetryPolicyFactory}
-     * @see TarantoolRequestRetryPolicies
-     * @return this instance of builder {@link TarantoolClientBuilder}
-     */
-    TarantoolClientBuilder withRetrying(RequestRetryPolicyFactory factory);
 
     /**
      * Build the configured Tarantool client instance. Call this when you have specified all necessary settings.
