@@ -18,6 +18,13 @@ import java.util.function.UnaryOperator;
 public interface TarantoolClientConfigurator {
 
     /**
+     * Specify using proxy methods.
+     *
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     */
+    TarantoolClientConfigurator withProxyMethodMapping();
+
+    /**
      * Specify a builder provider for operations proxy configuration.
      * This configuration allows specifying custom Lua function names callable on the Tarantool server,
      * for replacing the default space operations with these functions calls. This allows, for example,
@@ -27,13 +34,6 @@ public interface TarantoolClientConfigurator {
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
     TarantoolClientConfigurator withProxyMethodMapping(UnaryOperator<ProxyOperationsMappingConfig.Builder> builder);
-
-    /**
-     * Specify using proxy methods.
-     *
-     * @return this instance of builder {@link TarantoolClientConfigurator}
-     */
-    TarantoolClientConfigurator withProxyMethodMapping();
 
     /**
      * Specify retry attempts bound.
