@@ -29,7 +29,7 @@ public final class TarantoolRequestRetryPolicies {
     public static final long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
 
     /**
-     * Callback for check all network exceptions and user specified exceptions
+     * Check all known network exceptions and the user-specified exceptions
      *
      * @param exceptionCheck specified callback for checking exceptions
      * @param <T>            type of user specified callback for checking exceptions
@@ -50,7 +50,7 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Callback for check all network exceptions
+     * Check all known network exceptions
      *
      * @return callback for checking all network exceptions
      */
@@ -516,7 +516,7 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any network exceptions.
+     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any known network exceptions.
      *
      * @param numberOfAttempts maximum number of retries, zero value means no retries
      * @return new factory instance
@@ -540,8 +540,8 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Create a factory for retry policy with unbounded number of attempts
-     * By default used {@link #retryNetworkErrors} for checking exceptions
+     * Create a factory for retry policy with unbounded number of attempts.
+     * {@link #retryNetworkErrors} is used for checking exceptions by default.
      *
      * @param <T> exception checking callback function type
      * @return new factory instance

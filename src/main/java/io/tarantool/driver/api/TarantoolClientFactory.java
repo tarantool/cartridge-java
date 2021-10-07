@@ -13,23 +13,23 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
  * <pre>
  * <code>
  *
- * // Default Tarantool Client
+ * // Create a client instance with default settings. This client can connect to a local Tarantool process listening the default port 3301 (do not forget enabling it by executing this command in console: `box.cfg{ listen = 3301 }`).
  * TarantoolClientFactory.createClient().build();
  *
- * // Tarantool Cluster Tuple Client
+ * // Create a client instance for a single server with custom credentials
  * TarantoolClientFactory.createClient()
  *             .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *             .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
  *             .build();
  *
- * // Tarantool Proxy Tuple Client
+ * // Create a client instance with custom proxy operations mapping
  * TarantoolClientFactory.createClient()
  *             .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *             .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
  *             .withProxyMethodMapping(builder -&gt; builder.withDeleteFunctionName("custom_delete"))
  *             .build();
  *
- * // Tarantool Retrying Tuple Client
+ * // Create a client instance with request retry policy
  * TarantoolClientFactory.createClient()
  *            .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *            .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
@@ -39,7 +39,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
  *            .withConnectionSelectionStrategy(PARALLEL_ROUND_ROBIN)
  *            .build();
  *
- * // Tarantool Retrying Tuple Client with decorated Proxy client
+ * // Create a client instance with proxy operations mapping and request retry policy
  * TarantoolClientFactory.createClient()
  *           .withAddress(new TarantoolServerAddress("123.123.123.123", 3333))
  *           .withCredentials(new SimpleTarantoolCredentials("root", "passwd"))
@@ -51,14 +51,14 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
  *                           .withRequestTimeout(1000)
  *           ).build();
  *
- * // Configuring retry policy already created client
+ * // Create a client instance with request retry policy from an existing configured client
  * TarantoolClientFactory.configureClient(client)
  *           .withRetryingByNumberOfAttempts(5, throwable -&gt; throwable.getMessage().equals("Some error"),
  *                   policy -&gt; policy.withDelay(500)
  *                           .withRequestTimeout(1000)
  *           ).build();
  *
- * // Configuring proxy mapping already created client
+ * // Create a client instance with proxy operations mapping from an existing configured client
  * TarantoolClientFactory.configureClient(client)
  *          .withProxyMethodMapping(mapping -&gt; mapping.withDeleteFunctionName("custom_delete"))
  *          .build();
@@ -71,7 +71,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 public interface TarantoolClientFactory {
 
     /**
-     * Provides interface for Tarantool client building
+     * Create a new client instance. Provides a builder interface.
      *
      * @return Tarantool client builder {@link TarantoolClientBuilder}
      */
@@ -80,7 +80,7 @@ public interface TarantoolClientFactory {
     }
 
     /**
-     * Provides interface for Tarantool client configuring
+     * Configure an existing client instance and return a copy of it. Provides a builder interface.
      *
      * @return Tarantool client configurator {@link TarantoolClientConfigurator}
      */

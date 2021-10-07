@@ -85,12 +85,12 @@ library for starting it automatically in tests.
 ```java
 TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
         return TarantoolClientFactory.createClient()
-            // by default without using withAddress() methods, used host 127.0.0.1 and port 3301
+            // If any addresses or an address provider are not specified, the default host 127.0.0.1 and port 3301 are used
             .withAddress("123.123.123.1")
-            // use the value of cluster_cookie parameter in the init.lua file in your Cartridge application
+            // For connecting to a Cartridge application, use the value of cluster_cookie parameter in the init.lua file
             .withCredentials("admin", "secret-cluster-cookie")
-            // also you can specify more settings for client such as:
-            // timeouts, number of connections, methods names mapping, etc.
+            // you may also specify more client settings, such as:
+            // timeouts, number of connections, custom MessagePack entities to Java objects mapping, etc.
             .build();
         }
 ```
@@ -122,7 +122,7 @@ these variants or create your own discovery provider implementation. In real env
 requirements it is recommended to use an external configuration provider (like etcd), DNS or a balancing proxy for
 connecting to the Tarantool server.
 
-The next example is showing the instantiation of the `TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>`
+The next example shows the instantiation of the `TarantoolClient`
 with stored function discovery provider:
 
 ```java
@@ -168,7 +168,7 @@ class Scratch {
                 .withRequestTimeout(1000 * 5) // 5 seconds, timeout for receiving the server response
                 // The chosen connection selection strategy will determine how hosts and connections are selected for 
                 // performing the next request to the cluster
-                .withConnectionSelectionStrategy(PARALLEL_ROUND_ROBIN)
+                .withConnectionSelectionStrategy(TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN)
                 .build();
 
         // Mappers are used for converting MessagePack primitives to Java objects
@@ -197,11 +197,11 @@ class Scratch {
 
 ### Proxy Tarantool client
 
-The next settings allows connecting to instances with CRUD interfaces defined as user-defined
+This section shows the necessary settings for connecting to instances with a user-defined CRUD API exposed as Lua
 stored functions or Cartridge roles implementing the API similar to the one of [tarantool/crud](https://github.com/tarantool/crud).
 Works with `tarantool/crud` 0.3.0+.
 
-See an example of how to set proxy client with helps of `TarantoolClientFactory`:
+See an example of how to set up a proxy client working with `tarantool/crud`:
 
 ```java
 class Scratch {
@@ -212,7 +212,7 @@ class Scratch {
                 // use the value of cluster_cookie parameter in the init.lua file in your Cartridge application
                 .withCredentials("admin", "secret-cluster-cookie")
                 .withProxyMethodMapping()
-                // also you can change proxy methods name specify lambda as parameter
+                // also you may use a lambda function for specifying the proxy methods' names
                 .withProxyMethodMapping(builder -> builder.withSelectFunctionName("customSelect"))
                 .build();
         
@@ -243,10 +243,10 @@ class Scratch {
 
 For the cases of reliable communication with a Cartridge cluster under heavy load or in a case of some failure causing
 unavailability of a part of the cluster nodes, the methods of client builder with prefix `withRetrying` may be useful.
-The request retry policy allows to specify the types of exceptions which may be retried.
-<b> If you set some setting for retrying and not specified callback for checking exceptions,
-by default requests will be repeated only in cases network exceptions.
-Such as: `TimeoutException` `TarantoolConnectionException` and `TarantoolInternalNetworkException`.</b>
+
+The request retry policy allows specifying the types of exceptions that may be retried.
+By default, failed requests will be repeated only for some known network problems, such as
+`TimeoutException`, `TarantoolConnectionException` and `TarantoolInternalNetworkException`.
 Some retry policies are available in the `TarantoolRequestRetryPolicies` class, but you may use your own implementations.
 If you want to use proxy calls or retry settings only for a number of requests, you may use configureClient(client) 
 in `TarantoolClientFactory` for making a new configured client instance. Note, that the new instance will share the same 
