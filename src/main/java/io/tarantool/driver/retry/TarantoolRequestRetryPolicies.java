@@ -24,8 +24,8 @@ import java.util.function.Supplier;
  */
 public final class TarantoolRequestRetryPolicies {
 
-    public static final Function<Throwable, Boolean> RETRY_ALL = t -> true;
-    public static final Function<Throwable, Boolean> RETRY_NONE = t -> false;
+    public static final Function<Throwable, Boolean> retryAll = t -> true;
+    public static final Function<Throwable, Boolean> retryNone = t -> false;
     public static final long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
 
     /**
@@ -55,7 +55,7 @@ public final class TarantoolRequestRetryPolicies {
      * @return callback for checking all network exceptions
      */
     public static Function<Throwable, Boolean> retryNetworkErrors() {
-        return withRetryingNetworkErrors(RETRY_NONE);
+        return withRetryingNetworkErrors(retryNone);
     }
 
     private TarantoolRequestRetryPolicies() {
