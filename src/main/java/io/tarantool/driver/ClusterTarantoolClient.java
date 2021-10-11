@@ -26,7 +26,8 @@ public abstract class ClusterTarantoolClient<T extends Packable, R extends Colle
 
     /**
      * Create a client. The server address for connecting to the server is specified by the passed address provider.
-     * @param config the client configuration
+     *
+     * @param config          the client configuration
      * @param addressProvider provides Tarantool server address for connection
      * @see TarantoolClientConfig
      */
@@ -44,5 +45,9 @@ public abstract class ClusterTarantoolClient<T extends Packable, R extends Colle
                                                            TarantoolConnectionFactory connectionFactory,
                                                            TarantoolConnectionListeners listeners) {
         return new TarantoolClusterConnectionManager(config, connectionFactory, listeners, addressProvider);
+    }
+
+    protected TarantoolClusterAddressProvider getAddressProvider() {
+        return addressProvider;
     }
 }

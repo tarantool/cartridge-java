@@ -2,9 +2,9 @@ package io.tarantool.driver.retry;
 
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
 import io.tarantool.driver.exceptions.TarantoolTimeoutException;
-import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,8 +24,17 @@ import java.util.function.Supplier;
  */
 public final class TarantoolRequestRetryPolicies {
 
-    public static Function<Throwable, Boolean> retryAll = t -> true;
-    public static Function<Throwable, Boolean> retryNone = t -> false;
+    public static final Function<Throwable, Boolean> retryAll = t -> true;
+    public static final Function<Throwable, Boolean> retryNone = t -> false;
+    public static final long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
+
+    /**
+     * Check all known network exceptions and the user-specified exceptions
+     *
+     * @param exceptionCheck specified callback for checking exceptions
+     * @param <T>            type of user specified callback for checking exceptions
+     * @return callback for checking all networks exceptions
+     */
     public static <T extends Function<Throwable, Boolean>> Function<Throwable, Boolean>
     withRetryingNetworkErrors(T exceptionCheck) {
         return e -> {
@@ -39,6 +48,12 @@ public final class TarantoolRequestRetryPolicies {
             return retryRequest || userExceptionCheck;
         };
     }
+
+    /**
+     * Check all known network exceptions
+     *
+     * @return callback for checking all network exceptions
+     */
     public static Function<Throwable, Boolean> retryNetworkErrors() {
         return withRetryingNetworkErrors(retryNone);
     }
@@ -188,10 +203,10 @@ public final class TarantoolRequestRetryPolicies {
          */
         public static class Builder<T extends Function<Throwable, Boolean>> {
 
-            private long requestTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long requestTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
             private long delay; //ms
             private final T callback;
-            private long operationTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long operationTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
 
             /**
              * Basic constructor
@@ -237,6 +252,42 @@ public final class TarantoolRequestRetryPolicies {
             public InfiniteRetryPolicyFactory<T> build() {
                 return new InfiniteRetryPolicyFactory<>(requestTimeout, operationTimeout, delay, callback);
             }
+        }
+
+        /**
+         * Getter for exception handler
+         *
+         * @return exception handler
+         */
+        public T getCallback() {
+            return this.callback;
+        }
+
+        /**
+         * Getter for delay
+         *
+         * @return delay in milliseconds
+         */
+        public long getDelay() {
+            return this.delay;
+        }
+
+        /**
+         * Getter for request timout
+         *
+         * @return request timeout in milliseconds
+         */
+        public long getRequestTimeout() {
+            return this.requestTimeout;
+        }
+
+        /**
+         * Getter for operation timeout
+         *
+         * @return operation timeout in milliseconds
+         */
+        public long getOperationTimeout() {
+            return operationTimeout;
         }
     }
 
@@ -380,7 +431,7 @@ public final class TarantoolRequestRetryPolicies {
          */
         public static class Builder<T extends Function<Throwable, Boolean>> {
             private final int numberOfAttempts;
-            private long requestTimeout = TimeUnit.HOURS.toMillis(1); //ms
+            private long requestTimeout = DEFAULT_ONE_HOUR_TIMEOUT; //ms
             private long delay; //ms
             private final T exceptionCheck;
 
@@ -426,17 +477,54 @@ public final class TarantoolRequestRetryPolicies {
                 return new AttemptsBoundRetryPolicyFactory<>(numberOfAttempts, requestTimeout, delay, exceptionCheck);
             }
         }
+
+        /**
+         * Getter for number of attempts
+         *
+         * @return number of attempts
+         */
+        public int getNumberOfAttempts() {
+            return numberOfAttempts;
+        }
+
+        /**
+         * Getter for exception handler
+         *
+         * @return exception handler
+         */
+        public T getExceptionCheck() {
+            return exceptionCheck;
+        }
+
+        /**
+         * Getter for delay
+         *
+         * @return delay in milliseconds
+         */
+        public long getDelay() {
+            return delay;
+        }
+
+        /**
+         * Getter for request timeout
+         *
+         * @return request timeout in milliseconds
+         */
+        public long getRequestTimeout() {
+            return requestTimeout;
+        }
     }
 
     /**
-     * Create a factory for retry policy bound by retry attempts. The retry will be performed on any exception.
+     * Create a factory for retry policy bound by retry attempts.
+     * The retry will be performed on any known network exceptions.
      *
      * @param numberOfAttempts maximum number of retries, zero value means no retries
      * @return new factory instance
      */
     public static AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>
     byNumberOfAttempts(int numberOfAttempts) {
-        return byNumberOfAttempts(numberOfAttempts, retryAll);
+        return byNumberOfAttempts(numberOfAttempts, retryNetworkErrors());
     }
 
     /**
@@ -453,15 +541,15 @@ public final class TarantoolRequestRetryPolicies {
     }
 
     /**
-     * Create a factory for retry policy with unbounded number of attempts
+     * Create a factory for retry policy with unbounded number of attempts.
+     * {@link #retryNetworkErrors} is used for checking exceptions by default.
      *
      * @param <T> exception checking callback function type
      * @return new factory instance
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T>
-    unbound() {
-        return unbound((T) retryAll);
+    public static <T extends Function<Throwable, Boolean>> InfiniteRetryPolicyFactory.Builder<T> unbound() {
+        return unbound((T) retryNetworkErrors());
     }
 
     /**

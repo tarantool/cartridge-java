@@ -1,18 +1,15 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.DDLMetadataContainerResult;
@@ -38,22 +35,22 @@ import java.util.function.Supplier;
 /**
  * Client implementation that decorates a {@link TarantoolClient} instance, proxying all CRUD operations through the
  * instance's <code>call</code> method to the proxy functions defined on the Tarantool instance(s).
- *
+ * <p>
  * Proxy functions to be called can be specified by overriding the methods of the implemented
  * {@link ProxyOperationsMappingConfig} interface. These functions must be public API functions available on the
  * Tarantool instance for the connected API user.
- *
+ * <p>
  * It is recommended to use this client with the CRUD module (<a href="https://github.com/tarantool/crud">
  * https://github.com/tarantool/crud</a>) installed on the target Tarantool instance. Be sure that the server instances
  * you are connecting to with this client have the {@code crud-router} role enabled.
- *
+ * <p>
  * The default implementation of metadata retrieving function is provided by the DDL module
  * (<a href="https://github.com/tarantool/ddl">https://github.com/tarantool/ddl</a>). It is available by default
  * on the Cartridge instances. In the other cases, you'll have to expose the DDL module as public API on the target
  * Tarantool instance or use some other implementation of that function.
- *
+ * <p>
  * See <a href="https://github.com/tarantool/examples/blob/master/profile-storage/README.md">
- *     https://github.com/tarantool/examples/blob/master/profile-storage/README.md</a>
+ * https://github.com/tarantool/examples/blob/master/profile-storage/README.md</a>
  *
  * @param <T> target tuple type
  * @param <R> target tuple collection type
@@ -73,7 +70,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
      * Basic constructor
      *
      * @param decoratedClient configured Tarantool client
-     * @param mappingConfig config for proxy operations mapping
+     * @param mappingConfig   config for proxy operations mapping
      */
     public ProxyTarantoolClient(TarantoolClient<T, R> decoratedClient, ProxyOperationsMappingConfig mappingConfig) {
         Assert.notNull(decoratedClient, "Decorated client must not be null");
@@ -116,10 +113,10 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     /**
      * Creates a space API implementation instance for the specified space
      *
-     * @param config Tarantool client configuration
-     * @param client configured client instance
+     * @param config        Tarantool client configuration
+     * @param client        configured client instance
      * @param mappingConfig proxy operations mapping configuration
-     * @param metadata metadata operations
+     * @param metadata      metadata operations
      * @param spaceMetadata current space metadata
      * @return space API implementation instance
      */
@@ -417,5 +414,23 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     @Override
     public void close() throws Exception {
         this.client.close();
+    }
+
+    /**
+     * Getter for {@link ProxyOperationsMappingConfig}
+     *
+     * @return {@link ProxyOperationsMappingConfig} instance
+     */
+    ProxyOperationsMappingConfig getMappingConfig() {
+        return mappingConfig;
+    }
+
+    /**
+     * Getter for decorated client
+     *
+     * @return decorated client {@link TarantoolClient}
+     */
+    TarantoolClient<T, R> getClient() {
+        return client;
     }
 }

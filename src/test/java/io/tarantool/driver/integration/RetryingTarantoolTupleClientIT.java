@@ -1,7 +1,7 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.ClusterTarantoolTupleClient;
-import io.tarantool.driver.ProxyTarantoolTupleClient;
+import io.tarantool.driver.api.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.ProxyTarantoolTupleClient;
 import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
@@ -177,7 +177,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies
-                        .unbound()
+                        .unbound(t -> true)
                         .withRequestTimeout(20) //requestTimeout
                         .withOperationTimeout(200)  //operationTimeout
                         .build());

@@ -1,5 +1,6 @@
 package io.tarantool.driver.retry;
 
+import io.tarantool.driver.api.RetryingTarantoolClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.RetryingTarantoolSpaceOperations;

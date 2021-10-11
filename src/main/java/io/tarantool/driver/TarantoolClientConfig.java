@@ -10,7 +10,7 @@ import io.tarantool.driver.utils.Assert;
 
 /**
  * Class-container for {@link TarantoolClient} configuration.
- *
+ * <p>
  * It is recommended to use the {@link TarantoolClientConfig.Builder} for constructing the configuration
  *
  * @author Alexey Kuzin
@@ -41,6 +41,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get Tarantool credentials
+     *
      * @return configured Tarantool user credentials
      * @see TarantoolCredentials
      */
@@ -50,6 +51,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set Tarantool credentials store
+     *
      * @param credentials Tarantool user credentials
      * @see TarantoolCredentials
      */
@@ -59,6 +61,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get TCP connection timeout, in milliseconds
+     *
      * @return a number
      */
     public int getConnectTimeout() {
@@ -67,6 +70,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set TCP connection timeout, in milliseconds
+     *
      * @param connectTimeout timeout for establishing a connection to Tarantool server
      */
     public void setConnectTimeout(int connectTimeout) {
@@ -75,6 +79,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get request completion timeout, in milliseconds
+     *
      * @return a number
      */
     public int getRequestTimeout() {
@@ -83,6 +88,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set request completion timeout, in milliseconds
+     *
      * @param requestTimeout timeout for receiving the response for a request to Tarantool server
      */
     public void setRequestTimeout(int requestTimeout) {
@@ -91,6 +97,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get socket read timeout, in milliseconds
+     *
      * @return a number
      */
     public int getReadTimeout() {
@@ -99,6 +106,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set socket read timeout, in milliseconds
+     *
      * @param readTimeout timeout for reading data from a socket, in milliseconds
      */
     public void setReadTimeout(int readTimeout) {
@@ -107,6 +115,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get number of connections to be established with the target server. Default value is 1
+     *
      * @return number of server connections
      */
     public int getConnections() {
@@ -115,6 +124,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set number of connections to be established with the target server
+     *
      * @param connections number of server connections
      */
     public void setConnections(int connections) {
@@ -123,6 +133,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get mapper between Java objects and MessagePack entities
+     *
      * @return a {@link MessagePackMapper} instance
      */
     public MessagePackMapper getMessagePackMapper() {
@@ -131,6 +142,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set mapper between Java objects and MessagePack entities
+     *
      * @param messagePackMapper {@link MessagePackMapper} instance
      */
     public void setMessagePackMapper(MessagePackMapper messagePackMapper) {
@@ -139,6 +151,7 @@ public class TarantoolClientConfig {
 
     /**
      * Get factory implementation for collection selection strategy instances
+     *
      * @return connection selection strategy factory instance
      */
     public ConnectionSelectionStrategyFactory getConnectionSelectionStrategyFactory() {
@@ -148,11 +161,21 @@ public class TarantoolClientConfig {
     /**
      * Set factory implementation for collection selection strategy instances, for example, an instance of
      * {@link io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory}
+     *
      * @param connectionSelectionStrategyFactory connection selection strategy factory instance
      */
     public void setConnectionSelectionStrategyFactory(
             ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory) {
         this.connectionSelectionStrategyFactory = connectionSelectionStrategyFactory;
+    }
+
+    /**
+     * How many items will be fetched from server per cursor request.
+     *
+     * @return default size of a batch for a cursor.
+     */
+    public int getCursorBatchSize() {
+        return DEFAULT_CURSOR_BATCH_SIZE;
     }
 
     /**
@@ -179,7 +202,15 @@ public class TarantoolClientConfig {
         }
 
         /**
+         * Basic constructor.
+         */
+        public Builder(TarantoolClientConfig config) {
+            this.config = config;
+        }
+
+        /**
          * Specify user credentials
+         *
          * @param credentials the Tarantool user credentials
          * @return builder
          * @see TarantoolClientConfig#setCredentials(TarantoolCredentials)
@@ -192,6 +223,7 @@ public class TarantoolClientConfig {
 
         /**
          * Specify response reading timeout. Default is 1000 milliseconds
+         *
          * @param readTimeout the timeout for reading the responses from Tarantool server, in milliseconds
          * @return builder
          * @see TarantoolClientConfig#setReadTimeout(int)
@@ -204,6 +236,7 @@ public class TarantoolClientConfig {
 
         /**
          * Specify connection timeout. Default is 1000 milliseconds
+         *
          * @param connectTimeout the timeout for connecting to the Tarantool server, in milliseconds
          * @return builder
          * @see TarantoolClientConfig#setConnectTimeout(int)
@@ -216,6 +249,7 @@ public class TarantoolClientConfig {
 
         /**
          * Specify request timeout. Default is 2000 milliseconds
+         *
          * @param requestTimeout the timeout for receiving a response from the Tarantool server, in milliseconds
          * @return builder
          * @see TarantoolClientConfig#setRequestTimeout(int)
@@ -228,6 +262,7 @@ public class TarantoolClientConfig {
 
         /**
          * Specify mapper between Java objects and MessagePack entities
+         *
          * @param mapper configured {@link MessagePackMapper} instance
          * @return builder
          * @see TarantoolClientConfig#setMessagePackMapper(MessagePackMapper)
@@ -241,6 +276,7 @@ public class TarantoolClientConfig {
         /**
          * Specify the number of connections used for sending requests to the server. The default value is 1.
          * More connections may help if a request can stuck on the server side or if the request payloads are big.
+         *
          * @param connections the number of connections
          * @return builder
          */
@@ -253,6 +289,7 @@ public class TarantoolClientConfig {
         /**
          * Set the implementation of a factory which instantiates a strategy instance providing the algorithm of
          * selecting the next connection from a connection pool for performing the next request
+         *
          * @param factory connection selection strategy factory instance
          * @return builder
          */
@@ -264,6 +301,7 @@ public class TarantoolClientConfig {
 
         /**
          * Build a {@link TarantoolClientConfig} instance
+         *
          * @return configured instance
          */
         public TarantoolClientConfig build() {
@@ -276,20 +314,12 @@ public class TarantoolClientConfig {
 
         /**
          * Prepare the builder for new configuration process
+         *
          * @return the empty builder
          */
         public Builder clear() {
             config = new TarantoolClientConfig();
             return this;
         }
-
-        /**
-         * How many items will be fetched from server per cursor request.
-         * @return default size of a batch for a cursor.
-         */
-    }
-
-    public int getCursorBatchSize() {
-        return DEFAULT_CURSOR_BATCH_SIZE;
     }
 }
