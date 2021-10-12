@@ -4,7 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.slf4j.Logger;

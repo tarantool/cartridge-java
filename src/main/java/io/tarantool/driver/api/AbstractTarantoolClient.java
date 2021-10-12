@@ -1,14 +1,11 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.tarantool.driver.api.CallResult;
-import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.core.TarantoolConnectionFactory;

@@ -1,9 +1,9 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies;
+import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.utils.Assert;
@@ -160,7 +160,7 @@ public class TarantoolClientConfig {
 
     /**
      * Set factory implementation for collection selection strategy instances, for example, an instance of
-     * {@link io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory}
+     * {@link TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory}
      *
      * @param connectionSelectionStrategyFactory connection selection strategy factory instance
      */

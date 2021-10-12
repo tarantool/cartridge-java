@@ -1,4 +1,4 @@
-package io.tarantool.driver.retry;
+package io.tarantool.driver.api.retry;
 
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;

@@ -1,4 +1,4 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api.connection;
 
 import io.tarantool.driver.core.TarantoolConnection;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;

@@ -1,6 +1,6 @@
 package io.tarantool.driver.exceptions;
 
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.TarantoolServerAddress;
 
 /**
  * Represent network exception

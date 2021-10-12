@@ -1,6 +1,6 @@
 package io.tarantool.driver.proxy;
 
-import io.tarantool.driver.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.ClusterTarantoolTupleClient;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;

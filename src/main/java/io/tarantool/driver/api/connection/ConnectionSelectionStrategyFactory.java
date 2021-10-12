@@ -1,5 +1,6 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api.connection;
 
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.core.TarantoolConnection;
 
 import java.util.Collection;

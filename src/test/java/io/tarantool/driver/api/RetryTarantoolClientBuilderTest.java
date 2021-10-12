@@ -1,20 +1,17 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolServerAddress;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
-import io.tarantool.driver.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
-import static io.tarantool.driver.api.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
+import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
+import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

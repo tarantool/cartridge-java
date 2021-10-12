@@ -1,9 +1,9 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.ConnectionSelectionStrategy;
-import io.tarantool.driver.ConnectionSelectionStrategyFactory;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;

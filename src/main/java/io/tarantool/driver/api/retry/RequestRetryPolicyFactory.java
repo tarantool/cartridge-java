@@ -1,4 +1,4 @@
-package io.tarantool.driver.retry;
+package io.tarantool.driver.api.retry;
 
 /**
  * Manages instantiation of request retry policies. A policy contains an algorithm of deciding whether an exception

@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;

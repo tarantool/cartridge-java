@@ -1,4 +1,4 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
 import io.tarantool.driver.exceptions.TarantoolSocketException;
 

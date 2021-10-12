@@ -1,6 +1,5 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.RetryingTarantoolSpaceOperations;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
@@ -15,8 +14,8 @@ import io.tarantool.driver.mappers.ValueConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.protocol.Packable;
-import io.tarantool.driver.retry.RequestRetryPolicy;
-import io.tarantool.driver.retry.RequestRetryPolicyFactory;
+import io.tarantool.driver.api.retry.RequestRetryPolicy;
+import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import org.msgpack.value.Value;
 
 import java.util.Collection;

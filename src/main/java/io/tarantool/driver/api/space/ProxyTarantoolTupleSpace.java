@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolResult;
@@ -9,13 +9,10 @@ import io.tarantool.driver.api.cursor.StartAfterCursor;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.ObjectConverter;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
-import org.msgpack.value.ArrayValue;
 
 /**
  * {@link ProxyTarantoolSpace} implementation for working with default tuples

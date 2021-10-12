@@ -3,7 +3,7 @@ package io.tarantool.driver.core;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;

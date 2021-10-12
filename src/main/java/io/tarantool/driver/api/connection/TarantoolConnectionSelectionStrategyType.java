@@ -1,8 +1,7 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.api.connection;
 
-import io.tarantool.driver.ConnectionSelectionStrategyFactory;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
+import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
+import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 
 /**
  * Enumeration of the default types of connection selection strategies.

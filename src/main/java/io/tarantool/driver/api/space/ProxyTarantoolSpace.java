@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space;
 
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.conditions.Conditions;

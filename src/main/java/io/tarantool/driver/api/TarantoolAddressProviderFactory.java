@@ -1,4 +1,4 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;

@@ -1,6 +1,6 @@
 package io.tarantool.driver.exceptions;
 
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 
 /**
  * The exception that was thrown from {@link TarantoolRequestRetryPolicies}

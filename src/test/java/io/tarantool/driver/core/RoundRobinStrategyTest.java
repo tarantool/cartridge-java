@@ -1,8 +1,8 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.ConnectionSelectionStrategy;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.core.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies.RoundRobinStrategyFactory;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import org.junit.jupiter.api.Test;
 

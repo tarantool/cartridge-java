@@ -2,11 +2,11 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.api.ClusterTarantoolTupleClient;
 import io.tarantool.driver.api.ProxyTarantoolTupleClient;
-import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClusterAddressProvider;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.RetryingTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.TarantoolConnection;
 import org.junit.jupiter.api.BeforeAll;

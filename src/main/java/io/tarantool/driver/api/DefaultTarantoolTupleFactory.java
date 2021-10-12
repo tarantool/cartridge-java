@@ -1,6 +1,5 @@
-package io.tarantool.driver;
+package io.tarantool.driver.api;
 
-import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.MessagePackMapper;

@@ -1,7 +1,7 @@
 package io.tarantool.driver.api.tuple.operations;
 
 
-import io.tarantool.driver.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
