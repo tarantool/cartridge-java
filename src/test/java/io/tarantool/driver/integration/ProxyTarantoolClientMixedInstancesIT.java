@@ -8,7 +8,7 @@ import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;

@@ -2,6 +2,9 @@ package io.tarantool.driver.core;
 
 import io.netty.channel.Channel;
 import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.api.connection.TarantoolConnection;
+import io.tarantool.driver.api.connection.TarantoolConnectionCloseListener;
+import io.tarantool.driver.api.connection.TarantoolConnectionFailureListener;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;

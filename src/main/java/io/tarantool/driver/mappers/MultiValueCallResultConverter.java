@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MultiValueCallResult;
-import io.tarantool.driver.api.MultiValueCallResultImpl;
+import io.tarantool.driver.core.MultiValueCallResultImpl;
 import org.msgpack.value.ArrayValue;
 
 import java.util.List;

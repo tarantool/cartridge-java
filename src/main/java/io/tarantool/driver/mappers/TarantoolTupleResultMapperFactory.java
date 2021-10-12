@@ -1,6 +1,6 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.api.TarantoolTupleResult;
+import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 

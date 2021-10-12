@@ -3,6 +3,8 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.api.connection.TarantoolConnectionFactory;
+import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 
 import java.util.Collection;
 

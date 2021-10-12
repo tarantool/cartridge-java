@@ -2,7 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolTupleSingleResult;
+import io.tarantool.driver.api.tuple.TarantoolTupleSingleResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 

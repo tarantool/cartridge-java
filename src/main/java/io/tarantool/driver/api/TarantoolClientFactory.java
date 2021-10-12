@@ -1,6 +1,8 @@
 package io.tarantool.driver.api;
 
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.core.TarantoolClientBuilderImpl;
+import io.tarantool.driver.core.TarantoolClientConfiguratorImpl;
 
 /**
  * Tarantool client factory interface.

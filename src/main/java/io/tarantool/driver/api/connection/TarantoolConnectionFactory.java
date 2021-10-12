@@ -1,4 +1,4 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.api.connection;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -6,6 +6,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
+import io.tarantool.driver.core.RequestFutureManager;
+import io.tarantool.driver.core.TarantoolChannelInitializer;
+import io.tarantool.driver.core.TarantoolConnectionImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

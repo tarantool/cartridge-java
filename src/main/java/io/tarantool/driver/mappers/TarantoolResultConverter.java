@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolResultImpl;
+import io.tarantool.driver.core.TarantoolResultImpl;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 

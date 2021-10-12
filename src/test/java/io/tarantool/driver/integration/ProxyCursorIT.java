@@ -11,7 +11,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;

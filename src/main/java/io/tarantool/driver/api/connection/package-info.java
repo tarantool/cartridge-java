@@ -1,5 +1,5 @@
 /**
- * Classes for strategies for connecting to Tarantool instances
+ * Classes for working with connections to Tarantool instances.
  *
  * @author Alexey Kuzin
  * @author Oleg Kuznetsov

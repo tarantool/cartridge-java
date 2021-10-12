@@ -3,7 +3,7 @@ package io.tarantool.driver.api;
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.space.RetryingTarantoolSpaceOperations;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.core.TarantoolConnectionListeners;
+import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;

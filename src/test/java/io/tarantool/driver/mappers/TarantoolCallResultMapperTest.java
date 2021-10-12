@@ -4,7 +4,7 @@ import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import org.junit.jupiter.api.BeforeAll;

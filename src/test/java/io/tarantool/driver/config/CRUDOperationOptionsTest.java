@@ -1,7 +1,7 @@
 package io.tarantool.driver.config;
 
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.proxy.CRUDOperationOptions;

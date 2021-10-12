@@ -1,6 +1,7 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.api.tuple;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.MultiValueCallResult;
+import io.tarantool.driver.api.TarantoolResult;
 
 /**
  * Shortcut for {@link MultiValueCallResult} with default tuple result

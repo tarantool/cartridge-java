@@ -8,7 +8,7 @@ import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.core.TarantoolConnection;
+import io.tarantool.driver.api.connection.TarantoolConnection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;

@@ -1,4 +1,4 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.api.connection;
 
 import java.util.Arrays;
 import java.util.LinkedList;

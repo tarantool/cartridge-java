@@ -1,7 +1,8 @@
 package io.tarantool.driver.api;
 
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.MessagePackMapper;
 
 import java.util.Arrays;

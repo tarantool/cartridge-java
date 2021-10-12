@@ -1,4 +1,4 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.api.connection;
 
 /**
  * Connection failure listener. Used in {@link TarantoolConnection}

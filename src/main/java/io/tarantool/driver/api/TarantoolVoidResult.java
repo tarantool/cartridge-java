@@ -1,5 +1,7 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.core.TarantoolVoidResultImpl;
+
 /**
  * Shortcut for {@link SingleValueCallResult} with void result
  *

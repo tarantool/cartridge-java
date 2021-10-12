@@ -1,4 +1,6 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.core;
+
+import io.tarantool.driver.api.TarantoolVoidResult;
 
 /**
  * Implementation of Tarantool void result

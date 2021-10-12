@@ -1,6 +1,6 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.api.tuple;
 
-import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.TarantoolResult;
 
 /**
  * Shortcut for {@link TarantoolResult} with default tuples

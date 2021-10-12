@@ -1,5 +1,6 @@
-package io.tarantool.driver.api.tuple;
+package io.tarantool.driver.core.tuple;
 
+import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;

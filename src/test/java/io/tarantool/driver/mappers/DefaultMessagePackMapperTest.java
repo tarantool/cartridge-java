@@ -2,7 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.api.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;

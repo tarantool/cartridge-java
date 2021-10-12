@@ -1,5 +1,7 @@
 package io.tarantool.driver.core;
 
+import io.tarantool.driver.api.connection.TarantoolConnection;
+
 import java.util.concurrent.CompletableFuture;
 
 /**

@@ -1,6 +1,4 @@
-package io.tarantool.driver.api;
-
-import io.tarantool.driver.api.tuple.TarantoolTuple;
+package io.tarantool.driver.api.tuple;
 
 import java.util.Collection;
 
@@ -12,12 +10,14 @@ import java.util.Collection;
 public interface TarantoolTupleFactory {
     /**
      * Create an empty tuple
+     *
      * @return new tuple instance
      */
     TarantoolTuple create();
 
     /**
      * Create a tuple from an array of field values
+     *
      * @param fields array of field values, may contain null values
      * @return new tuple instance
      */
@@ -25,6 +25,7 @@ public interface TarantoolTupleFactory {
 
     /**
      * Create a tuple from a collection of field values
+     *
      * @param fields collection of field values, may contain null values
      * @return new tuple instance
      */

@@ -1,5 +1,6 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.core;
 
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import io.tarantool.driver.mappers.ValueConverter;
