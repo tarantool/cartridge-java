@@ -1,6 +1,7 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.core.connection;
 
 import io.tarantool.driver.api.connection.TarantoolConnection;
+import io.tarantool.driver.utils.CyclingIterator;
 
 import java.util.Collection;
 

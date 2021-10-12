@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.connection;
 
 import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.core.CyclingIterator;
-import io.tarantool.driver.core.TarantoolConnectionIterator;
+import io.tarantool.driver.utils.CyclingIterator;
+import io.tarantool.driver.core.connection.TarantoolConnectionIterator;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.utils.Assert;
 

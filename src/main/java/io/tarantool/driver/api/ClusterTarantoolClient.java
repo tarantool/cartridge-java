@@ -1,9 +1,9 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.core.TarantoolClusterConnectionManager;
-import io.tarantool.driver.api.connection.TarantoolConnectionFactory;
+import io.tarantool.driver.core.connection.TarantoolClusterConnectionManager;
+import io.tarantool.driver.core.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
-import io.tarantool.driver.core.TarantoolConnectionManager;
+import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.utils.Assert;
 

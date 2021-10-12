@@ -1,9 +1,8 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.core.connection;
 
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.api.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 
 import java.util.Collection;
@@ -19,10 +18,10 @@ public class TarantoolClusterConnectionManager extends AbstractTarantoolConnecti
     /**
      * Basic constructor.
      *
-     * @param config client configuration
+     * @param config            client configuration
      * @param connectionFactory manages instantiation of Tarantool server connections
-     * @param listeners are invoked after connection is established
-     * @param addressProvider provides Tarantool server nodes addresses
+     * @param listeners         are invoked after connection is established
+     * @param addressProvider   provides Tarantool server nodes addresses
      */
     public TarantoolClusterConnectionManager(TarantoolClientConfig config,
                                              TarantoolConnectionFactory connectionFactory,

@@ -4,7 +4,7 @@ import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolVoidResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.TarantoolConnectionManager;
+import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;

@@ -5,7 +5,7 @@ import io.tarantool.driver.api.space.TarantoolTupleSpace;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.core.TarantoolConnectionManager;
+import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;

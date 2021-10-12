@@ -1,4 +1,4 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;

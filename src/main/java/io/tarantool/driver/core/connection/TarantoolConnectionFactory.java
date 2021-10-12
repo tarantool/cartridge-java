@@ -1,14 +1,16 @@
-package io.tarantool.driver.api.connection;
+package io.tarantool.driver.core.connection;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersionHolder;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.connection.TarantoolConnection;
+import io.tarantool.driver.api.connection.TarantoolConnectionListener;
+import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
-import io.tarantool.driver.core.TarantoolConnectionImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +38,9 @@ public class TarantoolConnectionFactory {
 
     /**
      * Basic constructor.
-     * @param config Tarantool client config
-     * @param bootstrap prepared Netty's bootstrap
+     *
+     * @param config           Tarantool client config
+     * @param bootstrap        prepared Netty's bootstrap
      * @param timeoutScheduler scheduled executor for limiting the connection tasks by timeout
      */
     public TarantoolConnectionFactory(TarantoolClientConfig config,
@@ -50,7 +53,8 @@ public class TarantoolConnectionFactory {
 
     /**
      * Create single connection and return connection future
-     * @param serverAddress Tarantool server address to connect
+     *
+     * @param serverAddress       Tarantool server address to connect
      * @param connectionListeners listeners for the event of establishing the connection
      * @return connection future
      */
@@ -81,18 +85,19 @@ public class TarantoolConnectionFactory {
             result = result.thenCompose(listener::onConnection);
         }
         return result.handle((v, ex) -> {
-                    if (ex != null) {
-                        logger.warn("Connection failed: {}", ex.getMessage());
-                        return null;
-                    }
-                    return v;
-                });
+            if (ex != null) {
+                logger.warn("Connection failed: {}", ex.getMessage());
+                return null;
+            }
+            return v;
+        });
     }
 
     /**
      * Create several connections and return their futures
-     * @param serverAddress Tarantool server address to connect
-     * @param connections number of connections to create
+     *
+     * @param serverAddress       Tarantool server address to connect
+     * @param connections         number of connections to create
      * @param connectionListeners listeners for the event of establishing the connection
      * @return a collection with specified number of connection futures
      */

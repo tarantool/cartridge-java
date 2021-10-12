@@ -1,11 +1,10 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.core.connection;
 
-import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
-import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnection;
-import io.tarantool.driver.api.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -50,11 +49,12 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     /**
      * Constructor
-     * @deprecated
-     * @param config Tarantool client config
-     * @param connectionFactory connection factory
+     *
+     * @param config                   Tarantool client config
+     * @param connectionFactory        connection factory
      * @param selectionStrategyFactory connection selection strategy factory
-     * @param connectionListeners connection listeners
+     * @param connectionListeners      connection listeners
+     * @deprecated
      */
     protected AbstractTarantoolConnectionManager(TarantoolClientConfig config,
                                                  TarantoolConnectionFactory connectionFactory,
@@ -65,8 +65,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     /**
      * Basic constructor
-     * @param config Tarantool client config
-     * @param connectionFactory connection factory
+     *
+     * @param config              Tarantool client config
+     * @param connectionFactory   connection factory
      * @param connectionListeners connection listeners
      */
     public AbstractTarantoolConnectionManager(TarantoolClientConfig config,
@@ -82,6 +83,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     /**
      * Get server addresses to connect to. They must belong to one cluster and contain the information necessary for
      * the internal {@link ConnectionSelectionStrategy} instance.
+     *
      * @return Tarantool server addresses
      */
     protected abstract Collection<TarantoolServerAddress> getAddresses();
@@ -113,28 +115,28 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 initPhaser.register();
             }
             result = establishConnections()
-                .thenAccept(registry -> {
-                    if (currentMode == ConnectionMode.PARTIAL) {
-                        initPhaser.register();
-                    }
-                    // Add all alive connections
-                    connectionRegistry.set(registry);
-                    ConnectionSelectionStrategy strategy =
-                            selectStrategyFactory.create(config, registry.values().stream()
-                                    .flatMap(Collection::stream)
-                                    .collect(Collectors.toList()));
-                    connectionSelectStrategy.set(strategy);
-                })
-                .thenApply(v -> connectionSelectStrategy.get().next())
-                .whenComplete((v, ex) -> {
-                    if (ex != null) {
-                        // Connection attempt failed, signal the next thread coming for connection
-                        // to start the init sequence
-                        connectionMode.set(currentMode);
-                    }
-                    // Connection init sequence completed, release all waiting threads and lower the barrier
-                    initPhaser.arriveAndDeregister();
-                });
+                    .thenAccept(registry -> {
+                        if (currentMode == ConnectionMode.PARTIAL) {
+                            initPhaser.register();
+                        }
+                        // Add all alive connections
+                        connectionRegistry.set(registry);
+                        ConnectionSelectionStrategy strategy =
+                                selectStrategyFactory.create(config, registry.values().stream()
+                                        .flatMap(Collection::stream)
+                                        .collect(Collectors.toList()));
+                        connectionSelectStrategy.set(strategy);
+                    })
+                    .thenApply(v -> connectionSelectStrategy.get().next())
+                    .whenComplete((v, ex) -> {
+                        if (ex != null) {
+                            // Connection attempt failed, signal the next thread coming for connection
+                            // to start the init sequence
+                            connectionMode.set(currentMode);
+                        }
+                        // Connection init sequence completed, release all waiting threads and lower the barrier
+                        initPhaser.arriveAndDeregister();
+                    });
         } else {
             // Wait until a thread finishes the init sequence and lowers the barrier. Once the barrier is lowered, the
             // phaser advances to the next phase.
@@ -180,7 +182,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
             List<TarantoolConnection> aliveConnections = getAliveConnections(serverAddress);
             if (aliveConnections.size() < config.getConnections()) {
                 CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>> connectionFuture =
-                        establishConnectionsToEndpoint(serverAddress, config.getConnections() - aliveConnections.size())
+                        establishConnectionsToEndpoint(serverAddress,
+                                config.getConnections() - aliveConnections.size())
                                 .thenApply(connections -> {
                                     connections.addAll(aliveConnections);
                                     return new AbstractMap.SimpleEntry<>(serverAddress, connections);
@@ -216,31 +219,33 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private CompletableFuture<List<TarantoolConnection>> establishConnectionsToEndpoint(
             TarantoolServerAddress serverAddress, int connectionCount) {
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
-            .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners).stream()
-            .peek(cf -> cf.thenApply(conn -> {
-                    if (conn.isConnected()) {
-                        logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
-                    }
-                    conn.addConnectionFailureListener((c, ex) -> {
-                        // Connection lost, signal the next thread coming for connection to start the init sequence
-                        connectionMode.set(ConnectionMode.PARTIAL);
-                        try {
-                            c.close();
-                        } catch (Exception e) {
-                            logger.info("Failed to close the connection: {}", e.getMessage());
-                        }
-                    });
-                    conn.addConnectionCloseListener(c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
-                    return conn;
-                })
-            )
-            .collect(Collectors.toList());
+                .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners).stream()
+                .peek(cf -> cf.thenApply(conn -> {
+                            if (conn.isConnected()) {
+                                logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
+                            }
+                            conn.addConnectionFailureListener((c, ex) -> {
+                                // Connection lost, signal the next thread coming
+                                // for connection to start the init sequence
+                                connectionMode.set(ConnectionMode.PARTIAL);
+                                try {
+                                    c.close();
+                                } catch (Exception e) {
+                                    logger.info("Failed to close the connection: {}", e.getMessage());
+                                }
+                            });
+                            conn.addConnectionCloseListener(
+                                    c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
+                            return conn;
+                        })
+                )
+                .collect(Collectors.toList());
         return CompletableFuture
                 .allOf(connections.toArray(new CompletableFuture[0]))
                 .thenApply(v -> connections.parallelStream()
-                    .map(CompletableFuture::join)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList()));
+                        .map(CompletableFuture::join)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
     }
 
     @Override
@@ -249,13 +254,13 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
             initPhaser.awaitAdvance(initPhaser.getPhase());
         }
         connectionRegistry.get().values().stream()
-            .flatMap(Collection::stream)
-            .forEach(conn -> {
-                try {
-                    conn.close();
-                } catch (Exception e) {
-                    logger.warn("Failed to close connection: {}", e.getMessage());
-                }
-            });
+                .flatMap(Collection::stream)
+                .forEach(conn -> {
+                    try {
+                        conn.close();
+                    } catch (Exception e) {
+                        logger.warn("Failed to close connection: {}", e.getMessage());
+                    }
+                });
     }
 }

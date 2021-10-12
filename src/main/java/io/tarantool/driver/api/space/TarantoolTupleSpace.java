@@ -8,7 +8,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.OffsetCursor;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.TarantoolConnectionManager;
+import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.metadata.TarantoolSpaceMetadata;

@@ -1,4 +1,4 @@
-package io.tarantool.driver.core;
+package io.tarantool.driver.core.connection;
 
 /**
  * Represents connection sequence states
