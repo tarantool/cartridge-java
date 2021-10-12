@@ -1,6 +1,12 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.core;
 
 import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.api.MultiValueCallResult;
+import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;

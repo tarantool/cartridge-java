@@ -1,5 +1,9 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.core;
 
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.TarantoolTupleSpace;
 import io.tarantool.driver.api.tuple.TarantoolTuple;

@@ -1,17 +1,22 @@
-package io.tarantool.driver.api;
+package io.tarantool.driver.core;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.api.CallResult;
+import io.tarantool.driver.api.MultiValueCallResult;
+import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.connection.TarantoolConnection;
-import io.tarantool.driver.core.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.core.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
-import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
 import io.tarantool.driver.mappers.CallResultMapper;
@@ -68,6 +73,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     /**
      * Create a client.
+     *
      * @param config the client configuration
      * @see TarantoolClientConfig
      */
@@ -77,12 +83,13 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     /**
      * Create a client, specifying the connection established event listeners.
-     * @deprecated
-     * @param config the client configuration
+     *
+     * @param config                   the client configuration
      * @param selectionStrategyFactory instantiates strategies which provide the algorithm of selecting connections
      *                                 from the connection pool for performing the next request
-     * @param listeners connection established event listeners
+     * @param listeners                connection established event listeners
      * @see TarantoolClientConfig
+     * @deprecated
      */
     protected AbstractTarantoolClient(TarantoolClientConfig config,
                                       ConnectionSelectionStrategyFactory selectionStrategyFactory,
@@ -92,7 +99,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     /**
      * Create a client, specifying the connection established event listeners.
-     * @param config the client configuration
+     *
+     * @param config    the client configuration
      * @param listeners connection established event listeners
      * @see TarantoolClientConfig
      */
@@ -119,9 +127,10 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     /**
      * Provides a connection manager for Tarantool server connections
-     * @param config contains Tarantool client configuration options
+     *
+     * @param config            contains Tarantool client configuration options
      * @param connectionFactory provides helper methods for connection instantiation
-     * @param listeners listeners which will be invoked once all connections are established
+     * @param listeners         listeners which will be invoked once all connections are established
      * @return connection manager
      */
     protected abstract TarantoolConnectionManager connectionManager(TarantoolClientConfig config,
@@ -175,10 +184,10 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     /**
      * Creates a space API implementation instance for the specified space
      *
-     * @param config Tarantool client configuration
+     * @param config            Tarantool client configuration
      * @param connectionManager configured internal connection manager
-     * @param metadata metadata operations
-     * @param spaceMetadata current space metadata
+     * @param metadata          metadata operations
+     * @param spaceMetadata     current space metadata
      * @return space API implementation instance
      */
     protected abstract TarantoolSpaceOperations<T, R> spaceOperations(TarantoolClientConfig config,
@@ -457,7 +466,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             throws TarantoolClientException {
         try {
             TarantoolCallRequest.Builder builder = new TarantoolCallRequest.Builder()
-                .withFunctionName(functionName);
+                    .withFunctionName(functionName);
 
             if (arguments.size() > 0) {
                 builder.withArguments(arguments);

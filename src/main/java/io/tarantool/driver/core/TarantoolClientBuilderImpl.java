@@ -1,6 +1,5 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.api.ClusterTarantoolTupleClient;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientBuilder;
 import io.tarantool.driver.api.TarantoolClientConfig;
