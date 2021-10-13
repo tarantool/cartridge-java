@@ -4,7 +4,7 @@ import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTupleMultiResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 
 /**
  * Factory for {@link CallResultMapper} instances used for handling results with {@link TarantoolTuple}s as

@@ -2,7 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 
 /**
  * Factory for {@link TarantoolResultMapper} instances used for handling results with {@link TarantoolTuple}s

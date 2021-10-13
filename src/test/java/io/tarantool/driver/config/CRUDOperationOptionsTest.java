@@ -4,7 +4,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.proxy.CRUDOperationOptions;
+import io.tarantool.driver.core.proxy.CRUDOperationOptions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

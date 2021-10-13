@@ -2,7 +2,7 @@ package io.tarantool.driver.protocol.requests;
 
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;

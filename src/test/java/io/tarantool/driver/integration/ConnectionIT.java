@@ -12,7 +12,7 @@ import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

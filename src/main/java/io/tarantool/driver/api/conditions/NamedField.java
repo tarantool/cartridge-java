@@ -1,9 +1,9 @@
 package io.tarantool.driver.api.conditions;
 
 import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
-import io.tarantool.driver.metadata.TarantoolFieldMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Objects;

@@ -7,7 +7,7 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePackException;
