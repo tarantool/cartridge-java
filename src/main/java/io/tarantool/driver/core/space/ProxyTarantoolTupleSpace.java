@@ -11,16 +11,16 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.mappers.CallResultMapper;
 
 /**
- * {@link ProxyTarantoolSpaceOperations} implementation for working with default tuples
+ * {@link ProxyTarantoolSpace} implementation for working with default tuples
  *
  * @author Alexey Kuzin
  */
-public class ProxyTarantoolTupleSpaceOperations
-        extends ProxyTarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+public class ProxyTarantoolTupleSpace
+        extends ProxyTarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 
     private final TarantoolClientConfig config;
     private final TarantoolCallOperations client;
@@ -34,11 +34,11 @@ public class ProxyTarantoolTupleSpaceOperations
      * @param spaceMetadata      current space metadata
      * @param metadataOperations metadata operations
      */
-    public ProxyTarantoolTupleSpaceOperations(TarantoolClientConfig config,
-                                              TarantoolCallOperations client,
-                                              ProxyOperationsMappingConfig mappingConfig,
-                                              TarantoolSpaceMetadata spaceMetadata,
-                                              TarantoolMetadataOperations metadataOperations) {
+    public ProxyTarantoolTupleSpace(TarantoolClientConfig config,
+                                    TarantoolCallOperations client,
+                                    ProxyOperationsMappingConfig mappingConfig,
+                                    TarantoolSpaceMetadata spaceMetadata,
+                                    TarantoolMetadataOperations metadataOperations) {
         super(config, client, mappingConfig, metadataOperations, spaceMetadata);
         this.config = config;
         this.client = client;

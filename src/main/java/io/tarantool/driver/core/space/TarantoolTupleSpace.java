@@ -11,7 +11,7 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 /**
  * {@link TarantoolSpace} implementation for working with default tuples

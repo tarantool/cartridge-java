@@ -6,7 +6,7 @@ import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.core.space.RetryingTarantoolSpaceOperations;
+import io.tarantool.driver.core.space.RetryingTarantoolSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -107,7 +107,7 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
      * @param executor                 executor service for retry callbacks
      * @return space API implementation instance
      */
-    protected abstract RetryingTarantoolSpaceOperations<T, R> spaceOperations(
+    protected abstract RetryingTarantoolSpace<T, R> spaceOperations(
             TarantoolSpaceOperations<T, R> decoratedSpaceOperations,
             RequestRetryPolicyFactory retryPolicyFactory,
             Executor executor);

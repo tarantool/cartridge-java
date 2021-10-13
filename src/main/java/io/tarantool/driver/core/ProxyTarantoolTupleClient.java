@@ -4,11 +4,11 @@ import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.core.space.ProxyTarantoolTupleSpaceOperations;
+import io.tarantool.driver.core.space.ProxyTarantoolTupleSpace;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 
 /**
@@ -45,6 +45,6 @@ public class ProxyTarantoolTupleClient extends ProxyTarantoolClient<TarantoolTup
             ProxyOperationsMappingConfig mappingConfig,
             TarantoolMetadataOperations metadata,
             TarantoolSpaceMetadata spaceMetadata) {
-        return new ProxyTarantoolTupleSpaceOperations(config, client, mappingConfig, spaceMetadata, metadata);
+        return new ProxyTarantoolTupleSpace(config, client, mappingConfig, spaceMetadata, metadata);
     }
 }

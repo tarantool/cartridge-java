@@ -1,49 +1,39 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
+
 /**
  * Represents Tarantool index part metadata
  *
  * @author Sergey Volgin
  */
-public class TarantoolIndexPartMetadata {
+class TarantoolIndexPartMetadataImpl implements TarantoolIndexPartMetadata {
 
     private final int fieldIndex;
     private final String fieldType;
     private final String path;
 
-    public TarantoolIndexPartMetadata(int fieldIndex, String fieldType) {
+    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType) {
         this(fieldIndex, fieldType, null);
     }
 
-    public TarantoolIndexPartMetadata(int fieldIndex, String fieldType, String path) {
+    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType, String path) {
         this.fieldIndex = fieldIndex;
         this.fieldType = fieldType;
         this.path = path;
     }
 
-    /**
-     * Get field index in space format
-     *
-     * @return field index starts with 0
-     */
+    @Override
     public int getFieldIndex() {
         return fieldIndex;
     }
 
-    /**
-     * Get field type
-     *
-     * @return field type
-     */
+    @Override
     public String getFieldType() {
         return fieldType;
     }
 
-    /**
-     * Get path inside field (for "JSON-path" indexes)
-     *
-     * @return path inside field (may be null)
-     */
+    @Override
     public String getPath() {
         return path;
     }

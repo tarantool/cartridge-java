@@ -12,7 +12,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,7 +1,9 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.utils.Assert;
 

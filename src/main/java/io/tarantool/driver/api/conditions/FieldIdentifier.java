@@ -1,7 +1,7 @@
 package io.tarantool.driver.api.conditions;
 
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 import java.io.Serializable;
 

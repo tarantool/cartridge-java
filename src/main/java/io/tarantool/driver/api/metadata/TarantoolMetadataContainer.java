@@ -1,8 +1,5 @@
 package io.tarantool.driver.api.metadata;
 
-import io.tarantool.driver.core.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
-
 import java.util.Map;
 
 /**

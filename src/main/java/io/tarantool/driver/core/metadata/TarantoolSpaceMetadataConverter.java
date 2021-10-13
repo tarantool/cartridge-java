@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
@@ -13,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Maps MessagePack {@link ArrayValue} into {@link TarantoolSpaceMetadata}
+ * Maps MessagePack {@link ArrayValue} into {@link TarantoolSpaceMetadataImpl}
  *
  * @author Alexey Kuzin
  * @author Artyom Dubinin
@@ -35,7 +37,7 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
     @Override
     public TarantoolSpaceMetadata fromValue(ArrayValue value) {
         Iterator<Value> it = value.iterator();
-        TarantoolSpaceMetadata metadata = new TarantoolSpaceMetadata();
+        TarantoolSpaceMetadataImpl metadata = new TarantoolSpaceMetadataImpl();
         metadata.setSpaceId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setOwnerId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setSpaceName(mapper.fromValue(it.next().asStringValue()));
@@ -53,7 +55,7 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
             Optional<Value> isNullable = Optional.ofNullable(fieldMap.get(FORMAT_FIELD_IS_NULLABLE));
             spaceFormatMetadata.put(
                     fieldMap.get(FORMAT_FIELD_NAME).toString(),
-                    new TarantoolFieldMetadata(
+                    new TarantoolFieldMetadataImpl(
                             fieldMap.get(FORMAT_FIELD_NAME).asStringValue().asString(),
                             fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().asString(),
                             fieldPosition,

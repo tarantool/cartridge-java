@@ -6,7 +6,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolIndexQueryFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;

@@ -1,5 +1,8 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexOptions;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 
@@ -15,7 +18,7 @@ import java.util.stream.Collectors;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolIndexMetadata {
+class TarantoolIndexMetadataImpl implements TarantoolIndexMetadata {
 
     private int spaceId;
     private int indexId;
@@ -26,90 +29,69 @@ public class TarantoolIndexMetadata {
     private Map<Integer, TarantoolIndexPartMetadata> indexPartsByPosition;
     private Map<Integer, Integer> fieldPositionToKeyPosition;
 
-    /**
-     * Get ID of a space that this index is defined on
-     * @return a number
-     */
+    @Override
     public int getSpaceId() {
         return spaceId;
     }
 
     /**
      * Set space ID
+     *
      * @param spaceId a number
      */
     void setSpaceId(int spaceId) {
         this.spaceId = spaceId;
     }
 
-    /**
-     * Get index ID in the corresponding space on the Tarantool server
-     * @return a natural number
-     */
+    @Override
     public int getIndexId() {
         return indexId;
     }
 
     /**
      * Set index ID
+     *
      * @param indexId a positive number
      */
     void setIndexId(int indexId) {
         this.indexId = indexId;
     }
 
-    /**
-     * Get index name
-     * @return a non-empty {@code String}
-     */
+    @Override
     public String getIndexName() {
         return indexName;
     }
 
     /**
      * Set index name
+     *
      * @param indexName a non-empty {@code String}
      */
     void setIndexName(String indexName) {
         this.indexName = indexName;
     }
 
-    /**
-     * Get index type
-     * @return the index type
-     */
+    @Override
     public TarantoolIndexType getIndexType() {
         return indexType;
     }
 
-    /**
-     * Set index type
-     * @param indexType a non-empty {@link TarantoolIndexType}
-     */
+    @Override
     public void setIndexType(TarantoolIndexType indexType) {
         this.indexType = indexType;
     }
 
-    /**
-     * Get index options
-     * @return index options
-     */
+    @Override
     public TarantoolIndexOptions getIndexOptions() {
         return indexOptions;
     }
 
-    /**
-     * Set index options
-     * @param indexOptions a not-empty {@link TarantoolIndexOptions}
-     */
+    @Override
     public void setIndexOptions(TarantoolIndexOptions indexOptions) {
         this.indexOptions = indexOptions;
     }
 
-    /**
-     * Set index parts
-     * @param indexParts a not-empty list of {@link TarantoolIndexPartMetadata}
-     */
+    @Override
     public void setIndexParts(List<TarantoolIndexPartMetadata> indexParts) {
         this.indexParts = indexParts;
         this.indexPartsByPosition = indexParts.stream()
@@ -121,43 +103,27 @@ public class TarantoolIndexMetadata {
         }
     }
 
-    /**
-     * Get index parts
-     * @return a not-empty list of {@link TarantoolIndexPartMetadata}
-     */
+    @Override
     public List<TarantoolIndexPartMetadata> getIndexParts() {
         return indexParts;
     }
 
-    /**
-     * Get index parts by field indexes
-     * @return a not-empty map of index positions to {@link TarantoolIndexPartMetadata}
-     */
+    @Override
     public Map<Integer, TarantoolIndexPartMetadata> getIndexPartsByPosition() {
         return indexPartsByPosition;
     }
 
-    /**
-     * Get map of field positions to index parts positions
-     * @param fieldPosition field position in tuple, starting from 0
-     * @return field position
-     */
+    @Override
     public Optional<Integer> getIndexPartPositionByFieldPosition(int fieldPosition) {
         return Optional.ofNullable(fieldPositionToKeyPosition.get(fieldPosition));
     }
 
-    /**
-     * Returns true if this is a primary index, false otherwise.
-     * @return true if this is a primary index, false otherwise.
-     */
+    @Override
     public boolean isPrimary() {
         return indexId == TarantoolIndexQuery.PRIMARY;
     }
 
-    /**
-     * Returns true if this is a unique index, false otherwise.
-     * @return true if this is a unique index, false otherwise.
-     */
+    @Override
     public boolean isUnique() {
         return isPrimary() || indexOptions.isUnique();
     }

@@ -7,7 +7,7 @@ import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  * @param <R> target tuple collection type
  * @author Alexey Kuzin
  */
-public class RetryingTarantoolSpaceOperations<T extends Packable, R extends Collection<T>>
+public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
         implements TarantoolSpaceOperations<T, R> {
 
     private final TarantoolSpaceOperations<T, R> spaceOperations;
@@ -36,9 +36,9 @@ public class RetryingTarantoolSpaceOperations<T extends Packable, R extends Coll
      * @param retryPolicyFactory    request retrying policy factory
      * @param executor              executor service for retry callbacks
      */
-    public RetryingTarantoolSpaceOperations(TarantoolSpaceOperations<T, R> spaceOperations,
-                                            RequestRetryPolicyFactory retryPolicyFactory,
-                                            Executor executor) {
+    public RetryingTarantoolSpace(TarantoolSpaceOperations<T, R> spaceOperations,
+                                  RequestRetryPolicyFactory retryPolicyFactory,
+                                  Executor executor) {
         this.spaceOperations = spaceOperations;
         this.retryPolicyFactory = retryPolicyFactory;
         this.executor = executor;

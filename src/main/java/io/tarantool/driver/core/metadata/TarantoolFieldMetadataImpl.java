@@ -1,6 +1,6 @@
 package io.tarantool.driver.core.metadata;
 
-import java.io.Serializable;
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
 
 /**
  * Tarantool space field format metadata
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Sergey Volgin
  * @author Artyom Dubinin
  */
-public class TarantoolFieldMetadata implements Serializable {
+class TarantoolFieldMetadataImpl implements TarantoolFieldMetadata {
 
     private static final long serialVersionUID = 20200708L;
 
@@ -20,11 +20,11 @@ public class TarantoolFieldMetadata implements Serializable {
     /**
      * Basic constructor.
      *
-     * @param fieldName field name
-     * @param fieldType field type (from the set of field types supported by the server)
+     * @param fieldName     field name
+     * @param fieldType     field type (from the set of field types supported by the server)
      * @param fieldPosition field position in tuple starting from 0
      */
-    public TarantoolFieldMetadata(String fieldName, String fieldType, int fieldPosition) {
+    TarantoolFieldMetadataImpl(String fieldName, String fieldType, int fieldPosition) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldPosition = fieldPosition;
@@ -34,50 +34,34 @@ public class TarantoolFieldMetadata implements Serializable {
     /**
      * Basic constructor with isNullable parameter.
      *
-     * @param fieldName field name
-     * @param fieldType field type (from the set of field types supported by the server)
+     * @param fieldName     field name
+     * @param fieldType     field type (from the set of field types supported by the server)
      * @param fieldPosition field position in tuple starting from 0
-     * @param isNullable is field nullable
+     * @param isNullable    is field nullable
      */
-    public TarantoolFieldMetadata(String fieldName, String fieldType, int fieldPosition, boolean isNullable) {
+    TarantoolFieldMetadataImpl(String fieldName, String fieldType, int fieldPosition, boolean isNullable) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldPosition = fieldPosition;
         this.isNullable = isNullable;
     }
 
-    /**
-     * Get field name
-     *
-     * @return field name
-     */
+    @Override
     public String getFieldName() {
         return fieldName;
     }
 
-    /**
-     * Get field type
-     *
-     * @return field type
-     */
+    @Override
     public String getFieldType() {
         return fieldType;
     }
 
-    /**
-     * Get field position in space starts with 0
-     *
-     * @return field position in space starts with 0
-     */
+    @Override
     public int getFieldPosition() {
         return fieldPosition;
     }
 
-    /**
-     * Get isNullable parameter
-     *
-     * @return is_nullable parameter
-     */
+    @Override
     public boolean getIsNullable() {
         return isNullable;
     }

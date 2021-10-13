@@ -22,10 +22,10 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.core.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

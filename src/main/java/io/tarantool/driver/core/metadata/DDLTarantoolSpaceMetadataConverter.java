@@ -1,5 +1,9 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexOptions;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataContainer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
@@ -81,7 +85,7 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
             }
             Map<Value, Value> space = spaceValue.asMapValue().map();
 
-            TarantoolSpaceMetadata spaceMetadata = new TarantoolSpaceMetadata();
+            TarantoolSpaceMetadataImpl spaceMetadata = new TarantoolSpaceMetadataImpl();
             spaceMetadata.setOwnerId(ID_UNKNOWN);
             spaceMetadata.setSpaceName(nameValue.asStringValue().asString());
 
@@ -153,7 +157,7 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
                 fieldIsNullable = fieldIsNullableValue.asBooleanValue().getBoolean();
             }
             spaceFormatMetadata.put(fieldName,
-                    new TarantoolFieldMetadata(fieldName, fieldType, fieldPosition++, fieldIsNullable));
+                    new TarantoolFieldMetadataImpl(fieldName, fieldType, fieldPosition++, fieldIsNullable));
         }
 
         return spaceFormatMetadata;
@@ -193,10 +197,10 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
             }
             boolean isUnique = indexUniqueValue.asBooleanValue().getBoolean();
 
-            TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
+            TarantoolIndexOptions indexOptions = new TarantoolIndexOptionsImpl();
             indexOptions.setUnique(isUnique);
 
-            TarantoolIndexMetadata indexMetadata = new TarantoolIndexMetadata();
+            TarantoolIndexMetadataImpl indexMetadata = new TarantoolIndexMetadataImpl();
             indexMetadata.setSpaceId(ID_UNKNOWN);
             indexMetadata.setIndexId(indexId++);
             indexMetadata.setIndexType(TarantoolIndexType.fromString(indexType));
@@ -238,7 +242,7 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
                         }
                         String fieldType = fieldTypeValue.asStringValue().asString();
 
-                        return new TarantoolIndexPartMetadata(fieldNumber - 1, fieldType, fieldPath);
+                        return new TarantoolIndexPartMetadataImpl(fieldNumber - 1, fieldType, fieldPath);
                     })
                     .collect(Collectors.toList());
 

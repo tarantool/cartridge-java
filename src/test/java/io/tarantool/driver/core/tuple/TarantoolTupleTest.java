@@ -6,7 +6,7 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;

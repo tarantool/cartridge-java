@@ -19,7 +19,7 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

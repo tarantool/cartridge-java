@@ -8,7 +8,7 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.core.proxy.DeleteProxyOperation;
 import io.tarantool.driver.core.proxy.InsertProxyOperation;
 import io.tarantool.driver.core.proxy.ProxyOperation;
@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Sergey Volgin
  * @author Alexey Kuzin
  */
-public abstract class ProxyTarantoolSpaceOperations<T extends Packable, R extends Collection<T>>
+public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collection<T>>
         implements TarantoolSpaceOperations<T, R> {
 
     private final String spaceName;
@@ -43,11 +43,11 @@ public abstract class ProxyTarantoolSpaceOperations<T extends Packable, R extend
     private final ProxyOperationsMappingConfig operationsMapping;
     private final TarantoolSpaceMetadata spaceMetadata;
 
-    public ProxyTarantoolSpaceOperations(TarantoolClientConfig config,
-                                         TarantoolCallOperations client,
-                                         ProxyOperationsMappingConfig operationsMapping,
-                                         TarantoolMetadataOperations metadata,
-                                         TarantoolSpaceMetadata spaceMetadata) {
+    public ProxyTarantoolSpace(TarantoolClientConfig config,
+                               TarantoolCallOperations client,
+                               ProxyOperationsMappingConfig operationsMapping,
+                               TarantoolMetadataOperations metadata,
+                               TarantoolSpaceMetadata spaceMetadata) {
         this.config = config;
         this.client = client;
         this.operationsMapping = operationsMapping;

@@ -30,7 +30,7 @@ import io.tarantool.driver.core.metadata.SpacesMetadataProvider;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;

@@ -1,7 +1,10 @@
-package io.tarantool.driver.api.conditions;
+package io.tarantool.driver.core.conditions;
 
+import io.tarantool.driver.api.conditions.Condition;
+import io.tarantool.driver.api.conditions.FieldIdentifier;
+import io.tarantool.driver.api.conditions.Operator;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 import java.util.Arrays;
 import java.util.List;

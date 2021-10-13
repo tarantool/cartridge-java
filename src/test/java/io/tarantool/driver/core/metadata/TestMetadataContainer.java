@@ -1,6 +1,10 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataContainer;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,21 +17,21 @@ import java.util.Map;
  */
 public class TestMetadataContainer implements TarantoolMetadataContainer {
 
-    private final TarantoolSpaceMetadata testSpaceMetadata;
-    private final TarantoolIndexMetadata testPrimaryIndexMetadata;
-    private final TarantoolIndexMetadata testIndexMetadata1;
-    private final TarantoolIndexMetadata testIndexMetadata2;
-    private final TarantoolIndexMetadata testIndexMetadata3;
-    private final TarantoolIndexMetadata testIndexMetadata4;
+    private final TarantoolSpaceMetadataImpl testSpaceMetadata;
+    private final TarantoolIndexMetadataImpl testPrimaryIndexMetadata;
+    private final TarantoolIndexMetadataImpl testIndexMetadata1;
+    private final TarantoolIndexMetadataImpl testIndexMetadata2;
+    private final TarantoolIndexMetadataImpl testIndexMetadata3;
+    private final TarantoolIndexMetadataImpl testIndexMetadata4;
 
     public TestMetadataContainer() {
-        testSpaceMetadata = new TarantoolSpaceMetadata();
+        testSpaceMetadata = new TarantoolSpaceMetadataImpl();
         testSpaceMetadata.setSpaceId(512);
         testSpaceMetadata.setSpaceName("test");
-        TarantoolFieldMetadata firstFieldMetadata = new TarantoolFieldMetadata("first", "string", 0);
-        TarantoolFieldMetadata secondFieldMetadata = new TarantoolFieldMetadata("second", "number", 1);
-        TarantoolFieldMetadata thirdFieldMetadata = new TarantoolFieldMetadata("third", "number", 2);
-        TarantoolFieldMetadata fourthFieldMetadata = new TarantoolFieldMetadata("fourth", "number", 3);
+        TarantoolFieldMetadata firstFieldMetadata = new TarantoolFieldMetadataImpl("first", "string", 0);
+        TarantoolFieldMetadata secondFieldMetadata = new TarantoolFieldMetadataImpl("second", "number", 1);
+        TarantoolFieldMetadata thirdFieldMetadata = new TarantoolFieldMetadataImpl("third", "number", 2);
+        TarantoolFieldMetadata fourthFieldMetadata = new TarantoolFieldMetadataImpl("fourth", "number", 3);
         Map<String, TarantoolFieldMetadata> fieldMetadataMap = new HashMap<>();
         fieldMetadataMap.put("first", firstFieldMetadata);
         fieldMetadataMap.put("second", secondFieldMetadata);
@@ -35,45 +39,47 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
         fieldMetadataMap.put("fourth", fourthFieldMetadata);
         testSpaceMetadata.setSpaceFormatMetadata(fieldMetadataMap);
 
-        testPrimaryIndexMetadata = new TarantoolIndexMetadata();
+        testPrimaryIndexMetadata = new TarantoolIndexMetadataImpl();
         testPrimaryIndexMetadata.setIndexId(0);
         testPrimaryIndexMetadata.setIndexName("primary");
         testPrimaryIndexMetadata.setSpaceId(512);
-        testPrimaryIndexMetadata.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadata(0, "string")));
+        testPrimaryIndexMetadata.setIndexParts(Collections.singletonList(
+                new TarantoolIndexPartMetadataImpl(0, "string"))
+        );
 
-        testIndexMetadata2 = new TarantoolIndexMetadata();
+        testIndexMetadata2 = new TarantoolIndexMetadataImpl();
         testIndexMetadata2.setIndexId(1);
         testIndexMetadata2.setIndexName("asecondary1");
         testIndexMetadata2.setSpaceId(512);
         List<TarantoolIndexPartMetadata> parts = new ArrayList<>();
-        parts.add(new TarantoolIndexPartMetadata(1, "number"));
-        parts.add(new TarantoolIndexPartMetadata(2, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(1, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(2, "number"));
         testIndexMetadata2.setIndexParts(parts);
 
-        testIndexMetadata3 = new TarantoolIndexMetadata();
+        testIndexMetadata3 = new TarantoolIndexMetadataImpl();
         testIndexMetadata3.setIndexId(2);
         testIndexMetadata3.setIndexName("secondary2");
         testIndexMetadata3.setSpaceId(512);
         parts = new ArrayList<>();
-        parts.add(new TarantoolIndexPartMetadata(1, "number"));
-        parts.add(new TarantoolIndexPartMetadata(3, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(1, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(3, "number"));
         testIndexMetadata3.setIndexParts(parts);
 
-        testIndexMetadata4 = new TarantoolIndexMetadata();
+        testIndexMetadata4 = new TarantoolIndexMetadataImpl();
         testIndexMetadata4.setIndexId(3);
         testIndexMetadata4.setIndexName("asecondary3");
         testIndexMetadata4.setSpaceId(512);
         parts = new ArrayList<>();
-        parts.add(new TarantoolIndexPartMetadata(1, "number"));
-        parts.add(new TarantoolIndexPartMetadata(2, "number"));
-        parts.add(new TarantoolIndexPartMetadata(3, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(1, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(2, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(3, "number"));
         testIndexMetadata4.setIndexParts(parts);
 
-        testIndexMetadata1 = new TarantoolIndexMetadata();
+        testIndexMetadata1 = new TarantoolIndexMetadataImpl();
         testIndexMetadata1.setIndexId(4);
         testIndexMetadata1.setIndexName("asecondary");
         testIndexMetadata1.setSpaceId(512);
-        testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadata(1, "number")));
+        testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadataImpl(1, "number")));
     }
 
     @Override

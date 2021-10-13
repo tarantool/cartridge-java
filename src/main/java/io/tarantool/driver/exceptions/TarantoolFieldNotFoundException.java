@@ -1,6 +1,6 @@
 package io.tarantool.driver.exceptions;
 
-import io.tarantool.driver.core.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 /**
  * Represents error when a field is not found in space format metadata

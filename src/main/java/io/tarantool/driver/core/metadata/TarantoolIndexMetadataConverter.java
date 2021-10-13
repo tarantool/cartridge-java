@@ -1,5 +1,8 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexOptions;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.ValueConverter;
@@ -15,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Maps MessagePack {@link ArrayValue} into {@link TarantoolIndexMetadata}
+ * Maps MessagePack {@link ArrayValue} into {@link TarantoolIndexMetadataImpl}
  *
  * @author Alexey Kuzin
  */
@@ -35,13 +38,13 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
     @Override
     public TarantoolIndexMetadata fromValue(ArrayValue value) {
         Iterator<Value> it = value.iterator();
-        TarantoolIndexMetadata metadata = new TarantoolIndexMetadata();
+        TarantoolIndexMetadataImpl metadata = new TarantoolIndexMetadataImpl();
         metadata.setSpaceId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setIndexId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setIndexName(mapper.fromValue(it.next().asStringValue()));
         metadata.setIndexType(TarantoolIndexType.fromString(mapper.fromValue(it.next().asStringValue())));
 
-        TarantoolIndexOptions indexOptions = new TarantoolIndexOptions();
+        TarantoolIndexOptions indexOptions = new TarantoolIndexOptionsImpl();
         Map<String, Object> optionsMap = mapper.fromValue(it.next().asMapValue());
         indexOptions.setUnique((Boolean) optionsMap.get("unique"));
 
@@ -57,13 +60,13 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
         if (indexPartsValue.size() > 0) {
             if (indexPartsValue.get(0).isArrayValue()) {
                 indexParts = indexPartsValue.list().stream()
-                        .map(partValue -> new TarantoolIndexPartMetadata(
+                        .map(partValue -> new TarantoolIndexPartMetadataImpl(
                                 partValue.asArrayValue().get(0).asIntegerValue().asInt(),
                                 partValue.asArrayValue().get(1).asStringValue().asString()
                         )).collect(Collectors.toList());
             } else {
                 indexParts = indexPartsValue.list().stream()
-                        .map(partValue -> new TarantoolIndexPartMetadata(
+                        .map(partValue -> new TarantoolIndexPartMetadataImpl(
                                 partValue.asMapValue().map().get(INDEX_FIELD_KEY).asIntegerValue().asInt(),
                                 partValue.asMapValue().map().get(INDEX_TYPE_KEY).asStringValue().asString()
                         )).collect(Collectors.toList());

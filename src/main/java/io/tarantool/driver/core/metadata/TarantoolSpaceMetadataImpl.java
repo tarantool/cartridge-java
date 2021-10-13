@@ -1,6 +1,8 @@
 package io.tarantool.driver.core.metadata;
 
-import java.io.Serializable;
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,7 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolSpaceMetadata implements Serializable {
+public class TarantoolSpaceMetadataImpl implements TarantoolSpaceMetadata {
 
     private static final long serialVersionUID = 20200708L;
 
@@ -26,13 +28,10 @@ public class TarantoolSpaceMetadata implements Serializable {
     /**
      * Basic constructor.
      */
-    public TarantoolSpaceMetadata() {
+    public TarantoolSpaceMetadataImpl() {
     }
 
-    /**
-     * Get space ID on the Tarantool server
-     * @return a number
-     */
+    @Override
     public int getSpaceId() {
         return spaceId;
     }
@@ -41,10 +40,7 @@ public class TarantoolSpaceMetadata implements Serializable {
         this.spaceId = spaceId;
     }
 
-    /**
-     * Get owner ID
-     * @return a number
-     */
+    @Override
     public int getOwnerId() {
         return ownerId;
     }
@@ -53,10 +49,7 @@ public class TarantoolSpaceMetadata implements Serializable {
         this.ownerId = ownerId;
     }
 
-    /**
-     * Get space name
-     * @return a non-empty {@code String}
-     */
+    @Override
     public String getSpaceName() {
         return spaceName;
     }
@@ -65,6 +58,7 @@ public class TarantoolSpaceMetadata implements Serializable {
         this.spaceName = spaceName;
     }
 
+    @Override
     public Map<String, TarantoolFieldMetadata> getSpaceFormatMetadata() {
         return spaceFormatMetadata;
     }
@@ -74,23 +68,13 @@ public class TarantoolSpaceMetadata implements Serializable {
         this.spaceFormatMetadataAsList = new ArrayList<>(spaceFormatMetadata.values());
     }
 
-    /**
-     * Get field metadata by name
-     *
-     * @param fieldName field name
-     * @return field position by name starting with 0, or -1 if this field not found in format metadata
-     */
+    @Override
     public Optional<TarantoolFieldMetadata> getFieldByName(String fieldName) {
         TarantoolFieldMetadata fieldMetadata = spaceFormatMetadata.get(fieldName);
         return Optional.ofNullable(fieldMetadata);
     }
 
-    /**
-     * Get field metadata by position
-     *
-     * @param fieldPosition field position starting with 0
-     * @return field name or null if this field not found in format metadata
-     */
+    @Override
     public Optional<TarantoolFieldMetadata> getFieldByPosition(int fieldPosition) {
         if (fieldPosition >= spaceFormatMetadataAsList.size() || fieldPosition < 0) {
             return Optional.empty();
@@ -99,22 +83,12 @@ public class TarantoolSpaceMetadata implements Serializable {
         return Optional.of(fieldMetadata);
     }
 
-    /**
-     * Get field position in space by name starts with 0, or -1 if this field not found in format metadata
-     *
-     * @param fieldName field name
-     * @return field position by name starting with 0, or -1 if this field not found in format metadata
-     */
+    @Override
     public int getFieldPositionByName(String fieldName) {
         return getFieldByName(fieldName).map(TarantoolFieldMetadata::getFieldPosition).orElse(-1);
     }
 
-    /**
-     * Get field name by position
-     *
-     * @param fieldPosition field position starting with 0
-     * @return field name or null if this field not found in format metadata
-     */
+    @Override
     public Optional<String> getFieldNameByPosition(int fieldPosition) {
         return getFieldByPosition(fieldPosition).map(TarantoolFieldMetadata::getFieldName);
     }
@@ -138,7 +112,7 @@ public class TarantoolSpaceMetadata implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TarantoolSpaceMetadata that = (TarantoolSpaceMetadata) o;
+        TarantoolSpaceMetadataImpl that = (TarantoolSpaceMetadataImpl) o;
         return spaceId == that.spaceId &&
                 ownerId == that.ownerId &&
                 spaceName.equals(that.spaceName) &&
