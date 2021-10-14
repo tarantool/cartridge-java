@@ -7,6 +7,4 @@ package io.tarantool.driver.api.metadata;
  */
 public interface TarantoolIndexOptions {
     boolean isUnique();
-
-    void setUnique(boolean unique);
 }

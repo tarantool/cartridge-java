@@ -44,7 +44,7 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
         metadata.setIndexName(mapper.fromValue(it.next().asStringValue()));
         metadata.setIndexType(TarantoolIndexType.fromString(mapper.fromValue(it.next().asStringValue())));
 
-        TarantoolIndexOptions indexOptions = new TarantoolIndexOptionsImpl();
+        TarantoolIndexOptionsImpl indexOptions = new TarantoolIndexOptionsImpl();
         Map<String, Object> optionsMap = mapper.fromValue(it.next().asMapValue());
         indexOptions.setUnique((Boolean) optionsMap.get("unique"));
 

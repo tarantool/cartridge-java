@@ -19,7 +19,6 @@ class TarantoolIndexOptionsImpl implements TarantoolIndexOptions {
         return isUnique;
     }
 
-    @Override
     public void setUnique(boolean unique) {
         isUnique = unique;
     }

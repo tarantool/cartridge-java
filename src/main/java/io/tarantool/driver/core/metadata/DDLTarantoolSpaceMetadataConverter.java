@@ -197,7 +197,7 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
             }
             boolean isUnique = indexUniqueValue.asBooleanValue().getBoolean();
 
-            TarantoolIndexOptions indexOptions = new TarantoolIndexOptionsImpl();
+            TarantoolIndexOptionsImpl indexOptions = new TarantoolIndexOptionsImpl();
             indexOptions.setUnique(isUnique);
 
             TarantoolIndexMetadataImpl indexMetadata = new TarantoolIndexMetadataImpl();
