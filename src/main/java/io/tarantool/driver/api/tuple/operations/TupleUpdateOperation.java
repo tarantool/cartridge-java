@@ -62,7 +62,9 @@ abstract class TupleUpdateOperation implements TupleOperation {
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(
-                Arrays.asList(getOperationType().toString(), getFieldIndex(), getValue()));
+                Arrays.asList(getOperationType().toString(),
+                        getFieldIndex() != null ? getFieldIndex() : getFieldName(),
+                        getValue()));
     }
 
     @Override
