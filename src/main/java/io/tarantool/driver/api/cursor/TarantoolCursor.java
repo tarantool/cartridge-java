@@ -4,8 +4,6 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.protocol.Packable;
 
-import java.util.Collection;
-
 /**
  * Basic cursor interface which allows forward-only iteration
  * through query results.

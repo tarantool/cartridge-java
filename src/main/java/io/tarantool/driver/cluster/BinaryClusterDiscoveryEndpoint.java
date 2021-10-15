@@ -1,7 +1,7 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.utils.Assert;
 
 /**

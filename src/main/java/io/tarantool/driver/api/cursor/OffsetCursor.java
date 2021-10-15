@@ -3,7 +3,6 @@ package io.tarantool.driver.api.cursor;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;

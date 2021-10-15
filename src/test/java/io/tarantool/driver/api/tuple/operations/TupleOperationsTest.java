@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.tuple.operations;
 
 
-import io.tarantool.driver.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -134,7 +134,7 @@ public class TupleOperationsTest {
         List<String> object = Arrays.asList("test1", "test2");
 
         final String FIELD_TS = "ts";
-        Long epochSecond = 12345L;
+        long epochSecond = 12345L;
 
         final String FIELD_SPLICE = "test";
 

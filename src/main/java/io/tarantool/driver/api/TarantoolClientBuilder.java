@@ -1,9 +1,7 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.ConnectionSelectionStrategyFactory;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolClusterAddressProvider;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
+import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;

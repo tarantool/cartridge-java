@@ -1,15 +1,15 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.api.ClusterTarantoolTupleClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.api.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
@@ -19,7 +19,7 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

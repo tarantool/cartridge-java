@@ -7,7 +7,7 @@ import io.tarantool.driver.protocol.Packable;
 import java.util.Collection;
 
 /**
- * Generic cursor imlementation that performs client calls
+ * Generic cursor implementation that performs client calls
  * with TarantoolSpaceOperations.
  *
  * @author Vladimir Rogach

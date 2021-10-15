@@ -1,16 +1,22 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
+import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
+import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.core.conditions.FieldValueConditionImpl;
+import io.tarantool.driver.core.conditions.IdIndexImpl;
+import io.tarantool.driver.core.conditions.IndexValueConditionImpl;
+import io.tarantool.driver.core.conditions.NamedFieldImpl;
+import io.tarantool.driver.core.conditions.NamedIndexImpl;
+import io.tarantool.driver.core.conditions.PositionFieldImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.ObjectConverter;
-import io.tarantool.driver.metadata.TarantoolFieldMetadata;
-import io.tarantool.driver.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.metadata.TarantoolIndexPartMetadata;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.utils.Assert;
 import org.msgpack.value.ArrayValue;
@@ -267,7 +273,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexEquals(String indexName, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.EQ, new NamedIndex(indexName), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.EQ, new NamedIndexImpl(indexName), indexPartValues));
     }
 
     /**
@@ -278,7 +284,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public Conditions andIndexEquals(String indexName, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.EQ, new NamedIndex(indexName), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.EQ, new NamedIndexImpl(indexName), indexPartValues));
         return this;
     }
 
@@ -290,7 +296,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexEquals(int indexId, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.EQ, new IdIndex(indexId), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.EQ, new IdIndexImpl(indexId), indexPartValues));
     }
 
     /**
@@ -301,7 +307,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andIndexEquals(int indexId, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.EQ, new IdIndex(indexId), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.EQ, new IdIndexImpl(indexId), indexPartValues));
         return this;
     }
 
@@ -313,7 +319,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexGreaterThan(String indexName, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.GT, new NamedIndex(indexName), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.GT, new NamedIndexImpl(indexName), indexPartValues));
     }
 
     /**
@@ -324,7 +330,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public Conditions andIndexGreaterThan(String indexName, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.GT, new NamedIndex(indexName), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.GT, new NamedIndexImpl(indexName), indexPartValues));
         return this;
     }
 
@@ -336,7 +342,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexGreaterThan(int indexId, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.GT, new IdIndex(indexId), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.GT, new IdIndexImpl(indexId), indexPartValues));
     }
 
     /**
@@ -347,7 +353,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andIndexGreaterThan(int indexId, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.GT, new IdIndex(indexId), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.GT, new IdIndexImpl(indexId), indexPartValues));
         return this;
     }
 
@@ -360,7 +366,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexGreaterOrEquals(String indexName, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.GE, new NamedIndex(indexName), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.GE, new NamedIndexImpl(indexName), indexPartValues));
     }
 
     /**
@@ -371,7 +377,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public Conditions andIndexGreaterOrEquals(String indexName, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.GE, new NamedIndex(indexName), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.GE, new NamedIndexImpl(indexName), indexPartValues));
         return this;
     }
 
@@ -384,7 +390,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexGreaterOrEquals(int indexId, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.GE, new IdIndex(indexId), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.GE, new IdIndexImpl(indexId), indexPartValues));
     }
 
     /**
@@ -395,7 +401,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andIndexGreaterOrEquals(int indexId, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.GE, new IdIndex(indexId), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.GE, new IdIndexImpl(indexId), indexPartValues));
         return this;
     }
 
@@ -407,7 +413,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexLessThan(String indexName, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.LT, new NamedIndex(indexName), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.LT, new NamedIndexImpl(indexName), indexPartValues));
     }
 
     /**
@@ -418,7 +424,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public Conditions andIndexLessThan(String indexName, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.LT, new NamedIndex(indexName), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.LT, new NamedIndexImpl(indexName), indexPartValues));
         return this;
     }
 
@@ -430,7 +436,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexLessThan(int indexId, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.LT, new IdIndex(indexId), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.LT, new IdIndexImpl(indexId), indexPartValues));
     }
 
     /**
@@ -441,7 +447,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andIndexLessThan(int indexId, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.LT, new IdIndex(indexId), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.LT, new IdIndexImpl(indexId), indexPartValues));
         return this;
     }
 
@@ -454,7 +460,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexLessOrEquals(String indexName, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.LE, new NamedIndex(indexName), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.LE, new NamedIndexImpl(indexName), indexPartValues));
     }
 
     /**
@@ -465,7 +471,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public Conditions andIndexLessOrEquals(String indexName, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.LE, new NamedIndex(indexName), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.LE, new NamedIndexImpl(indexName), indexPartValues));
         return this;
     }
 
@@ -478,7 +484,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions indexLessOrEquals(int indexId, List<?> indexPartValues) {
-        return new Conditions(new IndexValueCondition(Operator.LE, new IdIndex(indexId), indexPartValues));
+        return new Conditions(new IndexValueConditionImpl(Operator.LE, new IdIndexImpl(indexId), indexPartValues));
     }
 
     /**
@@ -489,7 +495,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andIndexLessOrEquals(int indexId, List<?> indexPartValues) {
-        conditions.add(new IndexValueCondition(Operator.LE, new IdIndex(indexId), indexPartValues));
+        conditions.add(new IndexValueConditionImpl(Operator.LE, new IdIndexImpl(indexId), indexPartValues));
         return this;
     }
 
@@ -501,7 +507,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions equals(String fieldName, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.EQ, new NamedField(fieldName), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.EQ, new NamedFieldImpl(fieldName), value));
     }
 
     /**
@@ -512,7 +518,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andEquals(String fieldName, Object value) {
-        conditions.add(new FieldValueCondition(Operator.EQ, new NamedField(fieldName), value));
+        conditions.add(new FieldValueConditionImpl(Operator.EQ, new NamedFieldImpl(fieldName), value));
         return this;
     }
 
@@ -524,7 +530,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions equals(int fieldPosition, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.EQ, new PositionField(fieldPosition), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.EQ, new PositionFieldImpl(fieldPosition), value));
     }
 
     /**
@@ -535,7 +541,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andEquals(int fieldPosition, Object value) {
-        conditions.add(new FieldValueCondition(Operator.EQ, new PositionField(fieldPosition), value));
+        conditions.add(new FieldValueConditionImpl(Operator.EQ, new PositionFieldImpl(fieldPosition), value));
         return this;
     }
 
@@ -547,7 +553,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterThan(String fieldName, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.GT, new NamedField(fieldName), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.GT, new NamedFieldImpl(fieldName), value));
     }
 
     /**
@@ -558,7 +564,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterThan(String fieldName, Object value) {
-        conditions.add(new FieldValueCondition(Operator.GT, new NamedField(fieldName), value));
+        conditions.add(new FieldValueConditionImpl(Operator.GT, new NamedFieldImpl(fieldName), value));
         return this;
     }
 
@@ -570,7 +576,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterThan(int fieldPosition, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.GT, new PositionField(fieldPosition), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.GT, new PositionFieldImpl(fieldPosition), value));
     }
 
     /**
@@ -581,7 +587,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterThan(int fieldPosition, Object value) {
-        conditions.add(new FieldValueCondition(Operator.GT, new PositionField(fieldPosition), value));
+        conditions.add(new FieldValueConditionImpl(Operator.GT, new PositionFieldImpl(fieldPosition), value));
         return this;
     }
 
@@ -593,7 +599,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterOrEquals(String fieldName, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.GE, new NamedField(fieldName), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.GE, new NamedFieldImpl(fieldName), value));
     }
 
     /**
@@ -604,7 +610,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterOrEquals(String fieldName, Object value) {
-        conditions.add(new FieldValueCondition(Operator.GE, new NamedField(fieldName), value));
+        conditions.add(new FieldValueConditionImpl(Operator.GE, new NamedFieldImpl(fieldName), value));
         return this;
     }
 
@@ -616,7 +622,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions greaterOrEquals(int fieldPosition, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.GE, new PositionField(fieldPosition), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.GE, new PositionFieldImpl(fieldPosition), value));
     }
 
     /**
@@ -627,7 +633,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andGreaterOrEquals(int fieldPosition, Object value) {
-        conditions.add(new FieldValueCondition(Operator.GE, new PositionField(fieldPosition), value));
+        conditions.add(new FieldValueConditionImpl(Operator.GE, new PositionFieldImpl(fieldPosition), value));
         return this;
     }
 
@@ -639,7 +645,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions lessThan(String fieldName, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.LT, new NamedField(fieldName), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.LT, new NamedFieldImpl(fieldName), value));
     }
 
     /**
@@ -650,7 +656,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andLessThan(String fieldName, Object value) {
-        conditions.add(new FieldValueCondition(Operator.LT, new NamedField(fieldName), value));
+        conditions.add(new FieldValueConditionImpl(Operator.LT, new NamedFieldImpl(fieldName), value));
         return this;
     }
 
@@ -662,7 +668,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions lessThan(int fieldPosition, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.LT, new PositionField(fieldPosition), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.LT, new PositionFieldImpl(fieldPosition), value));
     }
 
     /**
@@ -673,7 +679,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andLessThan(int fieldPosition, Object value) {
-        conditions.add(new FieldValueCondition(Operator.LT, new PositionField(fieldPosition), value));
+        conditions.add(new FieldValueConditionImpl(Operator.LT, new PositionFieldImpl(fieldPosition), value));
         return this;
     }
 
@@ -685,7 +691,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions lessOrEquals(String fieldName, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.LE, new NamedField(fieldName), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.LE, new NamedFieldImpl(fieldName), value));
     }
 
     /**
@@ -696,7 +702,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andLessOrEquals(String fieldName, Object value) {
-        conditions.add(new FieldValueCondition(Operator.LE, new NamedField(fieldName), value));
+        conditions.add(new FieldValueConditionImpl(Operator.LE, new NamedFieldImpl(fieldName), value));
         return this;
     }
 
@@ -708,7 +714,7 @@ public final class Conditions implements Serializable {
      * @return new {@link Conditions} instance
      */
     public static Conditions lessOrEquals(int fieldPosition, Object value) {
-        return new Conditions(new FieldValueCondition(Operator.LE, new PositionField(fieldPosition), value));
+        return new Conditions(new FieldValueConditionImpl(Operator.LE, new PositionFieldImpl(fieldPosition), value));
     }
 
     /**
@@ -719,7 +725,7 @@ public final class Conditions implements Serializable {
      * @return this {@link Conditions} instance
      */
     public Conditions andLessOrEquals(int fieldPosition, Object value) {
-        conditions.add(new FieldValueCondition(Operator.LE, new PositionField(fieldPosition), value));
+        conditions.add(new FieldValueConditionImpl(Operator.LE, new PositionFieldImpl(fieldPosition), value));
         return this;
     }
 
@@ -735,7 +741,7 @@ public final class Conditions implements Serializable {
         final Map<Integer, TarantoolFieldMetadata> selectedFields = new HashMap<>();
 
         for (Condition condition : conditions) {
-            if (condition instanceof IndexValueCondition) {
+            if (condition instanceof IndexValueConditionImpl) {
                 TarantoolIndexMetadata indexMetadata =
                         (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<IndexValueCondition> current = indexConditions.computeIfAbsent(
@@ -789,10 +795,10 @@ public final class Conditions implements Serializable {
 
     private IndexValueCondition convertIndexIfNecessary(IndexValueCondition condition,
                                                         String indexName) {
-        if (!(condition.field() instanceof IdIndex)) {
+        if (!(condition.field() instanceof IdIndexImpl)) {
             return condition;
         }
-        return new IndexValueCondition(condition.operator(), new NamedIndex(indexName), condition.value());
+        return new IndexValueConditionImpl(condition.operator(), new NamedIndexImpl(indexName), condition.value());
     }
 
     private List<List<?>> conditionsListToLists(List<? extends Condition> conditionsList,
@@ -813,7 +819,7 @@ public final class Conditions implements Serializable {
         final Map<String, TarantoolFieldMetadata> selectedFields = new HashMap<>();
 
         for (Condition condition : conditions) {
-            if (condition instanceof IndexValueCondition) {
+            if (condition instanceof IndexValueConditionImpl) {
                 TarantoolIndexMetadata indexMetadata =
                         (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<IndexValueCondition> current = indexConditions.computeIfAbsent(

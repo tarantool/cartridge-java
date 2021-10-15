@@ -8,10 +8,10 @@ import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class-container for built-in tarantool errors factories

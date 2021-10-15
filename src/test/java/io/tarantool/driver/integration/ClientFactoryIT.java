@@ -5,7 +5,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.retry.RetryingTarantoolTupleClient;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.output.WaitingConsumer;

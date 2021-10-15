@@ -1,7 +1,7 @@
 package io.tarantool.driver.cluster;
 
-import io.tarantool.driver.TarantoolClusterAddressProvider;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
 
 import java.util.Collection;

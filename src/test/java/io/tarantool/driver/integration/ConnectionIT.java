@@ -1,8 +1,8 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.api.ClusterTarantoolTupleClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -12,7 +12,7 @@ import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

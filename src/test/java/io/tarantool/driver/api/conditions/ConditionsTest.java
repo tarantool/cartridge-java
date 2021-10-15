@@ -1,18 +1,18 @@
 package io.tarantool.driver.api.conditions;
 
-import io.tarantool.driver.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.metadata.TarantoolMetadata;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.metadata.TarantoolMetadata;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolIndexQueryFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
-import io.tarantool.driver.metadata.TestMetadataProvider;
+import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import org.junit.jupiter.api.Test;
 

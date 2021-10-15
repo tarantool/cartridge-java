@@ -2,13 +2,9 @@ package io.tarantool.driver.api.cursor;
 
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.ObjectConverter;
 import io.tarantool.driver.protocol.Packable;
-import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
 import java.util.Collections;

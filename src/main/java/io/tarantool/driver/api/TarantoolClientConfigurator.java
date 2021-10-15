@@ -1,9 +1,9 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
+import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.proxy.ProxyOperationsMappingConfig;
-import io.tarantool.driver.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.retry.TarantoolRequestRetryPolicies;
 
 import java.util.function.Function;
 import java.util.function.UnaryOperator;

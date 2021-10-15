@@ -1,10 +1,10 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.api.ClusterTarantoolTupleClient;
-import io.tarantool.driver.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.ProxyTarantoolTupleClient;
-import io.tarantool.driver.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolTupleFactory;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
+import io.tarantool.driver.core.ProxyTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;

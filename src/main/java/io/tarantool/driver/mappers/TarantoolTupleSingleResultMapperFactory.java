@@ -2,9 +2,9 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolTupleSingleResult;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.tuple.TarantoolTupleSingleResult;
 
 /**
  * Factory for {@link CallResultMapper} instances used for handling results with {@link TarantoolTuple}s
@@ -34,7 +34,7 @@ public class TarantoolTupleSingleResultMapperFactory
      * Get default {@link TarantoolTuple} converter
      *
      * @param messagePackMapper MessagePack-to-entity mapper for result contents conversion
-     * @param spaceMetadata configured {@link TarantoolSpaceMetadata} instance
+     * @param spaceMetadata     configured {@link TarantoolSpaceMetadata} instance
      * @return default mapper instance configured with {@link DefaultTarantoolTupleValueConverter} instance
      */
     public CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>

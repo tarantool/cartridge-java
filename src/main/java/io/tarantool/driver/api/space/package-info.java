@@ -1,5 +1,5 @@
 /**
- * Contains interfaces and implementations for Tarantool space operations
+ * Contains interfaces for Tarantool space operations
  *
  * @author Alexey Kuzin
  */

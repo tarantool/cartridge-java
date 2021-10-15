@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol.requests;
 
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;

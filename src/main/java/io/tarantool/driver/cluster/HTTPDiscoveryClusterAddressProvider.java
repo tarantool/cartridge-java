@@ -30,7 +30,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.CharsetUtil;
-import io.tarantool.driver.TarantoolServerAddress;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import javax.net.ssl.SSLException;

@@ -1,6 +1,6 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 

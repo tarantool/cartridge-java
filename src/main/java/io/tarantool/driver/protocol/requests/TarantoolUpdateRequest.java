@@ -1,14 +1,14 @@
 package io.tarantool.driver.protocol.requests;
 
 
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
 import io.tarantool.driver.protocol.TarantoolRequestType;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
 
 import java.util.HashMap;
 import java.util.List;

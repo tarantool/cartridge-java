@@ -1,12 +1,11 @@
 package io.tarantool.driver.api;
 
-import io.tarantool.driver.TarantoolClientConfig;
 import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
+import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
-import io.tarantool.driver.core.TarantoolConnectionListeners;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;
