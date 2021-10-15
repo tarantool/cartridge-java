@@ -5,10 +5,13 @@ import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 
 import org.junit.jupiter.api.Test;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -123,5 +126,44 @@ public class TupleOperationsTest {
                 .collect(Collectors.toList());
         assertEquals(Arrays.asList(0, 1, 2), fieldNumbers);
         assertEquals(new TarantoolNullField(), operations.asList().get(2).getValue());
+    }
+
+    @Test
+    public void test_tupleOperations_shouldSerializeCorrectly_ifFieldIsDefinedByName() {
+        final String FIELD_DATA = "data";
+        List<String> object = Arrays.asList("test1", "test2");
+
+        final String FIELD_TS = "ts";
+        Long epochSecond = 12345L;
+
+        final String FIELD_SPLICE = "test";
+
+        TupleOperations tupleOperations = TupleOperations
+                .set(FIELD_DATA, object)
+                .andSet(FIELD_TS, epochSecond)
+                .andSplice(FIELD_SPLICE, 1, 2, "rep");
+
+        Value value = mapperFactory.defaultComplexTypesMapper().toValue(tupleOperations.asProxyOperationList());
+
+        Value cond1 = ValueFactory.newArray(
+                ValueFactory.newString("="),
+                ValueFactory.newString(FIELD_DATA),
+                ValueFactory.newArray(ValueFactory.newString(object.get(0)), ValueFactory.newString(object.get(1))));
+
+        Value cond2 = ValueFactory.newArray(
+                ValueFactory.newString("="),
+                ValueFactory.newString(FIELD_TS),
+                ValueFactory.newInteger(epochSecond));
+
+        Value cond3 = ValueFactory.newArray(
+                ValueFactory.newString(":"),
+                ValueFactory.newString(FIELD_SPLICE),
+                ValueFactory.newInteger(1),
+                ValueFactory.newInteger(2),
+                ValueFactory.newString("rep"));
+
+        Value expected = ValueFactory.newArray(cond1, cond2, cond3);
+
+        assertEquals(expected, value);
     }
 }
