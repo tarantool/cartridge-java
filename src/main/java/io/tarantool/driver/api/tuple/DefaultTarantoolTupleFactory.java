@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.tuple;
 
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.metadata.TarantoolSpaceMetadata;
 
 import java.util.Arrays;
 import java.util.Collection;

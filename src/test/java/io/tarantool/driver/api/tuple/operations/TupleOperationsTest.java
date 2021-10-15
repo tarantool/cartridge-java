@@ -134,7 +134,7 @@ public class TupleOperationsTest {
         List<String> object = Arrays.asList("test1", "test2");
 
         final String FIELD_TS = "ts";
-        Long epochSecond = 12345L;
+        long epochSecond = 12345L;
 
         final String FIELD_SPLICE = "test";
 
