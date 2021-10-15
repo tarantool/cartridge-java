@@ -203,6 +203,8 @@ public class TarantoolClientConfig {
 
         /**
          * Basic constructor.
+         *
+         * @param config client configuration
          */
         public Builder(TarantoolClientConfig config) {
             this.config = config;
