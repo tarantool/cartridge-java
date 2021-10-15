@@ -2,8 +2,8 @@ package io.tarantool.driver.cluster;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import java.util.Collection;

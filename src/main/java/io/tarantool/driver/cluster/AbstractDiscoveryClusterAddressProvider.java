@@ -1,8 +1,8 @@
 package io.tarantool.driver.cluster;
 
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 
 import java.util.Collection;

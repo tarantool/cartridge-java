@@ -1,7 +1,6 @@
 package io.tarantool.driver.core.metadata;
 
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.api.metadata.TarantoolIndexOptions;
 import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.mappers.MessagePackValueMapper;

@@ -1,10 +1,10 @@
 package io.tarantool.driver.core.conditions;
 
 import io.tarantool.driver.api.conditions.NamedIndex;
-import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.exceptions.TarantoolIndexNotFoundException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Objects;

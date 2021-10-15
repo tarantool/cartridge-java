@@ -2,7 +2,6 @@ package io.tarantool.driver.core.metadata;
 
 import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.api.metadata.TarantoolIndexOptions;
 import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataContainer;
@@ -12,10 +11,10 @@ import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 /**

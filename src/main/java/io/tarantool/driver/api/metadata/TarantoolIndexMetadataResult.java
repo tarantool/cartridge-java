@@ -2,7 +2,6 @@ package io.tarantool.driver.api.metadata;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.core.metadata.SpacesMetadataProvider;
 
 /**
  * Shortcut for {@link SingleValueCallResult}, that contains index metadata mapping

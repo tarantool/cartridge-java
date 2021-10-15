@@ -1,10 +1,10 @@
 package io.tarantool.driver.protocol;
 
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapperException;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.MessagePackValueMapperException;
 
 import java.util.Collections;
 import java.util.HashMap;

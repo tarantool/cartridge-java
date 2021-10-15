@@ -1,13 +1,13 @@
 package io.tarantool.driver.core.space;
 
-import io.tarantool.driver.api.retry.RequestRetryPolicy;
-import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.retry.RequestRetryPolicy;
+import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;

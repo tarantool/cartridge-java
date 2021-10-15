@@ -1,8 +1,8 @@
 package io.tarantool.driver.core;
 
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.exceptions.errors.TarantoolErrorsParser;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.exceptions.errors.TarantoolErrorsParser;
 import io.tarantool.driver.mappers.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;

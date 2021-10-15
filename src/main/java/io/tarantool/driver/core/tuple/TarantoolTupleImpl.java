@@ -1,5 +1,6 @@
 package io.tarantool.driver.core.tuple;
 
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -7,7 +8,6 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.utils.Assert;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePackException;

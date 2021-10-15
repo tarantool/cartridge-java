@@ -1,17 +1,17 @@
 package io.tarantool.driver.core.space;
 
-import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.OffsetCursor;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 
 /**
  * {@link TarantoolSpace} implementation for working with default tuples

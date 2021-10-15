@@ -1,10 +1,10 @@
 package io.tarantool.driver.core.conditions;
 
 import io.tarantool.driver.api.conditions.PositionField;
-import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.exceptions.TarantoolFieldNotFoundException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Objects;

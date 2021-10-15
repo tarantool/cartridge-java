@@ -3,10 +3,10 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
 import java.util.Arrays;
 import java.util.List;
