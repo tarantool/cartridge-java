@@ -121,6 +121,25 @@ local function init_space()
         type = 'TREE'
     })
 
+    local test_space_with_byte_array = box.schema.space.create(
+             'test_space_with_byte_array', { if_not_exists = true })
+    test_space_with_byte_array:format({
+        { name = 'id', type = 'unsigned' },
+        { name = 'bucket_id', type = 'unsigned' },
+        { name = 'value', type = 'varbinary' },
+    });
+    test_space_with_byte_array:create_index('primary', {
+        type = 'tree',
+        parts = { 'id' },
+        if_not_exists = true,
+    })
+    test_space_with_byte_array:create_index('bucket_id', {
+        type = 'tree',
+        parts = { 'bucket_id' },
+        unique = false,
+        if_not_exists = true,
+    })
+
 end
 
 local function get_composite_data(id)
