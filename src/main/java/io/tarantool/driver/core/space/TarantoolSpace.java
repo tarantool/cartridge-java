@@ -7,9 +7,11 @@ import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperation;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.Packable;
@@ -26,8 +28,10 @@ import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Basic implementation for working with spaces via Tarantool protocol requests
@@ -170,11 +174,11 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 throw new TarantoolSpaceOperationException("Index must be primary or unique for update operation");
             }
 
-            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder(spaceMetadata)
+            TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder()
                     .withSpaceId(spaceId)
                     .withIndexId(indexQuery.getIndexId())
                     .withKeyValues(indexQuery.getKeyValues())
-                    .withTupleOperations(operations)
+                    .withTupleOperations(fillFieldIndexFromMetadata(operations))
                     .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
@@ -196,11 +200,11 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
-            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder(spaceMetadata)
+            TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder()
                     .withSpaceId(spaceId)
                     .withKeyValues(indexQuery.getKeyValues())
                     .withTuple(tuple)
-                    .withTupleOperations(operations)
+                    .withTupleOperations(fillFieldIndexFromMetadata(operations))
                     .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
@@ -249,5 +253,18 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     public String toString() {
         return String.format(
                 "StandaloneTarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
+    }
+
+    private List<TupleOperation> fillFieldIndexFromMetadata(TupleOperations operations) {
+        return operations.asList().stream()
+                .peek(operation -> {
+                    if (operation.getFieldIndex() == null) {
+                        String fieldName = operation.getFieldName();
+                        int fieldMetadataIndex = this.spaceMetadata.getFieldByName(fieldName)
+                                .orElseThrow(() -> new TarantoolSpaceFieldNotFoundException(fieldName))
+                                .getFieldPosition();
+                        operation.setFieldIndex(fieldMetadataIndex);
+                    }
+                }).collect(Collectors.toList());
     }
 }

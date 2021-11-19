@@ -14,6 +14,7 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -291,6 +292,11 @@ public class ClusterTarantoolTupleClientIT {
         TarantoolResult<TarantoolTuple> updateResult;
         updateResult = testSpace.update(conditions, TupleOperations.add("year", 7)).get();
         assertEquals(1900, updateResult.get(0).getInteger(4));
+
+        // an attempt to update by the name of a non-existed field
+        assertThrows(TarantoolSpaceFieldNotFoundException.class,
+                () -> testSpace.update(conditions,
+                        TupleOperations.add("non-existed-field", 17)).get());
     }
 
     @Test
@@ -307,7 +313,7 @@ public class ClusterTarantoolTupleClientIT {
         TupleOperations ops = TupleOperations.set(4, 2020)
                 .andSplice(2, 5, 1, "aaa");
 
-        //run upsert first time tuple
+        // run upsert first time tuple
         testSpace.upsert(conditions, tarantoolTuple, ops).get();
 
         TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
@@ -316,13 +322,18 @@ public class ClusterTarantoolTupleClientIT {
         assertEquals(1945, selectResult.get(0).getInteger(4));
         assertEquals("Animal Farm: A Fairy Story", selectResult.get(0).getString(2));
 
-        //run upsert second time
+        // run upsert second time
         testSpace.upsert(conditions, tarantoolTuple, ops).get();
 
         selectResult = testSpace.select(conditions).get();
         assertEquals(1, selectResult.size());
         assertEquals(2020, selectResult.get(0).getInteger(4));
         assertEquals("Animaaaa Farm: A Fairy Story", selectResult.get(0).getString(2));
+
+        // an attempt to upsert by the name of a non-existed field
+        assertThrows(TarantoolSpaceFieldNotFoundException.class,
+                () -> testSpace.upsert(conditions, tarantoolTuple,
+                        TupleOperations.set("non-existed-field", 17)).get());
     }
 
     @Test

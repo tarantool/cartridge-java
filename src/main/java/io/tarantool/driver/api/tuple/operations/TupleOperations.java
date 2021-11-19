@@ -43,19 +43,19 @@ public final class TupleOperations {
      * @return this
      */
     public TupleOperations addOperation(TupleOperation operation) {
-        Integer filedIndex = operation.getFieldIndex();
+        Integer fieldIndex = operation.getFieldIndex();
         String fieldName = operation.getFieldName();
 
         Optional<TupleOperation> existField;
-        if (filedIndex != null) {
-            existField = this.operations.stream().filter(op -> filedIndex.equals(op.getFieldIndex())).findFirst();
+        if (fieldIndex != null) {
+            existField = this.operations.stream().filter(op -> fieldIndex.equals(op.getFieldIndex())).findFirst();
         } else {
             existField = this.operations.stream().filter(op -> fieldName.equals(op.getFieldName())).findFirst();
         }
 
         if (existField.isPresent()) {
             throw new TarantoolSpaceOperationException("Double update of the same field (%s)",
-                    filedIndex != null ? filedIndex : fieldName);
+                    fieldIndex != null ? fieldIndex : fieldName);
         }
 
         addOperationToList(operation);
