@@ -1,7 +1,6 @@
 package io.tarantool.driver.protocol.requests;
 
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
+import io.tarantool.driver.api.tuple.operations.TupleOperation;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
@@ -17,7 +16,7 @@ import java.util.Map;
 /**
  * Upsert request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
@@ -36,11 +35,9 @@ public final class TarantoolUpsertRequest extends TarantoolRequest {
     public static class Builder {
 
         Map<Integer, Object> bodyMap;
-        TarantoolSpaceMetadata metadata;
 
-        public Builder(TarantoolSpaceMetadata metadata) {
+        public Builder() {
             this.bodyMap = new HashMap<>(4, 1);
-            this.metadata = metadata;
         }
 
         public Builder withSpaceId(int spaceId) {
@@ -58,10 +55,8 @@ public final class TarantoolUpsertRequest extends TarantoolRequest {
             return this;
         }
 
-        public Builder withTupleOperations(TupleOperations operations) {
-            fillFieldIndexFromMetadata(operations, metadata);
-
-            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_OPS.getCode(), operations.asList());
+        public Builder withTupleOperations(List<TupleOperation> operations) {
+            this.bodyMap.put(TarantoolRequestFieldType.IPROTO_OPS.getCode(), operations);
             return this;
         }
 

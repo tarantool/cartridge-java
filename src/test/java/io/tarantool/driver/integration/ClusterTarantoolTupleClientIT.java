@@ -333,7 +333,7 @@ public class ClusterTarantoolTupleClientIT {
         // An attempt to upsert by the name of a non-existent field
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
                 () -> testSpace.upsert(conditions, tarantoolTuple,
-                        TupleOperations.set("non-existent-field", 17)).get());
+                        TupleOperations.set("non-existed-field", 17)).get());
     }
 
     @Test

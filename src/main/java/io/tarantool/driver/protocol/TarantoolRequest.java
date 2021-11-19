@@ -1,9 +1,6 @@
 package io.tarantool.driver.protocol;
 
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolDecoderException;
-import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import org.msgpack.core.MessagePackException;
 import org.msgpack.core.MessagePacker;
@@ -15,33 +12,22 @@ import java.util.function.Supplier;
 /**
  * Base class for all kinds of requests to Tarantool server.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Alexey Kuzin
  */
 public class TarantoolRequest {
 
-    private static AtomicLong syncId = new AtomicLong(0);
-    private static Supplier<Long> syncIdSupplier = () -> syncId.updateAndGet(n -> (n >= Long.MAX_VALUE) ? 1 : n + 1);
+    private static final AtomicLong syncId = new AtomicLong(0);
+    private static final Supplier<Long> syncIdSupplier =
+            () -> syncId.updateAndGet(n -> (n >= Long.MAX_VALUE) ? 1 : n + 1);
 
-    public static void fillFieldIndexFromMetadata(TupleOperations operations, TarantoolSpaceMetadata metadata) {
-        operations.asList().forEach(op -> {
-            if (op.getFieldIndex() == null) {
-                String fieldName = op.getFieldName();
-                int fieldPosition = metadata.getFieldPositionByName(fieldName);
-                if (fieldPosition < 0) {
-                    throw new TarantoolSpaceFieldNotFoundException(fieldName);
-                }
-                op.setFieldIndex(fieldPosition);
-            }
-        });
-    }
-
-    private TarantoolHeader header;
-    private TarantoolRequestBody body;
+    private final TarantoolHeader header;
+    private final TarantoolRequestBody body;
 
     /**
      * Basic constructor. Sets an auto-incremented request ID into the Tarantool packet header.
+     *
      * @param type request type code supported by Tarantool
      * @param body request body, may be empty
      * @see TarantoolRequestType
@@ -53,6 +39,7 @@ public class TarantoolRequest {
 
     /**
      * Get header
+     *
      * @return header instance
      */
     public TarantoolHeader getHeader() {
@@ -61,6 +48,7 @@ public class TarantoolRequest {
 
     /**
      * Get body
+     *
      * @return instance of a {@link Packable}
      */
     public Packable getBody() {
@@ -69,6 +57,7 @@ public class TarantoolRequest {
 
     /**
      * Encode incapsulated data using {@link MessagePacker}
+     *
      * @param packer configured {@link MessagePacker}
      * @param mapper object-to-entity mapper
      * @throws TarantoolDecoderException if encoding failed
