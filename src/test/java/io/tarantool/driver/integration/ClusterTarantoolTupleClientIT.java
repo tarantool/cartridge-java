@@ -14,6 +14,7 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -291,6 +292,11 @@ public class ClusterTarantoolTupleClientIT {
         TarantoolResult<TarantoolTuple> updateResult;
         updateResult = testSpace.update(conditions, TupleOperations.add("year", 7)).get();
         assertEquals(1900, updateResult.get(0).getInteger(4));
+
+        // An attempt to update by the name of a non-existent field
+        assertThrows(TarantoolSpaceFieldNotFoundException.class,
+                () -> testSpace.update(conditions,
+                        TupleOperations.add("non-existent-field", 17)).get());
     }
 
     @Test
@@ -323,6 +329,11 @@ public class ClusterTarantoolTupleClientIT {
         assertEquals(1, selectResult.size());
         assertEquals(2020, selectResult.get(0).getInteger(4));
         assertEquals("Animaaaa Farm: A Fairy Story", selectResult.get(0).getString(2));
+
+        // An attempt to upsert by the name of a non-existent field
+        assertThrows(TarantoolSpaceFieldNotFoundException.class,
+                () -> testSpace.upsert(conditions, tarantoolTuple,
+                        TupleOperations.set("non-existent-field", 17)).get());
     }
 
     @Test

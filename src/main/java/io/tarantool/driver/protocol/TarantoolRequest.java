@@ -1,6 +1,9 @@
 package io.tarantool.driver.protocol;
 
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolDecoderException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import org.msgpack.core.MessagePackException;
 import org.msgpack.core.MessagePacker;
@@ -20,6 +23,19 @@ public class TarantoolRequest {
 
     private static AtomicLong syncId = new AtomicLong(0);
     private static Supplier<Long> syncIdSupplier = () -> syncId.updateAndGet(n -> (n >= Long.MAX_VALUE) ? 1 : n + 1);
+
+    public static void fillFieldIndexFromMetadata(TupleOperations operations, TarantoolSpaceMetadata metadata) {
+        operations.asList().forEach(op -> {
+            if (op.getFieldIndex() == null) {
+                String fieldName = op.getFieldName();
+                int fieldPosition = metadata.getFieldPositionByName(fieldName);
+                if (fieldPosition < 0) {
+                    throw new TarantoolSpaceFieldNotFoundException(fieldName);
+                }
+                op.setFieldIndex(fieldPosition);
+            }
+        });
+    }
 
     private TarantoolHeader header;
     private TarantoolRequestBody body;

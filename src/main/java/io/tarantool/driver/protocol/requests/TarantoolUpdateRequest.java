@@ -59,11 +59,7 @@ public final class TarantoolUpdateRequest extends TarantoolRequest {
         }
 
         public Builder withTupleOperations(TupleOperations operations) {
-            operations.asList().forEach(op -> {
-                if (op.getFieldIndex() == null) {
-                    op.setFieldIndex(metadata.getFieldPositionByName(op.getFieldName()));
-                }
-            });
+            fillFieldIndexFromMetadata(operations, metadata);
 
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), operations.asList());
             return this;
