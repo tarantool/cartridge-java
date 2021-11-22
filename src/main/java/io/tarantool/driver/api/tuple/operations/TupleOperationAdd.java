@@ -31,4 +31,15 @@ public class TupleOperationAdd extends TupleUpdateOperation {
                 true
         );
     }
+
+    @Override
+    public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
+        return new TupleOperationAdd(
+                this.getOperationType(),
+                fieldMetadataIndex,
+                this.getFieldName(),
+                this.getValue(),
+                this.isProxyOperation()
+        );
+    }
 }

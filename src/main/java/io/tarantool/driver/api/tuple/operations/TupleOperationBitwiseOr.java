@@ -39,4 +39,15 @@ public class TupleOperationBitwiseOr extends TupleUpdateOperation {
             throw new IllegalArgumentException("Bitwise operations can be performed only with values >= 0");
         }
     }
+
+    @Override
+    public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
+        return new TupleOperationBitwiseOr(
+                this.getOperationType(),
+                fieldMetadataIndex,
+                this.getFieldName(),
+                this.getValue(),
+                this.isProxyOperation()
+        );
+    }
 }

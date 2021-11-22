@@ -18,8 +18,8 @@ abstract class TupleUpdateOperation implements TupleOperation {
 
     protected final boolean isProxyOperation;
     protected final TarantoolUpdateOperationType operationType;
-    protected Integer fieldIndex;
-    protected String fieldName;
+    protected final Integer fieldIndex;
+    protected final String fieldName;
     protected final Object value;
 
     /**
@@ -75,11 +75,6 @@ abstract class TupleUpdateOperation implements TupleOperation {
     @Override
     public Integer getFieldIndex() {
         return fieldIndex;
-    }
-
-    @Override
-    public void setFieldIndex(Integer fieldIndex) {
-        this.fieldIndex = fieldIndex;
     }
 
     @Override

@@ -7,6 +7,7 @@ import io.tarantool.driver.protocol.Packable;
  * {@link io.tarantool.driver.protocol.requests.TarantoolUpdateRequest} and
  * {@link io.tarantool.driver.protocol.requests.TarantoolUpsertRequest}
  *
+ *
  * @author Sergey Volgin
  */
 public interface TupleOperation extends Packable {
@@ -19,9 +20,9 @@ public interface TupleOperation extends Packable {
 
     Object getValue();
 
-    void setFieldIndex(Integer fieldIndex);
-
     Boolean isProxyOperation();
 
     TupleOperation toProxyTupleOperation();
+
+    TupleOperation cloneWithIndex(int fieldMetadataIndex);
 }

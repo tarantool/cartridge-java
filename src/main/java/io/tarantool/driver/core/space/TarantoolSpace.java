@@ -257,14 +257,15 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     private List<TupleOperation> fillFieldIndexFromMetadata(TupleOperations operations) {
         return operations.asList().stream()
-                .peek(operation -> {
+                .map(operation -> {
                     if (operation.getFieldIndex() == null) {
                         String fieldName = operation.getFieldName();
                         int fieldMetadataIndex = this.spaceMetadata.getFieldByName(fieldName)
                                 .orElseThrow(() -> new TarantoolSpaceFieldNotFoundException(fieldName))
                                 .getFieldPosition();
-                        operation.setFieldIndex(fieldMetadataIndex);
+                        return operation.cloneWithIndex(fieldMetadataIndex);
                     }
+                    return operation;
                 }).collect(Collectors.toList());
     }
 }
