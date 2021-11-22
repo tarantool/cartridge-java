@@ -63,4 +63,17 @@ public class TupleSpliceOperation extends TupleUpdateOperation {
     public int getOffset() {
         return offset;
     }
+
+    @Override
+    public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
+        return new TupleSpliceOperation(
+                this.getOperationType(),
+                fieldMetadataIndex,
+                this.getFieldName(),
+                this.getValue(),
+                this.getPosition(),
+                this.getOffset(),
+                this.isProxyOperation()
+        );
+    }
 }

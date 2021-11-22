@@ -39,4 +39,15 @@ public class TupleOperationDelete extends TupleUpdateOperation {
             throw new IllegalArgumentException("The number of fields to remove must be greater than zero");
         }
     }
+
+    @Override
+    public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
+        return new TupleOperationDelete(
+                this.getOperationType(),
+                fieldIndex,
+                this.getFieldName(),
+                this.getValue(),
+                this.isProxyOperation()
+        );
+    }
 }

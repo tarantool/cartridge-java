@@ -290,7 +290,12 @@ public class ClusterTarantoolTupleClientIT {
         Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(105534));
 
         TarantoolResult<TarantoolTuple> updateResult;
-        updateResult = testSpace.update(conditions, TupleOperations.add("year", 7)).get();
+        TupleOperations op = TupleOperations.add("year", 7);
+        assertNull(op.asList().get(0).getFieldIndex());
+
+        updateResult = testSpace.update(conditions, op).get();
+        // this check is needed to understand that fieldIndex does not change after the operation
+        assertNull(op.asList().get(0).getFieldIndex());
         assertEquals(1900, updateResult.get(0).getInteger(4));
 
         // an attempt to update by the name of a non-existed field
@@ -311,24 +316,32 @@ public class ClusterTarantoolTupleClientIT {
         Conditions conditions = Conditions.equals("id", 255);
 
         TupleOperations ops = TupleOperations.set(4, 2020)
-                .andSplice(2, 5, 1, "aaa");
+                .andSplice(2, 5, 1, "aaa")
+                .andSet("author", "Leo Tolstoy");
+        assertNull(ops.asList().get(2).getFieldIndex());
 
         // run upsert first time tuple
         testSpace.upsert(conditions, tarantoolTuple, ops).get();
+        // this check is needed to understand that fieldIndex does not change after the operation
+        assertNull(ops.asList().get(2).getFieldIndex());
 
         TarantoolResult<TarantoolTuple> selectResult = testSpace.select(conditions).get();
 
         assertEquals(1, selectResult.size());
         assertEquals(1945, selectResult.get(0).getInteger(4));
         assertEquals("Animal Farm: A Fairy Story", selectResult.get(0).getString(2));
+        assertEquals("George Orwell", selectResult.get(0).getString("author"));
 
         // run upsert second time
         testSpace.upsert(conditions, tarantoolTuple, ops).get();
+        // this check is needed to understand that fieldIndex does not change after the operation
+        assertNull(ops.asList().get(2).getFieldIndex());
 
         selectResult = testSpace.select(conditions).get();
         assertEquals(1, selectResult.size());
         assertEquals(2020, selectResult.get(0).getInteger(4));
         assertEquals("Animaaaa Farm: A Fairy Story", selectResult.get(0).getString(2));
+        assertEquals("Leo Tolstoy", selectResult.get(0).getString("author"));
 
         // an attempt to upsert by the name of a non-existed field
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
