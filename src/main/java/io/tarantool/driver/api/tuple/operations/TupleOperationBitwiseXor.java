@@ -44,7 +44,7 @@ public class TupleOperationBitwiseXor extends TupleUpdateOperation {
     public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
         return new TupleOperationBitwiseXor(
                 this.getOperationType(),
-                fieldIndex,
+                fieldMetadataIndex,
                 this.getFieldName(),
                 this.getValue(),
                 this.isProxyOperation()
