@@ -5,7 +5,6 @@ import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolField;
 import io.tarantool.driver.api.tuple.TarantoolNullField;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 
@@ -165,5 +164,26 @@ public class TupleOperationsTest {
         Value expected = ValueFactory.newArray(cond1, cond2, cond3);
 
         assertEquals(expected, value);
+    }
+
+    @Test
+    public void test_cloneWithIndex_shouldCloneCorrectly() {
+        TupleOperations operations = TupleOperations
+                .add("field_1", 1)
+                .andBitwiseAnd("field_2", 2)
+                .andBitwiseOr("field_3", 3)
+                .andBitwiseXor("field_4", 4)
+                .andDelete("field5", 5)
+                .andInsert("field_6", 6)
+                .andSet("field_7", 7)
+                .andSubtract("field_8", 8)
+                .andSplice("field_9", 9, 9, "Hello")
+                ;
+        operations.asList().forEach(tupleOperation -> {
+            TupleOperation clonedTupleOperation = tupleOperation.cloneWithIndex(1);
+            assertNotEquals(tupleOperation, clonedTupleOperation);
+            assertNull(tupleOperation.getFieldIndex());
+            assertEquals(1, clonedTupleOperation.getFieldIndex());
+        });
     }
 }

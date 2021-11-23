@@ -44,7 +44,7 @@ public class TupleOperationDelete extends TupleUpdateOperation {
     public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
         return new TupleOperationDelete(
                 this.getOperationType(),
-                fieldIndex,
+                fieldMetadataIndex,
                 this.getFieldName(),
                 this.getValue(),
                 this.isProxyOperation()
