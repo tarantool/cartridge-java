@@ -139,7 +139,12 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     private TarantoolConnectionManager connectionManager() {
         if (this.connectionManagerHolder.get() == null) {
-            this.connectionManagerHolder.compareAndSet(null, connectionManager(config, connectionFactory, listeners));
+            synchronized (this) {
+                if (this.connectionManagerHolder.get() == null) {
+                    this.connectionManagerHolder.compareAndSet(null,
+                            connectionManager(config, connectionFactory, listeners));
+                }
+            }
         }
         return connectionManagerHolder.get();
     }

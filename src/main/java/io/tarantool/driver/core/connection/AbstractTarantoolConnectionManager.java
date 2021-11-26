@@ -6,6 +6,7 @@ import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
 import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnection;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
+import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
@@ -22,7 +23,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -45,6 +49,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final AtomicReference<ConnectionMode> connectionMode = new AtomicReference<>(ConnectionMode.FULL);
     // resettable barrier for preventing multiple threads from running into the connection init sequence
     private final Phaser initPhaser = new Phaser(0);
+    private final Semaphore semaphore;
+    private final ScheduledExecutorService reconnectService;
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**
@@ -78,6 +84,10 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         this.selectStrategyFactory = config.getConnectionSelectionStrategyFactory();
         this.connectionSelectStrategy.set(selectStrategyFactory.create(config, Collections.emptyList()));
         this.connectionListeners = connectionListeners;
+        this.semaphore = new Semaphore(1, true);
+        //todo: move to reconnection policy
+        this.reconnectService = Executors
+                .newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-reconnect"));
     }
 
     /**
@@ -104,56 +114,38 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         });
     }
 
+    public void connect() {
+        establishConnections().thenAccept(registry -> {
+            connectionRegistry.set(registry);
+            ConnectionSelectionStrategy strategy =
+                    selectStrategyFactory.create(config, registry.values().stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList()));
+            connectionSelectStrategy.set(strategy);
+        }).join();
+    }
+
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
-        CompletableFuture<TarantoolConnection> result;
-        ConnectionMode currentMode = connectionMode.get();
-        if (initPhaser.getRegisteredParties() == 0 &&
-                (connectionMode.compareAndSet(ConnectionMode.FULL, ConnectionMode.OFF) ||
-                        connectionMode.compareAndSet(ConnectionMode.PARTIAL, ConnectionMode.OFF))) {
-            // Only one thread can reach to this line because of CAS. Rise up the barrier for 1 thread
-            if (currentMode == ConnectionMode.FULL) {
-                initPhaser.register();
-            }
-            result = establishConnections()
-                    .thenAccept(registry -> {
-                        if (currentMode == ConnectionMode.PARTIAL) {
-                            initPhaser.register();
-                        }
-                        // Add all alive connections
-                        connectionRegistry.set(registry);
-                        ConnectionSelectionStrategy strategy =
-                                selectStrategyFactory.create(config, registry.values().stream()
-                                        .flatMap(Collection::stream)
-                                        .collect(Collectors.toList()));
-                        connectionSelectStrategy.set(strategy);
-                    })
-                    .thenApply(v -> connectionSelectStrategy.get().next())
-                    .whenComplete((v, ex) -> {
-                        if (ex != null) {
-                            // Connection attempt failed, signal the next thread coming for connection
-                            // to start the init sequence
-                            connectionMode.set(currentMode);
-                        }
-                        // Connection init sequence completed, release all waiting threads and lower the barrier
-                        initPhaser.arriveAndDeregister();
-                    });
-        } else {
-            // Wait until a thread finishes the init sequence and lowers the barrier. Once the barrier is lowered, the
-            // phaser advances to the next phase.
-            // As soon as all parties have arrived (register() is called once, so a single thread), all threads blocked
-            // on awaitAdvance() continue running. getPhase() in this case returns the last phase value before
-            // the termination.
-            initPhaser.awaitAdvance(initPhaser.getPhase());
-            // This call may produce NoAvailableConnectionsException if the connection attempt failed in all threads
-            // that waited for the init sequence completion on the line above.
-            // In this case the calling code may perform the request again.
-            result = new CompletableFuture<>();
+        //todo: add lazy init
+        if (connectionRegistry.get().isEmpty()) {
             try {
-                result.complete(connectionSelectStrategy.get().next());
-            } catch (Throwable t) {
-                result.completeExceptionally(t);
+                semaphore.acquire();
+                connect();
+                semaphore.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
+        CompletableFuture<TarantoolConnection> result;
+
+        result = new CompletableFuture<>();
+        try {
+            result.complete(connectionSelectStrategy.get().next());
+        } catch (Throwable t) {
+            result.completeExceptionally(t);
+        }
+
         return result;
     }
 
@@ -161,13 +153,9 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
             throws TarantoolClientException {
         CompletableFuture<Map<TarantoolServerAddress, List<TarantoolConnection>>> result = new CompletableFuture<>();
         try {
-            List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> endpointConnections =
-                    getConnections();
-            result = CompletableFuture
-                    .allOf(endpointConnections.toArray(new CompletableFuture[0]))
-                    .thenApply(v -> endpointConnections.parallelStream()
-                            .map(CompletableFuture::join)
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            result = CompletableFuture.supplyAsync(() -> getConnections().parallelStream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         } catch (Throwable e) {
             result.completeExceptionally(e);
         }
@@ -178,6 +166,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         Collection<TarantoolServerAddress> addresses = getAddresses();
         List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> endpointConnections =
                 new ArrayList<>(addresses.size());
+
         for (TarantoolServerAddress serverAddress : addresses) {
             List<TarantoolConnection> aliveConnections = getAliveConnections(serverAddress);
             if (aliveConnections.size() < config.getConnections()) {
@@ -218,34 +207,11 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private CompletableFuture<List<TarantoolConnection>> establishConnectionsToEndpoint(
             TarantoolServerAddress serverAddress, int connectionCount) {
-        List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
-                .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners).stream()
-                .peek(cf -> cf.thenApply(conn -> {
-                            if (conn.isConnected()) {
-                                logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
-                            }
-                            conn.addConnectionFailureListener((c, ex) -> {
-                                // Connection lost, signal the next thread coming
-                                // for connection to start the init sequence
-                                connectionMode.set(ConnectionMode.PARTIAL);
-                                try {
-                                    c.close();
-                                } catch (Exception e) {
-                                    logger.info("Failed to close the connection: {}", e.getMessage());
-                                }
-                            });
-                            conn.addConnectionCloseListener(
-                                    c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
-                            return conn;
-                        })
-                )
-                .collect(Collectors.toList());
-        return CompletableFuture
-                .allOf(connections.toArray(new CompletableFuture[0]))
-                .thenApply(v -> connections.parallelStream()
-                        .map(CompletableFuture::join)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
+        return CompletableFuture.supplyAsync(() -> connectionFactory
+                .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners)
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
     }
 
     @Override

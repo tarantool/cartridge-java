@@ -16,12 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -79,11 +78,14 @@ public class TarantoolConnectionFactory {
                                 serverAddress, config.getConnectTimeout())));
             }
         }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+
         CompletableFuture<TarantoolConnection> result = connectionFuture
                 .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
+
         for (TarantoolConnectionListener listener : connectionListeners.all()) {
             result = result.thenCompose(listener::onConnection);
         }
+
         return result.handle((v, ex) -> {
             if (ex != null) {
                 logger.warn("Connection failed: {}", ex.getMessage());
@@ -101,13 +103,32 @@ public class TarantoolConnectionFactory {
      * @param connectionListeners listeners for the event of establishing the connection
      * @return a collection with specified number of connection futures
      */
-    public Collection<CompletableFuture<TarantoolConnection>> multiConnection(
+    public Stream<CompletableFuture<TarantoolConnection>> multiConnection(
             InetSocketAddress serverAddress,
             int connections,
             TarantoolConnectionListeners connectionListeners) {
         return Stream.generate(() -> serverAddress)
                 .map(address -> singleConnection(address, connectionListeners))
-                .limit(connections)
-                .collect(Collectors.toList());
+                .peek(addListeners())
+                .limit(connections);
+    }
+
+    private Consumer<CompletableFuture<TarantoolConnection>> addListeners() {
+        return cf -> cf.thenApply(conn -> {
+            if (conn.isConnected()) {
+                logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
+            }
+            conn.addConnectionFailureListener((c, ex) -> {
+                // Connection lost, signal the next thread coming
+                // for connection to start the init sequence
+                try {
+                    c.close();
+                } catch (Exception e) {
+                    logger.info("Failed to close the connection: {}", e.getMessage());
+                }
+            });
+            conn.addConnectionCloseListener(c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
+            return conn;
+        });
     }
 }

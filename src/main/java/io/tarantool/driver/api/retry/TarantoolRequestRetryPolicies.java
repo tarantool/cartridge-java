@@ -365,9 +365,7 @@ public final class TarantoolRequestRetryPolicies {
                         ex = e.getCause();
                     }
                     if (attempts == 0) {
-                        ex = new TarantoolAttemptsLimitException(
-                                limit,
-                                ex);
+                        ex = new TarantoolAttemptsLimitException(limit, ex);
                         break;
                     }
                 } while (this.canRetryRequest(ex));

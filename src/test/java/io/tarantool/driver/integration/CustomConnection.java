@@ -25,7 +25,7 @@ public class CustomConnection implements TarantoolConnection {
 
     @Override
     public void close() throws Exception {
-        connection.getChannel().close();
+        connection.close();
     }
 
     @Override
