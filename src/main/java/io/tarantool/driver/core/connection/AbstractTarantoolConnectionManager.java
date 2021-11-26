@@ -24,9 +24,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Phaser;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -45,29 +45,10 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> connectionRegistry =
             new AtomicReference<>(new HashMap<>());
     private final AtomicReference<ConnectionSelectionStrategy> connectionSelectStrategy = new AtomicReference<>();
-    // connection init sequence state
-    private final AtomicReference<ConnectionMode> connectionMode = new AtomicReference<>(ConnectionMode.FULL);
-    // resettable barrier for preventing multiple threads from running into the connection init sequence
-    private final Phaser initPhaser = new Phaser(0);
     private final Semaphore semaphore;
-    private final ScheduledExecutorService reconnectService;
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param config                   Tarantool client config
-     * @param connectionFactory        connection factory
-     * @param selectionStrategyFactory connection selection strategy factory
-     * @param connectionListeners      connection listeners
-     * @deprecated
-     */
-    protected AbstractTarantoolConnectionManager(TarantoolClientConfig config,
-                                                 TarantoolConnectionFactory connectionFactory,
-                                                 ConnectionSelectionStrategyFactory selectionStrategyFactory,
-                                                 TarantoolConnectionListeners connectionListeners) {
-        this(config, connectionFactory, connectionListeners);
-    }
+    private ScheduledExecutorService reconnectService;
 
     /**
      * Basic constructor
@@ -86,8 +67,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         this.connectionListeners = connectionListeners;
         this.semaphore = new Semaphore(1, true);
         //todo: move to reconnection policy
-        this.reconnectService = Executors
-                .newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-reconnect"));
+        this.reconnectService = null;
     }
 
     /**
@@ -106,7 +86,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                     ex = ex.getCause();
                 }
                 if (ex instanceof NoAvailableConnectionsException) {
-                    connectionMode.set(ConnectionMode.FULL);
+                    //todo:
                 }
                 throw new TarantoolConnectionException(ex);
             }
@@ -126,20 +106,12 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     }
 
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
-        //todo: add lazy init
+        CompletableFuture<TarantoolConnection> result = new CompletableFuture<>();
+
         if (connectionRegistry.get().isEmpty()) {
-            try {
-                semaphore.acquire();
-                connect();
-                semaphore.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            initConnections();
         }
 
-        CompletableFuture<TarantoolConnection> result;
-
-        result = new CompletableFuture<>();
         try {
             result.complete(connectionSelectStrategy.get().next());
         } catch (Throwable t) {
@@ -147,6 +119,26 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         }
 
         return result;
+    }
+
+    private void initConnections() {
+        try {
+            semaphore.acquire();
+            if (reconnectService == null) {
+                initReconnectService();
+            }
+            connect();
+            semaphore.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initReconnectService() {
+        this.reconnectService = Executors.newSingleThreadScheduledExecutor(
+                new TarantoolDaemonThreadFactory("tarantool-reconnect")
+        );
+        this.reconnectService.scheduleAtFixedRate(this::connect, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     private CompletableFuture<Map<TarantoolServerAddress, List<TarantoolConnection>>> establishConnections()
@@ -216,9 +208,6 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     @Override
     public void close() {
-        if (initPhaser.getRegisteredParties() > 0) {
-            initPhaser.awaitAdvance(initPhaser.getPhase());
-        }
         connectionRegistry.get().values().stream()
                 .flatMap(Collection::stream)
                 .forEach(conn -> {
