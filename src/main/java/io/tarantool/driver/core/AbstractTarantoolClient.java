@@ -65,7 +65,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final Bootstrap bootstrap;
     private final TarantoolConnectionFactory connectionFactory;
     private final TarantoolConnectionListeners listeners;
-    private final AtomicReference<TarantoolConnectionManager> connectionManagerHolder = new AtomicReference<>();
+    private TarantoolConnectionManager connectionManager;
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
     private final SpacesMetadataProvider metadataProvider;
@@ -138,15 +138,14 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                                                                     TarantoolConnectionListeners listeners);
 
     private TarantoolConnectionManager connectionManager() {
-        if (this.connectionManagerHolder.get() == null) {
+        if (this.connectionManager == null) {
             synchronized (this) {
-                if (this.connectionManagerHolder.get() == null) {
-                    this.connectionManagerHolder.compareAndSet(null,
-                            connectionManager(config, connectionFactory, listeners));
+                if (this.connectionManager == null) {
+                    this.connectionManager = connectionManager(config, connectionFactory, listeners);
                 }
             }
         }
-        return connectionManagerHolder.get();
+        return connectionManager;
     }
 
     @Override
