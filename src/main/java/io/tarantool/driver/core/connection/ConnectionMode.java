@@ -18,5 +18,7 @@ public enum ConnectionMode {
     /**
      * Init sequence completed, requests will not block
      */
-    OFF;
+    OFF,
+
+    IN_PROGRESS;
 }

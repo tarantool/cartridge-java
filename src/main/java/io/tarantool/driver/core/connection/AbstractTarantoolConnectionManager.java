@@ -38,8 +38,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final TarantoolConnectionFactory connectionFactory;
     private final ConnectionSelectionStrategyFactory selectStrategyFactory;
     private final TarantoolConnectionListeners connectionListeners;
-    private final AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> connectionRegistry =
-            new AtomicReference<>(new HashMap<>());
+    private Map<TarantoolServerAddress, List<TarantoolConnection>> connectionRegistry;
     private final AtomicReference<ConnectionSelectionStrategy> connectionSelectStrategy = new AtomicReference<>();
     // connection init sequence state
     private final AtomicReference<ConnectionMode> connectionMode = new AtomicReference<>(ConnectionMode.FULL);
@@ -78,6 +77,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         this.selectStrategyFactory = config.getConnectionSelectionStrategyFactory();
         this.connectionSelectStrategy.set(selectStrategyFactory.create(config, Collections.emptyList()));
         this.connectionListeners = connectionListeners;
+        this.connectionRegistry = new HashMap<>();
     }
 
     /**
@@ -96,7 +96,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                     ex = ex.getCause();
                 }
                 if (ex instanceof NoAvailableConnectionsException) {
-                    connectionMode.set(ConnectionMode.FULL);
+                    connectionMode.compareAndSet(ConnectionMode.OFF, ConnectionMode.FULL);
                 }
                 throw new TarantoolConnectionException(ex);
             }
@@ -108,19 +108,24 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         CompletableFuture<TarantoolConnection> result;
         ConnectionMode currentMode = connectionMode.get();
         if (initPhaser.getRegisteredParties() == 0 &&
-                (connectionMode.compareAndSet(ConnectionMode.FULL, ConnectionMode.OFF) ||
-                        connectionMode.compareAndSet(ConnectionMode.PARTIAL, ConnectionMode.OFF))) {
+                (connectionMode.compareAndSet(ConnectionMode.FULL, ConnectionMode.IN_PROGRESS) ||
+                        connectionMode.compareAndSet(ConnectionMode.PARTIAL, ConnectionMode.IN_PROGRESS))) {
+
             // Only one thread can reach to this line because of CAS. Rise up the barrier for 1 thread
             if (currentMode == ConnectionMode.FULL) {
+                // We block the incoming requests until the connections are established and the registry is updated
                 initPhaser.register();
             }
+
             result = establishConnections()
                     .thenAccept(registry -> {
                         if (currentMode == ConnectionMode.PARTIAL) {
+                            // We block the incoming requests just before updating the registry
                             initPhaser.register();
                         }
+
                         // Add all alive connections
-                        connectionRegistry.set(registry);
+                        connectionRegistry = registry;
                         ConnectionSelectionStrategy strategy =
                                 selectStrategyFactory.create(config, registry.values().stream()
                                         .flatMap(Collection::stream)
@@ -136,6 +141,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         }
                         // Connection init sequence completed, release all waiting threads and lower the barrier
                         initPhaser.arriveAndDeregister();
+                        connectionMode.compareAndSet(ConnectionMode.IN_PROGRESS, ConnectionMode.OFF);
                     });
         } else {
             // Wait until a thread finishes the init sequence and lowers the barrier. Once the barrier is lowered, the
@@ -194,6 +200,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 for (TarantoolConnection aliveConnection : aliveConnections) {
                     if (count-- > 0) {
                         try {
+                            logger.info("Closing connection to {}, connections size greater than {}",
+                                    aliveConnection.getRemoteAddress(), config.getConnections());
                             aliveConnection.close();
                         } catch (Exception e) {
                             logger.info("Failed to close the connection: {}", e.getMessage());
@@ -207,12 +215,17 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         new AbstractMap.SimpleEntry<>(serverAddress, aliveConnections)));
             }
         }
+
         return endpointConnections;
     }
 
+
     private List<TarantoolConnection> getAliveConnections(TarantoolServerAddress serverAddress) {
-        List<TarantoolConnection> connections = connectionRegistry.get()
-                .getOrDefault(serverAddress, Collections.emptyList());
+        List<TarantoolConnection> connections = connectionRegistry.get(serverAddress);
+        if (connectionRegistry.get(serverAddress) == null) {
+            connections = Collections.emptyList();
+        }
+
         return connections.stream().filter(TarantoolConnection::isConnected).collect(Collectors.toList());
     }
 
@@ -253,7 +266,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         if (initPhaser.getRegisteredParties() > 0) {
             initPhaser.awaitAdvance(initPhaser.getPhase());
         }
-        connectionRegistry.get().values().stream()
+        connectionRegistry.values().stream()
                 .flatMap(Collection::stream)
                 .forEach(conn -> {
                     try {
