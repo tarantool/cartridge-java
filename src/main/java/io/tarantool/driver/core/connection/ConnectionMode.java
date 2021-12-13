@@ -20,5 +20,8 @@ public enum ConnectionMode {
      */
     OFF,
 
-    IN_PROGRESS;
+    /**
+     * The state in which the connection manager is trying to establish a connection
+     */
+    IN_PROGRESS
 }

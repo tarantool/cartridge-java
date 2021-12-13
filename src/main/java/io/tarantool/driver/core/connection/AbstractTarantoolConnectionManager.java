@@ -200,7 +200,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 for (TarantoolConnection aliveConnection : aliveConnections) {
                     if (count-- > 0) {
                         try {
-                            logger.info("Closing connection to {}, connections size greater than {}",
+                            logger.info("Closing connection to {}, connections size is greater than {}",
                                     aliveConnection.getRemoteAddress(), config.getConnections());
                             aliveConnection.close();
                         } catch (Exception e) {
@@ -215,10 +215,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         new AbstractMap.SimpleEntry<>(serverAddress, aliveConnections)));
             }
         }
-
         return endpointConnections;
     }
-
 
     private List<TarantoolConnection> getAliveConnections(TarantoolServerAddress serverAddress) {
         List<TarantoolConnection> connections = connectionRegistry.get(serverAddress);
