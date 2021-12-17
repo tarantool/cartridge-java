@@ -111,6 +111,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                 (connectionMode.compareAndSet(ConnectionMode.FULL, ConnectionMode.IN_PROGRESS) ||
                         connectionMode.compareAndSet(ConnectionMode.PARTIAL, ConnectionMode.IN_PROGRESS))) {
 
+            logger.debug("Current connection mode: {}", currentMode);
             // Only one thread can reach to this line because of CAS. Rise up the barrier for 1 thread
             if (currentMode == ConnectionMode.FULL) {
                 // We block the incoming requests until the connections are established and the registry is updated
