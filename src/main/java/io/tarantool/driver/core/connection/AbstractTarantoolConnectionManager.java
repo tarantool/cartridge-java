@@ -220,11 +220,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     }
 
     private List<TarantoolConnection> getAliveConnections(TarantoolServerAddress serverAddress) {
-        List<TarantoolConnection> connections = connectionRegistry.get(serverAddress);
-        if (connectionRegistry.get(serverAddress) == null) {
-            connections = Collections.emptyList();
-        }
-
+        List<TarantoolConnection> connections = connectionRegistry.getOrDefault(serverAddress, Collections.emptyList());
         return connections.stream().filter(TarantoolConnection::isConnected).collect(Collectors.toList());
     }
 
