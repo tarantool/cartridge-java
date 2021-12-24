@@ -18,5 +18,10 @@ public enum ConnectionMode {
     /**
      * Init sequence completed, requests will not block
      */
-    OFF;
+    OFF,
+
+    /**
+     * The state in which the connection manager is trying to establish a connection
+     */
+    IN_PROGRESS
 }
