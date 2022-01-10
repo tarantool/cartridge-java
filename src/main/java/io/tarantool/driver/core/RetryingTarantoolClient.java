@@ -379,6 +379,11 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
+    public boolean establishLackingConnections() {
+        return this.client.establishLackingConnections();
+    }
+
+    @Override
     public void close() throws Exception {
         client.close();
     }

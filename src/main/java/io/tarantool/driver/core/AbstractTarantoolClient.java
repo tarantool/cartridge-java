@@ -149,6 +149,11 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
+    public boolean establishLackingConnections() {
+        return connectionManager.establishLackingConnections();
+    }
+
+    @Override
     public TarantoolVersion getVersion() throws TarantoolClientException {
         try {
             return connectionManager().getConnection().thenApply(TarantoolConnection::getVersion).get();

@@ -8,6 +8,11 @@ testapp.second-router:
   advertise_uri: localhost:3311
   http_port: 8091
 
+testapp.third-router:
+  workdir: ./tmp/db_dev/3312
+  advertise_uri: localhost:3312
+  http_port: 8092
+
 testapp.s1-master:
   workdir: ./tmp/db_dev/3302
   advertise_uri: localhost:3302

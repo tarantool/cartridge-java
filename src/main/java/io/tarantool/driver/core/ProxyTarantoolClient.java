@@ -417,6 +417,11 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
+    public boolean establishLackingConnections() {
+        return this.client.establishLackingConnections();
+    }
+
+    @Override
     public void close() throws Exception {
         this.client.close();
     }
