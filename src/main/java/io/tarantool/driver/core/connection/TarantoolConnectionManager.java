@@ -18,4 +18,11 @@ public interface TarantoolConnectionManager extends AutoCloseable {
      * @return a future with next connection in order
      */
     CompletableFuture<TarantoolConnection> getConnection();
+
+    /**
+     * Starts the process of establishing lacking connections to each host
+     *
+     * @return returns true if the establishing process has been started, else false
+     */
+    boolean establishLackingConnections();
 }

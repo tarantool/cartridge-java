@@ -104,6 +104,11 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         });
     }
 
+    @Override
+    public boolean establishLackingConnections() {
+        return connectionMode.compareAndSet(ConnectionMode.OFF, ConnectionMode.PARTIAL);
+    }
+
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
         CompletableFuture<TarantoolConnection> result;
         ConnectionMode currentMode = connectionMode.get();

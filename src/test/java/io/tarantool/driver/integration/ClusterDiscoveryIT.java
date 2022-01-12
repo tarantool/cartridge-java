@@ -42,7 +42,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
         HTTPDiscoveryClusterAddressProvider addressProvider = getHttpProvider();
         Collection<TarantoolServerAddress> nodes = addressProvider.getAddresses();
 
-        assertEquals(nodes.size(), 2);
+        assertEquals(nodes.size(), 3);
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));
@@ -68,7 +68,7 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
         TarantoolClusterAddressProvider addressProvider = getBinaryProvider();
 
         Collection<TarantoolServerAddress> nodes = addressProvider.getAddresses();
-        assertEquals(nodes.size(), 2);
+        assertEquals(nodes.size(), 3);
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));

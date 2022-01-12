@@ -26,12 +26,14 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
 
     /**
      * Get the Tarantool client config passed to this client
+     *
      * @return {@link TarantoolClientConfig} instance
      */
     TarantoolClientConfig getConfig();
 
     /**
      * Get the Tarantool server version
+     *
      * @return {@link TarantoolVersion}
      * @throws TarantoolClientException if the client is not connected
      */
@@ -39,6 +41,7 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
 
     /**
      * Provides CRUD and other operations for a Tarantool space
+     *
      * @param spaceName name of the space, must not be null or empty
      * @return Tarantool space operations interface
      * @throws TarantoolClientException if the client is not connected
@@ -47,6 +50,7 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
 
     /**
      * Provides CRUD and other operations for a Tarantool space
+     *
      * @param spaceId ID of the space, must be greater than 0
      * @return Tarantool space operations implementation
      * @throws TarantoolClientException if the client is not connected
@@ -55,6 +59,7 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
 
     /**
      * Provides operations for Tarantool spaces and indexes metadata
+     *
      * @return Tarantool metadata operations implementation
      * @throws TarantoolClientException if the client is not connected
      */
@@ -67,4 +72,11 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
      * @return connection listeners
      */
     TarantoolConnectionListeners getConnectionListeners();
+
+    /**
+     * Starts the process of establishing lacking connections to each host
+     *
+     * @return returns true if the establishing process has been started, else false
+     */
+    boolean establishLackingConnections();
 }
