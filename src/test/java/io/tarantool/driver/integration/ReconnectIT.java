@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Testcontainers
 public class ReconnectIT extends SharedCartridgeContainer {
 
-    public static String USER_NAME;
-    public static String PASSWORD;
+    private static String USER_NAME;
+    private static String PASSWORD;
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
@@ -45,16 +45,18 @@ public class ReconnectIT extends SharedCartridgeContainer {
                                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
                         )
                         .withCredentials(USER_NAME, PASSWORD)
+                        .withConnections(10)
                         .build();
 
+        // getting all routers uuids
         final Set<String> routerUuids = getInstancesUuids(client);
 
         // stop routers
         container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "router");
         container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "second-router");
 
-        assertEquals(client.eval("return box.info().uuid").join().get(0),
-                client.eval("return box.info().uuid").join().get(0));
+        // check that there is only one instance left
+        assertEquals(getInstanceUuid(client), getInstanceUuid(client));
 
         // start routers
         container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
@@ -62,14 +64,23 @@ public class ReconnectIT extends SharedCartridgeContainer {
         client.establishLackingConnections();
         Thread.sleep(3000);
 
+        // getting all routers uuids after restarting
         final Set<String> uuidsAfterReconnect = getInstancesUuids(client);
 
+        // check that amount of routers is equal initial amount
         assertEquals(routerUuids.size(), uuidsAfterReconnect.size());
     }
 
+    /**
+     * Return all instances uuids from cluster, using round robin connection selection strategy
+     *
+     * @param client Tarantool client
+     * @return set of instances uuids from cluster
+     */
     private Set<String> getInstancesUuids(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
-        final Set<String> routerUuids = new HashSet<>();
         String firstUuid = getInstanceUuid(client);
+
+        final Set<String> routerUuids = new HashSet<>();
         routerUuids.add(firstUuid);
 
         String currentUuid = "";
@@ -77,6 +88,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
             currentUuid = getInstanceUuid(client);
             routerUuids.add(currentUuid);
         }
+
         return routerUuids;
     }
 
