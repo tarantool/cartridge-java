@@ -18,7 +18,7 @@ abstract class SharedCartridgeContainerMixedInstances {
                     "cartridge/topology_mixed.lua")
                     .withDirectoryBinding("cartridge")
                     .withLogConsumer(new Slf4jLogConsumer(logger))
-                    .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 7))
+                    .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
                     .withStartupTimeout(Duration.ofMinutes(2));
 
     protected static void startCluster() {

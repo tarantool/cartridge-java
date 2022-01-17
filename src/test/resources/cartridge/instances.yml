@@ -18,21 +18,6 @@ testapp.s1-master:
   advertise_uri: localhost:3302
   http_port: 8082
 
-testapp.s1-replica:
-  workdir: ./tmp/db_dev/3303
-  advertise_uri: localhost:3303
-  http_port: 8083
-
-testapp.s2-master:
-  workdir: ./tmp/db_dev/3304
-  advertise_uri: localhost:3304
-  http_port: 8084
-
-testapp.s2-replica:
-  workdir: ./tmp/db_dev/3305
-  advertise_uri: localhost:3305
-  http_port: 8085
-
 testapp-stateboard:
   workdir: ./tmp/db_dev/3310
   listen: localhost:3310
