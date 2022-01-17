@@ -27,6 +27,7 @@ import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -65,11 +66,11 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
         initClient();
-        truncateSpace(TEST_SPACE_NAME);
     }
 
-    private static void truncateSpace(String spaceName) {
-        client.space(spaceName).truncate().join();
+    @BeforeEach
+    public void truncateSpace() {
+        client.space(TEST_SPACE_NAME).truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {

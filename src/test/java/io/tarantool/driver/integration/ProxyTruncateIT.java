@@ -1,26 +1,27 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.Collections;
 
 import static io.tarantool.driver.integration.Utils.checkSpaceIsEmpty;
@@ -49,7 +50,11 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
         initClient();
-        truncateSpace(TEST_SPACE_NAME);
+    }
+
+    @BeforeEach
+    public void truncateSpace() {
+        client.space(TEST_SPACE_NAME).truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
@@ -129,9 +134,5 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
         // when truncate empty space and check that now exceptions was thrown and space is empty
         assertDoesNotThrow(() -> testSpace.truncate().join());
         checkSpaceIsEmpty(testSpace);
-    }
-
-    private static void truncateSpace(String spaceName) {
-        client.space(spaceName).truncate().join();
     }
 }
