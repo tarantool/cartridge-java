@@ -179,7 +179,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
                 TarantoolRequestRetryPolicies
                         .unbound(t -> true)
                         .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(200)  //operationTimeout
+                        .withOperationTimeout(500)  //operationTimeout
                         .build());
 
         CompletableFuture<List<?>> f = retryingClient
@@ -207,7 +207,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
                 TarantoolRequestRetryPolicies
                         .unbound()
                         .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(200)  //operationTimeout
+                        .withOperationTimeout(500)  //operationTimeout
                         .build());
 
         client.call("reset_request_counters");

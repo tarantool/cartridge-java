@@ -30,6 +30,7 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -74,10 +75,15 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         truncateSpace(TEST_SPACE_NAME);
     }
 
+    @BeforeEach
+    public void truncateSpace() {
+        truncateSpace("test_space");
+        truncateSpace("test_space_to_join");
+        truncateSpace("second_test_space");
+    }
+
     private static void truncateSpace(String spaceName) {
-        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(spaceName);
-        testSpace.truncate().join();
+        client.space(spaceName).truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
@@ -312,9 +318,6 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void functionAggregateResultViaCallTest() throws ExecutionException, InterruptedException {
-        truncateSpace("test_space");
-        truncateSpace("test_space_to_join");
-
         List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
         client.space("test_space").insert(tarantoolTuple).get();
@@ -395,8 +398,6 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void multiResultWithConverterTest() throws Exception {
-        truncateSpace("second_test_space");
-
         TarantoolSpaceMetadata metadata = client.space("second_test_space").getMetadata();
         MessagePackMapper mapper = client.getConfig().getMessagePackMapper();
 

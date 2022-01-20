@@ -5,7 +5,9 @@
         </encoder>
     </appender>
 
-    <root level="${logLevel:-info}">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
+
+    <logger name="org.testcontainers" level="INFO"/>
 </configuration>

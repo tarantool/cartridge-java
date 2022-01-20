@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
+
+import java.time.Duration;
 
 abstract class SharedCartridgeContainer {
 
@@ -14,7 +18,9 @@ abstract class SharedCartridgeContainer {
                     "cartridge/instances.yml",
                     "cartridge/topology.lua")
                     .withDirectoryBinding("cartridge")
-                    .withLogConsumer(new Slf4jLogConsumer(logger));
+                    .withLogConsumer(new Slf4jLogConsumer(logger))
+                    .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
+                    .withStartupTimeout(Duration.ofMinutes(2));
 
     protected static void startCluster() {
         if (!container.isRunning()) {

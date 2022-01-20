@@ -1,17 +1,21 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
+import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexType;
+import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
@@ -19,14 +23,14 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.ProxyTarantoolTupleClient;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
-import io.tarantool.driver.api.metadata.TarantoolIndexType;
-import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -37,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContainerMixedInstances {
 
-    private static ProxyTarantoolTupleClient client;
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
             new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -65,11 +70,11 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
         initClient();
-        truncateSpace(TEST_SPACE_NAME);
     }
 
-    private static void truncateSpace(String spaceName) {
-        client.space(spaceName).truncate().join();
+    @BeforeEach
+    public void truncateSpace() {
+        client.space(TEST_SPACE_NAME).truncate().join();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
@@ -109,7 +114,19 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
                 config, getClusterAddressProvider());
-        client = new ProxyTarantoolTupleClient(clusterClient);
+        final ProxyTarantoolTupleClient proxyClient = new ProxyTarantoolTupleClient(clusterClient);
+
+        //todo: remove this hack for crud after solving https://github.com/tarantool/cartridge-java/issues/159
+        final TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<Function<Throwable, Boolean>> retryFactory =
+                TarantoolRequestRetryPolicies
+                        .AttemptsBoundRetryPolicyFactory.builder(10,
+                        throwable -> throwable.getMessage().contains("Procedure 'crud")
+                                && throwable.getMessage().contains("is not defined"))
+                        .withDelay(500)
+                        .withRequestTimeout(2000)
+                        .build();
+
+        client = new RetryingTarantoolTupleClient(proxyClient, retryFactory);
     }
 
     @Test

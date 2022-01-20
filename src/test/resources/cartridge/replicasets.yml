@@ -19,18 +19,6 @@ app-router-second:
 s1-storage:
   instances:
   - s1-master
-  - s1-replica
-  roles:
-  - vshard-storage
-  - crud-storage
-  - app.roles.api_storage
-  weight: 1
-  all_rw: false
-  vshard_group: default
-s2-storage:
-  instances:
-  - s2-master
-  - s2-replica
   roles:
   - vshard-storage
   - crud-storage
