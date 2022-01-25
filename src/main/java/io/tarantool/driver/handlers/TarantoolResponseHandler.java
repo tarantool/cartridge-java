@@ -25,7 +25,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
     private final Logger log = LoggerFactory.getLogger(TarantoolResponseHandler.class);
     private final TarantoolErrors.TarantoolBoxErrorFactory boxErrorFactory
             = new TarantoolErrors.TarantoolBoxErrorFactory();
-    private RequestFutureManager futureManager;
+    private final RequestFutureManager futureManager;
 
     public TarantoolResponseHandler(RequestFutureManager futureManager) {
         super();

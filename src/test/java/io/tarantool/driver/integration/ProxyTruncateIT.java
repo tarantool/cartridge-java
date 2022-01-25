@@ -98,7 +98,7 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
     }
 
     @Test
-    public void test_truncate2TimesOneSpace_shouldNotThrowExceptionsAndSpaceShouldBeEmptyAfterItchCall() {
+    public void test_truncate2TimesOneSpace_shouldNotThrowExceptionsAndSpaceShouldBeEmptyAfterEachCall() {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
                 client.space(TEST_SPACE_NAME);
 

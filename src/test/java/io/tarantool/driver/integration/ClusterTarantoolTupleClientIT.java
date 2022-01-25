@@ -1,18 +1,19 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
@@ -20,8 +21,8 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class ClusterTarantoolTupleClientIT {
@@ -57,6 +63,11 @@ public class ClusterTarantoolTupleClientIT {
     public static void setUp() {
         assertTrue(tarantoolContainer.isRunning());
         initClient();
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        client.space(TEST_SPACE_NAME).truncate().join();
     }
 
     public static void tearDown() throws Exception {
@@ -83,7 +94,6 @@ public class ClusterTarantoolTupleClientIT {
         log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
-    //TODO: reset space before each test
     @Test
     public void insertAndSelectRequests() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
@@ -114,8 +124,8 @@ public class ClusterTarantoolTupleClientIT {
 
         //repeat insert same data
         assertThrows(ExecutionException.class,
-                 () -> testSpace.insert(tarantoolTuple).get(),
-        "Duplicate key exists in unique index 'primary' in space 'test_space'");
+                () -> testSpace.insert(tarantoolTuple).get(),
+                "Duplicate key exists in unique index 'primary' in space 'test_space'");
 
         //repeat select request
         TarantoolResult<TarantoolTuple> selectAfterInsertResult =
@@ -274,7 +284,7 @@ public class ClusterTarantoolTupleClientIT {
         Conditions queryByNotUniqIndex = Conditions.indexEquals(1, Collections.singletonList("J. R. R. Tolkien"));
 
         assertThrows(TarantoolSpaceOperationException.class, () -> testSpace.update(queryByNotUniqIndex,
-            TupleOperations.add(4, 12)));
+                TupleOperations.add(4, 12)));
     }
 
     @Test

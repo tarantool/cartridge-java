@@ -75,7 +75,7 @@ public class TarantoolConnectionFactory {
         timeoutScheduler.schedule(() -> {
             if (!connectionFuture.isDone()) {
                 connectionFuture.completeExceptionally(new TimeoutException(
-                        String.format("Failed to to the Tarantool server at %s within %d ms",
+                        String.format("Failed to connect to the Tarantool server at %s within %d ms",
                                 serverAddress, config.getConnectTimeout())));
             }
         }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);

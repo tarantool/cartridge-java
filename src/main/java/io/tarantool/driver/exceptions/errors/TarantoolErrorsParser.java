@@ -8,6 +8,7 @@ import org.msgpack.value.Value;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A parser that pushes the error into different types of tarantool errors
@@ -19,10 +20,10 @@ import java.util.Optional;
  */
 public final class TarantoolErrorsParser {
     private static final List<TarantoolErrorFactory> errorsFactories = Arrays.asList(
-        new TarantoolErrors.TarantoolBoxErrorFactory(),
-        new TarantoolErrors.TarantoolErrorsErrorFactory()
-    );
-    private static final TarantoolErrorFactory defaultFactory = new TarantoolErrors.TarantoolUnrecognizedErrorFactory();
+                    new TarantoolErrors.TarantoolBoxErrorFactory(),
+                    new TarantoolErrors.TarantoolErrorsErrorFactory(),
+                    new TarantoolErrors.TarantoolUnrecognizedErrorFactory()
+            );
 
     private TarantoolErrorsParser() {
     }
@@ -36,14 +37,12 @@ public final class TarantoolErrorsParser {
      */
     public static TarantoolException parse(Value error) {
         try {
-            Optional<TarantoolException> exception;
-            for (TarantoolErrorFactory errorFactory : errorsFactories) {
-                exception = errorFactory.create(error);
-                if (exception.isPresent()) {
-                    return exception.get();
-                }
-            }
-            return defaultFactory.create(error).get();
+            return errorsFactories.stream()
+                    .map(factory -> factory.create(error))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList())
+                    .get(0);
         } catch (MessagePackException e) {
             throw new TarantoolClientException("Failed to unpack internal error", e);
         }
