@@ -95,7 +95,7 @@ public class TarantoolErrors {
      * Produces {@link TarantoolInternalException} subclasses from the serialized representation
      * in the format of <code>box.error:unpack</code>,
      *
-     * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/error/">box_error</a>
+     * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/">box_error</a>
      */
     public static class TarantoolBoxErrorFactory implements TarantoolErrorFactory {
         private static final int ERROR_INDICATOR_OFFSET = 32768;
