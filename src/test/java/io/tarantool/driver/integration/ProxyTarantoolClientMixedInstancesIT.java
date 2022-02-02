@@ -120,7 +120,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
                 TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
                         .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
                         .withDelay(100)
-                        .build());;
+                        .build());
     }
 
     @Test
