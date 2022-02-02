@@ -26,6 +26,7 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
+import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -114,19 +115,12 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
                 config, getClusterAddressProvider());
-        final ProxyTarantoolTupleClient proxyClient = new ProxyTarantoolTupleClient(clusterClient);
 
-        //todo: remove this hack for crud after solving https://github.com/tarantool/cartridge-java/issues/159
-        final TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory<Function<Throwable, Boolean>> retryFactory =
-                TarantoolRequestRetryPolicies
-                        .AttemptsBoundRetryPolicyFactory.builder(10,
-                        throwable -> throwable.getMessage().contains("Procedure 'crud")
-                                && throwable.getMessage().contains("is not defined"))
-                        .withDelay(500)
-                        .withRequestTimeout(2000)
-                        .build();
-
-        client = new RetryingTarantoolTupleClient(proxyClient, retryFactory);
+        client =  new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
+                TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
+                        .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
+                        .withDelay(100)
+                        .build());;
     }
 
     @Test

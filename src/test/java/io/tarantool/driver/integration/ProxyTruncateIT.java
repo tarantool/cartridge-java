@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -17,6 +18,8 @@ import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
+import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class ProxyTruncateIT extends SharedCartridgeContainer {
 
-    private static ProxyTarantoolTupleClient client;
+    private static RetryingTarantoolTupleClient client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
             new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -94,7 +97,11 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
                 config, getClusterAddressProvider());
-        client = new ProxyTarantoolTupleClient(clusterClient);
+        client = new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
+                TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
+                        .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
+                        .withDelay(100)
+                        .build());
     }
 
     @Test

@@ -65,11 +65,6 @@ public class ClusterTarantoolTupleClientIT {
         initClient();
     }
 
-    @BeforeEach
-    public void beforeEach() {
-        client.space(TEST_SPACE_NAME).truncate().join();
-    }
-
     public static void tearDown() throws Exception {
         client.close();
         assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
