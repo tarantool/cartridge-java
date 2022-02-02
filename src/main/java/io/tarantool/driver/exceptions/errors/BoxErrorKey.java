@@ -3,7 +3,12 @@ package io.tarantool.driver.exceptions.errors;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;
 
-public enum BoxErrorKey implements ErrorKey {
+/**
+ * Errors keys for error message in box error
+ *
+ * @author Oleg Kuznetsov
+ */
+enum BoxErrorKey implements ErrorKey {
     CODE("code", ValueFactory.newString("code")),
     BASE_TYPE("base_type", ValueFactory.newString("base_type")),
     TYPE("type", ValueFactory.newString("type")),

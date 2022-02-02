@@ -3,7 +3,12 @@ package io.tarantool.driver.exceptions.errors;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;
 
-public enum ErrorsErrorKey implements ErrorKey {
+/**
+ * Errors keys for error message from tarantool/errors library
+ *
+ * @author Oleg Kuznetsov
+ */
+enum ErrorsErrorKey implements ErrorKey {
     LINE("line", ValueFactory.newString("line")),
     CLASS_NAME("class_name", ValueFactory.newString("line")),
     ERR("err", ValueFactory.newString("err")),

@@ -50,8 +50,7 @@ public class TarantoolErrors {
                 return Optional.empty();
             }
 
-            String exceptionMessage =
-                    new ErrorMessageBuilder("InnerErrorMessage:", ErrorsErrorKey.values(), errorMap).build();
+            String exceptionMessage = getExceptionMessage(ErrorsErrorKey.values(), errorMap);
 
             if (isNetworkError(errorMap)) {
                 return Optional.of(new TarantoolInternalNetworkException(exceptionMessage));
@@ -115,8 +114,7 @@ public class TarantoolErrors {
                 return Optional.empty();
             }
 
-            String exceptionMessage =
-                    new ErrorMessageBuilder("InnerErrorMessage:", BoxErrorKey.values(), errorMap).build();
+            String exceptionMessage = getExceptionMessage(BoxErrorKey.values(), errorMap);
 
             if (isNetworkError(errorMap)) {
                 return Optional.of(new TarantoolInternalNetworkException(exceptionMessage));
@@ -183,6 +181,10 @@ public class TarantoolErrors {
             return errorMap.containsKey(BoxErrorKey.CODE.getMsgPackKey())
                     && errorMap.containsKey(BoxErrorKey.MESSAGE.getMsgPackKey());
         }
+    }
+
+    private static String getExceptionMessage(ErrorKey[] errorKeys, Map<Value, Value> errorMap) {
+        return new ErrorMessageBuilder("InnerErrorMessage:", errorKeys, errorMap).build();
     }
 
     /**

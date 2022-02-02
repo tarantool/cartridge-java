@@ -5,19 +5,24 @@ import org.msgpack.value.Value;
 
 import java.util.Map;
 
-public class ErrorMessageBuilder {
+/**
+ * This class can create error message by keys from msgPack error response
+ *
+ * @author Oleg Kuznetsov
+ */
+class ErrorMessageBuilder {
 
     private final StringBuilder stringBuilder;
     private final Map<Value, Value> values;
     private final ErrorKey[] keys;
 
-    public ErrorMessageBuilder(String startsWith, ErrorKey[] keys, Map<Value, Value> values) {
+    ErrorMessageBuilder(String startsWith, ErrorKey[] keys, Map<Value, Value> values) {
         this.stringBuilder = new StringBuilder(startsWith);
         this.values = values;
         this.keys = keys;
     }
 
-    public String build() {
+    String build() {
         for (ErrorKey key : keys) {
             final StringValue stringValue = key.getMsgPackKey();
             final String s = values.containsKey(stringValue) ? values.get(stringValue).toString() : null;
