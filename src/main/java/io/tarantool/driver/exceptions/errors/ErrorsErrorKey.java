@@ -10,7 +10,7 @@ import org.msgpack.value.ValueFactory;
  */
 enum ErrorsErrorKey implements ErrorKey {
     LINE("line", ValueFactory.newString("line")),
-    CLASS_NAME("class_name", ValueFactory.newString("line")),
+    CLASS_NAME("class_name", ValueFactory.newString("class_name")),
     ERR("err", ValueFactory.newString("err")),
     FILE("file", ValueFactory.newString("file")),
     ERROR_MESSAGE("str", ValueFactory.newString("str")),

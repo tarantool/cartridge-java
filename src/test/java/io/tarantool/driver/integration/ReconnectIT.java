@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,16 +42,17 @@ public class ReconnectIT extends SharedCartridgeContainer {
         PASSWORD = container.getPassword();
     }
 
-    private boolean crudProcedureIsNotDefined;
 
     @Test
-    public void test_should_reconnect_ifReconnectIsInvoked() throws InterruptedException {
+    public void test_should_reconnect_ifCrudProcedureIsNotDefined() throws InterruptedException {
+        AtomicBoolean crudProcedureIsNotDefined = new AtomicBoolean(false);
+
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = getTarantoolClient();
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable.getMessage().contains("Procedure 'crud.select' is not defined")) {
                 logger.error(throwable.getMessage());
-                crudProcedureIsNotDefined = true;
+                crudProcedureIsNotDefined.set(true);
             }
         });
         new Thread(() -> {
@@ -64,11 +66,11 @@ public class ReconnectIT extends SharedCartridgeContainer {
         client.eval("rawset(_G, 'crud', require('crud'))").join();
         Thread.sleep(500);
 
-        assertFalse(crudProcedureIsNotDefined);
+        assertFalse(crudProcedureIsNotDefined.get());
     }
 
     @Test
-    public void test_should_reconnect_ifCrudProcedureIsNotDefined() throws Exception {
+    public void test_should_reconnect_ifReconnectIsInvoked() throws Exception {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = getTarantoolClient();
 
@@ -107,7 +109,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 .withProxyMethodMapping()
                 .withRetryingByNumberOfAttempts(5,
                         throwable -> throwable instanceof TarantoolNoSuchProcedureException,
-                        factory -> factory.withDelay(100)
+                        factory -> factory.withDelay(300)
                 )
                 .build();
     }
