@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 /**
- * Request retry policy contains an algorithm of deciding whether an exception is retriable and settings for
+ * Request retry policy contains an algorithm of deciding whether an exception is retryable and settings for
  * limiting the retry attempts
  *
  * @author Alexey Kuzin

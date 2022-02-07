@@ -6,7 +6,6 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,6 +18,8 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
+import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -42,7 +43,10 @@ public class ReconnectIT extends SharedCartridgeContainer {
         PASSWORD = container.getPassword();
     }
 
-
+    /**
+     * Checking if this test is valid is here
+     * {@link TarantoolErrorsIT#test_should_throwTarantoolNoSuchProcedureException_ifProcedureIsNil}
+     */
     @Test
     public void test_should_reconnect_ifCrudProcedureIsNotDefined() throws InterruptedException {
         AtomicBoolean crudProcedureIsNotDefined = new AtomicBoolean(false);
@@ -108,7 +112,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 .withConnections(10)
                 .withProxyMethodMapping()
                 .withRetryingByNumberOfAttempts(5,
-                        throwable -> throwable instanceof TarantoolNoSuchProcedureException,
+                        retryNetworkErrors().or(retryTarantoolNoSuchProcedureErrors()),
                         factory -> factory.withDelay(300)
                 )
                 .build();

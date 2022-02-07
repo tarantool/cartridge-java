@@ -1,21 +1,26 @@
 package io.tarantool.driver.integration;
 
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
-import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.CompletionException;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -161,5 +166,23 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             assertTrue(message.contains("code: 32"));
             assertTrue(message.contains("message:"));
         }
+    }
+
+    @Test
+    void test_should_throwTarantoolNoSuchProcedureException_ifProcedureIsNil() {
+        ProxyTarantoolTupleClient client = setupClient();
+
+        client.eval("rawset(_G, 'crud', nil)").join();
+
+        CompletionException exception =
+                assertThrows(CompletionException.class,
+                        () -> client.space("test_space").select(Conditions.any()).join());
+
+        assertTrue(exception.getCause() instanceof TarantoolNoSuchProcedureException);
+        assertTrue(exception.getCause().getMessage().contains("Procedure 'crud.select' is not defined"));
+
+        client.eval("rawset(_G, 'crud', require('crud'))").join();
+
+        assertDoesNotThrow(() -> client.space("test_space").select(Conditions.any()).join());
     }
 }

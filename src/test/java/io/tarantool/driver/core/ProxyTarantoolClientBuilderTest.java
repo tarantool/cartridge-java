@@ -12,7 +12,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
@@ -176,8 +176,7 @@ public class ProxyTarantoolClientBuilderTest {
         int expectedRequestTimeout = 123;
         String expectedReplaceFunctionName = "hello";
         String expectedTruncateFunctionName = "create";
-        Function<Throwable, Boolean> expectedCallback =
-                throwable -> throwable.getMessage().equals("Hello World");
+        Predicate<Throwable> expectedCallback = throwable -> throwable.getMessage().equals("Hello World");
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =

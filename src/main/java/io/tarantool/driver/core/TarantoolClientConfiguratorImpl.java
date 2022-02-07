@@ -8,7 +8,7 @@ import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
@@ -54,12 +54,12 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
     @Override
     public SELF withRetryingByNumberOfAttempts(
             int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
+            .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy) {
         return withRetryingByNumberOfAttempts(numberOfAttempts, retryNetworkErrors(), policy);
     }
 
     @Override
-    public <T extends Function<Throwable, Boolean>> SELF withRetryingByNumberOfAttempts(
+    public <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
             int numberOfAttempts, T exceptionsCheck,
             UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
         return withRetrying(policy.apply(TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
@@ -68,12 +68,12 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
 
     @Override
     public SELF withRetryingIndefinitely(UnaryOperator<TarantoolRequestRetryPolicies
-            .InfiniteRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy) {
+            .InfiniteRetryPolicyFactory.Builder<Predicate<Throwable>>> policy) {
         return withRetryingIndefinitely(retryNetworkErrors(), policy);
     }
 
     @Override
-    public <T extends Function<Throwable, Boolean>> SELF withRetryingIndefinitely(
+    public <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
             T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy) {
         return withRetrying(policy.apply(TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.builder(callback))
                 .build());

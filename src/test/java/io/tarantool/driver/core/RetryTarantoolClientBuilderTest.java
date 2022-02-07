@@ -13,7 +13,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.ROUND_ROBIN;
@@ -39,7 +39,7 @@ public class RetryTarantoolClientBuilderTest {
         int expectedRequestTimeout = 123;
         String expectedReplaceFunctionName = "hello";
         String expectedTruncateFunctionName = "create";
-        Function<Throwable, Boolean> expectedCallback =
+        Predicate<Throwable> expectedCallback =
                 throwable -> throwable.getMessage().equals("Hello World");
 
         //when
@@ -121,7 +121,7 @@ public class RetryTarantoolClientBuilderTest {
         int expectedRequestTimeoutMs = 230;
         String expectedUserName = "test";
         String expectedPassword = "passwordTest";
-        Function<Throwable, Boolean> expectedCallback = t -> t.getMessage().equals("Test");
+        Predicate<Throwable> expectedCallback = t -> t.getMessage().equals("Test");
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
                 .withCredentials(expectedUserName, expectedPassword)
@@ -203,7 +203,7 @@ public class RetryTarantoolClientBuilderTest {
         int expectedDelay = 100;
         int expectedNumberOfAttempts = 10;
         String expectedMappedFunctionName = "crud.delete";
-        Function<Throwable, Boolean> expectedExceptionCheck = t -> true;
+        Predicate<Throwable> expectedExceptionCheck = t -> true;
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
@@ -243,7 +243,7 @@ public class RetryTarantoolClientBuilderTest {
         int expectedDelay = 100;
         int expectedRequestTimeout = 10;
         int expectedNumberOfAttempts = 10;
-        Function<Throwable, Boolean> expectedExceptionCheck = t -> true;
+        Predicate<Throwable> expectedExceptionCheck = t -> true;
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =

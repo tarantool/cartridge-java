@@ -1,8 +1,8 @@
 package io.tarantool.driver.integration;
 
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
@@ -12,7 +12,7 @@ import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +42,7 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
         int expectedDelay = 500;
         int expectedRequestTimeout = 123;
         String expectedSelectFunctionName = "custom_crud_select";
-        Function<Throwable, Boolean> expectedCallback =
-                throwable -> throwable.getMessage().equals("Hello World");
+        Predicate<Throwable> expectedCallback = throwable -> throwable.getMessage().equals("Hello World");
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
