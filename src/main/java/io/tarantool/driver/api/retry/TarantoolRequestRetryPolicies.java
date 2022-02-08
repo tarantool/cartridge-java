@@ -31,23 +31,12 @@ public final class TarantoolRequestRetryPolicies {
     public static final long DEFAULT_ONE_HOUR_TIMEOUT = TimeUnit.HOURS.toMillis(1); //ms
 
     /**
-     * Check all known network exceptions and the user-specified exceptions
-     *
-     * @param exceptionCheck specified predicate for checking exceptions
-     * @param <T>            type of user specified predicate for checking exceptions
-     * @return predicate for checking all networks exceptions
-     */
-    public static <T extends Predicate<Throwable>> Predicate<Throwable> withRetryingNetworkErrors(T exceptionCheck) {
-        return exceptionCheck.or(TarantoolRequestRetryPolicies::isNetworkError);
-    }
-
-    /**
      * Check all known network exceptions
      *
      * @return predicate for checking all network exceptions
      */
     public static Predicate<Throwable> retryNetworkErrors() {
-        return withRetryingNetworkErrors(retryNone);
+        return TarantoolRequestRetryPolicies::isNetworkError;
     }
 
     /**

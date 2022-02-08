@@ -267,9 +267,13 @@ TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retrying(
     TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client, int retries, long delay) {
         return TarantoolClientFactory.configureClient(client)
                     .withRetryingByNumberOfAttempts(
-                        retries,
-                        e -> e.getMessage().contains("Unsuccessful attempt"),
-                        policy -> policy.withDelay(delay))
+                    retries,
+                    // you can use default predicates from TarantoolRequestRetryPolicies for checking errors
+                    TarantoolRequestRetryPolicies.retryNetworkErrors()
+                    // also you can use your own predicates and combine them with each other or with defaults
+                        .or(e -> e.getMessage().contains("Unsuccessful attempt"))
+                        .or(TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors()),
+                    policy -> policy.withDelay(delay))
                     .build();
         }
 
