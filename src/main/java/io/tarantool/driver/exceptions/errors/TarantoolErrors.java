@@ -98,7 +98,7 @@ public class TarantoolErrors {
      * @see <a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/box_error/">box_error</a>
      */
     public static class TarantoolBoxErrorFactory implements TarantoolErrorFactory {
-        private static final int ERROR_INDICATOR_OFFSET = 32768;
+        private static final long ERROR_INDICATOR_OFFSET = 32768L;
 
         public TarantoolBoxErrorFactory() {
         }

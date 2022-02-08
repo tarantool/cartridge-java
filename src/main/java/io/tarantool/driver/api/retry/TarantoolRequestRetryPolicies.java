@@ -38,7 +38,7 @@ public final class TarantoolRequestRetryPolicies {
      * @return predicate for checking all networks exceptions
      */
     public static <T extends Predicate<Throwable>> Predicate<Throwable> withRetryingNetworkErrors(T exceptionCheck) {
-        return exceptionCheck.or((TarantoolRequestRetryPolicies::isNetworkError));
+        return exceptionCheck.or(TarantoolRequestRetryPolicies::isNetworkError);
     }
 
     /**
