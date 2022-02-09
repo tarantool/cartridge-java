@@ -117,6 +117,10 @@ local function box_error_non_network_error()
     return nil, box.error.new(box.error.WAL_IO):unpack()
 end
 
+local function test_no_such_procedure()
+    return 'test_no_such_procedure'
+end
+
 local function crud_error_timeout()
     return nil, { class_name = 'SelectError',
                   err = 'Failed to get next object: GetTupleError: Failed to get tuples from storages: UpdateTuplesError: Failed to select tuples from storages: Call: Failed for 07d14fec-f32b-4b90-aa72-e6755273ad56: Function returned an error: {\"code\":78,\"base_type\":\"ClientError\",\"type\":\"ClientError\",\"message\":\"Timeout exceeded\",\"trace\":[{\"file\":\"builtin\\/box\\/net_box.lua\",\"line\":419}]}',
@@ -154,6 +158,7 @@ local function init(opts)
     rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
     rawset(_G, 'crud_error_timeout', crud_error_timeout)
     rawset(_G, 'custom_crud_select', custom_crud_select)
+    rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
 
     return true
 end

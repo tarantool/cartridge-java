@@ -1,6 +1,8 @@
 package io.tarantool.driver.integration;
 
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
@@ -16,10 +18,6 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class ProxyTruncateIT extends SharedCartridgeContainer {
 
-    private static RetryingTarantoolTupleClient client;
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
             new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -86,22 +84,17 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
     }
 
     public static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
+        client = TarantoolClientFactory.createClient()
+                .withCredentials(USER_NAME, PASSWORD)
+                .withAddressProvider(getClusterAddressProvider())
                 .withConnectTimeout(DEFAULT_TIMEOUT)
                 .withReadTimeout(DEFAULT_TIMEOUT)
                 .withRequestTimeout(DEFAULT_TIMEOUT)
+                .withProxyMethodMapping()
+                .withRetryingByNumberOfAttempts(10,
+                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                        b -> b.withDelay(100))
                 .build();
-
-        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, getClusterAddressProvider());
-        client = new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
-                TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
-                        .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
-                        .withDelay(100)
-                        .build());
     }
 
     @Test
