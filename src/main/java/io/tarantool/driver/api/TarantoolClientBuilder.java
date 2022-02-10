@@ -4,10 +4,12 @@ import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * Tarantool client builder interface.
@@ -105,6 +107,21 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
     TarantoolClientBuilder withConnections(int connections);
 
     /**
+     * Specify a configuration for mapping between Java objects and MessagePack entities.
+     * <p>
+     * This method takes a lambda as an argument, where the mapperBuilder is {@link DefaultMessagePackMapper.Builder}.
+     * </p>
+     * see {@link io.tarantool.driver.mappers.DefaultMessagePackMapperFactory}.
+     *
+     * @param mapperBuilder builder provider instance, e.g. a lambda function taking the builder
+     *                      for {@link MessagePackMapper} instance
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     * @see TarantoolClientConfig#setMessagePackMapper(MessagePackMapper)
+     */
+    TarantoolClientBuilder
+    withDefaultMessagePackMapperConfiguration(UnaryOperator<MessagePackMapperBuilder> mapperBuilder);
+
+    /**
      * Specify a mapper between Java objects and MessagePack entities.
      * The mapper contains converters for simple and complex tuple field types and for the entire tuples into custom
      * Java objects. This mapper is used by default if a custom mapper is not passed to a specific operation.
@@ -164,6 +181,17 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
             TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
+
+    /**
+     * Specify a tarantool client config
+     * <p>
+     * It overrides previous settings for config
+     * </p>
+     *
+     * @param config tarantool client config
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withTarantoolClientConfig(TarantoolClientConfig config);
 
     /**
      * Build the configured Tarantool client instance. Call this when you have specified all necessary settings.

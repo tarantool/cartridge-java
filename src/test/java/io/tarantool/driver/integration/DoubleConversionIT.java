@@ -1,13 +1,13 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +38,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
     @Test
     public void test_crudSelect_shouldReturnTupleWithDouble() throws Exception {
         //given
-        ProxyTarantoolTupleClient client = setupClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
         client.space("test_space_with_double_field")
                 .insert(tupleFactory.create(1, 1, Double.MAX_VALUE, 2.4)).get();
 
@@ -55,7 +55,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
     @Test
     public void test_crudSelect_shouldReturnTupleWithDouble_ifSavedDoubleImplicit() throws Exception {
         //given
-        ProxyTarantoolTupleClient client = setupClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
@@ -69,7 +69,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
     @Test
     public void test_insert_shouldSaveFloatFieldWithBadAccuracy_ifSavedInDoubleField() throws Exception {
         //given
-        ProxyTarantoolTupleClient client = setupClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
@@ -89,7 +89,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
     @Test
     public void test_select_shouldReturnValuesAsUserExpected() throws Exception {
         //given
-        ProxyTarantoolTupleClient client = setupClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
@@ -109,15 +109,16 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
         Assertions.assertEquals(Long.valueOf("1"), tuple.getObject("double_field", Long.class).get());
     }
 
-    private ProxyTarantoolTupleClient setupClient() {
-        TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
+        return TarantoolClientFactory.createClient()
+                .withAddress(container.getHost(), container.getPort())
+                .withCredentials(USER_NAME, PASSWORD)
                 .withConnectTimeout(1000)
                 .withReadTimeout(1000)
+                .withProxyMethodMapping()
+                .withRetryingByNumberOfAttempts(10,
+                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                        b -> b.withDelay(100))
                 .build();
-
-        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getHost(), container.getPort());
-        return new ProxyTarantoolTupleClient(clusterClient);
     }
 }

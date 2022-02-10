@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.api.MessagePackMapperBuilder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
@@ -42,6 +43,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
     /**
      * Copying constructor
+     *
      * @param mapper another mapper instance
      */
     public DefaultMessagePackMapper(DefaultMessagePackMapper mapper) {
@@ -128,9 +130,10 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Perform {@link ValueConverter} converter registration. The source entity class and target object class for
      * registration are determined automatically
+     *
      * @param converter entity-to-object converter
-     * @param <V> MessagePack entity type
-     * @param <O> object type
+     * @param <V>       MessagePack entity type
+     * @param <O>       object type
      * @see ValueConverter
      */
     public <V extends Value, O> void registerValueConverter(ValueConverter<V, ? extends O> converter) {
@@ -147,10 +150,11 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Perform {@link ValueConverter} converter registration. The target object class for registration is determined
      * automatically
+     *
      * @param valueClass source entity class
-     * @param converter entity-to-object converter
-     * @param <V> MessagePack entity type
-     * @param <O> object type
+     * @param converter  entity-to-object converter
+     * @param <V>        MessagePack entity type
+     * @param <O>        object type
      * @see ValueConverter
      */
     public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
@@ -182,7 +186,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         try {
             ValueConverter<? extends Value, ?> exactMatch = valueConvertersByTarget.get(targetClass.getTypeName());
             return exactMatch == converter ||
-                getInterfaceParameterClass(converter, converter.getClass(), 1).isAssignableFrom(targetClass);
+                    getInterfaceParameterClass(converter, converter.getClass(), 1).isAssignableFrom(targetClass);
         } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
             return false;
         }
@@ -217,9 +221,10 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Perform {@link ObjectConverter} converter registration. The source object class and target entity class for
      * registration are determined automatically
+     *
      * @param converter object-to-entity converter
-     * @param <V> MessagePack entity type
-     * @param <O> object type
+     * @param <V>       MessagePack entity type
+     * @param <O>       object type
      * @see ObjectConverter
      */
     public <V extends Value, O> void registerObjectConverter(ObjectConverter<O, V> converter) {
@@ -236,10 +241,11 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Adds a Java object converter to this mappers instance. The target value class for registration is determined
      * automatically
+     *
      * @param objectClass object class to register the converter for
-     * @param converter entity-to-object converter
-     * @param <V> the target MessagePack entity type
-     * @param <O> the source object type
+     * @param converter   entity-to-object converter
+     * @param <V>         the target MessagePack entity type
+     * @param <O>         the source object type
      * @see ObjectConverter
      */
     public <V extends Value, O> void registerObjectConverter(Class<O> objectClass, ObjectConverter<O, V> converter) {
@@ -277,12 +283,13 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
     /**
      * Convenience method for registering classes implementing both types of converters.
-     * @param converter object-to-entity and entity-to-object converter
-     * @param valueClass entity class
+     *
+     * @param converter   object-to-entity and entity-to-object converter
+     * @param valueClass  entity class
      * @param objectClass object class
-     * @param <V> MessagePack entity type
-     * @param <O> object type
-     * @param <T> converter type
+     * @param <V>         MessagePack entity type
+     * @param <O>         object type
+     * @param <T>         converter type
      */
     public <V extends Value, O, T extends ValueConverter<V, O> & ObjectConverter<O, V>> void registerConverter(
             Class<V> valueClass, Class<O> objectClass, T converter) {
@@ -298,7 +305,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     /**
      * Builder for {@link DefaultMessagePackMapper}
      */
-    public static class Builder {
+    public static class Builder implements MessagePackMapperBuilder {
         private final DefaultMessagePackMapper mapper;
 
         /**
@@ -310,151 +317,83 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
         /**
          * Basic constructor, initialized with the specified mapper
+         *
          * @param mapper a mapper instance
          */
         public Builder(DefaultMessagePackMapper mapper) {
             this.mapper = new DefaultMessagePackMapper(mapper);
         }
 
-        /**
-         * Configure the mapper with default {@code MP_MAP} entity to {@link Map} converter
-         * @return builder
-         */
+        @Override
         public Builder withDefaultMapValueConverter() {
             mapper.registerValueConverter(new DefaultMapValueConverter(mapper));
             return this;
         }
 
-        /**
-         * Configure the mapper with default {@link Map} to {@code MP_MAP} entity converter
-         * @return builder
-         */
+        @Override
         public Builder withDefaultMapObjectConverter() {
             mapper.registerObjectConverter(new DefaultMapObjectConverter(mapper));
             return this;
         }
 
-        /**
-         * Configure the mapper with default {@code MP_ARRAY} entity to {@link List} converter
-         * @return builder
-         */
+        @Override
         public Builder withDefaultArrayValueConverter() {
             mapper.registerValueConverter(new DefaultListValueConverter(mapper));
             return this;
         }
 
-        /**
-         * Configure the mapper with default {@link List} to {@code MP_ARRAY} entity converter
-         * @return builder
-         */
+        @Override
         public Builder withDefaultListObjectConverter() {
             mapper.registerObjectConverter(new DefaultListObjectConverter(mapper));
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack entity-to-object and object-to-entity converter
-         * @param valueClass MessagePack entity class
-         * @param objectClass object class
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @param <T> converter type
-         * @return builder
-         */
+        @Override
         public <V extends Value, O, T extends ValueConverter<V, O> & ObjectConverter<O, V>> Builder withConverter(
                 Class<V> valueClass, Class<O> objectClass, T converter) {
             mapper.registerConverter(valueClass, objectClass, converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack entity-to-object converter
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         * @see #registerValueConverter(ValueConverter)
-         */
+        @Override
         public <V extends Value, O> Builder withValueConverter(ValueConverter<V, O> converter) {
             mapper.registerValueConverter(converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack entity-to-object converter
-         * @param valueClass source entity class
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         * @see #registerValueConverter(Class, ValueConverter)
-         */
+        @Override
         public <V extends Value, O> Builder withValueConverter(Class<V> valueClass, ValueConverter<V, O> converter) {
             mapper.registerValueConverter(valueClass, converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack entity-to-object converter
-         * @param valueClass source entity class
-         * @param objectClass target object class
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         * @see #registerValueConverter(Class, Class, ValueConverter)
-         */
+        @Override
         public <V extends Value, O> Builder withValueConverter(Class<V> valueClass, Class<O> objectClass,
                                                                ValueConverter<V, O> converter) {
             mapper.registerValueConverter(valueClass, objectClass, converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack object-to-entity converter
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         */
+        @Override
         public <V extends Value, O> Builder withObjectConverter(ObjectConverter<O, V> converter) {
             mapper.registerObjectConverter(converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack object-to-entity converter
-         * @param objectClass source object class
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         */
+        @Override
         public <V extends Value, O> Builder withObjectConverter(Class<O> objectClass, ObjectConverter<O, V> converter) {
             mapper.registerObjectConverter(objectClass, converter);
             return this;
         }
 
-        /**
-         * Configure the mapper with a specified MessagePack object-to-entity converter
-         * @param objectClass source object class
-         * @param valueClass target object class
-         * @param converter MessagePack entity-to-object and object-to-entity converter
-         * @param <V> MessagePack entity type
-         * @param <O> object type
-         * @return builder
-         */
+        @Override
         public <V extends Value, O> Builder withObjectConverter(Class<O> objectClass, Class<V> valueClass,
                                                                 ObjectConverter<O, V> converter) {
             mapper.registerObjectConverter(objectClass, valueClass, converter);
             return this;
         }
 
-        /**
-         * Build the mapper instance
-         * @return a new mapper instance
-         */
+        @Override
         public DefaultMessagePackMapper build() {
             return mapper;
         }
