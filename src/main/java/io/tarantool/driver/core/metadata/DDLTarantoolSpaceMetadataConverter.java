@@ -221,7 +221,7 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
                     .map(parts -> {
                         if (!parts.isMapValue()) {
                             throw new TarantoolClientException(
-                                "Unsupported index metadata format: index part metadata is not a map");
+                                    "Unsupported index metadata format: index part metadata is not a map");
                         }
 
                         Map<Value, Value> partsMap = parts.asMapValue().map();

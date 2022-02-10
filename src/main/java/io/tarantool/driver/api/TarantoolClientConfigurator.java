@@ -5,7 +5,7 @@ import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 /**
@@ -55,7 +55,7 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      */
     SELF withRetryingByNumberOfAttempts(
             int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Function<Throwable, Boolean>>> policy);
+            .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy);
 
     /**
      * Configure the attempts bound request retry policy.
@@ -67,7 +67,7 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @param <T>              callback type for exceptions check
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
-    <T extends Function<Throwable, Boolean>> SELF withRetryingByNumberOfAttempts(
+    <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
             int numberOfAttempts, T exceptionsCheck,
             UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
 
@@ -81,7 +81,7 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      */
     SELF withRetryingIndefinitely(
             UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
-                    <Function<Throwable, Boolean>>> policy);
+                    <Predicate<Throwable>>> policy);
 
     /**
      * Configure the infinite request retry policy.
@@ -92,7 +92,7 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @param <T>      callback type for exceptions check
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
-    <T extends Function<Throwable, Boolean>> SELF withRetryingIndefinitely(
+    <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
             T callback,
             UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
 

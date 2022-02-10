@@ -16,13 +16,14 @@ import java.util.Optional;
  * As a result, an exception of the desired type and with the desired message is thrown.
  *
  * @author Artyom Dubinin
+ * @author Oleg Kuznetsov
  */
 public final class TarantoolErrorsParser {
     private static final List<TarantoolErrorFactory> errorsFactories = Arrays.asList(
-        new TarantoolErrors.TarantoolBoxErrorFactory(),
-        new TarantoolErrors.TarantoolErrorsErrorFactory()
+            new TarantoolErrors.TarantoolBoxErrorFactory(),
+            new TarantoolErrors.TarantoolErrorsErrorFactory(),
+            new TarantoolErrors.TarantoolUnrecognizedErrorFactory()
     );
-    private static final TarantoolErrorFactory defaultFactory = new TarantoolErrors.TarantoolUnrecognizedErrorFactory();
 
     private TarantoolErrorsParser() {
     }
@@ -36,14 +37,13 @@ public final class TarantoolErrorsParser {
      */
     public static TarantoolException parse(Value error) {
         try {
-            Optional<TarantoolException> exception;
-            for (TarantoolErrorFactory errorFactory : errorsFactories) {
-                exception = errorFactory.create(error);
-                if (exception.isPresent()) {
-                    return exception.get();
-                }
-            }
-            return defaultFactory.create(error).get();
+            return errorsFactories.stream()
+                    .map(factory -> factory.create(error))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .orElseThrow(() -> new TarantoolClientException("Failed to parse internal error"));
+
         } catch (MessagePackException e) {
             throw new TarantoolClientException("Failed to unpack internal error", e);
         }

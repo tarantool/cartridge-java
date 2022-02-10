@@ -5,19 +5,29 @@ import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 
+import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
+import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class ReconnectIT extends SharedCartridgeContainer {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReconnectIT.class);
 
     private static String USER_NAME;
     private static String PASSWORD;
@@ -34,19 +44,57 @@ public class ReconnectIT extends SharedCartridgeContainer {
         PASSWORD = container.getPassword();
     }
 
+    /**
+     * Checking if this test is valid is here
+     * {@link TarantoolErrorsIT#test_should_throwTarantoolNoSuchProcedureException_ifProcedureIsNil}
+     */
+    @Test
+    public void test_should_reconnect_ifCrudProcedureIsNotDefined() {
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clusterClient = getClusterClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingClient = getRetryingTarantoolClient();
+
+        try {
+            //save procedure to tmp variable set it to nil and call
+            clusterClient.eval("rawset(_G, 'tmp_test_no_such_procedure', test_no_such_procedure)")
+                    .thenAccept(c -> clusterClient.eval("rawset(_G, 'test_no_such_procedure', nil)"))
+                    .thenApply(c -> clusterClient.call("test_no_such_procedure"))
+                    .join();
+        } catch (CompletionException exception) {
+            assertTrue(exception.getCause() instanceof TarantoolNoSuchProcedureException);
+        }
+
+        //start another thread that will return the procedure back after 100 ms
+        new Thread(() -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            clusterClient.eval("rawset(_G, 'test_no_such_procedure', tmp_test_no_such_procedure)").join();
+        }).start();
+
+        assertDoesNotThrow(() -> retryingClient.call("test_no_such_procedure").join());
+        assertEquals("test_no_such_procedure", retryingClient.call("test_no_such_procedure").join().get(0));
+    }
+
+    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getClusterClient() {
+        return TarantoolClientFactory
+                .createClient()
+                .withAddresses(
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
+                )
+                .withCredentials(USER_NAME, PASSWORD)
+                .withConnections(10)
+                .build();
+    }
+
     @Test
     public void test_should_reconnect_ifReconnectIsInvoked() throws Exception {
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(
-                                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
-                                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
-                        )
-                        .withCredentials(USER_NAME, PASSWORD)
-                        .withConnections(10)
-                        .build();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = getRetryingTarantoolClient();
 
         // getting all routers uuids
         final Set<String> routerUuids = getInstancesUuids(client);
@@ -69,6 +117,23 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
         // check that amount of routers is equal initial amount
         assertEquals(routerUuids.size(), uuidsAfterReconnect.size());
+    }
+
+    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getRetryingTarantoolClient() {
+        return TarantoolClientFactory.createClient()
+                .withAddresses(
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
+                )
+                .withCredentials(USER_NAME, PASSWORD)
+                .withConnections(10)
+                .withProxyMethodMapping()
+                .withRetryingByNumberOfAttempts(5,
+                        retryNetworkErrors().or(retryTarantoolNoSuchProcedureErrors()),
+                        factory -> factory.withDelay(300)
+                )
+                .build();
     }
 
     /**
