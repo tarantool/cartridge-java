@@ -7,6 +7,7 @@ import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.utils.Assert;
 
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -31,7 +32,7 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
     }
 
     protected TarantoolClientConfiguratorImpl() {
-        this.client = new ClusterTarantoolTupleClient();
+        this.client = null;
     }
 
     @Override
@@ -99,6 +100,7 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
      */
     protected TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>
     decorate(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
+        Assert.notNull(client, "Tarantool client must not be null!");
 
         if (this.mappingConfig != null) {
             client = new ProxyTarantoolTupleClient(client, this.mappingConfig);

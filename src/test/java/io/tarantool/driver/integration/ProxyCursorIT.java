@@ -1,23 +1,23 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -32,7 +32,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ProxyCursorIT extends SharedCartridgeContainer {
 
@@ -106,18 +110,17 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
     }
 
     public static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
+        client = TarantoolClientFactory.createClient()
+                .withAddressProvider(getClusterAddressProvider())
+                .withCredentials(USER_NAME, PASSWORD)
                 .withConnectTimeout(DEFAULT_TIMEOUT)
                 .withReadTimeout(DEFAULT_TIMEOUT)
                 .withRequestTimeout(DEFAULT_TIMEOUT)
+                .withProxyMethodMapping()
+                .withRetryingByNumberOfAttempts(10,
+                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                        b -> b.withDelay(100))
                 .build();
-
-        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, getClusterAddressProvider());
-        client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
     private interface ElementGenerator {

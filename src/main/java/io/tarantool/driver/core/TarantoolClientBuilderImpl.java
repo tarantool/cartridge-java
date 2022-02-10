@@ -1,5 +1,6 @@
 package io.tarantool.driver.core;
 
+import io.tarantool.driver.api.MessagePackMapperBuilder;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientBuilder;
 import io.tarantool.driver.api.TarantoolClientConfig;
@@ -11,12 +12,14 @@ import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyTy
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * Tarantool client builder implementation.
@@ -27,6 +30,8 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
         implements TarantoolClientBuilder {
 
     private final TarantoolClientConfig.Builder configBuilder;
+
+    private TarantoolClientConfig config;
     private TarantoolClusterAddressProvider addressProvider;
 
     public TarantoolClientBuilderImpl() {
@@ -83,6 +88,12 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
     }
 
     @Override
+    public TarantoolClientBuilder
+    withDefaultMessagePackMapperConfiguration(UnaryOperator<MessagePackMapperBuilder> mapperBuilder) {
+        return withMessagePackMapper(mapperBuilder.apply(new DefaultMessagePackMapper.Builder()).build());
+    }
+
+    @Override
     public TarantoolClientBuilder withMessagePackMapper(MessagePackMapper mapper) {
         this.configBuilder.withMessagePackMapper(mapper);
         return this;
@@ -120,7 +131,15 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
     }
 
     @Override
+    public TarantoolClientBuilder withTarantoolClientConfig(TarantoolClientConfig config) {
+        this.config = config;
+        return this;
+    }
+
+    @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
-        return super.decorate(new ClusterTarantoolTupleClient(this.configBuilder.build(), this.addressProvider));
+        TarantoolClientConfig config = this.config != null ? this.config : this.configBuilder.build();
+
+        return super.decorate(new ClusterTarantoolTupleClient(config, this.addressProvider));
     }
 }
