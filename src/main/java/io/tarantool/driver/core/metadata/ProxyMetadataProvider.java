@@ -47,6 +47,9 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
     public CompletableFuture<TarantoolMetadataContainer> getMetadata() {
         return client.callForSingleResult(metadataFunctionName, mapper)
             .exceptionally(ex -> {
+                //FIXME this exception handling must consider retrying on TarantoolNoSuchProcedureException.
+                // See https://github.com/tarantool/cartridge-java/issues/170. Retry on metadata requests probably
+                // should be fixed in RetryingTarantoolTupleClientIT.
                 if (ex.getCause() != null && ex.getCause() instanceof TarantoolClientException) {
                     throw new TarantoolMetadataRequestException(metadataFunctionName, ex);
                 } else if (ex instanceof RuntimeException) {

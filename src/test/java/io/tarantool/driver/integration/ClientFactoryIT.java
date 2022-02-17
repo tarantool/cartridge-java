@@ -27,10 +27,6 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
     public static void setUp() throws TimeoutException {
         startCluster();
 
-        WaitingConsumer waitingConsumer = new WaitingConsumer();
-        container.followOutput(waitingConsumer);
-        waitingConsumer.waitUntil(f -> f.getUtf8String().contains("The cluster is balanced ok"));
-
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
     }
