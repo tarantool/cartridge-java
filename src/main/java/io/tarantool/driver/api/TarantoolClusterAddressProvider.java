@@ -19,7 +19,7 @@ public interface TarantoolClusterAddressProvider extends AutoCloseable {
     /**
      * Specify callback for refreshing connections to addresses.
      * <p>
-     * For example: you can run it when you want saying about your Tarantool server addresses is changed
+     * For example: can be executed when provider detects changes in the list of server addresses.
      *
      * @param runnable callback for running refresh connections
      */
