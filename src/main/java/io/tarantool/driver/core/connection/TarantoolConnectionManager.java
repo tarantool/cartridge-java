@@ -24,5 +24,5 @@ public interface TarantoolConnectionManager extends AutoCloseable {
      *
      * @return returns true if the establishing process has been started, else false
      */
-    boolean establishLackingConnections();
+    boolean refresh();
 }

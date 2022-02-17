@@ -2,6 +2,7 @@ local vshard = require('vshard')
 local cartridge_rpc = require('cartridge.rpc')
 local fiber = require('fiber')
 local crud = require('crud')
+local uuid = require('uuid')
 local log = require('log')
 
 local function get_schema()
@@ -12,6 +13,22 @@ end
 
 local function truncate_space(space_name)
     crud.truncate(space_name)
+end
+
+local function get_routers_status()
+    local res = crud.select('instances_info')
+
+    local result = {}
+    for k, v in pairs(res.rows) do
+        result[v[3]] = { status = v[4], uri = v[5] }
+    end
+    return result
+end
+
+local function init_router_status()
+    crud.insert('instances_info', { 1, 1, uuid.str(), 'available', 'localhost:3301' })
+    crud.insert('instances_info', { 2, 1, uuid.str(), 'available', 'localhost:3311' })
+    crud.insert('instances_info', { 3, 1, uuid.str(), 'available', 'localhost:3312' })
 end
 
 local retries_holder = {
@@ -158,6 +175,8 @@ local function init(opts)
     rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
     rawset(_G, 'crud_error_timeout', crud_error_timeout)
     rawset(_G, 'custom_crud_select', custom_crud_select)
+    rawset(_G, 'get_routers_status', get_routers_status)
+    rawset(_G, 'init_router_status', init_router_status)
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
 
     return true

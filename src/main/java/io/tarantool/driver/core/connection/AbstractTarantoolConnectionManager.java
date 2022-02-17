@@ -47,22 +47,6 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**
-     * Constructor
-     *
-     * @param config                   Tarantool client config
-     * @param connectionFactory        connection factory
-     * @param selectionStrategyFactory connection selection strategy factory
-     * @param connectionListeners      connection listeners
-     * @deprecated
-     */
-    protected AbstractTarantoolConnectionManager(TarantoolClientConfig config,
-                                                 TarantoolConnectionFactory connectionFactory,
-                                                 ConnectionSelectionStrategyFactory selectionStrategyFactory,
-                                                 TarantoolConnectionListeners connectionListeners) {
-        this(config, connectionFactory, connectionListeners);
-    }
-
-    /**
      * Basic constructor
      *
      * @param config              Tarantool client config
@@ -105,7 +89,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     }
 
     @Override
-    public boolean establishLackingConnections() {
+    public boolean refresh() {
         return connectionMode.compareAndSet(ConnectionMode.OFF, ConnectionMode.PARTIAL);
     }
 

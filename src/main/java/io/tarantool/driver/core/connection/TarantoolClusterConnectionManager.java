@@ -29,10 +29,18 @@ public class TarantoolClusterConnectionManager extends AbstractTarantoolConnecti
                                              TarantoolClusterAddressProvider addressProvider) {
         super(config, connectionFactory, listeners);
         this.addressProvider = addressProvider;
+        this.addressProvider.setRefreshCallback(super::refresh);
     }
 
     @Override
     protected Collection<TarantoolServerAddress> getAddresses() {
         return addressProvider.getAddresses();
+    }
+
+    @Override
+    public void close() {
+        addressProvider.setRefreshCallback(() -> {
+        });
+        super.close();
     }
 }

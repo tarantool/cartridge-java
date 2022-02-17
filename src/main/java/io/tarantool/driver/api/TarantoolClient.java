@@ -78,5 +78,5 @@ public interface TarantoolClient<T extends Packable, R extends Collection<T>>
      *
      * @return returns true if the establishing process has been started, else false
      */
-    boolean establishLackingConnections();
+    boolean refresh();
 }

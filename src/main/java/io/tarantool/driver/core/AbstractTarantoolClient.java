@@ -149,8 +149,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public boolean establishLackingConnections() {
-        return connectionManager().establishLackingConnections();
+    public boolean refresh() {
+        return connectionManager().refresh();
     }
 
     @Override

@@ -23,18 +23,28 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
     private final ScheduledExecutorService scheduledExecutorService;
     private final CountDownLatch initLatch = new CountDownLatch(1);
     private final AtomicReference<Collection<TarantoolServerAddress>> addressesHolder = new AtomicReference<>();
+    private final AtomicReference<Runnable> refreshCallback;
 
     public AbstractDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig discoveryConfig) {
         this.discoveryConfig = discoveryConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
                 new TarantoolDaemonThreadFactory("tarantool-discovery"));
+        this.refreshCallback = new AtomicReference<>(() -> {
+        });
     }
 
     protected void startDiscoveryTask() throws TarantoolClientException {
         Runnable discoveryTask = () -> {
             try {
+                Collection<TarantoolServerAddress> currentAddresses = this.addressesHolder.get();
                 Collection<TarantoolServerAddress> addresses = discoverAddresses();
                 setAddresses(addresses);
+
+                if (currentAddresses != null
+                        && addresses.size() != currentAddresses.size()
+                        || !addresses.equals(currentAddresses)) {
+                    this.refreshCallback.get().run();
+                }
             } finally {
                 if (initLatch.getCount() > 0) {
                     initLatch.countDown();
@@ -72,6 +82,11 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
             throw new TarantoolClientException("Interrupted while waiting for cluster addresses discovery");
         }
         return addressesHolder.get();
+    }
+
+    @Override
+    public void setRefreshCallback(Runnable runnable) {
+        this.refreshCallback.set(runnable);
     }
 
     @Override
