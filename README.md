@@ -67,7 +67,7 @@ role from the `tarantool/crud` module and at least one role enabled on the route
 to depends on the [`crud-router`](https://github.com/tarantool/crud#api) role.
 
 6. Start your Cartridge cluster. You may use [`cartridge start`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_cli/)
-for starting it manually or the [Testcontainers for Tarantool](https://github.com/tarantool/cartridge-testcontainers)
+for starting it manually or the [Testcontainers for Tarantool](https://github.com/tarantool/cartridge-java-testcontainers)
 library for starting it automatically in tests.
 
 7. Add the following dependency into your project:
