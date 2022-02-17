@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -116,7 +115,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
                 config, getClusterAddressProvider());
 
-        client =  new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
+        client = new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
                 TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
                         .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
                         .withDelay(100)

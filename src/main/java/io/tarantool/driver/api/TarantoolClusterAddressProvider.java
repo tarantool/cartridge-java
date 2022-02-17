@@ -10,10 +10,21 @@ import java.util.Collection;
  */
 public interface TarantoolClusterAddressProvider extends AutoCloseable {
     /**
-     * The the collection of Tarantool server nodes which belong to the same cluster
+     * The collection of Tarantool server nodes which belong to the same cluster
+     *
      * @return collection of {@link TarantoolServerAddress}
      */
     Collection<TarantoolServerAddress> getAddresses();
+
+    /**
+     * Specify callback for refreshing connections to addresses.
+     * <p>
+     * For example: you can run it when you want saying about your Tarantool server addresses is changed
+     *
+     * @param runnable callback for running refresh connections
+     */
+    default void setRefreshCallback(Runnable runnable) {
+    }
 
     @Override
     default void close() {

@@ -1,14 +1,14 @@
 package io.tarantool.driver.integration;
 
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.api.connection.TarantoolConnection;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.api.connection.TarantoolConnection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;
@@ -28,7 +28,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexey Kuzin
@@ -137,7 +139,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         // after the first retry we will turn off this router
         // and it is expected that the request will go to another router
         assertTrue(client.callForSingleResult("long_running_function",
-                        Collections.singletonList(Arrays.asList(0.5, nextRouterName.get())), Boolean.class).get());
+                Collections.singletonList(Arrays.asList(0.5, nextRouterName.get())), Boolean.class).get());
 
         // start the turned off router to get requests
         result.set(container.execInContainer(
@@ -232,20 +234,20 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
         // initiate another long-running request
         request1 = client.callForSingleResult("long_running_function", Collections.singletonList(0.5), Boolean.class)
-        .thenApply(r -> {
-            try {
-                // partial disconnect -> one connection is restored
-                assertEquals(3, connections.size());
+                .thenApply(r -> {
+                    try {
+                        // partial disconnect -> one connection is restored
+                        assertEquals(3, connections.size());
 
-                // close remaining connections
-                for (int i = 1; i < 3; i++) {
-                    connections.get(i).close();
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return r;
-        });
+                        // close remaining connections
+                        for (int i = 1; i < 3; i++) {
+                            connections.get(i).close();
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return r;
+                });
 
         // the request should return normally (reconnection effect)
         assertTrue(request1.get());

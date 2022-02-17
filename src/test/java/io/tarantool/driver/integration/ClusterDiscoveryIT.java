@@ -1,17 +1,17 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
-import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
-import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
-import io.tarantool.driver.cluster.HTTPClusterDiscoveryEndpoint;
-import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
+import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
+import io.tarantool.driver.cluster.HTTPClusterDiscoveryEndpoint;
+import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Sergey Volgin

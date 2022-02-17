@@ -81,6 +81,23 @@ local function init_space()
     test_space_with_double_field:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space_with_double_field:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
+    local instances_info = box.schema.space.create(
+            'instances_info',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'bucket_id', 'unsigned' },
+                    { 'uuid', 'string' },
+                    { 'status', 'string' },
+                    { 'uri', 'string' },
+                },
+                if_not_exists = true,
+            }
+    )
+
+    instances_info:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    instances_info:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
     -- cursor test spaces
     local cursor_test_space = box.schema.space.create('cursor_test_space', { if_not_exists = true })
     cursor_test_space:format({

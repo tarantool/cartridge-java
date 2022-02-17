@@ -25,6 +25,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Get service discovery endpoint provider
+     *
      * @return tarantool server address provider instance
      */
     public TarantoolClusterAddressProvider getEndpointProvider() {
@@ -33,6 +34,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Set service discovery endpoint provider
+     *
      * @param endpointProvider a tarantool address provider instance
      */
     public void setEndpointProvider(TarantoolClusterAddressProvider endpointProvider) {
@@ -41,6 +43,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Get client configuration for connecting to the set of the discovery endpoints
+     *
      * @return tarantool client configuration
      */
     public TarantoolClientConfig getClientConfig() {
@@ -50,6 +53,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
     /**
      * Set client configuration for connecting to the set of the discovery endpoints. The same configuration will be
      * used for each endpoint.
+     *
      * @param clientConfig tarantool client configuration
      */
     public void setClientConfig(TarantoolClientConfig clientConfig) {
@@ -58,6 +62,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Get discovery function name
+     *
      * @return discovery function name
      */
     public String getDiscoveryFunction() {
@@ -66,6 +71,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Set discovery function name
+     *
      * @param discoveryFunction discovery function name
      */
     public void setDiscoveryFunction(String discoveryFunction) {
@@ -75,8 +81,15 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
     /**
      * Builder for {@link BinaryClusterDiscoveryEndpoint}
      */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link BinaryClusterDiscoveryEndpoint}
+     */
     public static class Builder {
-        private BinaryClusterDiscoveryEndpoint endpoint;
+        private final BinaryClusterDiscoveryEndpoint endpoint;
 
         /**
          * Basic constructor.
@@ -89,6 +102,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
          * Specify the function name to invoke in the discovery endpoint for getting the list of nodes. The function
          * should not require any parameters and must be exposed as API function. Also the user which is connecting the
          * endpoint must have the appropriate permission for this function.
+         *
          * @param discoveryFunction the function name, should not be null
          * @return this builder instance
          */
@@ -100,6 +114,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
         /**
          * Specify address provider for the discovery endpoints
+         *
          * @param endpointProvider discovery endpoint address privider, should not be null
          * @return this builder instance
          * @see BinaryClusterDiscoveryEndpoint#setEndpointProvider(TarantoolClusterAddressProvider)
@@ -113,6 +128,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
         /**
          * Specify the client configuration for connecting to the discovery endpoints. The same configuration will be
          * used for all endpoints
+         *
          * @param clientConfig tarantool client configuration
          * @return this builder instance
          */
@@ -124,6 +140,7 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
         /**
          * Build the discovery endpoint configuration
+         *
          * @return {@link BinaryClusterDiscoveryEndpoint} instance
          */
         public BinaryClusterDiscoveryEndpoint build() {

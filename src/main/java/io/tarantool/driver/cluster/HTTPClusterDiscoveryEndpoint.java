@@ -21,6 +21,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Create an instance, specifying URI for connection
+     *
      * @param uri discovery endpoint URI
      */
     public HTTPClusterDiscoveryEndpoint(String uri) {
@@ -29,6 +30,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Get discovery endpoint URI
+     *
      * @return discovery endpoint URI
      */
     public String getUri() {
@@ -37,6 +39,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Set discovery endpoint URI
+     *
      * @param uri discovery endpoint URI
      */
     public void setUri(String uri) {
@@ -45,6 +48,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Get cluster discovery endpoint connection timeout
+     *
      * @return connection timeout, in milliseconds
      */
     public int getConnectTimeout() {
@@ -53,6 +57,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Set cluster discovery endpoint connection timeout
+     *
      * @param connectTimeout connection timeout, in milliseconds
      */
     public void setConnectTimeout(int connectTimeout) {
@@ -61,6 +66,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Get response timeout for cluster discovery request
+     *
      * @return request timeout, in milliseconds
      */
     public int getReadTimeout() {
@@ -69,6 +75,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Set response timeout for cluster discovery request
+     *
      * @param readTimeout request timeout, in milliseconds
      */
     public void setReadTimeout(int readTimeout) {
@@ -78,8 +85,15 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
     /**
      * Builder for {@link HTTPClusterDiscoveryEndpoint}
      */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link HTTPClusterDiscoveryEndpoint}
+     */
     public static class Builder {
-        private HTTPClusterDiscoveryEndpoint endpoint;
+        private final HTTPClusterDiscoveryEndpoint endpoint;
 
         /**
          * Basic constructor.
@@ -90,6 +104,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
         /**
          * Specify the cluster discovery endpoint URI
+         *
          * @param uri discovery endpoint URI, should not be null or empty
          * @return this builder instance
          */
@@ -101,6 +116,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
         /**
          * Specify the connection timeout for discovery endpoint
+         *
          * @param connectTimeout connection timeout, in milliseconds
          * @return this builder instance
          * @see HTTPClusterDiscoveryEndpoint#setConnectTimeout(int)
@@ -115,6 +131,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
         /**
          * Specify the read timeout for discovery endpoint connection
+         *
          * @param readTimeout timeout of receiving response in the connection, in milliseconds
          * @return this builder instance
          * @see HTTPClusterDiscoveryEndpoint#setReadTimeout(int)
@@ -129,6 +146,7 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
         /**
          * Build the discovery endpoint configuration
+         *
          * @return a {@link HTTPClusterDiscoveryEndpoint} instance
          */
         public HTTPClusterDiscoveryEndpoint build() {
