@@ -88,14 +88,6 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
             spaceMetadata.setOwnerId(ID_UNKNOWN);
             spaceMetadata.setSpaceName(nameValue.asStringValue().asString());
 
-            // FIXME Blocked by https://github.com/tarantool/ddl/issues/52
-//            Value idValue = space.get(SPACE_ID_KEY);
-//            if (idValue == null) {
-//                throw new TarantoolClientException(
-//                        "Unsupported space metadata format: key '" + SPACE_ID_KEY + "' not found");
-//            }
-//            spaceMetadata.setSpaceId(idValue.asIntegerValue().asInt());
-
             Value formatValue = space.get(SPACE_FORMAT_KEY);
             if (formatValue == null) {
                 throw new TarantoolClientException(

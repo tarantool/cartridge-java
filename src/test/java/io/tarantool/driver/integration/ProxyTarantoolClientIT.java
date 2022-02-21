@@ -144,8 +144,6 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolSpaceMetadata spaceMetadata = spaceMeta.get();
         assertEquals(TEST_SPACE_NAME, spaceMetadata.getSpaceName());
         assertEquals(-1, spaceMetadata.getOwnerId());
-        // FIXME Blocked by https://github.com/tarantool/ddl/issues/52
-//        assertTrue(spaceMetadata.getSpaceId() > 0);
         assertEquals(5, spaceMetadata.getSpaceFormatMetadata().size());
         assertEquals(3, spaceMetadata.getFieldPositionByName("age"));
         assertEquals("unsigned", spaceMetadata.getFieldByName("age").get().getFieldType());

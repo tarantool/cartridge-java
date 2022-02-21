@@ -18,7 +18,3 @@ testapp.s1-master:
   advertise_uri: localhost:3302
   http_port: 8082
 
-testapp-stateboard:
-  workdir: ./tmp/db_dev/3310
-  listen: localhost:3310
-  password: passwd

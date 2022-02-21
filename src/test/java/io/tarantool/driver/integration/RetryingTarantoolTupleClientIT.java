@@ -1,15 +1,15 @@
 package io.tarantool.driver.integration;
 
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolTimeoutException;
-import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -179,14 +179,11 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
                 TarantoolRequestRetryPolicies
                         .unbound(t -> true)
                         .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(500)  //operationTimeout
+                        .withOperationTimeout(1000)  //operationTimeout
                         .build());
 
-        CompletableFuture<List<?>> f = retryingClient
-                .call("raising_error", Collections.singletonList(10));
-
         try {
-            f.get();
+            retryingClient.call("raising_error").get();
         } catch (ExecutionException e) {
             assertEquals(ExecutionException.class, e.getClass());
             assertEquals(TarantoolTimeoutException.class, e.getCause().getClass());
@@ -194,8 +191,8 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
             assertEquals(TarantoolInternalException.class, e.getCause().getCause().getClass());
             assertTrue(e.getCause().getCause().getMessage().contains(
                     "InnerErrorMessage:\n" +
-                    "code: 32\n" +
-                    "message:"));
+                            "code: 32\n" +
+                            "message:"));
         }
     }
 
@@ -207,7 +204,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
                 TarantoolRequestRetryPolicies
                         .unbound()
                         .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(500)  //operationTimeout
+                        .withOperationTimeout(200)  //operationTimeout
                         .build());
 
         client.call("reset_request_counters");

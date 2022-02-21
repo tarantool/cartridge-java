@@ -3,6 +3,7 @@ package io.tarantool.driver.integration;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
@@ -23,17 +24,21 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.TarantoolCartridgeContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,10 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexey Andreev
+ * @author Vladimir Rogach
  */
-public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContainerMixedInstances {
+@Testcontainers
+public class ProxyTarantoolClientMixedInstancesIT {
 
-    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
             new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
@@ -64,23 +70,79 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
     private static final String TEST_SPACE_NAME = "test__profile";
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
 
+    private static final Logger logger = LoggerFactory.getLogger(ProxyTarantoolClientMixedInstancesIT.class);
+
+    @Container
+    private static final TarantoolCartridgeContainer container =
+            new TarantoolCartridgeContainer(
+                    "cartridge/instances.yml",
+                    "cartridge/topology_mixed.lua")
+                    .withDirectoryBinding("cartridge")
+                    .withLogConsumer(new Slf4jLogConsumer(logger))
+                    .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
+                    .withStartupTimeout(Duration.ofMinutes(2));
+
+    //FIXME this code should be moved to testcontaineres library.
+    // See https://github.com/tarantool/cartridge-java-testcontainers/issues/34
+    static private boolean waitUntilNodeIsConfigured(int port, int timeoutSec) {
+        boolean initalized = false;
+        int attempt = 0;
+        int delay = 500;
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withCredentials(USER_NAME, PASSWORD)
+                .withConnectTimeout(DEFAULT_TIMEOUT)
+                .withReadTimeout(DEFAULT_TIMEOUT)
+                .withRequestTimeout(DEFAULT_TIMEOUT)
+                .withProxyMethodMapping()
+                .withAddress(container.getRouterHost(), container.getMappedPort(port))
+                .build();
+
+        try {
+            while (attempt * delay / 1000.0 < timeoutSec) {
+                List<?> state = client.eval("return require('cartridge.confapplier').get_state()").get();
+                Object result = state.get(0);
+                if (result instanceof String && result.equals("RolesConfigured")) {
+                    initalized = true;
+                    break;
+                }
+                Thread.sleep(delay);
+                ++attempt;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.warn("Got exception while waiting for RolesConfigured state of client: ", e);
+        }
+        return initalized;
+    }
+
+    static private void waitUntilRolesConfigured() {
+        int INIT_TIMEOUT_SEC = 30;
+        Assertions.assertTrue(waitUntilNodeIsConfigured(3301, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(3302, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(3311, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(3312, INIT_TIMEOUT_SEC));
+    }
+
+    private static void startCluster() {
+        if (!container.isRunning()) {
+            container.start();
+        }
+    }
+
     @BeforeAll
     public static void setUp() throws Exception {
         startCluster();
+
         USER_NAME = container.getUsername();
         PASSWORD = container.getPassword();
-        initClient();
-    }
 
-    @BeforeEach
-    public void truncateSpace() {
-        client.space(TEST_SPACE_NAME).truncate().join();
+        waitUntilRolesConfigured();
     }
 
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = TarantoolClientConfig.builder()
                 .withCredentials(credentials)
+                .withRequestTimeout(DEFAULT_TIMEOUT)
                 .withReadTimeout(DEFAULT_TIMEOUT)
                 .withConnectTimeout(DEFAULT_TIMEOUT)
                 .build();
@@ -94,7 +156,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
                 .withEndpoint(endpoint)
-                .withDelay(1)
+                .withDelay(100)
                 .build();
 
         return new TestWrappedClusterAddressProvider(
@@ -102,40 +164,36 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
                 container);
     }
 
-    public static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
+    public static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClient() {
+        return TarantoolClientFactory.createClient()
+                .withCredentials(USER_NAME, PASSWORD)
+                .withAddressProvider(getClusterAddressProvider())
                 .withConnectTimeout(DEFAULT_TIMEOUT)
                 .withReadTimeout(DEFAULT_TIMEOUT)
                 .withRequestTimeout(DEFAULT_TIMEOUT)
+                .withProxyMethodMapping()
+                .withRetryingByNumberOfAttempts(
+                        10,
+                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors()
+                                .or(TarantoolRequestRetryPolicies.retryNetworkErrors()),
+                        b -> b.withDelay(100)
+                )
                 .build();
-
-        ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, getClusterAddressProvider());
-
-        client = new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
-                TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
-                        .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
-                        .withDelay(100)
-                        .build());
     }
 
     @Test
     public void getClusterMetaDataTest() {
-        TarantoolMetadataOperations metadataOperations = client.metadata();
+        TarantoolMetadataOperations metadataOperations = initClient().metadata();
 
         Optional<TarantoolSpaceMetadata> spaceMeta = metadataOperations.getSpaceByName(TEST_SPACE_NAME);
         assertTrue(spaceMeta.isPresent());
         TarantoolSpaceMetadata spaceMetadata = spaceMeta.get();
         assertEquals(TEST_SPACE_NAME, spaceMetadata.getSpaceName());
         assertEquals(-1, spaceMetadata.getOwnerId());
-        // FIXME Blocked by https://github.com/tarantool/ddl/issues/52
-//        assertTrue(spaceMetadata.getSpaceId() > 0);
         assertEquals(5, spaceMetadata.getSpaceFormatMetadata().size());
         assertEquals(3, spaceMetadata.getFieldPositionByName("age"));
-        assertEquals("unsigned", spaceMetadata.getFieldByName("age").get().getFieldType());
+        assertEquals("unsigned", spaceMetadata.getFieldByName("age")
+                .orElseGet(Assertions::fail).getFieldType());
 
         Optional<TarantoolIndexMetadata> indexMeta = metadataOperations
                 .getIndexByName(TEST_SPACE_NAME, "bucket_id");
@@ -150,7 +208,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
     @Test
     public void clusterInsertSelectTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+                initClient().space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple;
 
@@ -177,15 +235,16 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
             assertEquals(100 + i, tuple.getInteger(4));
         }
 
-        conditions = conditions.startAfter(tupleFactory.create(1_000_000 + 9, null, "FIO", 59, 109));
+        conditions.startAfter(tupleFactory.create(1_000_000 + 9, null, "FIO", 59, 109));
         selectResult = profileSpace.select(conditions).get();
         assertEquals(10, selectResult.size());
+        profileSpace.truncate().join();
     }
 
     @Test
     public void clusterInsertDeleteTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+                initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(100, null, "fio", 10, 100);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -217,12 +276,13 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         assertEquals(2, tuple.getInteger(0));
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals("John Doe", tuple.getString(2));
+        profileSpace.truncate().join();
     }
 
     @Test
     public void replaceTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+                initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(123, null, "Jane Doe", 18, 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -248,12 +308,13 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         assertEquals(tuple.getString(2), "John Doe");
         assertEquals(tuple.getInteger(3), 21);
         assertEquals(tuple.getInteger(4), 100);
+        profileSpace.truncate().join();
     }
 
     @Test
     public void clusterUpdateTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+                initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(223, null, "Jane Doe", 10, 10);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -273,12 +334,13 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         assertEquals(223, updateResult.get(0).getInteger(0));
         assertEquals(100, updateResult.get(0).getInteger(3));
         assertEquals(15, updateResult.get(0).getInteger(4));
+        profileSpace.truncate().join();
     }
 
     @Test
     public void clusterUpsertTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+                initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -310,10 +372,12 @@ public class ProxyTarantoolClientMixedInstancesIT extends SharedCartridgeContain
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals(35, upsertResult.get(0).getInteger(3));
         assertEquals(7, upsertResult.get(0).getInteger(4));
+        profileSpace.truncate().join();
     }
 
     @Test
     public void functionAggregateResultViaCallTest() throws ExecutionException, InterruptedException {
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = initClient();
         List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
         client.space("test_space").insert(tarantoolTuple).get();
