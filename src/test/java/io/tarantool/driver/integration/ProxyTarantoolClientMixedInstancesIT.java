@@ -84,7 +84,7 @@ public class ProxyTarantoolClientMixedInstancesIT {
 
     //FIXME this code should be moved to testcontaineres library.
     // See https://github.com/tarantool/cartridge-java-testcontainers/issues/34
-    static private boolean waitUntilNodeIsConfigured(int port, int timeoutSec) {
+    private static boolean waitUntilNodeIsConfigured(int port, int timeoutSec) {
         boolean initalized = false;
         int attempt = 0;
         int delay = 500;
@@ -114,7 +114,7 @@ public class ProxyTarantoolClientMixedInstancesIT {
         return initalized;
     }
 
-    static private void waitUntilRolesConfigured() {
+    private static void waitUntilRolesConfigured() {
         int INIT_TIMEOUT_SEC = 30;
         Assertions.assertTrue(waitUntilNodeIsConfigured(3301, INIT_TIMEOUT_SEC));
         Assertions.assertTrue(waitUntilNodeIsConfigured(3302, INIT_TIMEOUT_SEC));

@@ -80,6 +80,8 @@ public class BinaryClusterDiscoveryEndpoint implements TarantoolClusterDiscovery
 
     /**
      * Builder for {@link BinaryClusterDiscoveryEndpoint}
+     *
+     * @return new builder instance
      */
     public static Builder builder() {
         return new Builder();
