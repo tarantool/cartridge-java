@@ -5,6 +5,7 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.Map;
@@ -79,7 +80,13 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
             } catch (InterruptedException e) {
                 throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", e);
             } catch (ExecutionException e) {
-                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", e.getCause());
+                Throwable cause = e.getCause();
+                if (cause instanceof TarantoolNoSuchProcedureException) {
+                    //This case is required to handle retry when instances are not initialized yet.
+                    //See https://github.com/tarantool/cartridge-java/issues/170
+                    throw (TarantoolNoSuchProcedureException) cause;
+                }
+                throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", cause);
             }
         } else {
             initPhaser.awaitAdvance(initPhaser.getPhase());

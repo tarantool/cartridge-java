@@ -26,6 +26,8 @@ import org.msgpack.value.Value;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -91,12 +93,16 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
 
     @Override
     public TarantoolSpaceOperations<T, R> space(String spaceName) throws TarantoolClientException {
-        return spaceOperations(client.space(spaceName), retryPolicyFactory, executor);
+        TarantoolSpaceOperations<T, R> wrappedSpace = getTarantoolSpaceOperationsRetrying(
+                () -> client.space(spaceName));
+        return spaceOperations(wrappedSpace, retryPolicyFactory, executor);
     }
 
     @Override
     public TarantoolSpaceOperations<T, R> space(int spaceId) throws TarantoolClientException {
-        return spaceOperations(client.space(spaceId), retryPolicyFactory, executor);
+        TarantoolSpaceOperations<T, R> wrappedSpace = getTarantoolSpaceOperationsRetrying(
+                () -> client.space(spaceId));
+        return spaceOperations(wrappedSpace, retryPolicyFactory, executor);
     }
 
     /**
@@ -410,4 +416,16 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
         RequestRetryPolicy retryPolicy = retryPolicyFactory.create();
         return retryPolicy.wrapOperation(operation, executor);
     }
+
+    private TarantoolSpaceOperations<T, R> getTarantoolSpaceOperationsRetrying(
+            Supplier<TarantoolSpaceOperations<T, R>> spaceSupplier) {
+        try {
+            return wrapOperation(() -> CompletableFuture.supplyAsync(spaceSupplier, executor)).get();
+        } catch (InterruptedException e) {
+            throw new CompletionException(e);
+        } catch (ExecutionException e) {
+            throw new CompletionException(e.getCause());
+        }
+    }
+
 }
