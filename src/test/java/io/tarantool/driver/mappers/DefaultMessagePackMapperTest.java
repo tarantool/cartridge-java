@@ -4,19 +4,27 @@ import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.ImmutableStringValue;
+import org.msgpack.value.IntegerValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
+import org.msgpack.value.impl.ImmutableDoubleValueImpl;
+import org.msgpack.value.impl.ImmutableMapValueImpl;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 import java.util.UUID;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -168,6 +176,20 @@ class DefaultMessagePackMapperTest {
         testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
         testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
         assertEquals(testValue, mapper.toValue(testTuple).asMapValue().map());
+    }
+
+
+    @Test
+    void test_getValueConverter_should_if()  {
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        Optional<ValueConverter<MapValue, TreeMap>> m = mapper.getValueConverter(MapValue.class, TreeMap.class);
+        Assertions.assertTrue(m.isPresent());
+
+        Map<Value, Value> treeMap = new HashMap<>();
+        treeMap.put(ValueFactory.newInteger(1), ValueFactory.newString("Hello"));
+
+        TreeMap converterTreeMap = m.get().fromValue(ValueFactory.newMap(treeMap)); // ClassCastException
+        assertTrue(!treeMap.isEmpty());
     }
 
     //TODO: add this test when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
