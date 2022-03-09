@@ -3,7 +3,7 @@ package io.tarantool.driver.core.metadata;
 import io.tarantool.driver.api.metadata.TarantoolFieldMetadata;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.ImmutableStringValue;
 import org.msgpack.value.Value;

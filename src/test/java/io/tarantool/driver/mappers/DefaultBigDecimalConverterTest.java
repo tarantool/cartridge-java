@@ -1,5 +1,7 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToBigDecimalConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -17,7 +19,7 @@ class DefaultBigDecimalConverterTest {
 
     @Test
     void toValue() throws IOException {
-        DefaultBigDecimalConverter converter = new DefaultBigDecimalConverter();
+        DefaultBigDecimalToExtensionValueConverter converter = new DefaultBigDecimalToExtensionValueConverter();
         MessagePacker packer = MessagePack.newDefaultBufferPacker();
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] result = ((MessageBufferPacker) packer.packValue(converter.toValue(BigDecimal.ONE))).toByteArray();
@@ -59,7 +61,7 @@ class DefaultBigDecimalConverterTest {
 
     @Test
     void fromValue() throws IOException {
-        DefaultBigDecimalConverter converter = new DefaultBigDecimalConverter();
+        DefaultExtensionValueToBigDecimalConverter converter = new DefaultExtensionValueToBigDecimalConverter();
         Base64.Decoder base64decoder = Base64.getDecoder();
         byte[] mpOne = base64decoder.decode("1QEAHA==");
         ExtensionValue value = MessagePack.newDefaultUnpacker(mpOne).unpackValue().asExtensionValue();
@@ -95,7 +97,7 @@ class DefaultBigDecimalConverterTest {
 
     @Test
     void canConvertValue() {
-        DefaultBigDecimalConverter converter = new DefaultBigDecimalConverter();
+        DefaultExtensionValueToBigDecimalConverter converter = new DefaultExtensionValueToBigDecimalConverter();
         assertFalse(converter.canConvertValue(ValueFactory.newExtension((byte) 100, new byte[]{0})));
         assertTrue(converter.canConvertValue(ValueFactory.newExtension((byte) 0x01, new byte[]{0})));
     }

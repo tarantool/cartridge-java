@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToShortConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 
@@ -10,7 +11,7 @@ class DefaultShortConverterTest {
     @Test
     void should_fromValue_returnShortValue() {
         //given
-        DefaultShortConverter converter = new DefaultShortConverter();
+        DefaultIntegerValueToShortConverter converter = new DefaultIntegerValueToShortConverter();
 
         //when
         Short actual = converter.fromValue(ValueFactory.newInteger(Short.MAX_VALUE));
@@ -22,7 +23,7 @@ class DefaultShortConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifItInShortRange() {
         //given
-        DefaultShortConverter converter = new DefaultShortConverter();
+        DefaultIntegerValueToShortConverter converter = new DefaultIntegerValueToShortConverter();
 
         //when
         boolean actual = converter.canConvertValue(ValueFactory.newInteger(Short.MAX_VALUE));

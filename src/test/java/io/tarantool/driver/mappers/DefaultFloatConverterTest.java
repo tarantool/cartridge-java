@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToFloatConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 
@@ -13,7 +14,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifFloatIsMinusZero() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(-0.0));
@@ -25,7 +26,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifFloatIsZeroWithFloatingPoint() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(0.0));
@@ -37,7 +38,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifFloatIsZero() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(0));
@@ -49,7 +50,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifCheckFloatMinValue() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(MIN_VALUE));
@@ -61,7 +62,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifCheckFloatMaxValue() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(MAX_VALUE));
@@ -73,7 +74,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifCheckFloatOne() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(1.0f));
@@ -85,7 +86,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnTrue_ifCheckDoubleOne() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(1.0d));
@@ -97,7 +98,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnFalse_ifCheckDoubleMinValue() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(Double.MIN_VALUE));
@@ -109,7 +110,7 @@ class DefaultFloatConverterTest {
     @Test
     void should_canConvertValue_returnFalse_ifCheckDoubleMaxValue() {
         //given
-        DefaultFloatConverter defaultFloatConverter = new DefaultFloatConverter();
+        DefaultFloatValueToFloatConverter defaultFloatConverter = new DefaultFloatValueToFloatConverter();
 
         //when
         boolean actual = defaultFloatConverter.canConvertValue(ValueFactory.newFloat(Double.MAX_VALUE));

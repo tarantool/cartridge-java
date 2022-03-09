@@ -1,6 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.CallResult;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 
 /**

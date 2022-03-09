@@ -3,7 +3,7 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.errors.TarantoolErrorsParser;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 

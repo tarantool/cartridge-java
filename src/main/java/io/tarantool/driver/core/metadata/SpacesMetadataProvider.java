@@ -12,7 +12,7 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadataResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 
 import java.util.concurrent.CompletableFuture;

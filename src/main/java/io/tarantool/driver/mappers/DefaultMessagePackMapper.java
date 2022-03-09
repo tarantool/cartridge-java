@@ -2,6 +2,13 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MessagePackMapperBuilder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.converters.value.DefaultNullToNilValueConverter;
+import io.tarantool.driver.mappers.converters.ObjectConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultListToArrayValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultMapToMapValueConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultArrayValueToListConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultMapValueToMapConverter;
 import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
 
@@ -20,16 +27,17 @@ import static io.tarantool.driver.mappers.MapperReflectionUtils.getInterfacePara
  * Deals with standard Java objects
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class DefaultMessagePackMapper implements MessagePackMapper {
 
-    private static final long serialVersionUID = 20200708L;
+    private static final long serialVersionUID = 20220418L;
 
     private final Map<String, List<ValueConverter<? extends Value, ?>>> valueConverters;
     private final Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
     private final Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;
     private final Map<String, ObjectConverter<?, ? extends Value>> objectConvertersByTarget;
-    private final ObjectConverter<Object, NilValue> nilConverter = new DefaultNilConverter();
+    private final ObjectConverter<Object, NilValue> nilConverter = new DefaultNullToNilValueConverter();
 
     /**
      * Basic constructor
@@ -326,25 +334,25 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
         @Override
         public Builder withDefaultMapValueConverter() {
-            mapper.registerValueConverter(new DefaultMapValueConverter(mapper));
+            mapper.registerValueConverter(new DefaultMapValueToMapConverter(mapper));
             return this;
         }
 
         @Override
         public Builder withDefaultMapObjectConverter() {
-            mapper.registerObjectConverter(new DefaultMapObjectConverter(mapper));
+            mapper.registerObjectConverter(new DefaultMapToMapValueConverter(mapper));
             return this;
         }
 
         @Override
         public Builder withDefaultArrayValueConverter() {
-            mapper.registerValueConverter(new DefaultListValueConverter(mapper));
+            mapper.registerValueConverter(new DefaultArrayValueToListConverter(mapper));
             return this;
         }
 
         @Override
         public Builder withDefaultListObjectConverter() {
-            mapper.registerObjectConverter(new DefaultListObjectConverter(mapper));
+            mapper.registerObjectConverter(new DefaultListToArrayValueConverter(mapper));
             return this;
         }
 

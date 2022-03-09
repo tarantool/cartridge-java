@@ -14,7 +14,7 @@ import io.tarantool.driver.core.conditions.NamedIndexImpl;
 import io.tarantool.driver.core.conditions.PositionFieldImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.ObjectConverter;
+import io.tarantool.driver.mappers.converters.ObjectConverter;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
