@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleMultiResult;
+import io.tarantool.driver.mappers.converters.value.custom.TarantoolTupleConverter;
 
 /**
  * Factory for {@link CallResultMapper} instances used for handling results with {@link TarantoolTuple}s as
@@ -36,13 +37,13 @@ public class TarantoolTupleMultiResultMapperFactory
      *
      * @param messagePackMapper MessagePack-to-entity mapper for result contents conversion
      * @param spaceMetadata     configured {@link TarantoolSpaceMetadata} instance
-     * @return default mapper instance configured with {@link DefaultTarantoolTupleValueConverter} instance
+     * @return default mapper instance configured with {@link TarantoolTupleConverter} instance
      */
     public CallResultMapper<TarantoolResult<TarantoolTuple>,
             MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>>
     withDefaultTupleValueConverter(MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withTarantoolResultConverter(
-                new DefaultTarantoolTupleValueConverter(messagePackMapper, spaceMetadata),
+                new TarantoolTupleConverter(messagePackMapper, spaceMetadata),
                 TarantoolTupleMultiResult.class);
     }
 }

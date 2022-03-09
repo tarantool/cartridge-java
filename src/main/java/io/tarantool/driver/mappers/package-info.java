@@ -1,5 +1,5 @@
 /**
- * Contains Java object to MessagePack entity converters and object mappers
+ * Contains converters and mappers that map Java object and MessagePack
  *
  * @author Alexey Kuzin
  */

@@ -10,7 +10,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
-import io.tarantool.driver.mappers.ObjectConverter;
+import io.tarantool.driver.mappers.converters.ObjectConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;

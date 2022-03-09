@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.Value;
 
 import java.util.Optional;

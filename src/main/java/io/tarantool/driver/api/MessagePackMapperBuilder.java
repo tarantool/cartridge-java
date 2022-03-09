@@ -1,8 +1,8 @@
 package io.tarantool.driver.api;
 
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.ObjectConverter;
-import io.tarantool.driver.mappers.ValueConverter;
+import io.tarantool.driver.mappers.converters.ObjectConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.Value;
 
 import java.util.List;

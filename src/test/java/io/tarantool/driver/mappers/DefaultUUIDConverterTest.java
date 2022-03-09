@@ -1,5 +1,7 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.object.DefaultUUIDToExtensionValueConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToUUIDConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -17,7 +19,7 @@ class DefaultUUIDConverterTest {
 
     @Test
     void toValue() throws IOException {
-        DefaultUUIDConverter converter = new DefaultUUIDConverter();
+        DefaultUUIDToExtensionValueConverter converter = new DefaultUUIDToExtensionValueConverter();
         MessagePacker packer = MessagePack.newDefaultBufferPacker();
         Base64.Encoder encoder = Base64.getEncoder();
         UUID uuid = UUID.fromString("84b56906-aeed-11ea-b3de-0242ac130004");
@@ -27,7 +29,7 @@ class DefaultUUIDConverterTest {
 
     @Test
     void fromValue() throws IOException {
-        DefaultUUIDConverter converter = new DefaultUUIDConverter();
+        DefaultExtensionValueToUUIDConverter converter = new DefaultExtensionValueToUUIDConverter();
         Base64.Decoder base64decoder = Base64.getDecoder();
         byte[] packed = base64decoder.decode("2AKEtWkGru0R6rPeAkKsEwAE");
         ExtensionValue value = MessagePack.newDefaultUnpacker(packed).unpackValue().asExtensionValue();
@@ -37,7 +39,7 @@ class DefaultUUIDConverterTest {
 
     @Test
     void canConvertValue() {
-        DefaultUUIDConverter converter = new DefaultUUIDConverter();
+        DefaultExtensionValueToUUIDConverter converter = new DefaultExtensionValueToUUIDConverter();
         assertFalse(converter.canConvertValue(ValueFactory.newExtension((byte) 100, new byte[]{0})));
         assertFalse(converter.canConvertValue(ValueFactory.newExtension((byte) 0x01, new byte[]{0})));
         assertTrue(converter.canConvertValue(ValueFactory.newExtension((byte) 0x02, new byte[]{0})));
