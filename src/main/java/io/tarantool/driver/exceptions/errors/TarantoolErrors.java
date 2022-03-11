@@ -1,5 +1,6 @@
 package io.tarantool.driver.exceptions.errors;
 
+import io.tarantool.driver.exceptions.TarantoolAccessDeniedException;
 import io.tarantool.driver.exceptions.TarantoolException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
@@ -139,6 +140,10 @@ public class TarantoolErrors {
 
             if (ErrorCode.NO_SUCH_PROCEDURE.getCode().equals(code)) {
                 return new TarantoolNoSuchProcedureException(exceptionMessage);
+            }
+
+            if (ErrorCode.ACCESS_DENIED.getCode().equals(code)) {
+                return new TarantoolAccessDeniedException(exceptionMessage);
             }
 
             return new TarantoolInternalException(exceptionMessage);

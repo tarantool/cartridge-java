@@ -145,6 +145,17 @@ local function crud_error_timeout()
     }
 end
 
+function returning_number()
+    return 2
+end
+
+local function create_restricted_user()
+    box.schema.func.create("returning_number", {if_not_exists = true, setuid = true})
+
+    box.schema.user.create('restricted_user', { password = 'restricted_secret' })
+    box.schema.user.grant("restricted_user", "execute", "function", "returning_number")
+end
+
 local function init(opts)
 
     box.schema.space.create('request_counters', {
@@ -178,6 +189,8 @@ local function init(opts)
     rawset(_G, 'get_routers_status', get_routers_status)
     rawset(_G, 'init_router_status', init_router_status)
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
+
+    create_restricted_user()
 
     return true
 end
