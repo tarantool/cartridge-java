@@ -7,7 +7,7 @@ package io.tarantool.driver.exceptions.errors;
  * @author Oleg Kuznetsov
  */
 enum ErrorCode {
-    NO_SUCH_PROCEDURE(33L), NO_CONNECTION(77L), TIMEOUT(78L);
+    NO_SUCH_PROCEDURE(33L), ACCESS_DENIED(42L), NO_CONNECTION(77L), TIMEOUT(78L);
     private final Long code;
 
     ErrorCode(Long code) {
