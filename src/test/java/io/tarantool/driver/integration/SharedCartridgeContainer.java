@@ -5,9 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 
 abstract class SharedCartridgeContainer {
 
@@ -26,5 +27,34 @@ abstract class SharedCartridgeContainer {
         if (!container.isRunning()) {
             container.start();
         }
+    }
+
+    protected static void startCartridge() throws IOException, InterruptedException {
+        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+    }
+
+    protected static void stopCartridge() throws IOException, InterruptedException {
+        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "--data-dir=/tmp/data");
+    }
+
+    protected static void startInstances(List<String> instancesName) throws IOException, InterruptedException {
+        for (String instanceName : instancesName) {
+            startInstance(instanceName);
+        }
+    }
+
+    protected static void stopInstances(List<String> instancesName) throws IOException, InterruptedException {
+        for (String instanceName : instancesName) {
+            stopInstance(instanceName);
+        }
+    }
+
+    protected static void startInstance(String instanceName) throws IOException, InterruptedException {
+        container.execInContainer(
+                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", instanceName);
+    }
+
+    protected static void stopInstance(String instanceName) throws IOException, InterruptedException {
+        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "--data-dir=/tmp/data", instanceName);
     }
 }

@@ -3,6 +3,7 @@ package io.tarantool.driver.integration;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
@@ -13,6 +14,7 @@ import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.jetbrains.annotations.NotNull;
@@ -20,15 +22,23 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors;
@@ -149,7 +159,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void should_removeUnavailableHostsFromAddressProvider_ifDiscoveryProcedureReturnStatusNotHealthyAndNotAvailable()
+    public void
+    test_should_removeUnavailableHostsFromAddressProvider_ifDiscoveryProcedureReturnStatusNotHealthyAndNotAvailable()
             throws Exception {
         initRouterStatuses();
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = initClientWithDiscovery();
@@ -170,6 +181,83 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
         final Set<String> afterRoutersEnablingInstancesUuids = getInstancesUuids(client);
         assertEquals(3, afterRoutersEnablingInstancesUuids.size());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void test_should_closeConnections_ifAddressProviderReturnsNewAddresses() throws Exception {
+        // restart routers for resetting connections
+        stopInstances(Arrays.asList("router", "second-router"));
+        startCartridge();
+
+        final TarantoolServerAddress firstAddress =
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
+        final TarantoolServerAddress secondAddress =
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302));
+        final TarantoolServerAddress[] tarantoolServerAddresses = {firstAddress, secondAddress};
+
+        // create client for check number of connections
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientForCheck =
+                TarantoolClientFactory.createClient()
+                        .withCredentials(container.getUsername(), container.getPassword())
+                        .withAddresses(tarantoolServerAddresses)
+                        .withRetryingByNumberOfAttempts(10, b -> b.withDelay(100))
+                        .build();
+
+        // make a function which returns everytime a one of two addresses in order
+        AtomicBoolean isNextAddress = new AtomicBoolean(false);
+        Callable<List<TarantoolServerAddress>> getTarantoolServerAddresses = () -> {
+            if (isNextAddress.compareAndSet(true, false)) {
+                return Collections.singletonList(secondAddress);
+            }
+            isNextAddress.compareAndSet(false, true);
+            return Collections.singletonList(firstAddress);
+        };
+
+        // make client for testing
+        final AtomicBoolean isRefreshNeeded = new AtomicBoolean(false);
+        final AtomicInteger numberOfSwitching = new AtomicInteger(0);
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withCredentials(container.getUsername(), container.getPassword())
+                        .withAddressProvider(new TarantoolClusterAddressProvider() {
+
+                            @Override
+                            public Collection<TarantoolServerAddress> getAddresses() {
+                                try {
+                                    return getTarantoolServerAddresses.call();
+                                } catch (Exception exception) {
+                                    exception.printStackTrace();
+                                    return Collections.emptyList();
+                                }
+                            }
+
+                            @Override
+                            public void setRefreshCallback(Runnable runnable) {
+                                Executors.newSingleThreadScheduledExecutor(
+                                        new TarantoolDaemonThreadFactory("refresh-connections")
+                                ).scheduleAtFixedRate(() -> {
+                                    if (isRefreshNeeded.get()) {
+                                        numberOfSwitching.incrementAndGet();
+                                        runnable.run();
+                                    }
+                                }, 500, 500, TimeUnit.MILLISECONDS);
+                            }
+                        }).build();
+
+        //initiate establish connection
+        client.getVersion();
+
+        isRefreshNeeded.set(true);
+        while (numberOfSwitching.get() < 50) {
+            Thread.sleep(1000);
+            logger.info("Waiting while number of switching won't be 50");
+        }
+
+        final List<Map<String, Map<String, Integer>>> result = (List<Map<String, Map<String, Integer>>>)
+                clientForCheck.eval("return box.stat.net()").join();
+
+        assertTrue(result.get(0).get("CONNECTIONS").get("current") < 10);
     }
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClientWithDiscovery() {

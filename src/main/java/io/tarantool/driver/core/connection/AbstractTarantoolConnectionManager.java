@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -99,7 +100,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         if (initPhaser.getRegisteredParties() == 0 &&
                 (connectionMode.compareAndSet(ConnectionMode.FULL, ConnectionMode.IN_PROGRESS) ||
                         connectionMode.compareAndSet(ConnectionMode.PARTIAL, ConnectionMode.IN_PROGRESS))) {
-
+            AtomicReference<Map<TarantoolServerAddress, List<TarantoolConnection>>> currentRegistry =
+                    new AtomicReference<>();
             logger.debug("Current connection mode: {}", currentMode);
             // Only one thread can reach to this line because of CAS. Rise up the barrier for 1 thread
             if (currentMode == ConnectionMode.FULL) {
@@ -114,6 +116,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                             initPhaser.register();
                         }
 
+                        currentRegistry.set(connectionRegistry);
                         // Add all alive connections
                         connectionRegistry = registry;
                         ConnectionSelectionStrategy strategy =
@@ -128,6 +131,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                             // Connection attempt failed, signal the next thread coming for connection
                             // to start the init sequence
                             connectionMode.set(currentMode);
+                        } else {
+                            closeOldConnections(currentRegistry.get());
                         }
                         // Connection init sequence completed, release all waiting threads and lower the barrier
                         initPhaser.arriveAndDeregister();
@@ -245,6 +250,14 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                         .collect(Collectors.toList()));
     }
 
+    private void closeOldConnections(Map<TarantoolServerAddress, List<TarantoolConnection>> registry) {
+        registry.forEach((key, value) -> {
+            if (!connectionRegistry.containsKey(key)) {
+                value.forEach(closeConnection());
+            }
+        });
+    }
+
     @Override
     public void close() {
         if (initPhaser.getRegisteredParties() > 0) {
@@ -252,12 +265,16 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         }
         connectionRegistry.values().stream()
                 .flatMap(Collection::stream)
-                .forEach(conn -> {
-                    try {
-                        conn.close();
-                    } catch (Exception e) {
-                        logger.warn("Failed to close connection: {}", e.getMessage());
-                    }
-                });
+                .forEach(closeConnection());
+    }
+
+    private Consumer<TarantoolConnection> closeConnection() {
+        return conn -> {
+            try {
+                conn.close();
+            } catch (Exception e) {
+                logger.warn("Failed to close connection: {}", e.getMessage());
+            }
+        };
     }
 }
