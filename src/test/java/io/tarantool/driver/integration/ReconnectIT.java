@@ -234,6 +234,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
                             @Override
                             public void setRefreshCallback(Runnable runnable) {
+                                // make a daemon that will refresh connections every 100ms
                                 Executors.newSingleThreadScheduledExecutor(
                                         new TarantoolDaemonThreadFactory("refresh-connections")
                                 ).scheduleAtFixedRate(() -> {
