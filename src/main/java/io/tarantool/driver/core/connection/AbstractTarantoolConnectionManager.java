@@ -24,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +44,8 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private final AtomicReference<ConnectionMode> connectionMode = new AtomicReference<>(ConnectionMode.FULL);
     // resettable barrier for preventing multiple threads from running into the connection init sequence
     private final Phaser initPhaser = new Phaser(0);
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName());
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTarantoolConnectionManager.class);
 
     /**
      * Basic constructor
@@ -253,7 +253,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     private void closeOldConnections(Map<TarantoolServerAddress, List<TarantoolConnection>> registry) {
         registry.forEach((key, value) -> {
             if (!connectionRegistry.containsKey(key)) {
-                value.forEach(closeConnection());
+                value.forEach(AbstractTarantoolConnectionManager::closeConnection);
             }
         });
     }
@@ -265,16 +265,14 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         }
         connectionRegistry.values().stream()
                 .flatMap(Collection::stream)
-                .forEach(closeConnection());
+                .forEach(AbstractTarantoolConnectionManager::closeConnection);
     }
 
-    private Consumer<TarantoolConnection> closeConnection() {
-        return conn -> {
-            try {
-                conn.close();
-            } catch (Exception e) {
-                logger.warn("Failed to close connection: {}", e.getMessage());
-            }
-        };
+    private static void closeConnection(TarantoolConnection connection) {
+        try {
+            connection.close();
+        } catch (Exception e) {
+            logger.warn("Failed to close connection: {}", e.getMessage());
+        }
     }
 }

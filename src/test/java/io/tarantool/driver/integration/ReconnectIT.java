@@ -241,7 +241,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
                                         numberOfSwitching.incrementAndGet();
                                         runnable.run();
                                     }
-                                }, 500, 500, TimeUnit.MILLISECONDS);
+                                }, 500, 100, TimeUnit.MILLISECONDS);
                             }
                         }).build();
 
@@ -249,15 +249,15 @@ public class ReconnectIT extends SharedCartridgeContainer {
         client.getVersion();
 
         isRefreshNeeded.set(true);
+        logger.info("Waiting while number of switching won't be 50");
         while (numberOfSwitching.get() < 50) {
-            Thread.sleep(1000);
-            logger.info("Waiting while number of switching won't be 50");
+            Thread.sleep(100);
         }
 
         final List<Map<String, Map<String, Integer>>> result = (List<Map<String, Map<String, Integer>>>)
                 clientForCheck.eval("return box.stat.net()").join();
 
-        assertTrue(result.get(0).get("CONNECTIONS").get("current") < 10);
+        assertTrue(result.get(0).get("CONNECTIONS").get("current") < 20);
     }
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClientWithDiscovery() {
