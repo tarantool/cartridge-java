@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *   4141912c-34b8-4e40-a17e-7a6d80345954:
  *     priority: 1
  *     status: healthy
- *     uri: localhost:3311
+ *     uri: localhost:3302
  *     uuid: 898b4d01-4261-4006-85ea-a3500163cda0
  * ...
  * </code>

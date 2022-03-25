@@ -105,8 +105,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 .createClient()
                 .withAddresses(
                         new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
                 )
                 .withCredentials(USER_NAME, PASSWORD)
                 .withConnections(10)
@@ -145,8 +145,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
         return TarantoolClientFactory.createClient()
                 .withAddresses(
                         new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
                 )
                 .withCredentials(USER_NAME, PASSWORD)
                 .withConnections(10)
@@ -169,14 +169,14 @@ public class ReconnectIT extends SharedCartridgeContainer {
         assertEquals(3, instancesUuids.size());
 
         replaceInstancesInfo(client, 1, "unavailable", 3301);
-        replaceInstancesInfo(client, 2, "unavailable", 3311);
+        replaceInstancesInfo(client, 2, "unavailable", 3302);
         Thread.sleep(1000);
 
         final Set<String> afterRoutersDisablingInstancesUuids = getInstancesUuids(client);
         assertEquals(1, afterRoutersDisablingInstancesUuids.size());
 
         replaceInstancesInfo(client, 1, "available", 3301);
-        replaceInstancesInfo(client, 2, "available", 3311);
+        replaceInstancesInfo(client, 2, "available", 3302);
         Thread.sleep(1000);
 
         final Set<String> afterRoutersEnablingInstancesUuids = getInstancesUuids(client);
@@ -309,8 +309,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
     private TarantoolServerAddress[] getTarantoolServerAddresses() {
         return new TarantoolServerAddress[]{
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3312))
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
         };
     }
 

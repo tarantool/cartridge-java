@@ -114,9 +114,7 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
                 TarantoolRequestRetryPolicies
-                        .unbound(e -> {
-                            return e.getMessage().contains("Unsuccessful attempt");
-                        })
+                        .unbound(e -> e.getMessage().contains("Unsuccessful attempt"))
                         .withRequestTimeout(200) //requestTimeout
                         .withOperationTimeout(2000)  //operationTimeout
                         .build());

@@ -14,14 +14,14 @@ import io.tarantool.driver.protocol.TarantoolRequest;
  * @author Alexey Kuzin
  */
 public class TarantoolRequestHandler extends ChannelOutboundHandlerAdapter {
-    private RequestFutureManager futureManager;
+    private final RequestFutureManager futureManager;
 
     public TarantoolRequestHandler(RequestFutureManager futureManager) {
         this.futureManager = futureManager;
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         TarantoolRequest request = (TarantoolRequest) msg;
         ctx.write(request).addListener((ChannelFutureListener) channelFuture -> {
             if (!channelFuture.isSuccess()) {

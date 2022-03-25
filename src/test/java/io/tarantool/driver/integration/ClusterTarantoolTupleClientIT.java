@@ -22,11 +22,11 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -54,7 +54,8 @@ public class ClusterTarantoolTupleClientIT {
 
     @Container
     private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
+            .withScriptFileName("org/testcontainers/containers/server.lua")
+            .withLogConsumer(new Slf4jLogConsumer(log));
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -212,7 +213,7 @@ public class ClusterTarantoolTupleClientIT {
 
         List<Object> newValues = Arrays.asList(123, "a123", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
-        testSpace.insert(tarantoolTuple);
+        testSpace.insert(tarantoolTuple).join();
 
         Conditions conditions = Conditions.indexEquals("primary", Collections.singletonList(123));
 
@@ -279,7 +280,7 @@ public class ClusterTarantoolTupleClientIT {
         Conditions queryByNotUniqIndex = Conditions.indexEquals(1, Collections.singletonList("J. R. R. Tolkien"));
 
         assertThrows(TarantoolSpaceOperationException.class, () -> testSpace.update(queryByNotUniqIndex,
-                TupleOperations.add(4, 12)));
+                TupleOperations.add(4, 12)).join());
     }
 
     @Test

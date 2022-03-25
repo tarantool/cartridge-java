@@ -12,10 +12,7 @@ import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
-import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -41,8 +38,6 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
     public static String USER_NAME;
     public static String PASSWORD;
-
-    private static final Logger logger = LoggerFactory.getLogger(ClusterConnectionIT.class);
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
@@ -96,13 +91,13 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
     void testMultipleRoutersReconnect_retryableRequestShouldNotFail() throws Exception {
         RetryingTarantoolTupleClient routerClient1 = setupRouterClient(3301, 3, 10);
         routerClient1.call("reset_request_counters").get();
-        RetryingTarantoolTupleClient routerClient2 = setupRouterClient(3311, 3, 10);
+        RetryingTarantoolTupleClient routerClient2 = setupRouterClient(3302, 3, 10);
         routerClient2.call("reset_request_counters").get();
 
         // create retrying client with two routers
         TarantoolClusterAddressProvider addressProvider = () -> Arrays.asList(
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3311)));
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)));
 
         AtomicReference<Container.ExecResult> result = new AtomicReference<>();
         AtomicReference<String> nextRouterName = new AtomicReference<>();

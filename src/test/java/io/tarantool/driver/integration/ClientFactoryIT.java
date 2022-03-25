@@ -8,7 +8,6 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.TimeoutException;

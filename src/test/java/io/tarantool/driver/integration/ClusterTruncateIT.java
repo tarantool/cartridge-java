@@ -1,17 +1,17 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,17 +19,18 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static io.tarantool.driver.integration.Utils.checkSpaceIsEmpty;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class ClusterTruncateIT {
@@ -38,11 +39,12 @@ public class ClusterTruncateIT {
     private static final Logger log = LoggerFactory.getLogger(ClusterTruncateIT.class);
 
     @Container
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
+    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
+            .withScriptFileName("org/testcontainers/containers/server.lua")
+            .withLogConsumer(new Slf4jLogConsumer(log));
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
@@ -92,7 +94,7 @@ public class ClusterTruncateIT {
             testSpace.insert(tarantoolTuple).join();
 
             // when values are inserted check that space isn't empty
-            TarantoolResult<TarantoolTuple>  selectResult = testSpace.select(Conditions.any()).join();
+            TarantoolResult<TarantoolTuple> selectResult = testSpace.select(Conditions.any()).join();
             assertEquals(1, selectResult.size());
 
             // after that truncate space

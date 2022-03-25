@@ -16,6 +16,15 @@ app-router-second:
   - app.roles.api_router
   - app.roles.custom
   all_rw: false
+app-router-third:
+  instances:
+  - third-router
+  roles:
+  - vshard-router
+  - crud-router
+  - app.roles.api_router
+  - app.roles.custom
+  all_rw: false
 s1-storage:
   instances:
   - s1-master
