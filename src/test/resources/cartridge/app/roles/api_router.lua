@@ -150,10 +150,10 @@ function returning_number()
 end
 
 local function create_restricted_user()
-    box.schema.func.create("returning_number", {if_not_exists = true, setuid = true})
+    box.schema.func.create("returning_number", { if_not_exists = true, setuid = true })
 
-    box.schema.user.create('restricted_user', { password = 'restricted_secret' })
-    box.schema.user.grant("restricted_user", "execute", "function", "returning_number")
+    box.schema.user.create('restricted_user', { if_not_exists = true, password = 'restricted_secret' })
+    box.schema.user.grant("restricted_user", "execute", "function", "returning_number", { if_not_exists = true })
 end
 
 local function init()
