@@ -32,9 +32,9 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     /**
      * Basic constructor
      *
-     * @param spaceOperations       {@link TarantoolSpaceOperations} instance which operations will be wrapped
-     * @param retryPolicyFactory    request retrying policy factory
-     * @param executor              executor service for retry callbacks
+     * @param spaceOperations    {@link TarantoolSpaceOperations} instance which operations will be wrapped
+     * @param retryPolicyFactory request retrying policy factory
+     * @param executor           executor service for retry callbacks
      */
     public RetryingTarantoolSpace(TarantoolSpaceOperations<T, R> spaceOperations,
                                   RequestRetryPolicyFactory retryPolicyFactory,

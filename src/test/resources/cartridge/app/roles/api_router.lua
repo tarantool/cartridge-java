@@ -19,7 +19,7 @@ local function get_routers_status()
     local res = crud.select('instances_info')
 
     local result = {}
-    for k, v in pairs(res.rows) do
+    for _, v in pairs(res.rows) do
         result[v[3]] = { status = v[4], uri = v[5] }
     end
     return result
@@ -27,8 +27,8 @@ end
 
 local function init_router_status()
     crud.insert('instances_info', { 1, 1, uuid.str(), 'available', 'localhost:3301' })
-    crud.insert('instances_info', { 2, 1, uuid.str(), 'available', 'localhost:3311' })
-    crud.insert('instances_info', { 3, 1, uuid.str(), 'available', 'localhost:3312' })
+    crud.insert('instances_info', { 2, 1, uuid.str(), 'available', 'localhost:3302' })
+    crud.insert('instances_info', { 3, 1, uuid.str(), 'available', 'localhost:3303' })
 end
 
 local retries_holder = {
@@ -73,7 +73,7 @@ local function custom_crud_select(space_name)
     return crud.select(space_name)
 end
 
-local function raising_error(message)
+local function raising_error()
     error("Test error: raising_error() called")
 end
 
@@ -150,13 +150,13 @@ function returning_number()
 end
 
 local function create_restricted_user()
-    box.schema.func.create("returning_number", {if_not_exists = true, setuid = true})
+    box.schema.func.create("returning_number", { if_not_exists = true, setuid = true })
 
-    box.schema.user.create('restricted_user', { password = 'restricted_secret' })
-    box.schema.user.grant("restricted_user", "execute", "function", "returning_number")
+    box.schema.user.create('restricted_user', { if_not_exists = true, password = 'restricted_secret' })
+    box.schema.user.grant("restricted_user", "execute", "function", "returning_number", { if_not_exists = true })
 end
 
-local function init(opts)
+local function init()
 
     box.schema.space.create('request_counters', {
         format = { { 'id', 'unsigned' }, { 'count', 'unsigned' } },

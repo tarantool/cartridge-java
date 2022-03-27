@@ -63,15 +63,18 @@ public class TarantoolConnectionFactory {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
         RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
+
         ChannelFuture future = bootstrap.clone()
                 .handler(new TarantoolChannelInitializer(config, requestManager, versionHolder, connectionFuture))
                 .remoteAddress(serverAddress).connect();
+
         future.addListener((ChannelFutureListener) f -> {
             if (!f.isSuccess()) {
                 connectionFuture.completeExceptionally(new TarantoolClientException(
                         String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
             }
         });
+
         timeoutScheduler.schedule(() -> {
             if (!connectionFuture.isDone()) {
                 connectionFuture.completeExceptionally(new TimeoutException(
@@ -79,17 +82,19 @@ public class TarantoolConnectionFactory {
                                 serverAddress, config.getConnectTimeout())));
             }
         }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);
+
         CompletableFuture<TarantoolConnection> result = connectionFuture
                 .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
+
         for (TarantoolConnectionListener listener : connectionListeners.all()) {
             result = result.thenCompose(listener::onConnection);
         }
-        return result.handle((v, ex) -> {
+
+        return result.handle((connection, ex) -> {
             if (ex != null) {
                 logger.warn("Connection failed: {}", ex.getMessage());
-                return null;
             }
-            return v;
+            return connection;
         });
     }
 

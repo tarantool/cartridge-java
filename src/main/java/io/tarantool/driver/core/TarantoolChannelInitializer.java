@@ -19,19 +19,19 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * The main channel pipeline initializer.
- *
- *  - Adds authentication handler which accepts the Tarantool server greeting and sets up the pipeline when channel
- *  is connect to the server;
- *  - Sets up the necessary handlers and codecs.
+ * <p>
+ * - Adds authentication handler which accepts the Tarantool server greeting and sets up the pipeline when channel
+ * is connect to the server;
+ * - Sets up the necessary handlers and codecs.
  *
  * @author Alexey Kuzin
  */
 public class TarantoolChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private TarantoolClientConfig config;
-    private TarantoolVersionHolder versionHolder;
-    private CompletableFuture<Channel> connectionFuture;
-    private RequestFutureManager futureManager;
+    private final TarantoolClientConfig config;
+    private final TarantoolVersionHolder versionHolder;
+    private final CompletableFuture<Channel> connectionFuture;
+    private final RequestFutureManager futureManager;
 
     public TarantoolChannelInitializer(TarantoolClientConfig config,
                                        RequestFutureManager futureManager,
@@ -44,7 +44,7 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     }
 
     @Override
-    protected void initChannel(SocketChannel socketChannel) throws Exception {
+    protected void initChannel(SocketChannel socketChannel) {
         socketChannel.pipeline()
                 // greeting and authentication (will be removed after successful authentication)
                 .addLast("TarantoolAuthenticationHandler", new TarantoolAuthenticationHandler<>(

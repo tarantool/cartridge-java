@@ -177,7 +177,7 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
             List<?> arguments,
             CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
             throws TarantoolClientException {
-        return null;
+        return wrapOperation(() -> client.call(functionName, arguments, resultMapper));
     }
 
     @Override

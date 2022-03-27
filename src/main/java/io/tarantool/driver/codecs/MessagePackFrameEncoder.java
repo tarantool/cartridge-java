@@ -16,7 +16,7 @@ import org.msgpack.core.MessagePack;
 public class MessagePackFrameEncoder extends MessageToByteEncoder<TarantoolRequest> {
 
     private static final int MINIMAL_HEADER_SIZE = 5; // MP_UINT32
-    private MessagePackObjectMapper mapper;
+    private final MessagePackObjectMapper mapper;
 
     public MessagePackFrameEncoder(MessagePackObjectMapper mapper) {
         super();
