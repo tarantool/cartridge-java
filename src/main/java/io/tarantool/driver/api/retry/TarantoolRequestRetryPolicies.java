@@ -68,7 +68,7 @@ public final class TarantoolRequestRetryPolicies {
         private final long requestTimeout; //ms
         private final long operationTimeout; //ms
         private final long delay; //ms
-        private final T predicate;
+        private final T exceptionCheck;
 
         /**
          * Basic constructor
@@ -88,18 +88,14 @@ public final class TarantoolRequestRetryPolicies {
             this.requestTimeout = requestTimeout;
             this.operationTimeout = operationTimeout;
             this.delay = delay;
-            this.predicate = exceptionCheck;
+            this.exceptionCheck = exceptionCheck;
         }
 
         @Override
         public boolean canRetryRequest(Throwable throwable) {
-            if (predicate.test(throwable)) {
+            if (testException(exceptionCheck, throwable)) {
                 if (delay > 0) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(delay);
-                    } catch (InterruptedException e) {
-                        throw new TarantoolClientException("Request retry delay has been interrupted");
-                    }
+                    trySleep(delay);
                 }
                 return true;
             }
@@ -328,14 +324,10 @@ public final class TarantoolRequestRetryPolicies {
 
         @Override
         public boolean canRetryRequest(Throwable throwable) {
-            if (exceptionCheck.test(throwable) && attempts > 0) {
+            if (testException(exceptionCheck, throwable) && attempts > 0) {
                 attempts--;
                 if (delay > 0) {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(delay);
-                    } catch (InterruptedException e) {
-                        throw new TarantoolClientException("Request retry delay has been interrupted");
-                    }
+                    trySleep(delay);
                 }
                 return true;
             }
@@ -556,5 +548,22 @@ public final class TarantoolRequestRetryPolicies {
     public static <T extends Predicate<Throwable>> InfiniteRetryPolicyFactory.Builder<T>
     unbound(T exceptionCheck) {
         return InfiniteRetryPolicyFactory.builder(exceptionCheck);
+    }
+
+    private static boolean testException(Predicate<Throwable> exceptionCheck, Throwable throwable) {
+        try {
+            return exceptionCheck.test(throwable);
+        } catch (Exception e) {
+            throw new TarantoolClientException(
+                    "Specified in TarantoolClient predicate for exception check threw exception: ", e);
+        }
+    }
+
+    private static void trySleep(long delay) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new TarantoolClientException("Request retry delay has been interrupted");
+        }
     }
 }
