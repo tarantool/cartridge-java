@@ -6,15 +6,19 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class ClientFactoryIT extends SharedCartridgeContainer {
@@ -37,7 +41,11 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
         int expectedDelay = 500;
         int expectedRequestTimeout = 123;
         String expectedSelectFunctionName = "custom_crud_select";
-        Predicate<Throwable> expectedCallback = throwable -> throwable.getMessage().equals("Hello World");
+        Predicate<Throwable> expectedCallback = e -> {
+            // it's possible, when user will specify incorrect callback
+            // such as throwable.getMessage().equals() and message is null
+            throw new NullPointerException();
+        };
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
@@ -52,6 +60,12 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
                                         .withRequestTimeout(expectedRequestTimeout))
                         .build();
         //then
+        CompletionException completionException =
+                assertThrows(CompletionException.class, () -> client.eval("return error").join());
+        assertTrue(completionException.getCause() instanceof TarantoolClientException);
+        assertTrue(completionException.getMessage()
+                .contains("Specified in TarantoolClient predicate for exception check threw exception: "));
+
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
         assertDoesNotThrow(() -> client.space("test_space").select(Conditions.any()).join());
     }
