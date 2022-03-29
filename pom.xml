@@ -43,7 +43,7 @@
         <developerConnection>scm:git:git@github.com:akudiyar/tarantool-cartridge-java-driver.git</developerConnection>
         <url>https://github.com/akudiyar/tarantool-cartridge-java-driver/tree/master</url>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <properties>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
