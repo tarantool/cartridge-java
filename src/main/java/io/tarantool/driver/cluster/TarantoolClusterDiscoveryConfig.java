@@ -88,6 +88,9 @@ public final class TarantoolClusterDiscoveryConfig {
          */
         public Builder withEndpoint(TarantoolClusterDiscoveryEndpoint endpoint) {
             Assert.notNull(endpoint, "Cluster discovery endpoint config should not be null");
+            if (this.config.getEndpoint() != null) {
+                throw new TarantoolClientException("Cluster discovery endpoint already set");
+            }
             this.config.setEndpoint(endpoint);
             return this;
         }
