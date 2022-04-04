@@ -5,8 +5,6 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.Objects;
-
 /**
  * Represents a field with empty value which serializes to {@code msgpack.NULL}
  *

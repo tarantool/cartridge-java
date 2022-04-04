@@ -20,6 +20,42 @@ public class TarantoolNullFieldTest {
     }
 
     @Test
+    public void test_toString_shouldReturnString() {
+        // given
+        TarantoolNullField nullField = new TarantoolNullField();
+
+        // when
+        String str = nullField.toString();
+
+        // then
+        assertNotNull(str);
+        assertFalse(str.isEmpty());
+        assertEquals(str, nullField.toString());
+    }
+
+    @Test
+    public void test_equals_shouldReturnTrue() {
+        // given
+        TarantoolNullField nullField1 = new TarantoolNullField();
+        TarantoolNullField nullField2 = new TarantoolNullField();
+
+        // then
+        assertEquals(nullField1, nullField1);
+        assertEquals(nullField1, nullField2);
+    }
+
+    @Test
+    public void test_equals_shouldReturnFalse() {
+        // given
+        TarantoolNullField nullField = new TarantoolNullField();
+        Object dummyObject = new Object() { };
+
+        // then
+        assertNotEquals(nullField, null);
+        assertNotEquals(nullField, dummyObject);
+    }
+
+    @Test
     public void test_AddNullFieldsToHashSet_shouldCreateHashSetWithTwoElements() {
         // given
         TarantoolNullField nullField1 = new TarantoolNullField();
