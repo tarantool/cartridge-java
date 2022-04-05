@@ -1,17 +1,12 @@
 package io.tarantool.driver.integration;
 
+import io.tarantool.driver.api.*;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
-import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolConnectionException;
-import io.tarantool.driver.exceptions.TarantoolInternalException;
+import io.tarantool.driver.exceptions.*;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -19,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ClassUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -321,5 +317,24 @@ public class ConnectionIT {
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
         client.close();
+    }
+
+    @Test
+    public void test_AddressProviderReturnsNull_shouldThrowTarantoolClientException() {
+        // given
+        TarantoolClusterAddressProvider addressProvider = () -> null;
+
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
+                .withAddressProvider(addressProvider)
+                .withCredentials(new SimpleTarantoolCredentials(GUEST_USER, ""))
+                .withConnectTimeout(1000)
+                .withReadTimeout(1000)
+                .withConnections(1)
+                .build();
+
+        // then
+        TarantoolClientException exception =  assertThrows(TarantoolClientException.class, client::getVersion);
+        assertFalse(ClassUtil.getRootCause(exception) instanceof NullPointerException);
     }
 }

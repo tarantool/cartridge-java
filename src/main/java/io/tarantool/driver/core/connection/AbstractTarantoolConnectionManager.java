@@ -177,6 +177,11 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
 
     private List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> getConnections() {
         Collection<TarantoolServerAddress> addresses = getAddresses();
+        if (addresses == null) {
+            addresses = Collections.emptyList();
+            logger.debug("The list of server addresses is not defined");
+        }
+
         List<CompletableFuture<Map.Entry<TarantoolServerAddress, List<TarantoolConnection>>>> endpointConnections =
                 new ArrayList<>(addresses.size());
         for (TarantoolServerAddress serverAddress : addresses) {
