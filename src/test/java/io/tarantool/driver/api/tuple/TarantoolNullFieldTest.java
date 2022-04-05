@@ -56,7 +56,7 @@ public class TarantoolNullFieldTest {
     }
 
     @Test
-    public void test_AddNullFieldsToHashSet_shouldCreateHashSetWithTwoElements() {
+    public void test_AddNullFieldsToHashSet_shouldCreateHashSetWithOneElements() {
         // given
         TarantoolNullField nullField1 = new TarantoolNullField();
         TarantoolNullField nullField2 = new TarantoolNullField();
@@ -67,7 +67,7 @@ public class TarantoolNullFieldTest {
         fieldsSet.add(nullField2);
 
         // then
-        assertEquals(2, fieldsSet.size());
+        assertEquals(1, fieldsSet.size());
         assertTrue(fieldsSet.contains(nullField1));
         assertTrue(fieldsSet.contains(nullField2));
     }

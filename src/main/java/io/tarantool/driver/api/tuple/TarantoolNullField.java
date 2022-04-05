@@ -42,6 +42,6 @@ public final class TarantoolNullField implements TarantoolField {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return TarantoolNullField.class.hashCode();
     }
 }
