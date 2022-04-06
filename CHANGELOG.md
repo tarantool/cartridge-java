@@ -1,6 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## [0.7.1] - 2022-04-06
+
+### Features
+ - Added new error: TarantoolAccessDeniedException
+
+### Bugfixes
+ - Fixed stackoverflow on comparing two null fields #150
+ - Fixed overwriting endpoint by TarantoolClusterDiscoveryConfig.Builder.withEndpoint() #173
+ - Fixed closing connections to nodes not returned by address provider #77
+ - Fixed NPE in RetryingTarantoolClient #184
+
 
 ## [0.7.0] - 2022-02-21 
 
