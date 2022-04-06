@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2] - 2022-04-06
+
+### Bugfixes
+ - Fix CVE-2020-36518: jackson-databind bump to 2.12.6
+ - Fix CVE-2021-43797: bump netty-all to 4.1.75.Final
+ - Fix NPE in AbstractTarantoolConnectionManager when AddressProvider returns null
+
 ## [0.7.1] - 2022-04-06
 
 ### Features
