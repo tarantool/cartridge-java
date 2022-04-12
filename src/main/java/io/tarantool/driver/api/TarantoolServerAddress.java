@@ -34,29 +34,29 @@ public class TarantoolServerAddress implements Serializable {
 
     /**
      * Create a TarantoolServerAddress from connection string
-     * e.g. localhost:3301, [::1]:3301, user:password@localhost:3301, user:password@[::1]:3301
+     * e.g. 127.0.0.1:3301, localhost:3301, [::1]:3301, user:password@localhost:3301, user:password@[::1]:3301
      *
-     * @param host hostname
+     * @param address address to Tarantool
      */
-    public TarantoolServerAddress(final String host) {
-        String hostToUse = splitHostByUser(host);
+    public TarantoolServerAddress(final String address) {
+        String hostToUse = splitHostByUser(address);
         Integer portToUse = null;
         if (hostToUse.startsWith("[")) {
-            int idx = host.indexOf("]");
+            int idx = address.indexOf("]");
             if (idx == -1) {
                 throw new IllegalArgumentException(
                         "An IPV6 address must be enclosed with '[' and ']' according to RFC 2732.");
             }
 
-            int portIdx = host.indexOf("]:");
+            int portIdx = address.indexOf("]:");
             if (portIdx != -1) {
                 try {
-                    portToUse = Integer.parseInt(host.substring(portIdx + 2));
+                    portToUse = Integer.parseInt(address.substring(portIdx + 2));
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
+                    throw new IllegalArgumentException(String.format("Invalid address: %s", address));
                 }
             }
-            hostToUse = host.substring(1, idx);
+            hostToUse = address.substring(1, idx);
         }
 
         int idx = hostToUse.indexOf(":");
@@ -65,13 +65,13 @@ public class TarantoolServerAddress implements Serializable {
             try {
                 portToUse = Integer.parseInt(hostToUse.substring(idx + 1));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
+                throw new IllegalArgumentException(String.format("Invalid address: %s", address));
             }
             hostToUse = hostToUse.substring(0, idx).trim();
         }
 
         if (portToUse == null) {
-            throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
+            throw new IllegalArgumentException(String.format("Invalid address: %s", address));
         }
 
         this.socketAddress = new InetSocketAddress(hostToUse.toLowerCase(), portToUse);
