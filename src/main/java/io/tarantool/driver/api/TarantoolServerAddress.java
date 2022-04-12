@@ -3,78 +3,113 @@ package io.tarantool.driver.api;
 import io.tarantool.driver.exceptions.TarantoolSocketException;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 /**
  * Represents the location of a Tarantool server - server name and port number
  *
  * @author Sergey Volgin
+ * @author Oleg Kuznetsov
  */
 public class TarantoolServerAddress implements Serializable {
     private static final long serialVersionUID = 7327851568010264254L;
-    private static final String DEFAULT_HOST = "127.0.0.1";
-    private static final int DEFAULT_PORT = 3301;
 
-    private final String host;
-    private final int port;
+    private final InetSocketAddress socketAddress;
 
     /**
-     * Create a TarantoolServerAddress with default host and port
+     * Creates a TarantoolServerAddress with default host and port
      */
     public TarantoolServerAddress() {
-        this(DEFAULT_HOST, DEFAULT_PORT);
+        this("127.0.0.1", 3301);
     }
 
     /**
-     * Create a TarantoolServerAddress with default port
+     * Creates a {@link TarantoolServerAddress} instance
      *
      * @param host hostname
-     */
-    public TarantoolServerAddress(final String host) {
-        this(host, DEFAULT_PORT);
-    }
-
-    /**
-     * Create a {@link TarantoolServerAddress} instance
-     *
-     * @param host hostname
-     * @param port tarantool port
      */
     public TarantoolServerAddress(final String host, final int port) {
-        //discard username if specified
-        String[] parts = host.split("@");
-        String[] addressParts = parts[parts.length - 1].split(":");
+        this.socketAddress = new InetSocketAddress(host, port);
+    }
 
-        if (addressParts.length > 2) {
-            throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
-        }
-
-        int portNumber = port;
-        if (addressParts.length == 2) {
-            try {
-                portNumber = Integer.parseInt(addressParts[1]);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(String.format("Invalid host name: %s", host));
+    /**
+     * Create a TarantoolServerAddress from connection string
+     * e.g. 127.0.0.1:3301, localhost:3301, [::1]:3301, user:password@localhost:3301, user:password@[::1]:3301
+     *
+     * @param address address to Tarantool
+     */
+    public TarantoolServerAddress(final String address) {
+        String hostToUse = splitHostByUser(address);
+        Integer portToUse = null;
+        if (hostToUse.startsWith("[")) {
+            int idx = address.indexOf("]");
+            if (idx == -1) {
+                throw new IllegalArgumentException(
+                        "An IPV6 address must be enclosed with '[' and ']' according to RFC 2732.");
             }
+
+            int portIdx = address.indexOf("]:");
+            if (portIdx != -1) {
+                try {
+                    portToUse = Integer.parseInt(address.substring(portIdx + 2));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(String.format("Invalid address: %s", address));
+                }
+            }
+            hostToUse = address.substring(1, idx);
         }
 
-        if (portNumber <= 0 || portNumber > 65535) {
-            throw new IllegalArgumentException(String.format("Invalid port number : %s", portNumber));
+        int idx = hostToUse.indexOf(":");
+        int lastIdx = hostToUse.lastIndexOf(":");
+        if (idx == lastIdx && idx > 0) {
+            try {
+                portToUse = Integer.parseInt(hostToUse.substring(idx + 1));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(String.format("Invalid address: %s", address));
+            }
+            hostToUse = hostToUse.substring(0, idx).trim();
         }
 
-        this.host = addressParts[0];
-        this.port = portNumber;
+        if (portToUse == null) {
+            throw new IllegalArgumentException(String.format("Invalid address: %s", address));
+        }
+
+        this.socketAddress = new InetSocketAddress(hostToUse.toLowerCase(), portToUse);
+    }
+
+    private String splitHostByUser(String host) {
+        String hostToUse = host;
+        if (hostToUse == null) {
+            throw new IllegalArgumentException("Host is null");
+        }
+
+        final String[] split = hostToUse.split("@");
+
+        if (split.length > 2) {
+            throw new IllegalArgumentException(
+                    String.format("Incorrect address for connecting to Tarantool: %s", hostToUse));
+        }
+        if (split.length == 2) {
+            hostToUse = split[1];
+        }
+        if (split.length == 1) {
+            hostToUse = split[0];
+        }
+        hostToUse = hostToUse.trim();
+        if (hostToUse.length() == 0) {
+            throw new IllegalArgumentException("Host is empty");
+        }
+
+        return hostToUse;
     }
 
     /**
      * Auxiliary constructor for conversion between {@link InetSocketAddress} and {@link TarantoolServerAddress}
+     *
      * @param socketAddress remote server address
      */
     public TarantoolServerAddress(InetSocketAddress socketAddress) {
-        this.host = socketAddress.getHostName();
-        this.port = socketAddress.getPort();
+        this.socketAddress = socketAddress;
     }
 
     /**
@@ -83,7 +118,7 @@ public class TarantoolServerAddress implements Serializable {
      * @return hostname
      */
     public String getHost() {
-        return host;
+        return this.socketAddress.getHostName();
     }
 
     /**
@@ -92,7 +127,7 @@ public class TarantoolServerAddress implements Serializable {
      * @return port
      */
     public int getPort() {
-        return port;
+        return this.socketAddress.getPort();
     }
 
     /**
@@ -101,11 +136,7 @@ public class TarantoolServerAddress implements Serializable {
      * @return socket address
      */
     public InetSocketAddress getSocketAddress() throws TarantoolSocketException {
-        try {
-            return new InetSocketAddress(InetAddress.getByName(host), port);
-        } catch (UnknownHostException e) {
-            throw new TarantoolSocketException(e.getMessage(), this, e);
-        }
+        return this.socketAddress;
     }
 
     @Override
@@ -116,24 +147,17 @@ public class TarantoolServerAddress implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         TarantoolServerAddress that = (TarantoolServerAddress) o;
-        if (port != that.port) {
-            return false;
-        }
-
-        return host.equals(that.host);
+        return this.socketAddress.equals(that.socketAddress);
     }
 
     @Override
     public int hashCode() {
-        int result = host.hashCode();
-        result = 31 * result + port;
-        return result;
+        return this.socketAddress.hashCode();
     }
 
     @Override
     public String toString() {
-        return host + ":" + port;
+        return this.socketAddress.toString();
     }
 }
