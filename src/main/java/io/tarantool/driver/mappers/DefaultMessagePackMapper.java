@@ -11,6 +11,8 @@ import io.tarantool.driver.mappers.converters.value.DefaultArrayValueToListConve
 import io.tarantool.driver.mappers.converters.value.DefaultMapValueToMapConverter;
 import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
+import org.msgpack.value.impl.ImmutableArrayValueImpl;
+import org.msgpack.value.impl.ImmutableMapValueImpl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +70,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         if (o == null) {
             return (ObjectConverter<O, V>) nilConverter;
         }
-        Optional<ObjectConverter<O, V>> converter = findConverter(o.getClass(), getter);
+        Optional<ObjectConverter<O, V>> converter = findObjectConverter(o.getClass(), getter);
         if (!converter.isPresent()) {
             throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
         }
@@ -112,27 +114,31 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     }
 
     private <V extends Value, O> O fromValue(V v, Function<String, Optional<ValueConverter<V, O>>> getter) {
-        Optional<ValueConverter<V, O>> converter = findConverter(v.getClass(), getter);
+        Optional<ValueConverter<V, O>> converter = findValueConverter(v.getClass(), getter);
         if (!converter.isPresent()) {
             throw new MessagePackValueMapperException("ValueConverter for type %s is not found", v.getClass());
         }
         return converter.get().fromValue(v);
     }
 
-    private <T> Optional<T> findConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
+    private <T> Optional<T> findObjectConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
         Optional<T> converter = getter.apply(objectClass.getTypeName());
         if (!converter.isPresent() && objectClass.getSuperclass() != null) {
-            converter = findConverter(objectClass.getSuperclass(), getter);
+            converter = findObjectConverter(objectClass.getSuperclass(), getter);
         }
         if (!converter.isPresent()) {
             for (Class<?> iface : objectClass.getInterfaces()) {
-                converter = findConverter(iface, getter);
+                converter = findObjectConverter(iface, getter);
                 if (converter.isPresent()) {
                     break;
                 }
             }
         }
         return converter;
+    }
+
+    private <T> Optional<T> findValueConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
+        return getter.apply(objectClass.getTypeName());
     }
 
     /**
@@ -165,7 +171,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O>        object type
      * @see ValueConverter
      */
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+    public <V extends Value, O> void registerValueConverter(Class<? extends V> valueClass,
                                                             ValueConverter<V, ? extends O> converter) {
         try {
             Class<O> objectClass = getInterfaceParameterClass(converter, ValueConverter.class, 1);
@@ -178,7 +184,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+    public <V extends Value, O> void registerValueConverter(Class<? extends V> valueClass,
                                                             Class<? extends O> objectClass,
                                                             ValueConverter<V, ? extends O> converter) {
         List<ValueConverter<? extends Value, ?>> converters =
@@ -223,7 +229,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                         .filter(c -> checkConverterByTargetType(c, targetClass))
                         .map(c -> (ValueConverter<V, O>) c)
                         .findFirst();
-        return findConverter(entityClass, getter);
+        return findValueConverter(entityClass, getter);
     }
 
     /**
@@ -286,7 +292,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                         .filter(c -> checkObjectConverterByTargetType(c, valueClass))
                         .map(c -> (ObjectConverter<O, V>) c)
                         .findFirst();
-        return findConverter(objectClass, getter);
+        return findObjectConverter(objectClass, getter);
     }
 
     /**
@@ -334,7 +340,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
         @Override
         public Builder withDefaultMapValueConverter() {
-            mapper.registerValueConverter(new DefaultMapValueToMapConverter(mapper));
+            mapper.registerValueConverter(ImmutableMapValueImpl.class, new DefaultMapValueToMapConverter(mapper));
             return this;
         }
 
@@ -346,7 +352,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
         @Override
         public Builder withDefaultArrayValueConverter() {
-            mapper.registerValueConverter(new DefaultArrayValueToListConverter(mapper));
+            mapper.registerValueConverter(ImmutableArrayValueImpl.class, new DefaultArrayValueToListConverter(mapper));
             return this;
         }
 
@@ -376,7 +382,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         }
 
         @Override
-        public <V extends Value, O> Builder withValueConverter(Class<V> valueClass, Class<O> objectClass,
+        public <V extends Value, O> Builder withValueConverter(Class<? extends V> valueClass, Class<O> objectClass,
                                                                ValueConverter<V, O> converter) {
             mapper.registerValueConverter(valueClass, objectClass, converter);
             return this;

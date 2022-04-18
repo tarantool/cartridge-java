@@ -3,6 +3,7 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+import org.msgpack.value.impl.ImmutableArrayValueImpl;
 
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import java.util.Optional;
  *
  * @param <T> target result type
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public abstract class AbstractResultMapper<T> implements MessagePackValueMapper {
 
@@ -27,7 +29,7 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
                                 ValueConverter<ArrayValue, ? extends T> resultConverter,
                                 Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
-        valueMapper.registerValueConverter(ArrayValue.class, resultClass, resultConverter);
+        valueMapper.registerValueConverter(ImmutableArrayValueImpl.class, resultClass, resultConverter);
     }
 
     @Override
@@ -41,7 +43,7 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<V> valueClass,
+    public <V extends Value, O> void registerValueConverter(Class<? extends V> valueClass,
                                                             Class<? extends O> objectClass,
                                                             ValueConverter<V, ? extends O> converter) {
         valueMapper.registerValueConverter(valueClass, objectClass, converter);

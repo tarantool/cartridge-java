@@ -10,6 +10,7 @@ import java.util.Optional;
  * Value converters must be added using the {@link #registerValueConverter(Class, Class, ValueConverter)} method
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public interface MessagePackValueMapper {
     /**
@@ -43,7 +44,7 @@ public interface MessagePackValueMapper {
      * @param <O> target object type
      * @see ValueConverter
      */
-    <V extends Value, O> void registerValueConverter(Class<V> valueClass, Class<? extends O> objectClass,
+    <V extends Value, O> void registerValueConverter(Class<? extends V> valueClass, Class<? extends O> objectClass,
                                                      ValueConverter<V, ? extends O> converter);
 
     /**
