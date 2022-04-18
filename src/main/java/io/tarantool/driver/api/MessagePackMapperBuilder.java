@@ -89,7 +89,8 @@ public interface MessagePackMapperBuilder {
      * @return builder
      * @see io.tarantool.driver.mappers.DefaultMessagePackMapper#registerValueConverter(Class, Class, ValueConverter)
      */
-    <V extends Value, O> MessagePackMapperBuilder withValueConverter(Class<V> valueClass, Class<O> objectClass,
+    <V extends Value, O> MessagePackMapperBuilder withValueConverter(Class<? extends V> valueClass,
+                                                                     Class<O> objectClass,
                                                                      ValueConverter<V, O> converter);
 
     /**
