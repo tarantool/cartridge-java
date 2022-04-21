@@ -137,4 +137,31 @@ public class BenchmarkRunner {
         }
         bh.consume(tuples);
     }
+
+    @Benchmark
+    @Fork(0)
+    @BenchmarkMode(Mode.Throughput)
+    @OperationsPerInvocation(1000)
+    public void passingArrayOfArraysWithDiffTypes(TarantoolSetup plan, Blackhole bh) {
+        bh.consume(plan.tarantoolClient.call(
+                "empty_function", plan.arraysWithDiffElements).join());
+    }
+
+    @Benchmark
+    @Fork(0)
+    @BenchmarkMode(Mode.Throughput)
+    @OperationsPerInvocation(1000)
+    public void passingArrayOfArraysWithNestedArrays(TarantoolSetup plan, Blackhole bh) {
+        bh.consume(plan.tarantoolClient.call(
+                "empty_function", plan.arraysWithNestedArrays).join());
+    }
+
+    @Benchmark
+    @Fork(0)
+    @BenchmarkMode(Mode.Throughput)
+    @OperationsPerInvocation(1000)
+    public void passingArrayOfArraysWithNestedMaps(TarantoolSetup plan, Blackhole bh) {
+        bh.consume(plan.tarantoolClient.call(
+                "empty_function", plan.arraysWithNestedMaps).join());
+    }
 }

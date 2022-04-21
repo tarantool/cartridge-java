@@ -59,3 +59,5 @@ end
 function return_arrays_with_different_types()
     return tuples
 end
+
+function empty_function() end

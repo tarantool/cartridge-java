@@ -19,6 +19,12 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 @State(Scope.Benchmark)
 public class TarantoolSetup {
     public Logger log = LoggerFactory.getLogger(TarantoolSetup.class);
@@ -31,6 +37,9 @@ public class TarantoolSetup {
     MessagePackMapper defaultMapper;
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
             resultMapper;
+    List<List<Object>> arraysWithDiffElements;
+    List<List<Object>> arraysWithNestedArrays;
+    List<List<Object>> arraysWithNestedMaps;
 
     private void initClient() {
         log.info("Attempting connect to Tarantool");
@@ -50,6 +59,47 @@ public class TarantoolSetup {
         log.info("Successfully connected to Tarantool, version = {}", tarantoolClient.getVersion());
     }
 
+    private void initInput() {
+        arraysWithDiffElements = new ArrayList<>();
+        arraysWithNestedArrays = new ArrayList<>();
+        arraysWithNestedMaps = new ArrayList<>();
+
+        HashMap<String, Object> hm = new HashMap<String, Object>();
+        hm.put("hello", "world");
+        hm.put("d", 2);
+
+        List<Object> arrayOfDiffElements = new ArrayList<>(Arrays.asList(
+                'a',
+                null,
+                "bbbbb",
+                false,
+                99,
+                "cccccc",
+                3.4654F,
+                3.4654D,
+                'a',
+                -123312,
+                new ArrayList<>(Arrays.asList( 0, "asdsad", 1, false, 2.2 )),
+                hm,
+                true,
+                9223372036854775807L,
+                -9223372036854775807L
+        ));
+
+        List<Object> arrayOfNestedArrays = new ArrayList<>();
+        List<Object> arrayOfNestedMaps = new ArrayList<>();
+        for (int i = 0; i < 15; i++) {
+            arrayOfNestedArrays.add(new ArrayList<>());
+            arrayOfNestedMaps.add(new HashMap<>());
+        }
+
+        for (int i = 0; i < 1000; i++) {
+            arraysWithDiffElements.add(arrayOfDiffElements);
+            arraysWithNestedArrays.add(arrayOfNestedArrays);
+            arraysWithNestedMaps.add(arrayOfNestedMaps);
+        }
+    }
+
     @Setup(Level.Trial)
     public void doSetup() {
         System.out.println("Do Setup");
@@ -57,6 +107,7 @@ public class TarantoolSetup {
             tarantoolContainer.start();
         }
         initClient();
+        initInput();
     }
 
     @TearDown(Level.Trial)
