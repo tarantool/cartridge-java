@@ -14,6 +14,7 @@ import org.msgpack.value.Value;
 import org.msgpack.value.impl.ImmutableArrayValueImpl;
 import org.msgpack.value.impl.ImmutableMapValueImpl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -262,7 +263,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O>         the source object type
      * @see ObjectConverter
      */
-    public <V extends Value, O> void registerObjectConverter(Class<O> objectClass, ObjectConverter<O, V> converter) {
+    public <V extends Value, O> void registerObjectConverter(Class<? extends O> objectClass, ObjectConverter<O, V> converter) {
         try {
             Class<V> valueClass = getInterfaceParameterClass(converter, ObjectConverter.class, 1);
             registerObjectConverter(objectClass, valueClass, converter);
@@ -274,7 +275,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     }
 
     @Override
-    public <V extends Value, O> void registerObjectConverter(Class<O> objectClass,
+    public <V extends Value, O> void registerObjectConverter(Class<? extends O> objectClass,
                                                              Class<V> valueClass,
                                                              ObjectConverter<O, V> converter) {
         List<ObjectConverter<?, ? extends Value>> converters =
@@ -347,6 +348,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         @Override
         public Builder withDefaultMapObjectConverter() {
             mapper.registerObjectConverter(new DefaultMapToMapValueConverter(mapper));
+            Class<HashMap<?, ?>> cls = (Class<HashMap<?, ?>>) (Object) HashMap.class;
+            mapper.registerObjectConverter(cls, new DefaultMapToMapValueConverter(mapper));
             return this;
         }
 
@@ -359,6 +362,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         @Override
         public Builder withDefaultListObjectConverter() {
             mapper.registerObjectConverter(new DefaultListToArrayValueConverter(mapper));
+            Class<ArrayList<?>> cls = (Class<ArrayList<?>>) (Object) ArrayList.class;
+            mapper.registerObjectConverter(cls, new DefaultListToArrayValueConverter(mapper));
             return this;
         }
 
