@@ -68,6 +68,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     public static String PASSWORD;
 
     private static final String TEST_SPACE_NAME = "test__profile";
+    private static final String PK_FIELD_NAME = "profile_id";
+    private static final String BUCKET_ID_FIELD_NAME = "bucket_id";
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
 
     @BeforeAll
@@ -84,6 +86,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         truncateSpace("test_space");
         truncateSpace("test_space_to_join");
         truncateSpace("second_test_space");
+        truncateSpace("cursor_test_space");
     }
 
     private static void truncateSpace(String spaceName) {
@@ -149,10 +152,10 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals("unsigned", spaceMetadata.getFieldByName("age").get().getFieldType());
 
         Optional<TarantoolIndexMetadata> indexMeta = metadataOperations
-                .getIndexByName(TEST_SPACE_NAME, "bucket_id");
+                .getIndexByName(TEST_SPACE_NAME, BUCKET_ID_FIELD_NAME);
         assertTrue(indexMeta.isPresent());
         TarantoolIndexMetadata indexMetadata = indexMeta.get();
-        assertEquals("bucket_id", indexMetadata.getIndexName());
+        assertEquals(BUCKET_ID_FIELD_NAME, indexMetadata.getIndexName());
         assertEquals(1, indexMetadata.getIndexId());
         assertEquals(TarantoolIndexType.TREE, indexMetadata.getIndexType());
         assertFalse(indexMetadata.getIndexOptions().isUnique());
@@ -172,7 +175,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         }
         allFutures.forEach(CompletableFuture::join);
 
-        Conditions conditions = Conditions.greaterOrEquals("profile_id", 1_000_000);
+        Conditions conditions = Conditions.greaterOrEquals(PK_FIELD_NAME, 1_000_000);
 
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(20, selectResult.size());
@@ -188,7 +191,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             assertEquals(100 + i, tuple.getInteger(4));
         }
 
-        conditions = conditions.startAfter(tupleFactory.create(1_000_000 + 9, null, "FIO", 59, 109));
+        conditions.startAfter(tupleFactory.create(1_000_000 + 9, null, "FIO", 59, 109));
         selectResult = profileSpace.select(conditions).get();
         assertEquals(10, selectResult.size());
     }
@@ -270,13 +273,13 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
         TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insert(tarantoolTuple).get();
-        assertEquals(insertTuples.size(), 1);
+        assertEquals(1, insertTuples.size());
         TarantoolTuple tuple = insertTuples.get(0);
-        assertEquals(tuple.size(), 5);
-        assertEquals(tuple.getInteger(0), 223);
+        assertEquals(5, tuple.size());
+        assertEquals(223, tuple.getInteger(0));
         assertNotNull(tuple.getInteger(1)); //bucket_id
 
-        Conditions conditions = Conditions.indexEquals("profile_id", Collections.singletonList(223));
+        Conditions conditions = Conditions.indexEquals(PK_FIELD_NAME, Collections.singletonList(223));
 
         TarantoolResult<TarantoolTuple> updateResult;
 
@@ -287,6 +290,29 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     }
 
     @Test
+    public void test_clusterUpdate_shouldReturnTuple_ifSearchByFieldName() throws ExecutionException,
+            InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space("cursor_test_space");
+
+        int itemId = 223;
+        List<Object> rowData = Arrays.asList(itemId, "Jane Doe", 10, null);
+        TarantoolTuple tarantoolTuple = tupleFactory.create(rowData);
+
+        TarantoolResult<TarantoolTuple> insertTuples = profileSpace.replace(tarantoolTuple).get();
+        assertEquals(1, insertTuples.size());
+        TarantoolTuple tuple = insertTuples.get(0);
+        assertEquals(4, tuple.size());
+        assertEquals(itemId, tuple.getInteger(0));
+        assertNotNull(tuple.getInteger(3)); //bucket_id
+
+        Conditions conditions = Conditions.equals("id", itemId);
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, TupleOperations.set("year", 42)).get();
+        assertEquals(itemId, updateResult.get(0).getInteger(0));
+        assertEquals(42, updateResult.get(0).getInteger(2));
+    }
+
+    @Test
     public void clusterUpsertTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
                 client.space(TEST_SPACE_NAME);
@@ -294,7 +320,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
 
-        Conditions conditions = Conditions.equals("profile_id", 301);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 301);
 
         TarantoolResult<TarantoolTuple> upsertResult;
 
@@ -355,7 +381,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     }
 
     @Test
-    public void differentSpacesMappersTest() throws Exception {
+    public void differentSpacesMappersTest() {
         List<Object> values = Arrays.asList(123000, null, "Jane Doe", 999);
         TarantoolTuple firstTuple = tupleFactory.create(values);
 
@@ -395,16 +421,16 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         MessagePackMapper mapper = client.getConfig().getMessagePackMapper();
 
         client.callForSingleResult(
-                "get_array_as_single_result",
-                Collections.singletonList(Arrays.asList(1, 2, 3)),
-                v -> mapper.fromValue(v.asArrayValue(), (Class<List<Integer>>) (Class<?>) List.class)
-        )
+                        "get_array_as_single_result",
+                        Collections.singletonList(Arrays.asList(1, 2, 3)),
+                        v -> mapper.fromValue(v.asArrayValue(), (Class<List<Integer>>) (Class<?>) List.class)
+                )
                 .thenAccept(result -> assertEquals(3, result.size()))
                 .get();
     }
 
     @Test
-    public void multiResultWithConverterTest() throws Exception {
+    public void multiResultWithConverterTest() {
         TarantoolSpaceMetadata metadata = client.space("second_test_space").getMetadata();
         MessagePackMapper mapper = client.getConfig().getMessagePackMapper();
 

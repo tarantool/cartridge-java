@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.3] - unreleased
+
+### Bugfixes
+- Fixed incorrect fieldNumber in the index metadata #209
+
 ## [0.7.2] - 2022-04-06
 
 ### Bugfixes
