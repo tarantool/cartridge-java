@@ -3,7 +3,7 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
-import org.msgpack.value.impl.ImmutableArrayValueImpl;
+import org.msgpack.value.ValueType;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
                                 ValueConverter<ArrayValue, ? extends T> resultConverter,
                                 Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
-        valueMapper.registerValueConverter(ImmutableArrayValueImpl.class, resultClass, resultConverter);
+        valueMapper.registerValueConverter(ValueType.ARRAY, resultClass, resultConverter);
     }
 
     @Override
@@ -43,15 +43,15 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
     }
 
     @Override
-    public <V extends Value, O> void registerValueConverter(Class<? extends V> valueClass,
+    public <V extends Value, O> void registerValueConverter(ValueType valueType,
                                                             Class<? extends O> objectClass,
                                                             ValueConverter<V, ? extends O> converter) {
-        valueMapper.registerValueConverter(valueClass, objectClass, converter);
+        valueMapper.registerValueConverter(valueType, objectClass, converter);
     }
 
     @Override
-    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(Class<V> entityClass,
+    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(ValueType valueType,
                                                                                  Class<O> objectClass) {
-        return valueMapper.getValueConverter(entityClass, objectClass);
+        return valueMapper.getValueConverter(valueType, objectClass);
     }
 }

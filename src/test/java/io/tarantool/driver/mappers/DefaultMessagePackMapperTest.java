@@ -10,7 +10,7 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
-import org.msgpack.value.impl.ImmutableMapValueImpl;
+import org.msgpack.value.ValueType;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -145,8 +145,8 @@ class DefaultMessagePackMapperTest {
         testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
         testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
         assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newMap(testValue)));
-        mapper.registerValueConverter(ImmutableMapValueImpl.class, CustomTuple.class,
-                (ValueConverter<ImmutableMapValueImpl, CustomTuple>) v -> {
+        mapper.registerValueConverter(ValueType.MAP, CustomTuple.class,
+                (ValueConverter<MapValue, CustomTuple>) v -> {
             CustomTuple tuple = new CustomTuple();
             Map<Value, Value> keyValue = v.map();
             tuple.setId(keyValue.get(ValueFactory.newString("id")).asIntegerValue().asInt());
