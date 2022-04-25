@@ -12,7 +12,6 @@ import io.tarantool.driver.mappers.converters.object.DefaultLongToIntegerValueCo
 import io.tarantool.driver.mappers.converters.object.DefaultPackableObjectConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultStringToStringValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultUUIDToExtensionValueConverter;
-import io.tarantool.driver.mappers.converters.value.DefaultBigIntegerValueToLongConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultBinaryValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultBooleanValueToBooleanConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToBigDecimalConverter;
@@ -34,14 +33,7 @@ import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.FloatValue;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.StringValue;
-import org.msgpack.value.impl.ImmutableBigIntegerValueImpl;
-import org.msgpack.value.impl.ImmutableBinaryValueImpl;
-import org.msgpack.value.impl.ImmutableBooleanValueImpl;
-import org.msgpack.value.impl.ImmutableDoubleValueImpl;
-import org.msgpack.value.impl.ImmutableExtensionValueImpl;
-import org.msgpack.value.impl.ImmutableLongValueImpl;
-import org.msgpack.value.impl.ImmutableNilValueImpl;
-import org.msgpack.value.impl.ImmutableStringValueImpl;
+import org.msgpack.value.ValueType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -64,73 +56,35 @@ public final class DefaultMessagePackMapperFactory {
     private DefaultMessagePackMapperFactory() {
         defaultSimpleTypesMapper = new DefaultMessagePackMapper.Builder()
                 // converters for primitive values
-                .withValueConverter(ImmutableStringValueImpl.class, Character.class,
-                        new DefaultStringValueToCharacterConverter())
-                .withValueConverter(ImmutableStringValueImpl.class, String.class,
-                        new DefaultStringValueToStringConverter())
-                .withValueConverter(ImmutableBigIntegerValueImpl.class, Float.class,
-                        new DefaultIntegerValueToFloatConverter())
-                .withValueConverter(ImmutableBigIntegerValueImpl.class, Double.class,
-                        new DefaultIntegerValueToDoubleConverter())
-                .withValueConverter(ImmutableBigIntegerValueImpl.class, Long.class,
-                        new DefaultBigIntegerValueToLongConverter())
-                .withValueConverter(ImmutableBigIntegerValueImpl.class, Integer.class,
-                        new DefaultIntegerValueToIntegerConverter())
-                .withValueConverter(ImmutableLongValueImpl.class, Float.class,
-                        new DefaultIntegerValueToFloatConverter())
-                .withValueConverter(ImmutableLongValueImpl.class, Double.class,
-                        new DefaultIntegerValueToDoubleConverter())
-                .withValueConverter(ImmutableLongValueImpl.class, Long.class,
-                        new DefaultIntegerValueToLongConverter())
-                .withValueConverter(ImmutableLongValueImpl.class, Integer.class,
-                        new DefaultIntegerValueToIntegerConverter())
-                .withValueConverter(ImmutableBinaryValueImpl.class, byte[].class,
-                        new DefaultBinaryValueToByteArrayConverter())
-                .withValueConverter(ImmutableBooleanValueImpl.class, Boolean.class,
-                        new DefaultBooleanValueToBooleanConverter())
-                .withValueConverter(ImmutableDoubleValueImpl.class, Short.class,
-                        new DefaultFloatValueToShortConverter())
-                .withValueConverter(ImmutableDoubleValueImpl.class, Long.class,
-                        new DefaultFloatValueToLongConverter())
-                .withValueConverter(ImmutableDoubleValueImpl.class, Integer.class,
-                        new DefaultFloatValueToIntegerConverter())
-                .withValueConverter(ImmutableDoubleValueImpl.class, Float.class,
-                        new DefaultFloatValueToFloatConverter())
-                .withValueConverter(ImmutableDoubleValueImpl.class, Double.class,
-                        new DefaultFloatValueToDoubleConverter())
-                .withValueConverter(ImmutableExtensionValueImpl.class, UUID.class,
-                        new DefaultExtensionValueToUUIDConverter())
-                .withValueConverter(ImmutableExtensionValueImpl.class, BigDecimal.class,
-                        new DefaultExtensionValueToBigDecimalConverter())
-                .withValueConverter(ImmutableNilValueImpl.class, Object.class,
-                        new DefaultNilValueToNullConverter())
+                .withValueConverter(ValueType.STRING, Character.class, new DefaultStringValueToCharacterConverter())
+                .withValueConverter(ValueType.STRING, String.class, new DefaultStringValueToStringConverter())
+                .withValueConverter(ValueType.INTEGER, Float.class, new DefaultIntegerValueToFloatConverter())
+                .withValueConverter(ValueType.INTEGER, Double.class, new DefaultIntegerValueToDoubleConverter())
+                .withValueConverter(ValueType.INTEGER, Long.class, new DefaultIntegerValueToLongConverter())
+                .withValueConverter(ValueType.INTEGER, Integer.class, new DefaultIntegerValueToIntegerConverter())
+                .withValueConverter(ValueType.BINARY, byte[].class, new DefaultBinaryValueToByteArrayConverter())
+                .withValueConverter(ValueType.BOOLEAN, Boolean.class, new DefaultBooleanValueToBooleanConverter())
+                .withValueConverter(ValueType.FLOAT, Short.class, new DefaultFloatValueToShortConverter())
+                .withValueConverter(ValueType.FLOAT, Long.class, new DefaultFloatValueToLongConverter())
+                .withValueConverter(ValueType.FLOAT, Integer.class, new DefaultFloatValueToIntegerConverter())
+                .withValueConverter(ValueType.FLOAT, Float.class, new DefaultFloatValueToFloatConverter())
+                .withValueConverter(ValueType.FLOAT, Double.class, new DefaultFloatValueToDoubleConverter())
+                .withValueConverter(ValueType.EXTENSION, UUID.class, new DefaultExtensionValueToUUIDConverter())
+                .withValueConverter(ValueType.EXTENSION, BigDecimal.class, new DefaultExtensionValueToBigDecimalConverter())
+                .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
                 //TODO: add this when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
-                // .withValueConverter(ImmutableBigIntegerValueImpl.class, Short.class,
-                // new DefaultIntegerValueToShortConverter())
-                // .withValueConverter(ImmutableLongValueImpl.class, Short.class,
-                // new DefaultIntegerValueToShortConverter())
-                // .withObjectConverter(Short.class, IntegerValue.class,
-                // new DefaultShortToIntegerObjectConverter())
-                .withObjectConverter(Character.class, StringValue.class,
-                        new DefaultCharacterToStringValueConverter())
-                .withObjectConverter(String.class, StringValue.class,
-                        new DefaultStringToStringValueConverter())
-                .withObjectConverter(Long.class, IntegerValue.class,
-                        new DefaultLongToIntegerValueConverter())
-                .withObjectConverter(Integer.class, IntegerValue.class,
-                        new DefaultIntegerToIntegerValueConverter())
-                .withObjectConverter(byte[].class, BinaryValue.class,
-                        new DefaultByteArrayToBinaryValueConverter())
-                .withObjectConverter(Boolean.class, BooleanValue.class,
-                        new DefaultBooleanToBooleanValueConverter())
-                .withObjectConverter(Float.class, FloatValue.class,
-                        new DefaultFloatToFloatValueConverter())
-                .withObjectConverter(Double.class, FloatValue.class,
-                        new DefaultDoubleToFloatValueConverter())
-                .withObjectConverter(UUID.class, ExtensionValue.class,
-                        new DefaultUUIDToExtensionValueConverter())
-                .withObjectConverter(BigDecimal.class, ExtensionValue.class,
-                        new DefaultBigDecimalToExtensionValueConverter())
+                // .withValueConverter(ValueType.INTEGER, Short.class, new DefaultIntegerValueToShortConverter())
+                // .withObjectConverter(Short.class, new DefaultShortToIntegerObjectConverter())
+                .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
+                .withObjectConverter(String.class, StringValue.class, new DefaultStringToStringValueConverter())
+                .withObjectConverter(Long.class, IntegerValue.class, new DefaultLongToIntegerValueConverter())
+                .withObjectConverter(Integer.class, IntegerValue.class, new DefaultIntegerToIntegerValueConverter())
+                .withObjectConverter(byte[].class, BinaryValue.class, new DefaultByteArrayToBinaryValueConverter())
+                .withObjectConverter(Boolean.class, BooleanValue.class, new DefaultBooleanToBooleanValueConverter())
+                .withObjectConverter(Float.class, FloatValue.class, new DefaultFloatToFloatValueConverter())
+                .withObjectConverter(Double.class, FloatValue.class, new DefaultDoubleToFloatValueConverter())
+                .withObjectConverter(UUID.class, ExtensionValue.class, new DefaultUUIDToExtensionValueConverter())
+                .withObjectConverter(BigDecimal.class, ExtensionValue.class, new DefaultBigDecimalToExtensionValueConverter())
                 .build();
     }
 

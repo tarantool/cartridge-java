@@ -6,8 +6,8 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.converters.value.custom.MultiValueListConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +17,7 @@ import java.util.function.Supplier;
  * Manages instantiation of the operation result factories
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public final class DefaultResultMapperFactoryFactory implements ResultMapperFactoryFactory {
 
@@ -85,7 +86,7 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
     <T> CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
     getTarantoolResultMapper(MessagePackMapper mapper, Class<T> tupleClass) {
         return this.<T>singleValueTarantoolResultMapperFactory()
-                .withTarantoolResultConverter(getConverter(mapper, ArrayValue.class, tupleClass));
+                .withTarantoolResultConverter(getConverter(mapper, ValueType.ARRAY, tupleClass));
     }
 
     public
@@ -101,11 +102,11 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
     }
 
     private <V extends Value, T> ValueConverter<V, T> getConverter(
-            MessagePackMapper mapper, Class<V> valueClass, Class<T> tupleClass) {
-        Optional<? extends ValueConverter<V, T>> converter = mapper.getValueConverter(valueClass, tupleClass);
+            MessagePackMapper mapper, ValueType valueType, Class<T> tupleClass) {
+        Optional<? extends ValueConverter<V, T>> converter = mapper.getValueConverter(valueType, tupleClass);
         if (!converter.isPresent()) {
             throw new TarantoolClientException(
-                    "No converter for value class %s and type %s is present", valueClass, tupleClass);
+                    "No converter for value type %s and type %s is present", valueType, tupleClass);
         }
         return converter.get();
     }
