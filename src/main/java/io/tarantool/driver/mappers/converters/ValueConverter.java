@@ -6,11 +6,12 @@ import java.io.Serializable;
 
 /**
  * Basic interface for converters from MessagePack entities to Java objects for a particular class
+ *
  * @param <V> the source MessagePack entity type
  * @param <O> the target object type
  * @author Alexey Kuzin
  */
-public interface ValueConverter<V extends Value, O> extends Serializable {
+public interface ValueConverter<V extends Value, O> extends Converter {
     /**
      * Convert MessagePack entity to a Java object
      * @param value entity

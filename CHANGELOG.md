@@ -3,6 +3,7 @@
 ## [0.7.3] - unreleased
 
 - Added workflow for performance tests in CI
+- Fixed converting performance with targetType #212
 
 ### Bugfixes
 - Fixed incorrect fieldNumber in the index metadata #209

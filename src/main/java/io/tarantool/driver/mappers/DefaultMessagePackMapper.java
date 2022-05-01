@@ -35,10 +35,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
     private static final long serialVersionUID = 20220418L;
 
-    private final Map<ValueType, List<ValueConverter<? extends Value, ?>>> valueConverters;
-    private final Map<String, List<ObjectConverter<?, ? extends Value>>> objectConverters;
-    private final Map<String, ValueConverter<? extends Value, ?>> valueConvertersByTarget;
-    private final Map<String, ObjectConverter<?, ? extends Value>> objectConvertersByTarget;
+    private final Map<ValueType, List<ConverterWrapper<ValueConverter<? extends Value, ?>>>> valueConverters;
+    private final Map<String, List<ConverterWrapper<ObjectConverter<?, ? extends Value>>>> objectConverters;
     private final ObjectConverter<Object, NilValue> nilConverter = new DefaultNullToNilValueConverter();
 
     /**
@@ -46,9 +44,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      */
     public DefaultMessagePackMapper() {
         valueConverters = new HashMap<>();
-        valueConvertersByTarget = new HashMap<>();
         objectConverters = new HashMap<>();
-        objectConvertersByTarget = new HashMap<>();
     }
 
     /**
@@ -60,8 +56,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         this();
         this.valueConverters.putAll(mapper.valueConverters);
         this.objectConverters.putAll(mapper.objectConverters);
-        this.valueConvertersByTarget.putAll(mapper.valueConvertersByTarget);
-        this.objectConvertersByTarget.putAll(mapper.objectConvertersByTarget);
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +76,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     public <V extends Value, O> V toValue(O o) {
         Function<String, Optional<ObjectConverter<O, V>>> getter =
                 typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .map(c -> (ObjectConverter<O, V>) c)
+                        .map(c -> (ObjectConverter<O, V>) c.getConverter())
                         .filter(c -> c.canConvertObject(o))
                         .findFirst();
 
@@ -95,7 +89,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     public <V extends Value, O> O fromValue(V v) {
         Function<ValueType, Optional<ValueConverter<V, O>>> getter =
                 typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .map(c -> (ValueConverter<V, O>) c)
+                        .map(c -> (ValueConverter<V, O>) c.getConverter())
                         .filter(c -> c.canConvertValue(v))
                         .findFirst();
         return fromValue(v, getter);
@@ -106,9 +100,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     public <V extends Value, O> O fromValue(V v, Class<O> targetClass) {
         Function<ValueType, Optional<ValueConverter<V, O>>> getter =
                 typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .map(c -> (ValueConverter<V, O>) c)
+                        .filter(c -> checkConverterByTargetType(c.getTargetClass(), targetClass))
+                        .map(c -> (ValueConverter<V, O>) c.getConverter())
                         .filter(c -> c.canConvertValue(v))
-                        .filter(c -> checkConverterByTargetType(c, targetClass))
                         .findFirst();
         return fromValue(v, getter);
     }
@@ -167,37 +161,16 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     public <V extends Value, O> void registerValueConverter(ValueType valueType,
                                                             Class<? extends O> objectClass,
                                                             ValueConverter<V, ? extends O> converter) {
-        List<ValueConverter<? extends Value, ?>> converters =
+        List<ConverterWrapper<ValueConverter<? extends Value, ?>>> converters =
                 valueConverters.computeIfAbsent(valueType, k -> new LinkedList<>());
-        converters.add(0, converter);
-        valueConvertersByTarget.put(objectClass.getTypeName(), converter);
+        converters.add(0, new ConverterWrapper<>(converter, objectClass));
     }
 
     /**
      * Check if the specified converter can convert to the specified object type
      */
-    private boolean checkConverterByTargetType(ValueConverter<? extends Value, ?> converter, Class<?> targetClass) {
-        try {
-            ValueConverter<? extends Value, ?> exactMatch = valueConvertersByTarget.get(targetClass.getTypeName());
-            return exactMatch == converter ||
-                    getInterfaceParameterClass(converter, converter.getClass(), 1).isAssignableFrom(targetClass);
-        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Check if the specified converter can convert to the specified object type
-     */
-    private boolean checkObjectConverterByTargetType(ObjectConverter<?, ? extends Value> converter,
-                                                     Class<?> targetClass) {
-        try {
-            return objectConvertersByTarget.get(targetClass.getTypeName()) == converter ||
-                    getInterfaceParameterClass(converter, converter.getClass(), 1)
-                            .isAssignableFrom(targetClass);
-        } catch (InterfaceParameterClassNotFoundException | InterfaceParameterTypeNotFoundException e) {
-            return false;
-        }
+    private boolean checkConverterByTargetType(Class<?> targetClassOfConverter, Class<?> targetClass) {
+        return targetClassOfConverter.isAssignableFrom(targetClass);
     }
 
     @Override
@@ -206,8 +179,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                                                                                  Class<O> targetClass) {
         Function<ValueType, Optional<ValueConverter<V, O>>> getter =
                 typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .filter(c -> checkConverterByTargetType(c, targetClass))
-                        .map(c -> (ValueConverter<V, O>) c)
+                        .filter(c -> checkConverterByTargetType(c.getTargetClass(), targetClass))
+                        .map(c -> (ValueConverter<V, O>) c.getConverter())
                         .findFirst();
         return findValueConverter(valueType, getter);
     }
@@ -257,10 +230,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     public <V extends Value, O> void registerObjectConverter(Class<? extends O> objectClass,
                                                              Class<V> valueClass,
                                                              ObjectConverter<O, V> converter) {
-        List<ObjectConverter<?, ? extends Value>> converters =
+        List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> converters =
                 objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new LinkedList<>());
-        converters.add(0, converter);
-        objectConvertersByTarget.put(valueClass.getTypeName(), converter);
+        converters.add(0, new ConverterWrapper<>(converter, valueClass));
     }
 
     @Override
@@ -269,8 +241,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
                                                                                    Class<V> valueClass) {
         Function<String, Optional<ObjectConverter<O, V>>> getter =
                 typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                        .filter(c -> checkObjectConverterByTargetType(c, valueClass))
-                        .map(c -> (ObjectConverter<O, V>) c)
+                        .filter(c -> checkConverterByTargetType(c.getTargetClass(), valueClass))
+                        .map(c -> (ObjectConverter<O, V>) c.getConverter())
                         .findFirst();
         return findObjectConverter(objectClass, getter);
     }
