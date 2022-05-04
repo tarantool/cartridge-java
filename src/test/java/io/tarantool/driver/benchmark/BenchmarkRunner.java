@@ -26,7 +26,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypes(TarantoolSetup plan, Blackhole bh) {
@@ -63,7 +63,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypesAsTuplesAndUnpackIt(TarantoolSetup plan, Blackhole bh) {
@@ -101,7 +101,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypesAsTuplesAndUnpackItWithTargetType(TarantoolSetup plan, Blackhole bh) {
@@ -139,7 +139,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithDiffTypes(TarantoolSetup plan, Blackhole bh) {
@@ -148,7 +148,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithNestedArrays(TarantoolSetup plan, Blackhole bh) {
@@ -157,7 +157,7 @@ public class BenchmarkRunner {
     }
 
     @Benchmark
-    @Fork(0)
+    @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithNestedMaps(TarantoolSetup plan, Blackhole bh) {

@@ -21,7 +21,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class TarantoolSetup {
                 3.4654D,
                 'a',
                 -123312,
-                new ArrayList<>(Arrays.asList( 0, "asdsad", 1, false, 2.2 )),
+                new ArrayList<>(Arrays.asList(0, "asdsad", 1, false, 2.2)),
                 hm,
                 true,
                 9223372036854775807L,
