@@ -2,6 +2,8 @@
 
 ## [0.7.3] - unreleased
 
+- Added workflow for performance tests in CI
+
 ### Bugfixes
 - Fixed incorrect fieldNumber in the index metadata #209
 
