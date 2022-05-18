@@ -1,17 +1,26 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.api.*;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.exceptions.*;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
+import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolConnectionException;
+import io.tarantool.driver.exceptions.TarantoolInternalException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.TarantoolContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ClassUtil;
@@ -26,8 +35,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexey Kuzin
@@ -42,7 +53,8 @@ public class ConnectionIT {
 
     @Container
     private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
+            .withScriptFileName("org/testcontainers/containers/server.lua")
+            .withLogConsumer(new Slf4jLogConsumer(log));
 
     @Test
     public void connectAndCheckMetadata() throws Exception {
@@ -334,7 +346,7 @@ public class ConnectionIT {
                 .build();
 
         // then
-        TarantoolClientException exception =  assertThrows(TarantoolClientException.class, client::getVersion);
+        TarantoolClientException exception = assertThrows(TarantoolClientException.class, client::getVersion);
         assertFalse(ClassUtil.getRootCause(exception) instanceof NullPointerException);
     }
 }

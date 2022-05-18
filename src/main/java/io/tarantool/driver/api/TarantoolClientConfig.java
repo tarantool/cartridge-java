@@ -1,5 +1,6 @@
 package io.tarantool.driver.api;
 
+import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
@@ -32,6 +33,7 @@ public class TarantoolClientConfig {
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
             TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE;
+    private SslContext sslContext;
 
     /**
      * Basic constructor.
@@ -129,6 +131,24 @@ public class TarantoolClientConfig {
      */
     public void setConnections(int connections) {
         this.connections = connections;
+    }
+
+    /**
+     * Set {@link SslContext} for establishing SSL/TLS connection
+     *
+     * @param sslContext {@link SslContext} instance
+     */
+    public void setSslContext(SslContext sslContext) {
+        this.sslContext = sslContext;
+    }
+
+    /**
+     * Get settings for establishing SSL/TLS connection
+     *
+     * @return a {@link SslContext} instance
+     */
+    public SslContext getSslContext() {
+        return this.sslContext;
     }
 
     /**
@@ -284,7 +304,19 @@ public class TarantoolClientConfig {
          */
         public Builder withConnections(int connections) {
             Assert.state(connections > 0, "The number of server connections must be greater than 0");
-            config.connections = connections;
+            config.setConnections(connections);
+            return this;
+        }
+
+        /**
+         * Specify SslContext with settings for establishing SSL/TLS connection between Tarantool
+         *
+         * @param sslContext {@link SslContext} instance
+         * @return builder
+         */
+        public Builder withSslContext(SslContext sslContext) {
+            Assert.notNull(sslContext, "SslContext must not be null");
+            config.setSslContext(sslContext);
             return this;
         }
 

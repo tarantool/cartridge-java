@@ -63,10 +63,13 @@ public class TarantoolConnectionFactory {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
         RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
+        TarantoolChannelInitializer handler = new TarantoolChannelInitializer(
+                config, requestManager, versionHolder, connectionFuture);
 
         ChannelFuture future = bootstrap.clone()
-                .handler(new TarantoolChannelInitializer(config, requestManager, versionHolder, connectionFuture))
-                .remoteAddress(serverAddress).connect();
+                .handler(handler)
+                .remoteAddress(serverAddress)
+                .connect();
 
         future.addListener((ChannelFutureListener) f -> {
             if (!f.isSuccess()) {

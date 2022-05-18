@@ -48,3 +48,11 @@ jobs:
         TARANTOOL_SERVER_USER: root
         TARANTOOL_SERVER_GROUP: root
       run: mvn -B test -P integration --file pom.xml
+
+    - name: Run enterprise tests
+      env:
+        TARANTOOL_VERSION: ${{ matrix.tarantool-version }}
+        TARANTOOL_SERVER_USER: root
+        TARANTOOL_SERVER_GROUP: root
+        DOWNLOAD_SDK_URI: ${{ secrets.DOWNLOAD_SDK_URI }}
+      run: mvn -B test -P enterprise --file pom.xml
