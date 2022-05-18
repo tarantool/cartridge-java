@@ -35,7 +35,8 @@ public class SslClientITEnterprise {
 
     private static final Logger log = LoggerFactory.getLogger(SslClientITEnterprise.class);
 
-    private static TarantoolContainer container;
+    private static TarantoolContainer containerWithSsl;
+    private static TarantoolContainer containerWithoutSsl;
 
     @BeforeAll
     public static void setUp() throws URISyntaxException {
@@ -47,21 +48,33 @@ public class SslClientITEnterprise {
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", "tarantool-enterprise-bundle-2.10.0-beta2-91-g08c9b4963-r474");
 
-        container = new TarantoolContainer(
+        containerWithSsl = new TarantoolContainer(
                 new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
                 .withScriptFileName("ssl_server.lua")
                 .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl")
                 .withLogConsumer(new Slf4jLogConsumer(log));
 
-        if (!container.isRunning()) {
-            container.start();
+        containerWithoutSsl = new TarantoolContainer(
+                new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
+                .withScriptFileName("server.lua")
+                .withDirectoryBinding("org/testcontainers/containers/enterprise")
+                .withLogConsumer(new Slf4jLogConsumer(log));
+
+        if (!containerWithSsl.isRunning()) {
+            containerWithSsl.start();
+        }
+
+        if (!containerWithoutSsl.isRunning()) {
+            containerWithoutSsl.start();
         }
     }
 
     @Test
     public void test_should_throwException_ifClientWithSslButServerNot() throws SSLException {
         final TarantoolServerAddress address =
-                new TarantoolServerAddress("127.0.0.1", container.getMappedPort(3301));
+                new TarantoolServerAddress(containerWithoutSsl.getHost(),
+                        containerWithoutSsl.getMappedPort(3301));
+
         final SimpleTarantoolCredentials credentials =
                 new SimpleTarantoolCredentials("test_user", "test_password");
 
@@ -75,7 +88,7 @@ public class SslClientITEnterprise {
     @Test
     public void test_should_clientConnectWithSsl() throws SSLException {
         final TarantoolServerAddress address =
-                new TarantoolServerAddress("127.0.0.1", container.getMappedPort(3301));
+                new TarantoolServerAddress("127.0.0.1", containerWithSsl.getMappedPort(3301));
         final SimpleTarantoolCredentials credentials =
                 new SimpleTarantoolCredentials("test_user", "test_password");
 
