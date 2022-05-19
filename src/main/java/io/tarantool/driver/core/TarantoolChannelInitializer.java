@@ -2,7 +2,9 @@ package io.tarantool.driver.core;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
@@ -45,9 +47,16 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
 
     @Override
     protected void initChannel(SocketChannel socketChannel) {
-        socketChannel.pipeline()
-                // greeting and authentication (will be removed after successful authentication)
-                .addLast("TarantoolAuthenticationHandler", new TarantoolAuthenticationHandler<>(
+        final ChannelPipeline pipeline = socketChannel.pipeline();
+
+        final SslContext sslContext = config.getSslContext();
+        if (sslContext != null) {
+            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+        }
+
+        // greeting and authentication (will be removed after successful authentication)
+        pipeline.addLast("TarantoolAuthenticationHandler",
+                new TarantoolAuthenticationHandler<>(
                         connectionFuture,
                         versionHolder,
                         (SimpleTarantoolCredentials) config.getCredentials(),

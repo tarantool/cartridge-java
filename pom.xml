@@ -240,7 +240,7 @@
         <dependency>
             <groupId>io.tarantool</groupId>
             <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>0.4.7</version>
+            <version>0.5.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -275,6 +275,27 @@
                         <configuration>
                             <includes>
                                 <include>**/*IT.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <logback.configurationFile>${logging.config}</logback.configurationFile>
+                                <logLevel>${logging.logLevel}</logLevel>
+                            </systemPropertyVariables>
+                            <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>enterprise</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M5</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*ITEnterprise.java</include>
                             </includes>
                             <systemPropertyVariables>
                                 <logback.configurationFile>${logging.config}</logback.configurationFile>

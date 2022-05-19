@@ -35,7 +35,7 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
     }
 
     @Test
-    void test_should_createProxyRetryingClientWithMappedCrudMethodName() {
+    public void test_should_createProxyRetryingClientWithMappedCrudMethodName() {
         //given
         int expectedNumberOfAttempts = 5;
         int expectedDelay = 500;

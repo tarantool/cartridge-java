@@ -1,5 +1,8 @@
 package io.tarantool.driver.core;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientBuilder;
 import io.tarantool.driver.api.TarantoolClientConfig;
@@ -13,6 +16,8 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;
+
+import javax.net.ssl.SSLException;
 
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,32 +49,57 @@ public class TarantoolClientBuilderTest {
     @Test
     void test_should_createClient() {
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withAddresses(SAMPLE_ADDRESS)
-                .withCredentials(SAMPLE_CREDENTIALS)
-                .withMessagePackMapper(SAMPLE_MAPPER)
-                .withConnections(SAMPLE_CONNECTIONS)
-                .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                .build();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withAddresses(SAMPLE_ADDRESS)
+                        .withCredentials(SAMPLE_CREDENTIALS)
+                        .withMessagePackMapper(SAMPLE_MAPPER)
+                        .withConnections(SAMPLE_CONNECTIONS)
+                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .build();
 
         //then
         assertClientParams(client);
     }
 
     @Test
+    void test_should_createClient_withSslContext() throws SSLException {
+        final SslContext sslContext = SslContextBuilder.forClient()
+                .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                .build();
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withAddresses(SAMPLE_ADDRESS)
+                        .withCredentials(SAMPLE_CREDENTIALS)
+                        .withMessagePackMapper(SAMPLE_MAPPER)
+                        .withConnections(SAMPLE_CONNECTIONS)
+                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .withSslContext(sslContext)
+                        .build();
+
+        //then
+        assertClientParams(client);
+        assertEquals(sslContext, client.getConfig().getSslContext());
+    }
+
+    @Test
     void test_should_configureClient() {
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withAddresses(SAMPLE_ADDRESS)
-                .withCredentials(SAMPLE_CREDENTIALS)
-                .withMessagePackMapper(SAMPLE_MAPPER)
-                .withConnections(SAMPLE_CONNECTIONS)
-                .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                .build();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withAddresses(SAMPLE_ADDRESS)
+                        .withCredentials(SAMPLE_CREDENTIALS)
+                        .withMessagePackMapper(SAMPLE_MAPPER)
+                        .withConnections(SAMPLE_CONNECTIONS)
+                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .build();
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
                 TarantoolClientFactory.configureClient(client).build();
