@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 /**
  * Populates metadata from results of a call to proxy API function in Tarantool instance. The function result is
  * expected to have the format which is returned by DDL module.
- * See <a href="https://github.com/tarantool/ddl#input-data-format">https://github.com/tarantool/ddl#input-data-format</a>
+ * See
+ * <a href="https://github.com/tarantool/ddl#input-data-format">https://github.com/tarantool/ddl#input-data-format</a>
  *
  * @author Sergey Volgin
  * @author Artyom Dubinin

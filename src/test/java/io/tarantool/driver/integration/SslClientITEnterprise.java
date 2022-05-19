@@ -3,7 +3,9 @@ package io.tarantool.driver.integration;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.tarantool.driver.api.TarantoolClientBuilder;
 import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
@@ -39,7 +41,7 @@ public class SslClientITEnterprise {
     private static TarantoolContainer containerWithoutSsl;
 
     @BeforeAll
-    public static void setUp() throws URISyntaxException {
+    public static void setUp() throws URISyntaxException, SSLException {
         final File dockerfile = new File(
                 SslClientITEnterprise.class.getClassLoader()
                         .getResource("org/testcontainers/containers/enterprise/Dockerfile").toURI()
@@ -48,15 +50,27 @@ public class SslClientITEnterprise {
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", "tarantool-enterprise-bundle-2.10.0-beta2-91-g08c9b4963-r474");
 
+        final SslContext sslContext = SslContextBuilder.forClient()
+                .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                .build();
+        final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
+                .withSslContext(sslContext);
+
         containerWithSsl = new TarantoolContainer(
-                new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
+                new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
                 .withScriptFileName("ssl_server.lua")
+                .withUsername("test_user")
+                .withPassword("test_password")
+                .withMemtxMemory(256 * 1024 * 1024)
                 .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl")
                 .withLogConsumer(new Slf4jLogConsumer(log));
 
         containerWithoutSsl = new TarantoolContainer(
                 new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
                 .withScriptFileName("server.lua")
+                .withUsername("test_user")
+                .withPassword("test_password")
+                .withMemtxMemory(256 * 1024 * 1024)
                 .withDirectoryBinding("org/testcontainers/containers/enterprise")
                 .withLogConsumer(new Slf4jLogConsumer(log));
 

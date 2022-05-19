@@ -263,7 +263,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param <O>         the source object type
      * @see ObjectConverter
      */
-    public <V extends Value, O> void registerObjectConverter(Class<? extends O> objectClass, ObjectConverter<O, V> converter) {
+    public <V extends Value, O> void registerObjectConverter(
+            Class<? extends O> objectClass, ObjectConverter<O, V> converter) {
         try {
             Class<V> valueClass = getInterfaceParameterClass(converter, ObjectConverter.class, 1);
             registerObjectConverter(objectClass, valueClass, converter);

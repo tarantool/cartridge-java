@@ -1,5 +1,6 @@
 package io.tarantool.driver.core;
 
+import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.api.MessagePackMapperBuilder;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientBuilder;
@@ -121,6 +122,12 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
     public TarantoolClientBuilder withConnectionSelectionStrategy(
             TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType) {
         return withConnectionSelectionStrategy(connectionSelectionStrategyType.value());
+    }
+
+    @Override
+    public TarantoolClientBuilder withSslContext(SslContext sslContext) {
+        this.configBuilder.withSslContext(sslContext);
+        return this;
     }
 
     @Override

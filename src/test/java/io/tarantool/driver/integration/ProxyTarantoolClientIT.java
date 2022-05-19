@@ -307,7 +307,8 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertNotNull(tuple.getInteger(3)); //bucket_id
 
         Conditions conditions = Conditions.equals("id", itemId);
-        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, TupleOperations.set("year", 42)).get();
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace
+                .update(conditions, TupleOperations.set("year", 42)).get();
         assertEquals(itemId, updateResult.get(0).getInteger(0));
         assertEquals(42, updateResult.get(0).getInteger(2));
     }

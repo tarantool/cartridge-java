@@ -1,5 +1,6 @@
 package io.tarantool.driver.api;
 
+import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -181,6 +182,14 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
             TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
+
+    /**
+     * Specify SslContext with settings for establishing SSL/TLS connection between Tarantool
+     *
+     * @param sslContext {@link SslContext} instance
+     * @return this instance of builder {@link TarantoolClientBuilder}
+     */
+    TarantoolClientBuilder withSslContext(SslContext sslContext);
 
     /**
      * Specify a tarantool client config
