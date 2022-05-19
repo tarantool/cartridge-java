@@ -1,9 +1,10 @@
 # Changelog
 
-## [0.7.3] - unreleased
-
+## [unreleased]
 - Added workflow for performance tests in CI
 - Fixed converting performance with targetType #212
+- Added support for SSl/TLS
+- Fixed TarantoolClientConfig.Builder
 
 ### Bugfixes
 - Fixed incorrect fieldNumber in the index metadata #209
