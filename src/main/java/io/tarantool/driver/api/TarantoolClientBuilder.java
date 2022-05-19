@@ -163,6 +163,14 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
     TarantoolClientBuilder withReadTimeout(int readTimeout);
 
     /**
+     * Turn on secure connection or turn off secure connection.
+     * Works only for new connections.
+     *
+     * @param isSecure boolean flag
+     */
+    TarantoolClientBuilder withSecure(boolean isSecure);
+
+    /**
      * Specify a custom connection selection strategy factory. A connection selection strategy encapsulates an algorithm
      * of selecting the next connection from the pool of available ones for performing the next request.
      *

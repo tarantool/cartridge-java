@@ -9,6 +9,8 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.utils.Assert;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Class-container for {@link TarantoolClient} configuration.
  * <p>
@@ -33,12 +35,28 @@ public class TarantoolClientConfig {
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
             TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE;
+    private final AtomicBoolean isSecure = new AtomicBoolean(false);
     private SslContext sslContext;
 
     /**
      * Basic constructor.
      */
     public TarantoolClientConfig() {
+    }
+
+    /**
+     * Copy constructor.
+     */
+    public TarantoolClientConfig(TarantoolClientConfig config) {
+        this.connectionSelectionStrategyFactory = config.getConnectionSelectionStrategyFactory();
+        this.messagePackMapper = config.getMessagePackMapper();
+        this.connectTimeout = config.getConnectTimeout();
+        this.requestTimeout = config.getRequestTimeout();
+        this.credentials = config.getCredentials();
+        this.readTimeout = config.getReadTimeout();
+        this.connections = config.getConnections();
+        this.isSecure.set(config.isSecure.get());
+        this.sslContext = config.getSslContext();
     }
 
     /**
@@ -140,6 +158,7 @@ public class TarantoolClientConfig {
      */
     public void setSslContext(SslContext sslContext) {
         this.sslContext = sslContext;
+        this.isSecure.set(true);
     }
 
     /**
@@ -149,6 +168,24 @@ public class TarantoolClientConfig {
      */
     public SslContext getSslContext() {
         return this.sslContext;
+    }
+
+    /**
+     * Gets a flag that determines client uses encryption for binary connections or not
+     *
+     * @return boolean flag
+     */
+    public boolean isSecure() {
+        return this.isSecure.get();
+    }
+
+    /**
+     * Turn on secure connection or turn off secure connection
+     *
+     * @param isSecure boolean flag
+     */
+    public void setSecure(boolean isSecure) {
+        this.isSecure.set(isSecure);
     }
 
     /**
@@ -321,6 +358,18 @@ public class TarantoolClientConfig {
         }
 
         /**
+         * Turn on secure connection or turn off secure connection
+         * Works only for new connections
+         *
+         * @param isSecure boolean flag
+         */
+        public Builder withSecure(boolean isSecure) {
+            Assert.notNull(config.getSslContext(), "SslContext must not be null");
+            config.setSecure(isSecure);
+            return this;
+        }
+
+        /**
          * Set the implementation of a factory which instantiates a strategy instance providing the algorithm of
          * selecting the next connection from a connection pool for performing the next request
          *
@@ -343,7 +392,7 @@ public class TarantoolClientConfig {
                 config.setCredentials(new SimpleTarantoolCredentials());
             }
 
-            return config;
+            return new TarantoolClientConfig(config);
         }
 
         /**
