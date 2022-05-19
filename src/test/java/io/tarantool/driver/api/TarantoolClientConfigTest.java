@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import javax.net.ssl.SSLException;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Oleg Kuznetsov
@@ -23,6 +25,7 @@ public class TarantoolClientConfigTest {
         //when
         final TarantoolClientConfig config = TarantoolClientConfig.builder()
                 .withSslContext(SslContextBuilder.forClient().build())
+                .withSecure(false)
                 .withCredentials(credentials)
                 .build();
 
@@ -31,5 +34,9 @@ public class TarantoolClientConfigTest {
         //then
         assertNotNull(config.getSslContext());
         assertNotNull(clientWithSsl.getConfig().getSslContext());
+        assertFalse(config.isSecure());
+
+        config.setSecure(true);
+        assertTrue(config.isSecure());
     }
 }

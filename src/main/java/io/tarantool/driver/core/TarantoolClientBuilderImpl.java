@@ -131,6 +131,12 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
     }
 
     @Override
+    public TarantoolClientBuilder withSecure(boolean isSecure) {
+        this.configBuilder.withSecure(isSecure);
+        return this;
+    }
+
+    @Override
     public TarantoolClientBuilder withConnectionSelectionStrategy(
             ConnectionSelectionStrategyFactory connectionSelectionStrategy) {
         this.configBuilder.withConnectionSelectionStrategyFactory(connectionSelectionStrategy);

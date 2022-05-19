@@ -3,13 +3,13 @@ package io.tarantool.driver.integration;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientBuilder;
-import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClientFactory;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,11 +50,8 @@ public class SslClientITEnterprise {
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", "tarantool-enterprise-bundle-2.10.0-beta2-91-g08c9b4963-r474");
 
-        final SslContext sslContext = SslContextBuilder.forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                .build();
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-                .withSslContext(sslContext);
+                .withSslContext(getSslContext());
 
         containerWithSsl = new TarantoolContainer(
                 new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
@@ -85,55 +82,47 @@ public class SslClientITEnterprise {
 
     @Test
     public void test_should_throwException_ifClientWithSslButServerNot() throws SSLException {
-        final TarantoolServerAddress address =
-                new TarantoolServerAddress(containerWithoutSsl.getHost(),
-                        containerWithoutSsl.getMappedPort(3301));
+        //when
+        final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
+                .withAddress(containerWithoutSsl.getHost(), containerWithoutSsl.getMappedPort(3301))
+                .withCredentials("test_user", "test_password")
+                .withSslContext(getSslContext());
 
-        final SimpleTarantoolCredentials credentials =
-                new SimpleTarantoolCredentials("test_user", "test_password");
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientWithSsl =
+                tarantoolClientBuilder.build();
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                tarantoolClientBuilder.withSecure(false).build();
 
-        final ClusterTarantoolTupleClient clientWithSsl = makeClientWithSsl(address, credentials);
-        final ClusterTarantoolTupleClient clientWithoutSsl = makeClient(address, credentials);
-
-        assertDoesNotThrow(clientWithoutSsl::getVersion);
+        //then
+        assertDoesNotThrow(client::getVersion);
         assertThrows(TarantoolClientException.class, clientWithSsl::getVersion);
     }
 
     @Test
     public void test_should_clientConnectWithSsl() throws SSLException {
-        final TarantoolServerAddress address =
-                new TarantoolServerAddress("127.0.0.1", containerWithSsl.getMappedPort(3301));
-        final SimpleTarantoolCredentials credentials =
-                new SimpleTarantoolCredentials("test_user", "test_password");
+        //when
+        final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
+                .withAddress(containerWithSsl.getHost(), containerWithSsl.getMappedPort(3301))
+                .withCredentials("test_user", "test_password")
+                .withSslContext(getSslContext());
 
-        final ClusterTarantoolTupleClient clientWithSsl = makeClientWithSsl(address, credentials);
-        final ClusterTarantoolTupleClient clientWithoutSsl = makeClient(address, credentials);
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientWithSsl =
+                tarantoolClientBuilder.build();
+        final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                tarantoolClientBuilder.withSecure(false).build();
 
+        //then
         assertDoesNotThrow(clientWithSsl::getVersion);
-        assertThrows(TarantoolClientException.class, clientWithoutSsl::getVersion);
+        assertThrows(TarantoolClientException.class, client::getVersion);
 
         final List<?> result = assertDoesNotThrow(() -> clientWithSsl.eval("return 'test'").join());
         assertEquals("test", result.get(0));
     }
 
-    private ClusterTarantoolTupleClient makeClientWithSsl(
-            TarantoolServerAddress address, SimpleTarantoolCredentials credentials) throws SSLException {
-        final SslContext sslContext = SslContextBuilder.forClient()
+    @NotNull
+    private static SslContext getSslContext() throws SSLException {
+        return SslContextBuilder.forClient()
                 .trustManager(InsecureTrustManagerFactory.INSTANCE)
                 .build();
-
-        final TarantoolClientConfig tarantoolClientConfig = new TarantoolClientConfig();
-        tarantoolClientConfig.setSslContext(sslContext);
-        tarantoolClientConfig.setCredentials(credentials);
-
-        return new ClusterTarantoolTupleClient(tarantoolClientConfig, address);
-    }
-
-    private ClusterTarantoolTupleClient makeClient(
-            TarantoolServerAddress address, SimpleTarantoolCredentials credentials) {
-        return new ClusterTarantoolTupleClient(
-                TarantoolClientConfig.builder()
-                        .withCredentials(credentials)
-                        .build(), address);
     }
 }

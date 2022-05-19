@@ -11,6 +11,7 @@ import io.tarantool.driver.auth.ChapSha1TarantoolAuthenticator;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.codecs.MessagePackFrameDecoder;
 import io.tarantool.driver.codecs.MessagePackFrameEncoder;
+import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.handlers.TarantoolAuthenticationHandler;
 import io.tarantool.driver.handlers.TarantoolAuthenticationResponseHandler;
 import io.tarantool.driver.handlers.TarantoolRequestHandler;
@@ -49,9 +50,8 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     protected void initChannel(SocketChannel socketChannel) {
         final ChannelPipeline pipeline = socketChannel.pipeline();
 
-        final SslContext sslContext = config.getSslContext();
-        if (sslContext != null) {
-            pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
+        if (config.isSecure()) {
+            wrapForSecure(socketChannel, pipeline);
         }
 
         // greeting and authentication (will be removed after successful authentication)
@@ -72,5 +72,15 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
                         connectionFuture))
                 // inbound
                 .addLast("TarantoolResponseHandler", new TarantoolResponseHandler(futureManager));
+    }
+
+    private void wrapForSecure(SocketChannel socketChannel, ChannelPipeline pipeline) {
+        final SslContext sslContext = config.getSslContext();
+
+        if (sslContext == null) {
+            throw new TarantoolClientException("Ssl context must not be null!");
+        }
+
+        pipeline.addLast(sslContext.newHandler(socketChannel.alloc()));
     }
 }
