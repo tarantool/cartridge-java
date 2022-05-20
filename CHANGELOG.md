@@ -1,13 +1,21 @@
 # Changelog
 
-## [unreleased]
-- Added workflow for performance tests in CI
-- Fixed converting performance with targetType #212
-- Added support for SSl/TLS
-- Fixed TarantoolClientConfig.Builder
+## [Unreleased]
+
+## [0.8.0] - 2022-05-20
+
+### Features
+- **[breaking change]** Use ValueType for registering ValueConverters ([#213](https://github.com/tarantool/cartridge-java/issues/213))
+- Removed reflection in value converters search for performance ([#178](https://github.com/tarantool/cartridge-java/issues/178))
+- Added objects converters for ArrayList and HashMap for increasing performance ([#207](https://github.com/tarantool/cartridge-java/issues/207))
+- Fixed converting performance with targetType ([#212](https://github.com/tarantool/cartridge-java/issues/212))
+- Added microbenchmark tests
+- Added support for SSl/TLS ([#180](https://github.com/tarantool/cartridge-java/issues/180))
+- Added support for IPv6 ([#199](https://github.com/tarantool/cartridge-java/issues/199))
 
 ### Bugfixes
-- Fixed incorrect fieldNumber in the index metadata #209
+- Fixed TarantoolClientConfig.Builder
+- Fixed incorrect fieldNumber in the index metadata ([#203](https://github.com/tarantool/cartridge-java/issues/203))
 
 ## [0.7.2] - 2022-04-06
 
