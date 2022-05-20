@@ -1,5 +1,6 @@
 package io.tarantool.driver.api;
 
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.converters.ObjectConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
@@ -63,7 +64,7 @@ public interface MessagePackMapperBuilder {
      * @param <V>         MessagePack's entity type that the converter accepts and/or returns
      * @param <O>         java object's type that the converter accepts and/or returns
      * @return builder
-     * @see io.tarantool.driver.mappers.DefaultMessagePackMapper#registerValueConverter(ValueType, Class, ValueConverter)
+     * @see DefaultMessagePackMapper#registerValueConverter(ValueType, Class, ValueConverter)
      */
     <V extends Value, O> MessagePackMapperBuilder withValueConverter(ValueType valueType,
                                                                      Class<O> objectClass,

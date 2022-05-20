@@ -84,6 +84,8 @@ public class HTTPClusterDiscoveryEndpoint implements TarantoolClusterDiscoveryEn
 
     /**
      * Builder for {@link HTTPClusterDiscoveryEndpoint}
+     *
+     * @return new instance of Builder for {@link HTTPClusterDiscoveryEndpoint}
      */
     public static Builder builder() {
         return new Builder();
