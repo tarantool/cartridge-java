@@ -70,7 +70,8 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(ValueType.FLOAT, Float.class, new DefaultFloatValueToFloatConverter())
                 .withValueConverter(ValueType.FLOAT, Double.class, new DefaultFloatValueToDoubleConverter())
                 .withValueConverter(ValueType.EXTENSION, UUID.class, new DefaultExtensionValueToUUIDConverter())
-                .withValueConverter(ValueType.EXTENSION, BigDecimal.class, new DefaultExtensionValueToBigDecimalConverter())
+                .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
+                        new DefaultExtensionValueToBigDecimalConverter())
                 .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
                 //TODO: add this when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
                 // .withValueConverter(ValueType.INTEGER, Short.class, new DefaultIntegerValueToShortConverter())
@@ -84,7 +85,8 @@ public final class DefaultMessagePackMapperFactory {
                 .withObjectConverter(Float.class, FloatValue.class, new DefaultFloatToFloatValueConverter())
                 .withObjectConverter(Double.class, FloatValue.class, new DefaultDoubleToFloatValueConverter())
                 .withObjectConverter(UUID.class, ExtensionValue.class, new DefaultUUIDToExtensionValueConverter())
-                .withObjectConverter(BigDecimal.class, ExtensionValue.class, new DefaultBigDecimalToExtensionValueConverter())
+                .withObjectConverter(BigDecimal.class, ExtensionValue.class,
+                        new DefaultBigDecimalToExtensionValueConverter())
                 .build();
     }
 

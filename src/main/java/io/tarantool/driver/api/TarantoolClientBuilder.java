@@ -167,6 +167,7 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      * Works only for new connections.
      *
      * @param isSecure boolean flag
+     * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withSecure(boolean isSecure);
 

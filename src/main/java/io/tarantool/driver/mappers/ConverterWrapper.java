@@ -26,7 +26,6 @@ class ConverterWrapper<C extends Converter> implements Serializable {
         this.targetClass = targetClass;
     }
 
-
     public C getConverter() {
         return converter;
     }

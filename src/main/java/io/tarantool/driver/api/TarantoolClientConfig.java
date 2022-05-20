@@ -46,6 +46,8 @@ public class TarantoolClientConfig {
 
     /**
      * Copy constructor.
+     *
+     * @param config whose internal fields will be copied
      */
     public TarantoolClientConfig(TarantoolClientConfig config) {
         this.connectionSelectionStrategyFactory = config.getConnectionSelectionStrategyFactory();
@@ -362,6 +364,7 @@ public class TarantoolClientConfig {
          * Works only for new connections
          *
          * @param isSecure boolean flag
+         * @return builder
          */
         public Builder withSecure(boolean isSecure) {
             Assert.notNull(config.getSslContext(), "SslContext must not be null");

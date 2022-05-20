@@ -26,7 +26,8 @@ public class TarantoolServerAddress implements Serializable {
     /**
      * Creates a {@link TarantoolServerAddress} instance
      *
-     * @param host hostname
+     * @param host Tarantool server hostname
+     * @param port Tarantool server port
      */
     public TarantoolServerAddress(final String host, final int port) {
         this.socketAddress = new InetSocketAddress(host, port);
