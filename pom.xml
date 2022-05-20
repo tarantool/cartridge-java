@@ -31,6 +31,13 @@
             <organization>Tarantool</organization>
             <organizationUrl>https://tarantool.io/</organizationUrl>
         </developer>
+        <developer>
+            <id>ArtDub</id>
+            <name>Artyom Dubinin</name>
+            <email>rusartdub@gmail.com</email>
+            <organization>Tarantool</organization>
+            <organizationUrl>https://tarantool.io/</organizationUrl>
+        </developer>
     </developers>
 
     <issueManagement>
