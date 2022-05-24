@@ -16,6 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.util.UUID;
+import org.testcontainers.shaded.org.apache.commons.lang.ArrayUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Artyom Dubinin
@@ -58,5 +63,25 @@ public class ConvertersWithClusterClientIT extends SharedTarantoolContainer {
 
         //then
         Assertions.assertEquals(uuid, fields.getUUID("uuid_field"));
+    }
+
+    @Test
+    @EnabledIf("io.tarantool.driver.TarantoolUtils#versionWithVarbinary")
+    public void test_boxOperations_shouldWorkWithVarbinary() throws Exception {
+        //given
+        byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
+        List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
+        client.space("space_with_varbinary")
+                .insert(tupleFactory.create(1, bytes)).get();
+
+        //when
+        TarantoolTuple fields = client
+                .space("space_with_varbinary")
+                .select(Conditions.equals("id", 1)).get().get(0);
+
+        //then
+        byte[] bytesFromTarantool = fields.getByteArray("varbinary_field");
+        List<Byte> byteListFromTarantool = Arrays.asList(ArrayUtils.toObject(bytesFromTarantool));
+        Assertions.assertEquals(byteList, byteListFromTarantool);
     }
 }

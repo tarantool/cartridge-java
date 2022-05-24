@@ -31,6 +31,10 @@ public final class TarantoolUtils {
         return versionGreaterThen("2.4");
     }
 
+    public static boolean versionWithVarbinary() {
+        return versionGreaterThen("2.2.1");
+    }
+
     public static class TarantoolVersion {
         private final Integer major;
         private final Integer minor;
