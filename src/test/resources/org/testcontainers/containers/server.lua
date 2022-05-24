@@ -93,6 +93,20 @@ if major >= 2 and minor >= 4 and patch > 1 then
     )
     space_with_uuid:create_index('id', { parts = { 'id' }, if_not_exists = true, })
 end
+if major >= 2 and minor >= 2 and patch > 1 then
+    -- test space for check varbinary
+    local space_with_varbinary = box.schema.space.create(
+            'space_with_varbinary',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'varbinary_field', 'varbinary',},
+                },
+                if_not_exists = true,
+            }
+    )
+    space_with_varbinary:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+end
 
 --functions
 
