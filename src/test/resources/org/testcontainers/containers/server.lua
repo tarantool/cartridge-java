@@ -22,7 +22,7 @@ s:format({
     {name = 'year', type = 'unsigned',is_nullable=true},
     {name = 'test_delete', type = 'unsigned',is_nullable=true},
     {name = 'test_delete_2', type = 'unsigned',is_nullable=true},
-	{name = 'number_field', type = 'number', is_nullable=true}
+    {name = 'number_field', type = 'number', is_nullable=true},
 })
 s:create_index('primary', {
     type = 'tree',
@@ -66,6 +66,33 @@ m:create_index('primary', {
     type = 'tree',
     parts = {'id', 'name'}
 })
+
+local function tarantool_version()
+    local major_minor_patch = _G._TARANTOOL:split('-', 1)[1]
+    local major_minor_patch_parts = major_minor_patch:split('.', 2)
+
+    local major = tonumber(major_minor_patch_parts[1])
+    local minor = tonumber(major_minor_patch_parts[2])
+    local patch = tonumber(major_minor_patch_parts[3])
+
+    return major, minor, patch
+end
+
+local major, minor, patch = tarantool_version()
+if major >= 2 and minor >= 4 and patch > 1 then
+    -- test space for check uuid
+    local space_with_uuid = box.schema.space.create(
+            'space_with_uuid',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'uuid_field', 'uuid',},
+                },
+                if_not_exists = true,
+            }
+    )
+    space_with_uuid:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+end
 
 --functions
 

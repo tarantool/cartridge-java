@@ -1,3 +1,14 @@
+local function tarantool_version()
+    local major_minor_patch = _G._TARANTOOL:split('-', 1)[1]
+    local major_minor_patch_parts = major_minor_patch:split('.', 2)
+
+    local major = tonumber(major_minor_patch_parts[1])
+    local minor = tonumber(major_minor_patch_parts[2])
+    local patch = tonumber(major_minor_patch_parts[3])
+
+    return major, minor, patch
+end
+
 local function init_space()
     local profile = box.schema.space.create(
             'test__profile',
@@ -97,6 +108,24 @@ local function init_space()
 
     instances_info:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     instances_info:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
+    local major, minor, patch = tarantool_version()
+    if major >= 2 and minor >= 4 and patch > 1 then
+        -- test space for check uuid
+        local space_with_uuid = box.schema.space.create(
+                'space_with_uuid',
+                {
+                    format = {
+                        { 'id', 'unsigned' },
+                        { 'uuid_field', 'uuid',},
+                        { 'bucket_id', 'unsigned' },
+                    },
+                    if_not_exists = true,
+                }
+        )
+        space_with_uuid:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+        space_with_uuid:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+    end
 
     -- cursor test spaces
     local cursor_test_space = box.schema.space.create('cursor_test_space', { if_not_exists = true })
