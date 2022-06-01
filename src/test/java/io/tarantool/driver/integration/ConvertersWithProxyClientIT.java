@@ -85,4 +85,23 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
         List<Byte> byteListFromTarantool = Arrays.asList(ArrayUtils.toObject(bytesFromTarantool));
         Assertions.assertEquals(byteList, byteListFromTarantool);
     }
+
+    @Test
+    public void test_crudOperations_shouldWorkWithBytesAsString() throws Exception {
+        //given
+        byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
+        List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
+        client.space("space_with_string")
+                .insert(tupleFactory.create(1, bytes)).get();
+
+        //when
+        TarantoolTuple fields = client
+                .space("space_with_string")
+                .select(Conditions.equals("id", 1)).get().get(0);
+
+        //then
+        byte[] bytesFromTarantool = fields.getByteArray("string_field");
+        List<Byte> byteListFromTarantool = Arrays.asList(ArrayUtils.toObject(bytesFromTarantool));
+        Assertions.assertEquals(byteList, byteListFromTarantool);
+    }
 }

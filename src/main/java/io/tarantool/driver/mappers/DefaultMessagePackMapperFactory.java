@@ -25,6 +25,7 @@ import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToInteger
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToDoubleConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToFloatConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToLongConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultStringValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToCharacterConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToStringConverter;
 import org.msgpack.value.BinaryValue;
@@ -56,6 +57,7 @@ public final class DefaultMessagePackMapperFactory {
     private DefaultMessagePackMapperFactory() {
         defaultSimpleTypesMapper = new DefaultMessagePackMapper.Builder()
                 // converters for primitive values
+                .withValueConverter(ValueType.STRING, byte[].class, new DefaultStringValueToByteArrayConverter())
                 .withValueConverter(ValueType.STRING, Character.class, new DefaultStringValueToCharacterConverter())
                 .withValueConverter(ValueType.STRING, String.class, new DefaultStringValueToStringConverter())
                 .withValueConverter(ValueType.INTEGER, Float.class, new DefaultIntegerValueToFloatConverter())
