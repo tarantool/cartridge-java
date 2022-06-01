@@ -221,6 +221,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>ru.cryptopro.jcp</groupId>
+            <artifactId>jcp-jscp</artifactId>
+            <version>5.0.40363-A</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>1.35</version>

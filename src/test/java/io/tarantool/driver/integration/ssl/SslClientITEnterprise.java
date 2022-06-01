@@ -1,4 +1,4 @@
-package io.tarantool.driver.integration;
+package io.tarantool.driver.integration.ssl;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
