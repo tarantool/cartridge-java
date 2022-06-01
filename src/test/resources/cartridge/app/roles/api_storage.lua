@@ -145,6 +145,21 @@ local function init_space()
         space_with_varbinary:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
     end
 
+    local space_with_string = box.schema.space.create(
+            'space_with_string',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'string_field', 'string',},
+                    { 'bucket_id', 'unsigned' },
+                },
+                if_not_exists = true,
+            }
+    )
+
+    space_with_string:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    space_with_string:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+
     -- cursor test spaces
     local cursor_test_space = box.schema.space.create('cursor_test_space', { if_not_exists = true })
     cursor_test_space:format({

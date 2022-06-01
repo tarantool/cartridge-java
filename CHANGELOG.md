@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Add StringValueToByteArray converter ([#230](https://github.com/tarantool/cartridge-java/issues/230))
+
 ## [0.8.0] - 2022-05-20
 
 ### Features
