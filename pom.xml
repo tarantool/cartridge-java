@@ -119,8 +119,8 @@
                         <configuration>
                             <consoleOutput>true</consoleOutput>
                             <logViolationsToConsole>true</logViolationsToConsole>
-                            <!--<failsOnError>false</failsOnError>-->
-                            <failOnViolation>false</failOnViolation>
+                            <failsOnError>true</failsOnError>
+                            <failOnViolation>true</failOnViolation>
                             <configLocation>${checkstyle.config}</configLocation>
                             <suppressionsLocation>${checkstyle.suppressions}</suppressionsLocation>
                             <propertyExpansion>project.basedir=${project.basedir}</propertyExpansion>
