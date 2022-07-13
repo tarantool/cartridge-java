@@ -46,9 +46,8 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
                         break;
                     case IPROTO_OK:
                         try {
-                            TarantoolOkResult okResult = new TarantoolOkResult(tarantoolResponse.getSyncId(),
-                                    tarantoolResponse.getBody().getData());
-                            requestFuture.complete(requestMeta.getMapper().fromValue(okResult.getData()));
+                            requestFuture.complete(requestMeta.getMapper()
+                                    .fromValue(tarantoolResponse.getBody().getData()));
                         } catch (Throwable e) {
                             requestFuture.completeExceptionally(e);
                         }

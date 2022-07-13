@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol;
 
 /**
- * Incapsulates Tarantool response body types
+ * Encapsulates Tarantool response body types
  */
 public enum TarantoolResponseBodyType {
     EMPTY,

@@ -56,7 +56,7 @@ public class TarantoolRequest {
     }
 
     /**
-     * Encode incapsulated data using {@link MessagePacker}
+     * Encode encapsulated data using {@link MessagePacker}
      *
      * @param packer configured {@link MessagePacker}
      * @param mapper object-to-entity mapper

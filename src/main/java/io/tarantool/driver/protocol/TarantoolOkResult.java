@@ -3,7 +3,7 @@ package io.tarantool.driver.protocol;
 import org.msgpack.value.Value;
 
 /**
- * Incapsulates the result data returned in Tarantool server response
+ * Encapsulates the result data returned in Tarantool server response
  *
  * @author Alexey Kuzin
  */

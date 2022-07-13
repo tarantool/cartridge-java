@@ -10,10 +10,10 @@ import java.util.concurrent.CompletableFuture;
  * @author Alexey Kuzin
  */
 public class TarantoolRequestMetadata {
-    private CompletableFuture<?> feature;
-    private MessagePackValueMapper mapper;
+    private final CompletableFuture<?> feature;
+    private final MessagePackValueMapper mapper;
 
-    TarantoolRequestMetadata(CompletableFuture<?> feature, MessagePackValueMapper mapper) {
+    protected TarantoolRequestMetadata(CompletableFuture<?> feature, MessagePackValueMapper mapper) {
         this.feature = feature;
         this.mapper = mapper;
     }

@@ -17,7 +17,7 @@ public final class TarantoolUtils {
 
     public static boolean versionGreaterThen(String tarantoolVersion) {
         Assert.notNull(tarantoolVersion, "tarantoolVersion must not be null");
-        String tarantoolCiVersion = java.lang.System.getenv(TARANTOOL_VERSION);
+        String tarantoolCiVersion = System.getenv(TARANTOOL_VERSION);
         if (StringUtils.isEmpty(tarantoolCiVersion)) {
             return true;
         }

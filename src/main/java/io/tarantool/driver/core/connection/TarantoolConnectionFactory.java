@@ -10,6 +10,7 @@ import io.tarantool.driver.api.connection.TarantoolConnection;
 import io.tarantool.driver.api.connection.TarantoolConnectionListener;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.core.RequestFutureManager;
+import io.tarantool.driver.core.RequestFutureManagerImpl;
 import io.tarantool.driver.core.TarantoolChannelInitializer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.slf4j.Logger;
@@ -31,9 +32,9 @@ import java.util.stream.Stream;
  */
 public class TarantoolConnectionFactory {
 
-    private final TarantoolClientConfig config;
-    private final Bootstrap bootstrap;
-    private final ScheduledExecutorService timeoutScheduler;
+    protected final TarantoolClientConfig config;
+    protected final Bootstrap bootstrap;
+    protected final ScheduledExecutorService timeoutScheduler;
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**
@@ -61,7 +62,7 @@ public class TarantoolConnectionFactory {
     public CompletableFuture<TarantoolConnection> singleConnection(InetSocketAddress serverAddress,
                                                                    TarantoolConnectionListeners connectionListeners) {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
-        RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
+        RequestFutureManager requestManager = new RequestFutureManagerImpl(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
         TarantoolChannelInitializer handler = new TarantoolChannelInitializer(
                 config, requestManager, versionHolder, connectionFuture);
