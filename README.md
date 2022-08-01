@@ -1,3 +1,8 @@
+<a href="http://tarantool.org">
+   <img src="https://avatars2.githubusercontent.com/u/2344919?v=2&s=250"
+align="right">
+</a>
+
 # Java driver for Tarantool Cartridge
 
 [![java-driver:ubuntu/master Actions Status](https://github.com/tarantool/cartridge-java/workflows/ubuntu-master/badge.svg)](https://github.com/tarantool/cartridge-java/actions)
