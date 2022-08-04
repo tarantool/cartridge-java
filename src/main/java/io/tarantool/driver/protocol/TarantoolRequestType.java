@@ -7,6 +7,7 @@ package io.tarantool.driver.protocol;
  */
 public enum TarantoolRequestType {
 
+    IPROTO_OK(0x00),
     IPROTO_SELECT(0x01),
     IPROTO_INSERT(0x02),
     IPROTO_REPLACE(0x03),
@@ -15,7 +16,10 @@ public enum TarantoolRequestType {
     IPROTO_AUTH(0x07),
     IPROTO_EVAL(0x08),
     IPROTO_UPSERT(0x09),
-    IPROTO_CALL(0x0a);
+    IPROTO_CALL(0x0a),
+    IPROTO_SUBSCRIBE(0x42),
+    IPROTO_JOIN(0x41),
+    IPROTO_FETCH_SNAP(0x45);
 
     private long code;
 
