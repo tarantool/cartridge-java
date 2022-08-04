@@ -31,9 +31,9 @@ import java.util.stream.Stream;
  */
 public class TarantoolConnectionFactory {
 
-    private final TarantoolClientConfig config;
-    private final Bootstrap bootstrap;
-    private final ScheduledExecutorService timeoutScheduler;
+    protected final TarantoolClientConfig config;
+    protected final Bootstrap bootstrap;
+    protected final ScheduledExecutorService timeoutScheduler;
     private final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     /**

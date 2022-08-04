@@ -20,11 +20,17 @@ public final class TarantoolHeader implements Packable {
 
     private static final int IPROTO_REQUEST_TYPE = 0x00;
     private static final int IPROTO_SYNC = 0x01;
+    private static final int IPROTO_REPLICA_ID = 0x02;
+    private static final int IPROTO_LSN = 0x03;
+    private static final int IPROTO_TIMESTAMP = 0x04;
     private static final int IPROTO_SCHEMA_VERSION = 0x05;
 
     private Long sync;
     private Long code;
     private Long schemaVersion;
+    private Long replicaId;
+    private Long lsn;
+    private Double timestamp;
 
     private TarantoolHeader() {
     }
@@ -40,7 +46,7 @@ public final class TarantoolHeader implements Packable {
         this.schemaVersion = schemaVersion;
     }
 
-    private void setSync(Long sync) {
+    public void setSync(Long sync) {
         this.sync = sync;
     }
 
@@ -48,20 +54,44 @@ public final class TarantoolHeader implements Packable {
         return sync;
     }
 
-    private void setCode(Long code) {
+    public void setCode(Long code) {
         this.code = code;
     }
 
-    Long getCode() {
+    public Long getCode() {
         return code;
     }
 
-    private void setSchemaVersion(Long schemaVersion) {
+    public void setSchemaVersion(Long schemaVersion) {
         this.schemaVersion = schemaVersion;
     }
 
-    private Long getSchemaVersion() {
+    public Long getSchemaVersion() {
         return schemaVersion;
+    }
+
+    public void setReplicaId(Long replicaId) {
+        this.replicaId = replicaId;
+    }
+
+    public Long getReplicaId() {
+        return replicaId;
+    }
+
+    public Long getLsn() {
+        return lsn;
+    }
+
+    public void setLsn(Long lsn) {
+        this.lsn = lsn;
+    }
+
+    public Double getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Double timestamp) {
+        this.timestamp = timestamp;
     }
 
     /**
@@ -97,7 +127,7 @@ public final class TarantoolHeader implements Packable {
                 throw new TarantoolProtocolException("TarantoolHeader keys must be of MP_INT type");
             }
             Value field = values.get(key);
-            if (!field.isIntegerValue()) {
+            if (!field.isNumberValue()) {
                 throw new TarantoolProtocolException("TarantoolHeader values must be of MP_INT type");
             }
             switch (key.asIntegerValue().asInt()) {
@@ -110,8 +140,15 @@ public final class TarantoolHeader implements Packable {
                 case IPROTO_SCHEMA_VERSION:
                     header.setSchemaVersion(field.asIntegerValue().asLong());
                     break;
-                default:
-                    throw new TarantoolProtocolException("Unsupported header field {}", key.asIntegerValue().asLong());
+                case IPROTO_LSN:
+                    header.setLsn(field.asIntegerValue().asLong());
+                    break;
+                case IPROTO_REPLICA_ID:
+                    header.setReplicaId(field.asIntegerValue().asLong());
+                    break;
+                case IPROTO_TIMESTAMP:
+                    header.setTimestamp(field.asFloatValue().toDouble());
+                    break;
             }
         }
         if (header.getCode() == null) {
