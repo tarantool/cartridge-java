@@ -118,19 +118,21 @@ public final class TarantoolHeader implements Packable {
     public static TarantoolHeader fromMessagePackValue(Value value) throws TarantoolProtocolException {
         if (!value.isMapValue()) {
             throw new TarantoolProtocolException("TarantoolHeader can be unpacked only from MP_MAP, received "
-                    + value.toString());
+                    + value);
         }
         Map<Value, Value> values = value.asMapValue().map();
         TarantoolHeader header = new TarantoolHeader();
-        for (Value key: values.keySet()) {
+        for (Map.Entry<Value, Value> entry : values.entrySet()) {
+            Value key = entry.getKey();
             if (!key.isIntegerValue()) {
                 throw new TarantoolProtocolException("TarantoolHeader keys must be of MP_INT type");
             }
-            Value field = values.get(key);
+            Value field = entry.getValue();
             if (!field.isNumberValue()) {
                 throw new TarantoolProtocolException("TarantoolHeader values must be of MP_INT type");
             }
-            switch (key.asIntegerValue().asInt()) {
+            int keyInt = key.asIntegerValue().asInt();
+            switch (keyInt) {
                 case IPROTO_REQUEST_TYPE:
                     header.setCode(field.asIntegerValue().asLong());
                     break;
@@ -149,6 +151,8 @@ public final class TarantoolHeader implements Packable {
                 case IPROTO_TIMESTAMP:
                     header.setTimestamp(field.asFloatValue().toDouble());
                     break;
+                default:
+                    throw new IllegalStateException("unexpected IPROTO type key " + keyInt);
             }
         }
         if (header.getCode() == null) {

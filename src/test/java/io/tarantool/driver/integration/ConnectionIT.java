@@ -135,9 +135,8 @@ public class ConnectionIT {
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
                 tarantoolContainer.getHost(), tarantoolContainer.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
-            ExecutionException e = assertThrows(ExecutionException.class, () -> {
-                client.eval("return box.session.user()").get();
-            });
+            ExecutionException e = assertThrows(ExecutionException.class, () ->
+                    client.eval("return box.session.user()").get());
             // In the logs:
             // .TarantoolInternalException: InnerErrorMessage:
             // code: 47
@@ -200,9 +199,8 @@ public class ConnectionIT {
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
                 tarantoolContainer.getHost(), tarantoolContainer.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
-            ExecutionException e = assertThrows(ExecutionException.class, () -> {
-                client.eval("return box.session.user()").get();
-            });
+            ExecutionException e = assertThrows(ExecutionException.class,
+                    () -> client.eval("return box.session.user()").get());
             // In the logs we see an inner tarantool error message
             // "User 'RandomUserName' is not found"
             assertTrue(e.getCause() instanceof TarantoolConnectionException);

@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 public class TarantoolFieldImpl implements TarantoolField {
 
-    private Object value;
+    private final Object value;
 
     /**
      * Deserializing constructor
@@ -39,7 +39,6 @@ public class TarantoolFieldImpl implements TarantoolField {
         return getEntity(mapper);
     }
 
-    @SuppressWarnings("unchecked")
     private Value getEntity(MessagePackObjectMapper mapper) {
         if (value == null) {
             return ValueFactory.newNil();

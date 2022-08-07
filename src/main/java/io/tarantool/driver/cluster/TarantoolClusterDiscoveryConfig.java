@@ -60,7 +60,7 @@ public final class TarantoolClusterDiscoveryConfig {
      */
     public static class Builder {
 
-        private TarantoolClusterDiscoveryConfig config;
+        private final TarantoolClusterDiscoveryConfig config;
 
         public Builder() {
             this.config = new TarantoolClusterDiscoveryConfig();

@@ -53,12 +53,12 @@ public class ClusterTarantoolTupleClientIT {
     private static final Logger log = LoggerFactory.getLogger(ClusterTarantoolTupleClientIT.class);
 
     @Container
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
+    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
             .withScriptFileName("org/testcontainers/containers/server.lua")
             .withLogConsumer(new Slf4jLogConsumer(log));
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {

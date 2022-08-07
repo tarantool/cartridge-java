@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class TarantoolRequestBody implements Packable {
 
-    private Map<IntegerValue, Value> values;
+    private final Map<IntegerValue, Value> values;
 
     /**
      * In rare cases, the body may be empty. Creates a request with empty body
@@ -39,8 +39,8 @@ public class TarantoolRequestBody implements Packable {
             throws TarantoolProtocolException {
         try {
             this.values = new HashMap<>(body.size(), 1);
-            for (Integer key: body.keySet()) {
-                values.put(ValueFactory.newInteger(key), mapper.toValue(body.get(key)));
+            for (Map.Entry<Integer, ?> entry : body.entrySet()) {
+                values.put(ValueFactory.newInteger(entry.getKey()), mapper.toValue(entry.getValue()));
             }
         } catch (MessagePackValueMapperException e) {
             throw new TarantoolProtocolException(e);

@@ -31,7 +31,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
      */
     public static class Builder {
 
-        Map<Integer, Object> bodyMap;
+        final Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(6, 1);

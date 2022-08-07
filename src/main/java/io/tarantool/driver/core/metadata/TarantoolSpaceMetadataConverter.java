@@ -28,7 +28,7 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
     private static final ImmutableStringValue FORMAT_FIELD_TYPE = new ImmutableStringValueImpl("type");
     private static final ImmutableStringValue FORMAT_FIELD_IS_NULLABLE = new ImmutableStringValueImpl("is_nullable");
 
-    private MessagePackValueMapper mapper;
+    private final MessagePackValueMapper mapper;
 
     public TarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;

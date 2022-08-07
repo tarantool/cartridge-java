@@ -32,7 +32,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
      */
     public static class Builder {
 
-        Map<Integer, Object> bodyMap;
+        final Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(3, 1);

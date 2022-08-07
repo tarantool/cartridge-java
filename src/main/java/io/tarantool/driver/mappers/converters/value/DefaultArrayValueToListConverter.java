@@ -16,7 +16,7 @@ public class DefaultArrayValueToListConverter implements ValueConverter<ArrayVal
 
     private static final long serialVersionUID = 20220418L;
 
-    private MessagePackValueMapper mapper;
+    private final MessagePackValueMapper mapper;
 
     public DefaultArrayValueToListConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;

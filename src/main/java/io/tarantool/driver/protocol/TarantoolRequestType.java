@@ -21,7 +21,7 @@ public enum TarantoolRequestType {
     IPROTO_JOIN(0x41),
     IPROTO_FETCH_SNAP(0x45);
 
-    private long code;
+    private final long code;
 
     TarantoolRequestType(long code) {
         this.code = code;

@@ -145,7 +145,4 @@ public class ClusterTarantoolTupleClient
         return new TarantoolTupleSpace(this, config, connectionManager, metadata, spaceMetadata);
     }
 
-    protected TarantoolClusterAddressProvider getAddressProvider() {
-        return super.getAddressProvider();
-    }
 }
