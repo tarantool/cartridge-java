@@ -151,8 +151,6 @@ public final class TarantoolHeader implements Packable {
                 case IPROTO_TIMESTAMP:
                     header.setTimestamp(field.asFloatValue().toDouble());
                     break;
-                default:
-                    throw new IllegalStateException("unexpected IPROTO type key " + keyInt);
             }
         }
         if (header.getCode() == null) {
