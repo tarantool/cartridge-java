@@ -2,7 +2,11 @@
 
 ## [Unreleased]
 
-- Add StringValueToByteArray converter ([#230](https://github.com/tarantool/cartridge-java/issues/230))
+## [0.8.1] - 2022-08-18
+
+### Features
+- Added StringValueToByteArray converter ([#230](https://github.com/tarantool/cartridge-java/issues/230))
+- Added IPROTO constants to align code more with Tarantool
 
 ## [0.8.0] - 2022-05-20
 
