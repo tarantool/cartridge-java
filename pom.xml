@@ -42,13 +42,13 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/akudiyar/tarantool-cartridge-java-driver/issues/</url>
+        <url>https://github.com/tarantool/cartridge-java/issues/</url>
     </issueManagement>
 
     <scm>
-        <connection>scm:git:git@github.com:akudiyar/tarantool-cartridge-java-driver.git</connection>
-        <developerConnection>scm:git:git@github.com:akudiyar/tarantool-cartridge-java-driver.git</developerConnection>
-        <url>https://github.com/akudiyar/tarantool-cartridge-java-driver/tree/master</url>
+        <connection>scm:git:git@github.com/tarantool/cartridge-java.git</connection>
+        <developerConnection>scm:git:git@github.com:tarantool/cartridge-java.git</developerConnection>
+        <url>http://github.com/tarantool/cartridge-java/tree/master</url>
       <tag>v0.8.1</tag>
     </scm>
 
