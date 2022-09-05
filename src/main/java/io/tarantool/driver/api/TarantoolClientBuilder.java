@@ -212,6 +212,14 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
     TarantoolClientBuilder withTarantoolClientConfig(TarantoolClientConfig config);
 
     /**
+     * Specify netty threads number. Default is 0, real value will set in netty background
+     *
+     * @param eventLoopThreadsNumber number of threads
+     * @return builder
+     */
+    TarantoolClientBuilder withEventLoopThreadsNumber(int eventLoopThreadsNumber);
+
+    /**
      * Build the configured Tarantool client instance. Call this when you have specified all necessary settings.
      *
      * @return instance of tarantool tuple client {@link TarantoolClient}

@@ -319,6 +319,29 @@ Optional<?> stringValue = tarantoolTuple.getObject(2);
 Optional<?> bigDecimalValue = tarantoolTuple.getObject(3);
 ```
 
+## Thread control
+
+For specific case maybe need specify custom numbers of netty work threads
+First way is use client builder property 
+
+```java
+
+TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
+        return TarantoolClientFactory.createClient()
+        .withCredentials("admin", "secret-cluster-cookie")
+        .withAddress(container.getRouterHost(), container.getRouterPort())
+        .withEventLoopThreadsNumber(threadsNumber)
+        .build();
+```        
+
+Second way is use java system property
+
+```
+-Dio.netty.eventLoopThreads
+```        
+
+All this  properties should be used carefully, because if threads more than need may give low app performance  
+
 ## Documentation
 
 The Java Docs are available at [Github pages](https://tarantool.github.io/cartridge-java/).

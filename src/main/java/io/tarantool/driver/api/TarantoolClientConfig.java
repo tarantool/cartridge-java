@@ -25,12 +25,14 @@ public class TarantoolClientConfig {
     private static final int DEFAULT_REQUEST_TIMEOUT = 2000; // milliseconds
     private static final int DEFAULT_CONNECTIONS = 1;
     private static final int DEFAULT_CURSOR_BATCH_SIZE = 100;
+    private static final int DEFAULT_EVENT_LOOP_THREADS_NUMBER = 0;
 
     private TarantoolCredentials credentials;
     private int connectTimeout = DEFAULT_CONNECT_TIMEOUT;
     private int readTimeout = DEFAULT_READ_TIMEOUT;
     private int requestTimeout = DEFAULT_REQUEST_TIMEOUT;
     private int connections = DEFAULT_CONNECTIONS;
+    private int eventLoopThreadsNumber = DEFAULT_EVENT_LOOP_THREADS_NUMBER;
     private MessagePackMapper messagePackMapper =
             DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
@@ -59,6 +61,7 @@ public class TarantoolClientConfig {
         this.connections = config.getConnections();
         this.isSecure.set(config.isSecure.get());
         this.sslContext = config.getSslContext();
+        this.eventLoopThreadsNumber = config.getEventLoopThreadsNumber();
     }
 
     /**
@@ -247,6 +250,24 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * Get numbers of threads
+     *
+     * @return
+     */
+    public int getEventLoopThreadsNumber() {
+        return eventLoopThreadsNumber;
+    }
+
+    /**
+     * Set numbers of threads
+     *
+     * @param eventLoopThreadsNumber number of threads
+     */
+    public void setEventLoopThreadsNumber(int eventLoopThreadsNumber) {
+        this.eventLoopThreadsNumber = eventLoopThreadsNumber;
+    }
+
+    /**
      * A builder for {@link TarantoolClientConfig}
      */
     public static final class Builder {
@@ -382,6 +403,18 @@ public class TarantoolClientConfig {
         public Builder withConnectionSelectionStrategyFactory(ConnectionSelectionStrategyFactory factory) {
             Assert.notNull(factory, "Connection selection strategy factory must not be null");
             config.setConnectionSelectionStrategyFactory(factory);
+            return this;
+        }
+
+        /**
+         * Specify netty threads number. Default is 0, real value will set in netty background
+         *
+         * @param eventLoopThreadsNumber number of threads
+         * @return builder
+         */
+        public Builder withEventLoopThreadsNumber(int eventLoopThreadsNumber) {
+            Assert.state(eventLoopThreadsNumber > 0, "EventLoopThreadsNumber should be equals or greater than 0");
+            config.setEventLoopThreadsNumber(eventLoopThreadsNumber);
             return this;
         }
 

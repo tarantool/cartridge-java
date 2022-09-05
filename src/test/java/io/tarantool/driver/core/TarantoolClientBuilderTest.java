@@ -45,6 +45,7 @@ public class TarantoolClientBuilderTest {
     private final int SAMPLE_CONNECT_TIMEOUT = 5000;
     private final int SAMPLE_REQUEST_TIMEOUT = 400;
     private final int SAMPLE_READ_TIMEOUT = 4999;
+    private final int SAMPLE_EVENT_LOOP_THREADS_NUMBER = 4;
 
     @Test
     void test_should_createClient() {
@@ -58,6 +59,7 @@ public class TarantoolClientBuilderTest {
                         .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
                         .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
                         .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                         .build();
 
         //then
@@ -79,6 +81,7 @@ public class TarantoolClientBuilderTest {
                         .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
                         .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
                         .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                         .withSslContext(sslContext)
                         .build();
 
@@ -99,6 +102,7 @@ public class TarantoolClientBuilderTest {
                         .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
                         .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
                         .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                         .build();
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
@@ -118,6 +122,7 @@ public class TarantoolClientBuilderTest {
                 .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
                 .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
                 .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                 .build();
 
         //when
@@ -153,6 +158,7 @@ public class TarantoolClientBuilderTest {
                 .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
                 .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
                 .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                 .build();
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
@@ -179,6 +185,40 @@ public class TarantoolClientBuilderTest {
         assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
     }
 
+    @Test
+    void test_should_createClient_with_default_threads() {
+        //when
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .build();
+
+        //then
+        assertEquals(client.getConfig().getEventLoopThreadsNumber(), 0);
+    }
+
+    @Test
+    void test_should_createClient_with_custom_threads() {
+        //when
+        int customThreadsNumber = 10;
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                TarantoolClientFactory.createClient()
+                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+                        .build();
+
+        //then
+        assertEquals(client.getConfig().getEventLoopThreadsNumber(), 4);
+    }
+
+    @Test
+    void test_should_createClient_with_illegal_threads() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+                    TarantoolClientFactory.createClient()
+                            .withEventLoopThreadsNumber(-1)
+                            .build();
+        });
+    }
+
     private void assertClientParams(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
         assertEquals(ClusterTarantoolTupleClient.class, client.getClass());
         TarantoolClientConfig config = client.getConfig();
@@ -193,6 +233,7 @@ public class TarantoolClientBuilderTest {
         assertEquals(SAMPLE_REQUEST_TIMEOUT, config.getRequestTimeout());
         assertEquals(SAMPLE_CONNECT_TIMEOUT, config.getConnectTimeout());
         assertEquals(PARALLEL_ROUND_ROBIN.value(), config.getConnectionSelectionStrategyFactory());
+        assertEquals(SAMPLE_EVENT_LOOP_THREADS_NUMBER, config.getEventLoopThreadsNumber());
     }
 
     @Test
