@@ -150,6 +150,12 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
     }
 
     @Override
+    public TarantoolClientBuilder withEventLoopThreadsNumber(int eventLoopThreadsNumber) {
+        this.configBuilder.withEventLoopThreadsNumber(eventLoopThreadsNumber);
+        return this;
+    }
+
+    @Override
     public TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> build() {
         TarantoolClientConfig config = this.config != null ? this.config : this.configBuilder.build();
 

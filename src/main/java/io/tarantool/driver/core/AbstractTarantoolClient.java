@@ -110,7 +110,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
         this.config = config;
         this.mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
-        this.eventLoopGroup = new NioEventLoopGroup();
+        this.eventLoopGroup = new NioEventLoopGroup(config.getEventLoopThreadsNumber());
         this.bootstrap = new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)

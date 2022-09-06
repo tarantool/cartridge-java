@@ -7,6 +7,7 @@
 ### Features
 - Added StringValueToByteArray converter ([#230](https://github.com/tarantool/cartridge-java/issues/230))
 - Added IPROTO constants to align code more with Tarantool
+- Added client EventLoopThreadsNumber property for control netty work threads ([#253](https://github.com/tarantool/cartridge-java/pull/253))
 
 ## [0.8.0] - 2022-05-20
 
