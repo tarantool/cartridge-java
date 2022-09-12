@@ -16,6 +16,7 @@ import java.util.List;
  * @param <T> result type
  * @param <R> result collection type
  * @author Sergey Volgin
+ * @author Artyom Dubinin
  */
 public final class InsertProxyOperation<T extends Packable, R extends Collection<T>> extends AbstractProxyOperation<R> {
 
@@ -30,30 +31,15 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
     /**
      * The builder for this class.
      */
-    public static final class Builder<T extends Packable, R extends Collection<T>> {
-        private TarantoolCallOperations client;
-        private String spaceName;
-        private String functionName;
+    public static final class Builder<T extends Packable, R extends Collection<T>>
+            extends GenericOperationsBuilder<R, Builder<T, R>> {
         private T tuple;
-        private MessagePackObjectMapper argumentsMapper;
-        private CallResultMapper<R, SingleValueCallResult<R>> resultMapper;
-        private int requestTimeout;
 
         public Builder() {
         }
 
-        public Builder<T, R> withClient(TarantoolCallOperations client) {
-            this.client = client;
-            return this;
-        }
-
-        public Builder<T, R> withSpaceName(String spaceName) {
-            this.spaceName = spaceName;
-            return this;
-        }
-
-        public Builder<T, R> withFunctionName(String functionName) {
-            this.functionName = functionName;
+        @Override
+        Builder<T, R> self() {
             return this;
         }
 
@@ -62,23 +48,10 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
             return this;
         }
 
-        public Builder<T, R> withArgumentsMapper(MessagePackObjectMapper argumentsMapper) {
-            this.argumentsMapper = argumentsMapper;
-            return this;
-        }
-
-        public Builder<T, R> withResultMapper(CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
-            this.resultMapper = resultMapper;
-            return this;
-        }
-
-        public Builder<T, R> withRequestTimeout(int requestTimeout) {
-            this.requestTimeout = requestTimeout;
-            return this;
-        }
-
         public InsertProxyOperation<T, R> build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder().withTimeout(requestTimeout).build();
+            CRUDOperationOptions options = CRUDOperationOptions.builder()
+                    .withTimeout(requestTimeout)
+                    .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, options.asMap());
 
