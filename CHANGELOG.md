@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Removed code duplication in *ProxyOperations builders
+
 ## [0.8.1] - 2022-08-18
 
 ### Features
