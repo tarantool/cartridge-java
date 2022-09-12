@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Alexey Kuzin
  * @author Sergey Volgin
+ * @author Artyom Dubinin
  */
 abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
@@ -54,5 +55,69 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     @Override
     public CompletableFuture<T> execute() {
         return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
+    }
+
+    abstract static class GenericOperationsBuilder<T, B extends GenericOperationsBuilder<T, B>> {
+        protected TarantoolCallOperations client;
+        protected String spaceName;
+        protected String functionName;
+        protected MessagePackObjectMapper argumentsMapper;
+        protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
+        protected int requestTimeout;
+
+        GenericOperationsBuilder() {
+        }
+
+        abstract B self();
+
+        /**
+         * Specify a client for sending and receiving requests from Tarantool server
+         * @param client Tarantool server client
+         * @return builder
+         */
+        public B withClient(TarantoolCallOperations client) {
+            this.client = client;
+            return self();
+        }
+
+        /**
+         * Specify name of Tarantool server space to work with
+         * @param spaceName name of Tarantool server space
+         * @return builder
+         */
+        public B withSpaceName(String spaceName) {
+            this.spaceName = spaceName;
+            return self();
+        }
+
+        /**
+         * Specify name of the Tarantool server function called through preparing request
+         * @param functionName name of Tarantool server function
+         * @return builder
+         */
+        public B withFunctionName(String functionName) {
+            this.functionName = functionName;
+            return self();
+        }
+
+        public B withArgumentsMapper(MessagePackObjectMapper objectMapper) {
+            this.argumentsMapper = objectMapper;
+            return self();
+        }
+
+        public B withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+            this.resultMapper = resultMapper;
+            return self();
+        }
+
+        /**
+         * Specify response reading timeout
+         * @param requestTimeout the timeout for reading the responses from Tarantool server, in milliseconds
+         * @return builder
+         */
+        public B withRequestTimeout(int requestTimeout) {
+            this.requestTimeout = requestTimeout;
+            return self();
+        }
     }
 }

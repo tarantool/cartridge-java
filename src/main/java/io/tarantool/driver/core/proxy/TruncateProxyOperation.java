@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
  * Proxy operation for truncate
  *
  * @author Ivan Dneprov
+ * @author Artyom Dubinin
  */
 public final class TruncateProxyOperation implements ProxyOperation<Void> {
 
@@ -53,52 +54,12 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
         return new Builder();
     }
 
-    public static final class Builder {
-        private TarantoolCallOperations client;
-        private String spaceName;
-        private String functionName;
-        private int requestTimeout;
-
+    public static final class Builder extends AbstractProxyOperation.GenericOperationsBuilder<Void, Builder> {
         public Builder() {
         }
 
-        /**
-         * Specify a client for sending and receiving requests from Tarantool server
-         * @param client Tarantool server client
-         * @return builder
-         */
-        public Builder withClient(TarantoolCallOperations client) {
-            this.client = client;
-            return this;
-        }
-
-        /**
-         * Specify name of Tarantool server space to work with
-         * @param spaceName name of Tarantool server space
-         * @return builder
-         */
-        public Builder withSpaceName(String spaceName) {
-            this.spaceName = spaceName;
-            return this;
-        }
-
-        /**
-         * Specify name of the Tarantool server function called through preparing request
-         * @param functionName name of Tarantool server function
-         * @return builder
-         */
-        public Builder withFunctionName(String functionName) {
-            this.functionName = functionName;
-            return this;
-        }
-
-        /**
-         * Specify response reading timeout.
-         * @param requestTimeout the timeout for reading the responses from Tarantool server, in milliseconds
-         * @return builder
-         */
-        public Builder withRequestTimeout(int requestTimeout) {
-            this.requestTimeout = requestTimeout;
+        @Override
+        Builder self() {
             return this;
         }
 
@@ -107,7 +68,9 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          * @return TruncateProxyOperation instance
          */
         public TruncateProxyOperation build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder().withTimeout(requestTimeout).build();
+            CRUDOperationOptions options = CRUDOperationOptions.builder()
+                    .withTimeout(requestTimeout)
+                    .build();
 
             List<?> arguments = Arrays.asList(spaceName, options.asMap());
 
