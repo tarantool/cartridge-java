@@ -64,6 +64,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         protected MessagePackObjectMapper argumentsMapper;
         protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
         protected int requestTimeout;
+        protected List<String> fields;
 
         GenericOperationsBuilder() {
         }
@@ -72,6 +73,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
         /**
          * Specify a client for sending and receiving requests from Tarantool server
+         *
          * @param client Tarantool server client
          * @return builder
          */
@@ -82,6 +84,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
         /**
          * Specify name of Tarantool server space to work with
+         *
          * @param spaceName name of Tarantool server space
          * @return builder
          */
@@ -92,6 +95,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
         /**
          * Specify name of the Tarantool server function called through preparing request
+         *
          * @param functionName name of Tarantool server function
          * @return builder
          */
@@ -112,11 +116,23 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
         /**
          * Specify response reading timeout
+         *
          * @param requestTimeout the timeout for reading the responses from Tarantool server, in milliseconds
          * @return builder
          */
         public B withRequestTimeout(int requestTimeout) {
             this.requestTimeout = requestTimeout;
+            return self();
+        }
+
+        /**
+         * Specify response fields
+         *
+         * @param fields {@link List} of names for getting only a subset of fields
+         * @return builder
+         */
+        public B withFields(List<String> fields) {
+            this.fields = fields;
             return self();
         }
     }

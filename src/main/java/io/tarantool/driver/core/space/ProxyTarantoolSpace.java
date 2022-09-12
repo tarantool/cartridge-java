@@ -74,6 +74,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
                 .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
                 .build();
 
         return executeOperation(operation);
@@ -94,6 +95,23 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
                 .withRequestTimeout(config.getRequestTimeout())
+                .build();
+
+        return executeOperation(operation);
+    }
+
+    private CompletableFuture<R> insert(Conditions conditions, T tuple,
+                                        CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
+            throws TarantoolClientException {
+        InsertProxyOperation<T, R> operation = new InsertProxyOperation.Builder<T, R>()
+                .withClient(client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMapping.getInsertFunctionName())
+                .withTuple(tuple)
+                .withArgumentsMapper(config.getMessagePackMapper())
+                .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
                 .build();
 
         return executeOperation(operation);
@@ -120,6 +138,23 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         return executeOperation(operation);
     }
 
+    private CompletableFuture<R> replace(Conditions conditions, T tuple,
+                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper)
+            throws TarantoolClientException {
+        ReplaceProxyOperation<T, R> operation = new ReplaceProxyOperation.Builder<T, R>()
+                .withClient(client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMapping.getReplaceFunctionName())
+                .withTuple(tuple)
+                .withArgumentsMapper(config.getMessagePackMapper())
+                .withResultMapper(resultMapper)
+                .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
+                .build();
+
+        return executeOperation(operation);
+    }
+
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
         return select(conditions, tupleResultMapper());
@@ -137,6 +172,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
                 .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
                 .build();
 
         return executeOperation(operation);
@@ -174,6 +210,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
                 .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
                 .build();
 
         return executeOperation(operation);
@@ -198,6 +235,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
                 .withRequestTimeout(config.getRequestTimeout())
+                .withFields(conditions.getFields())
                 .build();
 
         return executeOperation(operation);
@@ -207,12 +245,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     public CompletableFuture<Void> truncate() throws TarantoolClientException {
         try {
             return executeVoidOperation(TruncateProxyOperation.<Void>builder()
-                    .withClient(client)
-                    .withSpaceName(spaceName)
-                    .withFunctionName(operationsMapping.getTruncateFunctionName())
-                    .withRequestTimeout(config.getRequestTimeout())
-                    .build()
-            );
+                                                .withClient(client)
+                                                .withSpaceName(spaceName)
+                                                .withFunctionName(operationsMapping.getTruncateFunctionName())
+                                                .withRequestTimeout(config.getRequestTimeout())
+                                                .build()
+                                       );
         } catch (TarantoolClientException e) {
             throw new TarantoolClientException(e);
         }

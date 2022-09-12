@@ -231,6 +231,16 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(2, tuple.getInteger(0));
         assertNotNull(tuple.getInteger(1)); //bucket_id
         assertEquals("John Doe", tuple.getString(2));
+
+        insertTuples = profileSpace.insert(tarantoolTuple).get();
+        assertEquals(1, insertTuples.size());
+
+        conditions.withFields(Arrays.asList("profile_id", "fio"));
+        deleteResult = profileSpace.delete(conditions).get();
+        tuple = deleteResult.get(0);
+        assertEquals(2, tuple.size());
+        assertEquals(2, tuple.getInteger(0));
+        assertEquals("John Doe", tuple.getString(1)); //fio
     }
 
     @Test

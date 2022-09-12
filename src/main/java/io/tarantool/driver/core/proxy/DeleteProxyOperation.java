@@ -48,6 +48,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         public DeleteProxyOperation<T> build() {
             CRUDOperationOptions options = CRUDOperationOptions.builder()
                     .withTimeout(requestTimeout)
+                    .withFields(fields)
                     .build();
 
             List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());

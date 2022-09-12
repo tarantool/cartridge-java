@@ -41,6 +41,7 @@ public class ProxyOperationBuildersTest {
     public void deleteOperationBuilderTest() {
         TarantoolIndexQuery indexQuery = new TarantoolIndexQuery();
         indexQuery.withKeyValues(Collections.singletonList(42L));
+        List<String> fields = Arrays.asList("id", "book_name");
 
         DeleteProxyOperation<TarantoolResult<TarantoolTuple>> deleteProxyOperation =
                 new DeleteProxyOperation.Builder<TarantoolResult<TarantoolTuple>>()
@@ -51,10 +52,12 @@ public class ProxyOperationBuildersTest {
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
                         .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withFields(fields)
                         .build();
 
         Map<String, Object> options = new HashMap<>();
         options.put(CRUDOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDOperationOptions.FIELDS, fields);
 
         assertEquals(client, deleteProxyOperation.getClient());
         assertEquals("function1", deleteProxyOperation.getFunctionName());

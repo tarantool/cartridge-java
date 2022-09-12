@@ -56,6 +56,7 @@ public final class Conditions implements Serializable {
     private long limit = MAX_LIMIT; // 0 is unlimited
     private long offset; // 0 is no offset
     private Packable startTuple;
+    private List<String> fields;
 
     private Conditions(boolean descending) {
         this.descending = descending;
@@ -66,6 +67,7 @@ public final class Conditions implements Serializable {
         this.limit = conditions.limit;
         this.offset = conditions.offset;
         this.startTuple = conditions.startTuple;
+        this.fields = conditions.fields;
         this.conditions.addAll(conditions.conditions);
     }
 
@@ -204,6 +206,26 @@ public final class Conditions implements Serializable {
      */
     public long getOffset() {
         return offset;
+    }
+
+    /**
+     * Get the specified fields
+     *
+     * @param fields {@link List} of names for getting only a subset of fields
+     * @return this {@link Conditions} instance
+     */
+    public Conditions withFields(List<String> fields) {
+        this.fields = fields;
+        return this;
+    }
+
+    /**
+     * Get the specified fields
+     *
+     * @return field names for getting only a subset of fields
+     */
+    public List<String> getFields() {
+        return fields;
     }
 
     /**
