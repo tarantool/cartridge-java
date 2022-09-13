@@ -1,12 +1,17 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import org.msgpack.value.ArrayValue;
 import org.msgpack.value.IntegerValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,18 +23,24 @@ import java.util.Map;
  */
 public final class TarantoolHeader implements Packable {
 
+    private static final Logger log = LoggerFactory.getLogger(TarantoolHeader.class);
+
     private static final int IPROTO_REQUEST_TYPE = 0x00;
     private static final int IPROTO_SYNC = 0x01;
     private static final int IPROTO_REPLICA_ID = 0x02;
     private static final int IPROTO_LSN = 0x03;
     private static final int IPROTO_TIMESTAMP = 0x04;
     private static final int IPROTO_SCHEMA_VERSION = 0x05;
+    private static final int IPROTO_TSN = 0x08;
+    private static final int IPROTO_FLAGS = 0x09;
 
     private Long sync;
     private Long code;
     private Long schemaVersion;
     private Long replicaId;
     private Long lsn;
+    private Long tsn;
+    private Long flags;
     private Double timestamp;
 
     private TarantoolHeader() {
@@ -94,16 +105,38 @@ public final class TarantoolHeader implements Packable {
         this.timestamp = timestamp;
     }
 
+    public Long getFlags() {
+        return flags;
+    }
+
+    public void setFlags(Long flags) {
+        this.flags = flags;
+    }
+
+    public Long getTsn() {
+        return tsn;
+    }
+
+    public void setTsn(Long tsn) {
+        this.tsn = tsn;
+    }
+
     /**
      * Converts the current header contents into a MessagePack {@link Value}
      * @return MessagePack representation of the header
      */
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
-        Map<IntegerValue, IntegerValue> values = new HashMap<>();
+        Map<IntegerValue, Value> values = new HashMap<>();
         values.put(ValueFactory.newInteger(IPROTO_REQUEST_TYPE), ValueFactory.newInteger(code));
         values.put(ValueFactory.newInteger(IPROTO_SYNC), ValueFactory.newInteger(sync));
         if (schemaVersion != null) {
             values.put(ValueFactory.newInteger(IPROTO_SCHEMA_VERSION), ValueFactory.newInteger(schemaVersion));
+        }
+        if (flags != null) {
+            values.put(ValueFactory.newInteger(IPROTO_FLAGS),  ValueFactory.newInteger(flags));
+        }
+        if (tsn != null) {
+            values.put(ValueFactory.newInteger(IPROTO_TSN), ValueFactory.newInteger(tsn));
         }
         return ValueFactory.newMap(values);
     }
@@ -148,6 +181,12 @@ public final class TarantoolHeader implements Packable {
                     break;
                 case IPROTO_TIMESTAMP:
                     header.setTimestamp(field.asFloatValue().toDouble());
+                    break;
+                case IPROTO_FLAGS:
+                    header.setFlags(field.asIntegerValue().asLong());
+                    break;
+                case IPROTO_TSN:
+                    header.setTsn(field.asIntegerValue().asLong());
                     break;
             }
         }
