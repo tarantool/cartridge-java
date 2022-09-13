@@ -52,7 +52,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public SelectProxyOperation<T> build() {
-            CRUDOperationOptions.Builder requestOptions = CRUDOperationOptions.builder()
+            CRUDSelectOperationOptions.Builder requestOptions = new CRUDSelectOperationOptions.Builder()
                     .withTimeout(requestTimeout)
                     .withSelectBatchSize(conditions.getLimit())
                     .withSelectLimit(conditions.getLimit())

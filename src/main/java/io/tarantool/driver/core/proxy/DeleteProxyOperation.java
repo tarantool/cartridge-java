@@ -46,7 +46,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public DeleteProxyOperation<T> build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
+            CRUDBaseOperationOptions options = new CRUDBaseOperationOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 
