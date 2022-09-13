@@ -53,4 +53,16 @@ public class CRUDOperationOptionsTest {
         assertEquals(1, options.asMap().size());
         assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
     }
+
+    @Test
+    public void batchOperationOptions_createNotEmptyTest() {
+        CRUDBatchOptions options = new CRUDBatchOptions.Builder()
+                .withStopOnError(false)
+                .withRollbackOnError(true)
+                .build();
+
+        assertEquals(2, options.asMap().size());
+        assertEquals(false, options.asMap().get(CRUDBatchOptions.BATCH_STOP_ON_ERROR));
+        assertEquals(true, options.asMap().get(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR));
+    }
 }

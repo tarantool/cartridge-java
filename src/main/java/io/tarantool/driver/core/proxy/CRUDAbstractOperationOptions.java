@@ -16,7 +16,7 @@ abstract class CRUDAbstractOperationOptions {
     private final Map<String, Object> resultMap = new HashMap<>();
 
     /**
-     * Inheritable Builder for select cluster proxy operation options.
+     * Inheritable Builder for cluster proxy operation options.
      * <p>
      * This abstract class is necessary for implementing fluent builder inheritance.
      * The solution with {@code self()} method allows to avoid weird java
