@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.api.space.options.UpdateOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
@@ -30,7 +31,8 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
     /**
      * The builder for this class.
      */
-    public static final class Builder<T> extends GenericOperationsBuilder<T, Builder<T>> {
+    public static final class Builder<T>
+        extends GenericOperationsBuilder<T, UpdateOptions, Builder<T>> {
         private TarantoolIndexQuery indexQuery;
         private TupleOperations operations;
 
@@ -54,8 +56,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public UpdateProxyOperation<T> build() {
             CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
-                    .withTimeout(requestTimeout)
-                    .withOptions(options)
+                    .withTimeout(options.getTimeout())
                     .build();
 
             List<?> arguments = Arrays.asList(spaceName,

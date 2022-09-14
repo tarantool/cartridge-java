@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class is not part of the public API.
@@ -38,8 +39,10 @@ abstract class CRUDAbstractOperationOptions {
         public abstract O build();
     }
 
-    protected void addOption(String option, Object value) {
-        resultMap.put(option, value);
+    protected void addOption(String option, Optional<?> value) {
+        if (value.isPresent()) {
+            resultMap.put(option, value.get());
+        }
     }
 
     /**

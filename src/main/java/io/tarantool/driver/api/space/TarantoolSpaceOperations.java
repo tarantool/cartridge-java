@@ -4,7 +4,9 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceManyOptions;
 import io.tarantool.driver.api.space.options.ReplaceOptions;
 import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.options.UpdateOptions;
@@ -38,7 +40,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Delete a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
-     * @param options    specified options
+     * @param options    operation options
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
@@ -59,12 +61,36 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
      *
      * @param tuple   new data
-     * @param options specified options
+     * @param options operation options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
     default CompletableFuture<R> insert(T tuple, InsertOptions options) throws TarantoolClientException {
         return insert(tuple);
+    }
+
+    /**
+     * Inserts several tuples into the space at once. If writing of any tuple fails,
+     * all tuples will not be saved.
+     *
+     * @param tuples new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<R> insertMany(Collection<T> tuples) throws TarantoolClientException;
+
+    /**
+     * Inserts several tuples into the space at once. If writing of any tuple fails,
+     * all tuples will not be saved.
+     *
+     * @param tuples new data
+     * @param options operation options
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    default CompletableFuture<R> insertMany(Collection<T> tuples, InsertManyOptions options)
+            throws TarantoolClientException {
+        return insertMany(tuples);
     }
 
     /**
@@ -80,7 +106,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Insert a tuple into the space or replace an existing one.
      *
      * @param tuple   new data
-     * @param options specified options
+     * @param options operation options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
@@ -89,7 +115,31 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
     }
 
     /**
-     * Select tuples matching the specified query with specified conditions.
+     * Insert or replace several tuples into the space at once. If writing of any tuple fails,
+     * all tuples will not be saved.
+     *
+     * @param tuples new data
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException;
+
+    /**
+     * Insert or replace several tuples into the space at once. If writing of any tuple fails,
+     * all tuples will not be saved, but this behavior can be changed with the options.
+     *
+     * @param tuples new data
+     * @param options operation options
+     * @return a future that will contain all corresponding tuples once completed
+     * @throws TarantoolClientException in case if request failed
+     */
+    default CompletableFuture<R> replaceMany(Collection<T> tuples, ReplaceManyOptions options)
+            throws TarantoolClientException {
+        return replaceMany(tuples);
+    }
+
+    /**
+     * Select tuples matching the specified query with options.
      *
      * @param conditions query with options
      * @return a future that will contain all corresponding tuples once completed
@@ -101,7 +151,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Select tuples matching the specified query with specified conditions and options.
      *
      * @param conditions specified conditions
-     * @param options    specified options
+     * @param options    operation options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
@@ -124,7 +174,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      *
      * @param conditions query with options
      * @param tuple      tuple with new field values
-     * @param options    specified options
+     * @param options    operation options
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
@@ -147,7 +197,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      *
      * @param conditions query with options
      * @param operations the list update operations
-     * @param options    specified options
+     * @param options    operation options
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
@@ -174,7 +224,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * @param conditions query with options
      * @param tuple      new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
-     * @param options    specified options
+     * @param options    operation options
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */

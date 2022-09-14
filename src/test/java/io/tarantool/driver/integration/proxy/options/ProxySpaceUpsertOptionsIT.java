@@ -88,11 +88,11 @@ public class ProxySpaceUpsertOptionsIT extends SharedCartridgeContainer {
 
         // with option timeout
         profileSpace.upsert(
-                conditions,
-                tarantoolTuple,
-                TupleOperations.set("age", 50),
-                ProxyUpsertOptions.create().withTimeout(customRequestTimeout)
-                           ).get();
+            conditions,
+            tarantoolTuple,
+            TupleOperations.set("age", 50),
+            ProxyUpsertOptions.create().withTimeout(customRequestTimeout)
+        ).get();
         crudUpsertOpts = client.eval("return crud_upsert_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudUpsertOpts.get(0)).get("timeout"));
     }

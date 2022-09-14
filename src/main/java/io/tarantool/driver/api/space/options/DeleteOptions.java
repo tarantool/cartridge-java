@@ -1,10 +1,10 @@
 package io.tarantool.driver.api.space.options;
 
 /**
- * Marker interface for space delete options
+ * Marker interface for space delete operation options
  *
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface DeleteOptions extends Options {
+public interface DeleteOptions extends OperationWithTimeoutOptions {
 }

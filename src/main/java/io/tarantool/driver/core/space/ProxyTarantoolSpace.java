@@ -9,16 +9,29 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceManyOptions;
 import io.tarantool.driver.api.space.options.ReplaceOptions;
 import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.options.UpdateOptions;
 import io.tarantool.driver.api.space.options.UpsertOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyTruncateOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyUpdateOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyUpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.proxy.DeleteProxyOperation;
 import io.tarantool.driver.core.proxy.InsertProxyOperation;
+import io.tarantool.driver.core.proxy.InsertManyProxyOperation;
 import io.tarantool.driver.core.proxy.ProxyOperation;
 import io.tarantool.driver.core.proxy.ReplaceProxyOperation;
+import io.tarantool.driver.core.proxy.ReplaceManyProxyOperation;
 import io.tarantool.driver.core.proxy.SelectProxyOperation;
 import io.tarantool.driver.core.proxy.TruncateProxyOperation;
 import io.tarantool.driver.core.proxy.UpdateProxyOperation;
@@ -64,11 +77,16 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
-        return delete(conditions, tupleResultMapper(), null);
+        return delete(conditions, tupleResultMapper(), ProxyDeleteOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions, DeleteOptions options) throws TarantoolClientException {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return delete(conditions, tupleResultMapper(), options);
     }
 
@@ -85,7 +103,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withIndexQuery(indexQuery)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
                 .withOptions(options)
                 .build();
 
@@ -94,11 +111,16 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
-        return insert(tuple, tupleResultMapper(), null);
+        return insert(tuple, tupleResultMapper(), ProxyInsertOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> insert(T tuple, InsertOptions options) throws TarantoolClientException {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return insert(tuple, tupleResultMapper(), options);
     }
 
@@ -113,7 +135,41 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withTuple(tuple)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
+                .withOptions(options)
+                .build();
+
+        return executeOperation(operation);
+    }
+
+    @Override
+    public CompletableFuture<R> insertMany(Collection<T> tuples) {
+        return insertMany(tuples, tupleResultMapper(), ProxyInsertManyOptions.create()
+            .withTimeout(config.getRequestTimeout())
+            .withStopOnError(true)
+            .withRollbackOnError(true)
+        );
+    }
+
+    @Override
+    public CompletableFuture<R> insertMany(Collection<T> tuples, InsertManyOptions options)
+            throws TarantoolClientException {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
+        return insertMany(tuples, tupleResultMapper(), options);
+    }
+
+    private CompletableFuture<R> insertMany(Collection<T> tuples,
+                                            CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+                                            InsertManyOptions options)
+            throws TarantoolClientException {
+        InsertManyProxyOperation<T, R> operation = new InsertManyProxyOperation.Builder<T, R>()
+                .withClient(client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMapping.getInsertManyFunctionName())
+                .withTuples(tuples)
+                .withArgumentsMapper(config.getMessagePackMapper())
+                .withResultMapper(resultMapper)
                 .withOptions(options)
                 .build();
 
@@ -122,11 +178,16 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
-        return replace(tuple, tupleResultMapper(), null);
+        return replace(tuple, tupleResultMapper(), ProxyReplaceOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> replace(T tuple, ReplaceOptions options) throws TarantoolClientException {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return replace(tuple, tupleResultMapper(), options);
     }
 
@@ -141,7 +202,40 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withTuple(tuple)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
+                .withOptions(options)
+                .build();
+
+        return executeOperation(operation);
+    }
+
+    @Override
+    public CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException {
+        return replaceMany(tuples, tupleResultMapper(), ProxyReplaceManyOptions.create()
+            .withTimeout(config.getRequestTimeout())
+            .withStopOnError(true)
+            .withRollbackOnError(true)
+        );
+    }
+
+    @Override
+    public CompletableFuture<R> replaceMany(Collection<T> tuples, ReplaceManyOptions options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
+        return replaceMany(tuples, tupleResultMapper(), options);
+    }
+
+    private CompletableFuture<R> replaceMany(Collection<T> tuples,
+                                             CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+                                             ReplaceManyOptions options)
+            throws TarantoolClientException {
+        ReplaceManyProxyOperation<T, R> operation = new ReplaceManyProxyOperation.Builder<T, R>()
+                .withClient(client)
+                .withSpaceName(spaceName)
+                .withFunctionName(operationsMapping.getReplaceManyFunctionName())
+                .withTuples(tuples)
+                .withArgumentsMapper(config.getMessagePackMapper())
+                .withResultMapper(resultMapper)
                 .withOptions(options)
                 .build();
 
@@ -150,12 +244,17 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
-        return select(conditions, tupleResultMapper(), null);
+        return select(conditions, tupleResultMapper(), ProxySelectOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> select(Conditions conditions,
                                        SelectOptions options) throws TarantoolClientException {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return select(conditions, tupleResultMapper(), options);
     }
 
@@ -163,7 +262,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
                                         SelectOptions options)
             throws TarantoolClientException {
-
         SelectProxyOperation<R> operation = new SelectProxyOperation.Builder<R>(metadataOperations, spaceMetadata)
                 .withClient(client)
                 .withSpaceName(spaceName)
@@ -172,7 +270,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withOptions(options)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
+                .withOptions(options)
                 .build();
 
         return executeOperation(operation);
@@ -180,11 +278,16 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, T tuple) {
-        return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper(), null);
+        return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper(), ProxyUpdateOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, T tuple, UpdateOptions options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper(), options);
     }
 
@@ -198,11 +301,16 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
-        return update(conditions, operations, tupleResultMapper(), null);
+        return update(conditions, operations, tupleResultMapper(), ProxyUpdateOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, UpdateOptions options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return update(conditions, operations, tupleResultMapper(), options);
     }
 
@@ -220,7 +328,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withTupleOperation(operations)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
                 .withOptions(options)
                 .build();
 
@@ -229,12 +336,17 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
-        return upsert(conditions, tuple, operations, tupleResultMapper(), null);
+        return upsert(conditions, tuple, operations, tupleResultMapper(), ProxyUpsertOptions.create()
+            .withTimeout(config.getRequestTimeout())
+        );
     }
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
                                        UpsertOptions options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options should not be null");
+        }
         return upsert(conditions, tuple, operations, tupleResultMapper(), options);
     }
 
@@ -252,7 +364,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withTupleOperation(operations)
                 .withArgumentsMapper(config.getMessagePackMapper())
                 .withResultMapper(resultMapper)
-                .withRequestTimeout(config.getRequestTimeout())
                 .withOptions(options)
                 .build();
 
@@ -266,7 +377,9 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                     .withClient(client)
                     .withSpaceName(spaceName)
                     .withFunctionName(operationsMapping.getTruncateFunctionName())
-                    .withRequestTimeout(config.getRequestTimeout())
+                    .withOptions(ProxyTruncateOptions.create()
+                        .withTimeout(config.getRequestTimeout())
+                    )
                     .build()
             );
         } catch (TarantoolClientException e) {

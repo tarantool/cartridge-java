@@ -13,6 +13,9 @@ public final class ProxyDeleteOptions extends ProxyBaseOptions<ProxyDeleteOption
     private ProxyDeleteOptions() {
     }
 
+    /**
+     * Create new instance.
+     */
     public static ProxyDeleteOptions create() {
         return new ProxyDeleteOptions();
     }

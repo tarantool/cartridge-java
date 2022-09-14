@@ -1,6 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class is not part of the public API.
@@ -15,38 +15,32 @@ public final class CRUDBatchOptions extends CRUDBaseOptions {
     public static final String BATCH_ROLLBACK_ON_ERROR = "rollback_on_error";
 
     protected
-    <O extends CRUDBatchOptions, T extends AbstractBuilder<O, T>>
-    CRUDBatchOptions(AbstractBuilder<O, T> builder) {
+    <T extends AbstractBuilder<T>>
+    CRUDBatchOptions(AbstractBuilder<T> builder) {
         super(builder);
 
-        if (builder.stopOnError != null) {
-            addOption(BATCH_STOP_ON_ERROR, builder.stopOnError);
-        }
-
-        if (builder.rollbackOnError != null) {
-            addOption(BATCH_ROLLBACK_ON_ERROR, builder.rollbackOnError);
-        }
+        addOption(BATCH_STOP_ON_ERROR, builder.stopOnError);
+        addOption(BATCH_ROLLBACK_ON_ERROR, builder.rollbackOnError);
     }
 
     protected abstract static
-    class AbstractBuilder<O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
-        extends CRUDBaseOptions.AbstractBuilder<O, T> {
-        private Boolean stopOnError;
-        private Boolean rollbackOnError;
+    class AbstractBuilder<T extends AbstractBuilder<T>>
+        extends CRUDBaseOptions.AbstractBuilder<CRUDBatchOptions, T> {
+        private Optional<Boolean> stopOnError = Optional.empty();
+        private Optional<Boolean> rollbackOnError = Optional.empty();
 
-        public T withStopOnError(Boolean stopOnError) {
+        public T withStopOnError(Optional<Boolean> stopOnError) {
             this.stopOnError = stopOnError;
             return self();
         }
 
-        public T withRollbackOnError(Boolean rollbackOnError) {
+        public T withRollbackOnError(Optional<Boolean> rollbackOnError) {
             this.rollbackOnError = rollbackOnError;
             return self();
         }
     }
 
-    protected static final class Builder
-        extends AbstractBuilder<CRUDBatchOptions, Builder> {
+    protected static final class Builder extends AbstractBuilder<Builder> {
 
         @Override
         Builder self() {

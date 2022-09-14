@@ -87,10 +87,13 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(10, selectResult.size());
         List<?> crudSelectOpts = client.eval("return crud_select_opts").get();
-        assertEquals(10, ((HashMap) crudSelectOpts.get(0)).get("batch_size"));
+        assertEquals(null, ((HashMap) crudSelectOpts.get(0)).get("batch_size"));
 
         // with batchSize
-        selectResult = profileSpace.select(conditions, ProxySelectOptions.create().withBatchSize(5)).get();
+        selectResult = profileSpace.select(
+            conditions,
+            ProxySelectOptions.create().withBatchSize(5)
+        ).get();
         assertEquals(10, selectResult.size());
         crudSelectOpts = client.eval("return crud_select_opts").get();
         assertEquals(5, ((HashMap) crudSelectOpts.get(0)).get("batch_size"));

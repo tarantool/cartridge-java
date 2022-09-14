@@ -1,10 +1,10 @@
 package io.tarantool.driver.api.space.options;
 
 /**
- * Marker interface for space replace options
+ * Marker interface for space replace operation options
  *
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface ReplaceOptions extends Options {
+public interface ReplaceOptions extends OperationWithTimeoutOptions {
 }

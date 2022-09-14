@@ -2,12 +2,10 @@ package io.tarantool.driver.api.space.options;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * Public API for space operations.
- *
- * An abstract class necessary for implementing CRT (curiously recurring template)
- * pattern for the cluster proxy operation options.
+ * An abstract class-container for all operation options.
  *
  * @author Alexey Kuzin
  * @author Artyom Dubinin
@@ -18,11 +16,24 @@ public abstract class AbstractOptions<B extends AbstractOptions<B>> implements O
 
     protected abstract B self();
 
+    /**
+     * Add an option value.
+     *
+     * @param option option name
+     * @param value option value
+     */
     public void addOption(String option, Object value) {
         resultMap.put(option, value);
     }
 
-    public Map<String, Object> asMap() {
-        return resultMap;
+    /**
+     * Get an option value.
+     *
+     * @param option option name
+     * @param optionClass option value type
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getOption(String option, Class<T> optionClass) {
+        return Optional.ofNullable((T) resultMap.get(option));
     }
 }

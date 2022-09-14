@@ -58,14 +58,14 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
     }
 
-    abstract static class GenericOperationsBuilder<T, B extends GenericOperationsBuilder<T, B>> {
+    abstract static
+    class GenericOperationsBuilder<T, O extends Options, B extends GenericOperationsBuilder<T, O, B>> {
         protected TarantoolCallOperations client;
         protected String spaceName;
         protected String functionName;
         protected MessagePackObjectMapper argumentsMapper;
         protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
-        protected int requestTimeout;
-        protected Options options;
+        protected O options;
 
         GenericOperationsBuilder() {
         }
@@ -128,23 +128,12 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         }
 
         /**
-         * Specify response reading timeout
-         *
-         * @param requestTimeout the timeout for reading the responses from Tarantool server, in milliseconds
-         * @return builder
-         */
-        public B withRequestTimeout(int requestTimeout) {
-            this.requestTimeout = requestTimeout;
-            return self();
-        }
-
-        /**
          * Specify custom options
          *
          * @param options cluster proxy operation options
          * @return builder
          */
-        public B withOptions(Options options) {
+        public B withOptions(O options) {
             this.options = options;
             return self();
         }

@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
@@ -33,7 +34,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-            extends GenericOperationsBuilder<R, Builder<T, R>> {
+            extends GenericOperationsBuilder<R, UpsertOptions, Builder<T, R>> {
         private T tuple;
         private TupleOperations operations;
 
@@ -57,8 +58,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
 
         public UpsertProxyOperation<T, R> build() {
             CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
-                    .withTimeout(requestTimeout)
-                    .withOptions(options)
+                    .withTimeout(options.getTimeout())
                     .build();
 
             List<?> arguments = Arrays.asList(

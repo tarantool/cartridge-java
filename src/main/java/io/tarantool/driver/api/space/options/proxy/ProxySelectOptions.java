@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
+import java.util.Optional;
+
 import io.tarantool.driver.api.space.options.SelectOptions;
 
 /**
@@ -19,7 +21,16 @@ public final class ProxySelectOptions extends ProxyBaseOptions<ProxySelectOption
         return new ProxySelectOptions();
     }
 
-    public ProxySelectOptions withBatchSize(long batchSize) {
+    /**
+     * Specifies internal batch size for transferring data from storage nodes to router nodes.
+     *
+     * @param batchSize batch size, should be greater than 0
+     * @return this options instance
+     */
+    public ProxySelectOptions withBatchSize(int batchSize) {
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("Batch size should be greater than 0");
+        }
         addOption(BATCH_SIZE, batchSize);
         return self();
     }
@@ -27,5 +38,10 @@ public final class ProxySelectOptions extends ProxyBaseOptions<ProxySelectOption
     @Override
     protected ProxySelectOptions self() {
         return this;
+    }
+
+    @Override
+    public Optional<Integer> getBatchSize() {
+        return getOption(BATCH_SIZE, Integer.class);
     }
 }

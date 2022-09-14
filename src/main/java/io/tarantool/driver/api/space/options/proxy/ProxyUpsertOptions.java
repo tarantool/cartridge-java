@@ -13,6 +13,9 @@ public final class ProxyUpsertOptions extends ProxyBaseOptions<ProxyUpsertOption
     private ProxyUpsertOptions() {
     }
 
+    /**
+     * Create new instance.
+     */
     public static ProxyUpsertOptions create() {
         return new ProxyUpsertOptions();
     }

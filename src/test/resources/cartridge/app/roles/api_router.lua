@@ -19,7 +19,9 @@ local crud_methods_to_patch = {
     'select',
     'delete',
     'insert',
+    'insert_many',
     'replace',
+    'replace_many',
     'update',
     'upsert',
 }

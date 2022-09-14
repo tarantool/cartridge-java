@@ -10,13 +10,15 @@ import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.space.options.proxy.ProxyReplaceOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -24,9 +26,9 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @author Artyom Dubinin
+ * @author Alexey Kuzin
  */
-public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
+public class ProxySpaceReplaceManyOptionsIT extends SharedCartridgeContainer {
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -68,6 +70,34 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
     }
 
     @Test
+    public void withStopOnError_withRollbackOnError() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(1, null, "FIO", 50, 100),
+            tupleFactory.create(2, null, "KEK", 75, 125)
+        );
+
+        // with default values
+        profileSpace.replaceMany(tarantoolTuples).get();
+        List<?> crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
+        assertEquals(true, ((HashMap) crudReplaceManyOpts.get(0)).get("rollback_on_error"));
+        assertEquals(true, ((HashMap) crudReplaceManyOpts.get(0)).get("stop_on_error"));
+
+        // with custom values
+        profileSpace.replaceMany(
+            tarantoolTuples,
+            ProxyReplaceManyOptions.create()
+                .withRollbackOnError(false)
+                .withStopOnError(false)
+        ).get();
+        crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
+        assertEquals(false, ((HashMap) crudReplaceManyOpts.get(0)).get("rollback_on_error"));
+        assertEquals(false, ((HashMap) crudReplaceManyOpts.get(0)).get("stop_on_error"));
+    }
+
+    @Test
     public void withTimeout() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
                 client.space(TEST_SPACE_NAME);
@@ -75,19 +105,22 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
         int requestConfigTimeout = client.getConfig().getRequestTimeout();
         int customRequestTimeout = requestConfigTimeout * 2;
 
-        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(1, null, "FIO", 50, 100),
+            tupleFactory.create(2, null, "KEK", 75, 125)
+        );
 
         // with config timeout
-        profileSpace.replace(tarantoolTuple).get();
-        List<?> crudReplaceOpts = client.eval("return crud_replace_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudReplaceOpts.get(0)).get("timeout"));
+        profileSpace.replaceMany(tarantoolTuples).get();
+        List<?> crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
+        assertEquals(requestConfigTimeout, ((HashMap) crudReplaceManyOpts.get(0)).get("timeout"));
 
         // with option timeout
-        profileSpace.replace(
-                tarantoolTuple,
-                ProxyReplaceOptions.create().withTimeout(customRequestTimeout)
+        profileSpace.replaceMany(
+            tarantoolTuples,
+            ProxyReplaceManyOptions.create().withTimeout(customRequestTimeout)
         ).get();
-        crudReplaceOpts = client.eval("return crud_replace_opts").get();
-        assertEquals(customRequestTimeout, ((HashMap) crudReplaceOpts.get(0)).get("timeout"));
+        crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
+        assertEquals(customRequestTimeout, ((HashMap) crudReplaceManyOpts.get(0)).get("timeout"));
     }
 }
