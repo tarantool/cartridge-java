@@ -1,12 +1,9 @@
 package io.tarantool.driver.core.proxy;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * This class is not part of the public API.
  *
- * Represent basic options for cluster operations
+ * Represent basic options for all cluster operations
  *
  * @author Alexey Kuzin
  */
@@ -22,6 +19,11 @@ public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
         }
     }
 
+    /**
+     * Inheritable Builder for basic cluster proxy operation options.
+     *
+     * @see CRUDAbstractOperationOptions.AbstractBuilder
+     */
     protected abstract static
     class AbstractBuilder<O extends CRUDBaseOperationOptions, T extends AbstractBuilder<O, T>>
         extends CRUDAbstractOperationOptions.AbstractBuilder<O, T> {
@@ -33,6 +35,9 @@ public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
         }
     }
 
+    /**
+     * Concrete Builder implementation for basic cluster proxy operation options.
+     */
     protected static final class Builder
         extends AbstractBuilder<CRUDBaseOperationOptions, Builder> {
 

@@ -1,12 +1,11 @@
 package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.protocol.Packable;
-import java.util.Map;
 
 /**
  * This class is not part of the public API.
  *
- * Represent options for proxy cluster select operations
+ * Represent options for select cluster proxy operations
  *
  * @author Sergey Volgin
  * @author Alexey Kuzin
@@ -35,6 +34,11 @@ public final class CRUDSelectOptions extends CRUDBaseOperationOptions {
         }
     }
 
+    /**
+     * Inheritable Builder for select cluster proxy operation options.
+     *
+     * @see CRUDAbstractOperationOptions.AbstractBuilder
+     */
     protected abstract static
     class AbstractBuilder<O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
         extends CRUDBaseOperationOptions.AbstractBuilder<O, T> {
@@ -58,6 +62,9 @@ public final class CRUDSelectOptions extends CRUDBaseOperationOptions {
         }
     }
 
+    /**
+     * Concrete Builder implementation for select cluster proxy operation options.
+     */
     protected static final class Builder
         extends AbstractBuilder<CRUDSelectOptions, Builder> {
 
