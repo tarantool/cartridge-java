@@ -11,15 +11,15 @@ import java.util.Map;
  * @author Sergey Volgin
  * @author Alexey Kuzin
  */
-public final class CRUDSelectOperationOptions extends CRUDBaseOperationOptions {
+public final class CRUDSelectOptions extends CRUDBaseOperationOptions {
 
     public static final String SELECT_LIMIT = "first";
     public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
 
     protected
-    <O extends CRUDSelectOperationOptions, T extends AbstractBuilder<O, T>>
-    CRUDSelectOperationOptions(AbstractBuilder<O, T> builder) {
+    <O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
+    CRUDSelectOptions(AbstractBuilder<O, T> builder) {
         super(builder);
 
         if (builder.selectLimit != null) {
@@ -36,7 +36,7 @@ public final class CRUDSelectOperationOptions extends CRUDBaseOperationOptions {
     }
 
     protected abstract static
-    class AbstractBuilder<O extends CRUDSelectOperationOptions, T extends AbstractBuilder<O, T>>
+    class AbstractBuilder<O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
         extends CRUDBaseOperationOptions.AbstractBuilder<O, T> {
         private Long selectLimit;
         private Packable after;
@@ -59,7 +59,7 @@ public final class CRUDSelectOperationOptions extends CRUDBaseOperationOptions {
     }
 
     protected static final class Builder
-        extends AbstractBuilder<CRUDSelectOperationOptions, Builder> {
+        extends AbstractBuilder<CRUDSelectOptions, Builder> {
 
         @Override
         Builder self() {
@@ -67,8 +67,8 @@ public final class CRUDSelectOperationOptions extends CRUDBaseOperationOptions {
         }
 
         @Override
-        public CRUDSelectOperationOptions build() {
-            return new CRUDSelectOperationOptions(this);
+        public CRUDSelectOptions build() {
+            return new CRUDSelectOptions(this);
         }
     }
 }

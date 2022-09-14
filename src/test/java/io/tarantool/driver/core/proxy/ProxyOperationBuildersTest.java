@@ -137,8 +137,8 @@ public class ProxyOperationBuildersTest {
 
         Map<String, Object> options = new HashMap<>();
         options.put(CRUDBaseOperationOptions.TIMEOUT, client.getConfig().getRequestTimeout());
-        options.put(CRUDSelectOperationOptions.SELECT_BATCH_SIZE, 100L);
-        options.put(CRUDSelectOperationOptions.SELECT_LIMIT, 100L);
+        options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 100L);
+        options.put(CRUDSelectOptions.SELECT_LIMIT, 100L);
 
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());

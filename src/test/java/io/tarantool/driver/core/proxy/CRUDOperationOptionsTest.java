@@ -19,7 +19,7 @@ public class CRUDOperationOptionsTest {
 
     @Test
     public void selectOperationOptions_createEmptyTest() {
-        CRUDSelectOperationOptions options = new CRUDSelectOperationOptions.Builder().build();
+        CRUDSelectOptions options = new CRUDSelectOptions.Builder().build();
         assertEquals(Collections.EMPTY_MAP, options.asMap());
     }
 
@@ -29,7 +29,7 @@ public class CRUDOperationOptionsTest {
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
         TarantoolTuple tuple = new TarantoolTupleImpl(values, defaultMapper);
 
-        CRUDSelectOperationOptions options = new CRUDSelectOperationOptions.Builder()
+        CRUDSelectOptions options = new CRUDSelectOptions.Builder()
                 .withTimeout(1000)
                 .withSelectLimit(50)
                 .withSelectBatchSize(10)
@@ -39,13 +39,13 @@ public class CRUDOperationOptionsTest {
         assertEquals(4, options.asMap().size());
 
         assertEquals(1000, options.asMap().get(CRUDBaseOperationOptions.TIMEOUT));
-        assertEquals(50L, options.asMap().get(CRUDSelectOperationOptions.SELECT_LIMIT));
-        assertEquals(10L, options.asMap().get(CRUDSelectOperationOptions.SELECT_BATCH_SIZE));
-        assertEquals(tuple, options.asMap().get(CRUDSelectOperationOptions.SELECT_AFTER));
+        assertEquals(50L, options.asMap().get(CRUDSelectOptions.SELECT_LIMIT));
+        assertEquals(10L, options.asMap().get(CRUDSelectOptions.SELECT_BATCH_SIZE));
+        assertEquals(tuple, options.asMap().get(CRUDSelectOptions.SELECT_AFTER));
     }
 
     @Test
-    public void batchOperationOptions_createNotEmptyTest() {
+    public void baseOperationOptions_createNotEmptyTest() {
         CRUDBaseOperationOptions options = new CRUDBaseOperationOptions.Builder()
                 .withTimeout(1000)
                 .build();
