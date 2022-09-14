@@ -38,7 +38,7 @@ public class CRUDOperationOptionsTest {
 
         assertEquals(4, options.asMap().size());
 
-        assertEquals(1000, options.asMap().get(CRUDBaseOperationOptions.TIMEOUT));
+        assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
         assertEquals(50L, options.asMap().get(CRUDSelectOptions.SELECT_LIMIT));
         assertEquals(10L, options.asMap().get(CRUDSelectOptions.SELECT_BATCH_SIZE));
         assertEquals(tuple, options.asMap().get(CRUDSelectOptions.SELECT_AFTER));
@@ -46,11 +46,11 @@ public class CRUDOperationOptionsTest {
 
     @Test
     public void baseOperationOptions_createNotEmptyTest() {
-        CRUDBaseOperationOptions options = new CRUDBaseOperationOptions.Builder()
+        CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                 .withTimeout(1000)
                 .build();
 
         assertEquals(1, options.asMap().size());
-        assertEquals(1000, options.asMap().get(CRUDBaseOperationOptions.TIMEOUT));
+        assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
     }
 }

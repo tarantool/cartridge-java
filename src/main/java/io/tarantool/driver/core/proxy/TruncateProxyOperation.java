@@ -68,7 +68,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          * @return TruncateProxyOperation instance
          */
         public TruncateProxyOperation build() {
-            CRUDBaseOperationOptions options = new CRUDBaseOperationOptions.Builder()
+            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 

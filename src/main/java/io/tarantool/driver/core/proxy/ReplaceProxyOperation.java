@@ -50,7 +50,7 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
         }
 
         public ReplaceProxyOperation<T, R> build() {
-            CRUDBaseOperationOptions options = new CRUDBaseOperationOptions.Builder()
+            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 

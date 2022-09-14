@@ -7,13 +7,13 @@ package io.tarantool.driver.core.proxy;
  *
  * @author Alexey Kuzin
  */
-public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
+public class CRUDBaseOptions extends CRUDAbstractOperationOptions {
 
     public static final String TIMEOUT = "timeout";
 
     protected
-    <O extends CRUDBaseOperationOptions, T extends AbstractBuilder<O, T>>
-    CRUDBaseOperationOptions(AbstractBuilder<O, T> builder) {
+    <O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
+    CRUDBaseOptions(AbstractBuilder<O, T> builder) {
         if (builder.timeout != null) {
             addOption(TIMEOUT, builder.timeout);
         }
@@ -25,7 +25,7 @@ public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
      * @see CRUDAbstractOperationOptions.AbstractBuilder
      */
     protected abstract static
-    class AbstractBuilder<O extends CRUDBaseOperationOptions, T extends AbstractBuilder<O, T>>
+    class AbstractBuilder<O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
         extends CRUDAbstractOperationOptions.AbstractBuilder<O, T> {
         protected Integer timeout;
 
@@ -39,7 +39,7 @@ public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
      * Concrete Builder implementation for basic cluster proxy operation options.
      */
     protected static final class Builder
-        extends AbstractBuilder<CRUDBaseOperationOptions, Builder> {
+        extends AbstractBuilder<CRUDBaseOptions, Builder> {
 
         @Override
         Builder self() {
@@ -47,8 +47,8 @@ public class CRUDBaseOperationOptions extends CRUDAbstractOperationOptions {
         }
 
         @Override
-        public CRUDBaseOperationOptions build() {
-            return new CRUDBaseOperationOptions(this);
+        public CRUDBaseOptions build() {
+            return new CRUDBaseOptions(this);
         }
     }
 }

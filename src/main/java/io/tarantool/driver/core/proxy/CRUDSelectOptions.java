@@ -10,7 +10,7 @@ import io.tarantool.driver.protocol.Packable;
  * @author Sergey Volgin
  * @author Alexey Kuzin
  */
-public final class CRUDSelectOptions extends CRUDBaseOperationOptions {
+public final class CRUDSelectOptions extends CRUDBaseOptions {
 
     public static final String SELECT_LIMIT = "first";
     public static final String SELECT_AFTER = "after";
@@ -41,7 +41,7 @@ public final class CRUDSelectOptions extends CRUDBaseOperationOptions {
      */
     protected abstract static
     class AbstractBuilder<O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
-        extends CRUDBaseOperationOptions.AbstractBuilder<O, T> {
+        extends CRUDBaseOptions.AbstractBuilder<O, T> {
         private Long selectLimit;
         private Packable after;
         private Long selectBatchSize;
