@@ -5,19 +5,19 @@ import io.tarantool.driver.protocol.Packable;
 /**
  * This class is not part of the public API.
  *
- * Represent options for select cluster proxy operations
+ * Represent options for select cluster proxy operation
  *
  * @author Sergey Volgin
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
-public final class CRUDSelectOptions extends CRUDBaseOptions {
+final class CRUDSelectOptions extends CRUDBaseOptions {
 
     public static final String SELECT_LIMIT = "first";
     public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
 
-    protected
-    <O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
+    private <O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
     CRUDSelectOptions(AbstractBuilder<O, T> builder) {
         super(builder);
 
@@ -31,6 +31,13 @@ public final class CRUDSelectOptions extends CRUDBaseOptions {
 
         if (builder.selectBatchSize != null) {
             addOption(SELECT_BATCH_SIZE, builder.selectBatchSize);
+        }
+
+        if (builder.options != null) {
+            Object batchSize = builder.options.asMap().get(SELECT_BATCH_SIZE);
+            if (batchSize != null) {
+                addOption(SELECT_BATCH_SIZE, batchSize);
+            }
         }
     }
 

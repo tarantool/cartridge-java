@@ -53,14 +53,15 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public UpdateProxyOperation<T> build() {
-            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
+            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
+                    .withOptions(options)
                     .build();
 
             List<?> arguments = Arrays.asList(spaceName,
                     indexQuery.getKeyValues(),
                     operations.asProxyOperationList(),
-                    options.asMap());
+                    requestOptions.asMap());
 
             return new UpdateProxyOperation<>(
                     this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

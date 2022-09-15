@@ -15,6 +15,25 @@ local function truncate_space(space_name)
     crud.truncate(space_name)
 end
 
+local crud_methods_to_patch = {
+    'select',
+    'delete',
+    'insert',
+    'replace',
+    'update',
+    'upsert',
+}
+local function patch_crud_methods_for_tests()
+    for _, name in ipairs(crud_methods_to_patch) do
+        local real_method = crud[name]
+        crud[name] = function(...)
+            local args = {...}
+            rawset(_G, ('crud_%s_opts'):format(name), args[#args])
+            return real_method(...)
+        end
+    end
+end
+
 local function get_routers_status()
     local res = crud.select('instances_info')
 
@@ -157,6 +176,7 @@ local function create_restricted_user()
 end
 
 local function init()
+    patch_crud_methods_for_tests()
 
     box.schema.space.create('request_counters', {
         format = { { 'id', 'unsigned' }, { 'count', 'unsigned' } },

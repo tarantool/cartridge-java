@@ -46,11 +46,12 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public DeleteProxyOperation<T> build() {
-            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
+            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
+                    .withOptions(options)
                     .build();
 
-            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), requestOptions.asMap());
 
             return new DeleteProxyOperation<>(
                     this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

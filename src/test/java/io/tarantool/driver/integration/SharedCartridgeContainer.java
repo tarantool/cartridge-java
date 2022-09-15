@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-abstract class SharedCartridgeContainer {
+public abstract class SharedCartridgeContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedCartridgeContainer.class);
 
