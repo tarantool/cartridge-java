@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Features
+- Added options parameter to Tarantool Space API ([#266](https://github.com/tarantool/cartridge-java/pull/266))
+
 ## [0.8.2] - 2022-09-16
 
 ### Features

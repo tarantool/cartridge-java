@@ -7,6 +7,7 @@ import io.tarantool.driver.api.retry.RequestRetryPolicy;
 import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
+import io.tarantool.driver.core.space.options.Options;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.Packable;
 
@@ -51,8 +52,19 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
+    public CompletableFuture<R> delete(Conditions conditions, Options options)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.delete(conditions, options));
+    }
+
+    @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.insert(tuple));
+    }
+
+    @Override
+    public CompletableFuture<R> insert(T tuple, Options options) throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.insert(tuple, options));
     }
 
     @Override
@@ -62,9 +74,21 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
+    public CompletableFuture<R> replace(T tuple, Options options)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.replace(tuple, options));
+    }
+
+    @Override
     public CompletableFuture<R> select(Conditions conditions)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.select(conditions));
+    }
+
+    @Override
+    public CompletableFuture<R> select(Conditions conditions, Options options)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.select(conditions, options));
     }
 
     @Override
@@ -73,13 +97,28 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
+    public CompletableFuture<R> update(Conditions conditions, T tuple, Options options) {
+        return wrapOperation(() -> spaceOperations.update(conditions, tuple, options));
+    }
+
+    @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
         return wrapOperation(() -> spaceOperations.update(conditions, operations));
     }
 
     @Override
+    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, Options options) {
+        return wrapOperation(() -> spaceOperations.update(conditions, operations, options));
+    }
+
+    @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
         return wrapOperation(() -> spaceOperations.upsert(conditions, tuple, operations));
+    }
+
+    @Override
+    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations, Options options) {
+        return wrapOperation(() -> spaceOperations.upsert(conditions, tuple, operations, options));
     }
 
     @Override

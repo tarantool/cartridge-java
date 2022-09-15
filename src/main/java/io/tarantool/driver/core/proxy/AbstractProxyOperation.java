@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.core.space.options.Options;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
@@ -64,6 +65,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         protected MessagePackObjectMapper argumentsMapper;
         protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
         protected int requestTimeout;
+        protected Options options;
 
         GenericOperationsBuilder() {
         }
@@ -133,6 +135,17 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
          */
         public B withRequestTimeout(int requestTimeout) {
             this.requestTimeout = requestTimeout;
+            return self();
+        }
+
+        /**
+         * Specify custom options
+         *
+         * @param options cluster proxy operation options
+         * @return builder
+         */
+        public B withOptions(Options options) {
+            this.options = options;
             return self();
         }
     }

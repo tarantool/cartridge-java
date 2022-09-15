@@ -56,11 +56,17 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public UpsertProxyOperation<T, R> build() {
-            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
+            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
+                    .withOptions(options)
                     .build();
 
-            List<?> arguments = Arrays.asList(spaceName, tuple, operations.asProxyOperationList(), options.asMap());
+            List<?> arguments = Arrays.asList(
+                    spaceName,
+                    tuple,
+                    operations.asProxyOperationList(),
+                    requestOptions.asMap()
+            );
 
             return new UpsertProxyOperation<>(
                     this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

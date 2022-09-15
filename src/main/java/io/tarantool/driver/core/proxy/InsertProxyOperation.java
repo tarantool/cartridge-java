@@ -49,11 +49,12 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public InsertProxyOperation<T, R> build() {
-            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
+            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
+                    .withOptions(options)
                     .build();
 
-            List<?> arguments = Arrays.asList(spaceName, tuple, options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());
 
             return new InsertProxyOperation<>(
                     this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
