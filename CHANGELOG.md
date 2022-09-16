@@ -2,14 +2,18 @@
 
 ## [Unreleased]
 
-- Removed code duplication in *ProxyOperations builders
+## [0.8.2] - 2022-09-16
+
+### Features
+- Removed code duplication in *ProxyOperations builders ([#256](https://github.com/tarantool/cartridge-java/issues/256))
+- Added client EventLoopThreadsNumber property for control netty work threads ([#253](https://github.com/tarantool/cartridge-java/pull/253))
+- Refactor CRUDOperationOptions to a hierarchy of classes ([#258](https://github.com/tarantool/cartridge-java/issues/258))
 
 ## [0.8.1] - 2022-08-18
 
 ### Features
 - Added StringValueToByteArray converter ([#230](https://github.com/tarantool/cartridge-java/issues/230))
 - Added IPROTO constants to align code more with Tarantool
-- Added client EventLoopThreadsNumber property for control netty work threads ([#253](https://github.com/tarantool/cartridge-java/pull/253))
 
 ## [0.8.0] - 2022-05-20
 
