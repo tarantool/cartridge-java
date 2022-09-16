@@ -56,7 +56,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public UpsertProxyOperation<T, R> build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
+            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 

@@ -53,7 +53,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public UpdateProxyOperation<T> build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
+            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 

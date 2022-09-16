@@ -49,7 +49,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public InsertProxyOperation<T, R> build() {
-            CRUDOperationOptions options = CRUDOperationOptions.builder()
+            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
                     .withTimeout(requestTimeout)
                     .build();
 
