@@ -1,7 +1,6 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.utils.Assert;
-import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,13 +17,14 @@ public final class TarantoolUtils {
     public static boolean versionGreaterOrEqualThen(String tarantoolVersion) {
         Assert.notNull(tarantoolVersion, "tarantoolVersion must not be null");
         String tarantoolCiVersion = java.lang.System.getenv(TARANTOOL_VERSION);
-        if (StringUtils.isEmpty(tarantoolCiVersion)) {
+        if (tarantoolCiVersion == null || tarantoolCiVersion.isEmpty()) {
             return true;
         }
         TarantoolVersion ciVersion = new TarantoolVersion(tarantoolCiVersion);
         TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
         return ciVersion.getMajor() >= version.getMajor() &&
             ciVersion.getMinor() >= version.getMinor();
+
     }
 
     public static boolean versionWithUUID() {
@@ -44,7 +44,8 @@ public final class TarantoolUtils {
         private Integer minor;
 
         public TarantoolVersion(String stringVersion) {
-            List<String> majorMinor = StringUtils.isEmpty(stringVersion) ? Collections.emptyList() :
+            List<String> majorMinor = stringVersion == null || stringVersion.isEmpty() ?
+                Collections.emptyList() :
                 Arrays.stream(stringVersion.split("\\."))
                     .collect(Collectors.toList());
             if (majorMinor.size() >= 1) {

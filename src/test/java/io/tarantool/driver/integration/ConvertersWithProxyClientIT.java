@@ -13,13 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
-import org.testcontainers.shaded.org.apache.commons.lang3.ArrayUtils;
 
 import java.time.Instant;
 import java.util.UUID;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -89,7 +87,7 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
     public void test_crudOperations_shouldWorkWithVarbinary() throws Exception {
         //given
         byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
-        List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
+        List<Byte> byteList = Utils.convertBytesToByteList(bytes);
         client.space("space_with_varbinary")
             .insert(tupleFactory.create(1, bytes)).get();
 
@@ -100,7 +98,7 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
 
         //then
         byte[] bytesFromTarantool = fields.getByteArray("varbinary_field");
-        List<Byte> byteListFromTarantool = Arrays.asList(ArrayUtils.toObject(bytesFromTarantool));
+        List<Byte> byteListFromTarantool = Utils.convertBytesToByteList(bytesFromTarantool);
         Assertions.assertEquals(byteList, byteListFromTarantool);
     }
 
@@ -108,7 +106,7 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
     public void test_crudOperations_shouldWorkWithBytesAsString() throws Exception {
         //given
         byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
-        List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
+        List<Byte> byteList = Utils.convertBytesToByteList(bytes);
         client.space("space_with_string")
             .insert(tupleFactory.create(1, bytes)).get();
 
@@ -119,7 +117,7 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
 
         //then
         byte[] bytesFromTarantool = fields.getByteArray("string_field");
-        List<Byte> byteListFromTarantool = Arrays.asList(ArrayUtils.toObject(bytesFromTarantool));
+        List<Byte> byteListFromTarantool = Utils.convertBytesToByteList(bytesFromTarantool);
         Assertions.assertEquals(byteList, byteListFromTarantool);
     }
 }

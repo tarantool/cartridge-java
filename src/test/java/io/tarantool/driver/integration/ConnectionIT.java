@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ClassUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -364,6 +363,6 @@ public class ConnectionIT extends SharedTarantoolContainer {
 
         // then
         TarantoolClientException exception = assertThrows(TarantoolClientException.class, client::getVersion);
-        assertFalse(ClassUtil.getRootCause(exception) instanceof NullPointerException);
+        assertFalse(Utils.getRootCause(exception) instanceof NullPointerException);
     }
 }
