@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -102,5 +104,14 @@ public final class Utils {
         }
         crc32 = Integer.reverse(crc32); // result reflect
         return crc32 & 0x00000000ffffffffL; // the unsigned java problem
+    }
+
+    /**
+     * Converts a byte array to a list of bytes
+     *
+     * @param bytes byte array
+     */
+    static List<Byte> convertBytesToByteList(byte[] bytes) {
+        return IntStream.range(0, bytes.length).mapToObj(i -> bytes[i]).collect(Collectors.toList());
     }
 }
