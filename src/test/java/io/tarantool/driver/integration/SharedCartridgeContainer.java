@@ -16,11 +16,13 @@ public abstract class SharedCartridgeContainer {
 
     protected static final TarantoolCartridgeContainer container =
         new TarantoolCartridgeContainer(
+            "Dockerfile",
+            "cartridge-java-test",
             "cartridge/instances.yml",
             "cartridge/topology.lua")
             .withDirectoryBinding("cartridge")
             .withLogConsumer(new Slf4jLogConsumer(logger))
-            .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
+            .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 5))
             .withStartupTimeout(Duration.ofMinutes(2));
 
     protected static void startCluster() {
