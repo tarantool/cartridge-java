@@ -4,4 +4,4 @@
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-package io.tarantool.driver.core.space.options.proxy;
+package io.tarantool.driver.api.space.options.proxy;

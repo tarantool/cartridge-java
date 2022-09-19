@@ -6,8 +6,13 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.retry.RequestRetryPolicy;
 import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceOptions;
+import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.UpdateOptions;
+import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.space.options.Options;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.Packable;
 
@@ -52,7 +57,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> delete(Conditions conditions, Options options)
+    public CompletableFuture<R> delete(Conditions conditions, DeleteOptions options)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.delete(conditions, options));
     }
@@ -63,7 +68,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> insert(T tuple, Options options) throws TarantoolClientException {
+    public CompletableFuture<R> insert(T tuple, InsertOptions options) throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.insert(tuple, options));
     }
 
@@ -74,7 +79,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> replace(T tuple, Options options)
+    public CompletableFuture<R> replace(T tuple, ReplaceOptions options)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replace(tuple, options));
     }
@@ -86,7 +91,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> select(Conditions conditions, Options options)
+    public CompletableFuture<R> select(Conditions conditions, SelectOptions options)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.select(conditions, options));
     }
@@ -97,7 +102,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> update(Conditions conditions, T tuple, Options options) {
+    public CompletableFuture<R> update(Conditions conditions, T tuple, UpdateOptions options) {
         return wrapOperation(() -> spaceOperations.update(conditions, tuple, options));
     }
 
@@ -107,7 +112,7 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, Options options) {
+    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, UpdateOptions options) {
         return wrapOperation(() -> spaceOperations.update(conditions, operations, options));
     }
 
@@ -117,7 +122,8 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations, Options options) {
+    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
+                                       UpsertOptions options) {
         return wrapOperation(() -> spaceOperations.upsert(conditions, tuple, operations, options));
     }
 

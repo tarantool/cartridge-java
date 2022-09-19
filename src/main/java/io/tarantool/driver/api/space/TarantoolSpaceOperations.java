@@ -3,8 +3,13 @@ package io.tarantool.driver.api.space;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceOptions;
+import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.UpdateOptions;
+import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
-import io.tarantool.driver.core.space.options.Options;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.Packable;
 
@@ -33,13 +38,13 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Delete a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
-     * @param options specified options
+     * @param options    specified options
      * @return a future that will contain removed tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-     default CompletableFuture<R> delete(Conditions conditions, Options options) throws TarantoolClientException {
-         return delete(conditions);
-     }
+    default CompletableFuture<R> delete(Conditions conditions, DeleteOptions options) throws TarantoolClientException {
+        return delete(conditions);
+    }
 
     /**
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
@@ -53,14 +58,14 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
     /**
      * Inserts tuple into the space, if no tuple with same unique keys exists. Otherwise throw duplicate key error.
      *
-     * @param tuple new data
+     * @param tuple   new data
      * @param options specified options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    default CompletableFuture<R> insert(T tuple, Options options) throws TarantoolClientException {
+    default CompletableFuture<R> insert(T tuple, InsertOptions options) throws TarantoolClientException {
         return insert(tuple);
-    };
+    }
 
     /**
      * Insert a tuple into the space or replace an existing one.
@@ -74,14 +79,14 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
     /**
      * Insert a tuple into the space or replace an existing one.
      *
-     * @param tuple new data
+     * @param tuple   new data
      * @param options specified options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
-    default CompletableFuture<R> replace(T tuple, Options options) throws TarantoolClientException {
+    default CompletableFuture<R> replace(T tuple, ReplaceOptions options) throws TarantoolClientException {
         return replace(tuple);
-    };
+    }
 
     /**
      * Select tuples matching the specified query with specified conditions.
@@ -96,19 +101,19 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Select tuples matching the specified query with specified conditions and options.
      *
      * @param conditions specified conditions
-     * @param options specified options
+     * @param options    specified options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    default CompletableFuture<R> select(Conditions conditions, Options options) throws TarantoolClientException {
+    default CompletableFuture<R> select(Conditions conditions, SelectOptions options) throws TarantoolClientException {
         return select(conditions);
-    };
+    }
 
     /**
      * Update a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
-     * @param tuple tuple with new field values
+     * @param tuple      tuple with new field values
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
@@ -118,14 +123,14 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Update a tuple. Only a single primary index value condition is supported.
      *
      * @param conditions query with options
-     * @param tuple tuple with new field values
-     * @param options specified options
+     * @param tuple      tuple with new field values
+     * @param options    specified options
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    default CompletableFuture<R> update(Conditions conditions, T tuple, Options options) {
+    default CompletableFuture<R> update(Conditions conditions, T tuple, UpdateOptions options) {
         return update(conditions, tuple);
-    };
+    }
 
     /**
      * Update a tuple. Only a single primary index value condition is supported.
@@ -142,11 +147,11 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      *
      * @param conditions query with options
      * @param operations the list update operations
-     * @param options specified options
+     * @param options    specified options
      * @return a future that will contain corresponding tuple once completed
      * @throws TarantoolClientException in case if the request failed
      */
-    default CompletableFuture<R> update(Conditions conditions, TupleOperations operations, Options options) {
+    default CompletableFuture<R> update(Conditions conditions, TupleOperations operations, UpdateOptions options) {
         return update(conditions, operations);
     };
 
@@ -155,7 +160,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * is supported.
      *
      * @param conditions query with options
-     * @param tuple new data that will be insert if tuple will be not found
+     * @param tuple      new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
@@ -167,13 +172,14 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * is supported.
      *
      * @param conditions query with options
-     * @param tuple new data that will be insert if tuple will be not found
+     * @param tuple      new data that will be insert if tuple will be not found
      * @param operations the list of update operations to be performed if the tuple exists
-     * @param options specified options
+     * @param options    specified options
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */
-    default CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations, Options options) {
+    default CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
+                                        UpsertOptions options) {
         return upsert(conditions, tuple, operations);
     };
 
@@ -196,7 +202,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Cursor is an iterator-like object that is able to scroll through
      * results of a query. Unlike a single cursor loads new tuples
      * dynamically issuing requests to server.
-     *
+     * <p>
      * Select will fetch tuples matching the specified query.
      * Each request to server will fetch no more than 'batch size' tuples.
      *

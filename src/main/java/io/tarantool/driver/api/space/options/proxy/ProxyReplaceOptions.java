@@ -1,4 +1,6 @@
-package io.tarantool.driver.core.space.options.proxy;
+package io.tarantool.driver.api.space.options.proxy;
+
+import io.tarantool.driver.api.space.options.ReplaceOptions;
 
 /**
  * Represent options for replace cluster proxy operation
@@ -6,7 +8,7 @@ package io.tarantool.driver.core.space.options.proxy;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyReplaceOptions extends ProxyBaseOptions<ProxyReplaceOptions> {
+public final class ProxyReplaceOptions extends ProxyBaseOptions<ProxyReplaceOptions> implements ReplaceOptions {
 
     private ProxyReplaceOptions() {
     }

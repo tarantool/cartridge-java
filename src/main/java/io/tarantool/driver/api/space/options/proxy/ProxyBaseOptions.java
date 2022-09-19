@@ -1,6 +1,6 @@
-package io.tarantool.driver.core.space.options.proxy;
+package io.tarantool.driver.api.space.options.proxy;
 
-import io.tarantool.driver.core.space.options.Options;
+import io.tarantool.driver.api.space.options.AbstractOptions;
 
 /**
  * Represent options for all proxy functions
@@ -8,7 +8,7 @@ import io.tarantool.driver.core.space.options.Options;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-abstract class ProxyBaseOptions<B extends ProxyBaseOptions<B>> extends Options<B> {
+abstract class ProxyBaseOptions<B extends ProxyBaseOptions<B>> extends AbstractOptions<B> {
 
     public static final String TIMEOUT = "timeout";
 
