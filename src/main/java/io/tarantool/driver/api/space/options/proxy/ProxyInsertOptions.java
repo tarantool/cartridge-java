@@ -1,4 +1,6 @@
-package io.tarantool.driver.core.space.options.proxy;
+package io.tarantool.driver.api.space.options.proxy;
+
+import io.tarantool.driver.api.space.options.InsertOptions;
 
 /**
  * Represent options for insert cluster proxy operation
@@ -6,7 +8,7 @@ package io.tarantool.driver.core.space.options.proxy;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyInsertOptions extends ProxyBaseOptions<ProxyInsertOptions> {
+public final class ProxyInsertOptions extends ProxyBaseOptions<ProxyInsertOptions> implements InsertOptions {
 
     private ProxyInsertOptions() {
     }

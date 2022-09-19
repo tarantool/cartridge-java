@@ -1,4 +1,4 @@
-package io.tarantool.driver.core.space.options;
+package io.tarantool.driver.api.space.options;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,20 +12,16 @@ import java.util.Map;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public abstract class Options<B extends Options<B>> {
+public abstract class AbstractOptions<B extends AbstractOptions<B>> implements Options {
 
     private final Map<String, Object> resultMap = new HashMap<>();
 
     protected abstract B self();
 
-    protected void addOption(String option, Object value) {
+    public void addOption(String option, Object value) {
         resultMap.put(option, value);
     }
-    /**
-     * Return serializable options representation.
-     *
-     * @return a map
-     */
+
     public Map<String, Object> asMap() {
         return resultMap;
     }

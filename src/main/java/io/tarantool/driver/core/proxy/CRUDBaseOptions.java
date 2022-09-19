@@ -1,6 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
-import io.tarantool.driver.core.space.options.Options;
+import io.tarantool.driver.api.space.options.Options;
 
 /**
  * This class is not part of the public API.

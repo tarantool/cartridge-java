@@ -8,6 +8,12 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceOptions;
+import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.UpdateOptions;
+import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.proxy.DeleteProxyOperation;
 import io.tarantool.driver.core.proxy.InsertProxyOperation;
@@ -17,7 +23,6 @@ import io.tarantool.driver.core.proxy.SelectProxyOperation;
 import io.tarantool.driver.core.proxy.TruncateProxyOperation;
 import io.tarantool.driver.core.proxy.UpdateProxyOperation;
 import io.tarantool.driver.core.proxy.UpsertProxyOperation;
-import io.tarantool.driver.core.space.options.Options;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.protocol.Packable;
@@ -63,13 +68,13 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> delete(Conditions conditions, Options options) throws TarantoolClientException {
+    public CompletableFuture<R> delete(Conditions conditions, DeleteOptions options) throws TarantoolClientException {
         return delete(conditions, tupleResultMapper(), options);
     }
 
     private CompletableFuture<R> delete(Conditions conditions,
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                        Options options)
+                                        DeleteOptions options)
             throws TarantoolClientException {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
@@ -93,13 +98,13 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> insert(T tuple, Options options) throws TarantoolClientException {
+    public CompletableFuture<R> insert(T tuple, InsertOptions options) throws TarantoolClientException {
         return insert(tuple, tupleResultMapper(), options);
     }
 
     private CompletableFuture<R> insert(T tuple,
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                        Options options)
+                                        InsertOptions options)
             throws TarantoolClientException {
         InsertProxyOperation<T, R> operation = new InsertProxyOperation.Builder<T, R>()
                 .withClient(client)
@@ -121,13 +126,13 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> replace(T tuple, Options options) throws TarantoolClientException {
+    public CompletableFuture<R> replace(T tuple, ReplaceOptions options) throws TarantoolClientException {
         return replace(tuple, tupleResultMapper(), options);
     }
 
     private CompletableFuture<R> replace(T tuple,
                                          CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                         Options options)
+                                         ReplaceOptions options)
             throws TarantoolClientException {
         ReplaceProxyOperation<T, R> operation = new ReplaceProxyOperation.Builder<T, R>()
                 .withClient(client)
@@ -150,13 +155,13 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> select(Conditions conditions,
-                                       Options options) throws TarantoolClientException {
+                                       SelectOptions options) throws TarantoolClientException {
         return select(conditions, tupleResultMapper(), options);
     }
 
     private CompletableFuture<R> select(Conditions conditions,
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                        Options options)
+                                        SelectOptions options)
             throws TarantoolClientException {
 
         SelectProxyOperation<R> operation = new SelectProxyOperation.Builder<R>(metadataOperations, spaceMetadata)
@@ -179,7 +184,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> update(Conditions conditions, T tuple, Options options) {
+    public CompletableFuture<R> update(Conditions conditions, T tuple, UpdateOptions options) {
         return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper(), options);
     }
 
@@ -197,14 +202,14 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, Options options) {
+    public CompletableFuture<R> update(Conditions conditions, TupleOperations operations, UpdateOptions options) {
         return update(conditions, operations, tupleResultMapper(), options);
     }
 
     private CompletableFuture<R> update(Conditions conditions,
                                         TupleOperations operations,
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                        Options options) {
+                                        UpdateOptions options) {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
         UpdateProxyOperation<R> operation = new UpdateProxyOperation.Builder<R>()
@@ -228,7 +233,8 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     }
 
     @Override
-    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations, Options options) {
+    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
+                                       UpsertOptions options) {
         return upsert(conditions, tuple, operations, tupleResultMapper(), options);
     }
 
@@ -236,7 +242,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                                         T tuple,
                                         TupleOperations operations,
                                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
-                                        Options options) {
+                                        UpsertOptions options) {
 
         UpsertProxyOperation<T, R> operation = new UpsertProxyOperation.Builder<T, R>()
                 .withClient(client)

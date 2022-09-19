@@ -1,4 +1,6 @@
-package io.tarantool.driver.core.space.options.proxy;
+package io.tarantool.driver.api.space.options.proxy;
+
+import io.tarantool.driver.api.space.options.SelectOptions;
 
 /**
  * Represent options for select cluster proxy operation
@@ -6,7 +8,7 @@ package io.tarantool.driver.core.space.options.proxy;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxySelectOptions extends ProxyBaseOptions<ProxySelectOptions> {
+public final class ProxySelectOptions extends ProxyBaseOptions<ProxySelectOptions> implements SelectOptions {
 
     public static final String BATCH_SIZE = "batch_size";
 
