@@ -1,7 +1,8 @@
 <!-- What has been done? Why? What problem is being solved? -->
 
-I haven't forgotten about:
 
+
+I haven't forgotten about:
 - [ ] Tests
 - [ ] Changelog
 - [ ] Documentation
