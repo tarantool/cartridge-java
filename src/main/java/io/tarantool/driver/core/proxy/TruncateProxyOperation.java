@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolVoidResult;
+import io.tarantool.driver.api.space.options.OperationWithTimeoutOptions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +55,9 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
         return new Builder();
     }
 
-    public static final class Builder extends AbstractProxyOperation.GenericOperationsBuilder<Void, Builder> {
+    public static final class Builder
+        extends AbstractProxyOperation.GenericOperationsBuilder<Void, OperationWithTimeoutOptions, Builder> {
+
         public Builder() {
         }
 
@@ -68,11 +71,11 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          * @return TruncateProxyOperation instance
          */
         public TruncateProxyOperation build() {
-            CRUDBaseOptions options = new CRUDBaseOptions.Builder()
-                    .withTimeout(requestTimeout)
+            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
+                    .withTimeout(options.getTimeout())
                     .build();
 
-            List<?> arguments = Arrays.asList(spaceName, options.asMap());
+            List<?> arguments = Arrays.asList(spaceName, requestOptions.asMap());
 
             return new TruncateProxyOperation(this.client, this.functionName, arguments);
         }

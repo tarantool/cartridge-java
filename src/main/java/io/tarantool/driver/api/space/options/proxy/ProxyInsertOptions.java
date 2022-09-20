@@ -13,6 +13,9 @@ public final class ProxyInsertOptions extends ProxyBaseOptions<ProxyInsertOption
     private ProxyInsertOptions() {
     }
 
+    /**
+     * Create new instance.
+     */
     public static ProxyInsertOptions create() {
         return new ProxyInsertOptions();
     }

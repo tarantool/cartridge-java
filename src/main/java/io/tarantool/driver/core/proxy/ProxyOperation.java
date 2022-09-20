@@ -9,6 +9,10 @@ import java.util.concurrent.CompletableFuture;
  * @author Sergey Volgin
  */
 public interface ProxyOperation<T> {
-
+    /**
+     * Perform operation.
+     *
+     * @return a future with operation result
+     */
     CompletableFuture<T> execute();
 }

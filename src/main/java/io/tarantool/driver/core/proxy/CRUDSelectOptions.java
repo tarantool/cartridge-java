@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import java.util.Optional;
+
 import io.tarantool.driver.protocol.Packable;
 
 /**
@@ -17,28 +19,13 @@ final class CRUDSelectOptions extends CRUDBaseOptions {
     public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
 
-    private <O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
-    CRUDSelectOptions(AbstractBuilder<O, T> builder) {
+    private <T extends AbstractBuilder<T>>
+    CRUDSelectOptions(AbstractBuilder<T> builder) {
         super(builder);
 
-        if (builder.selectLimit != null) {
-            addOption(SELECT_LIMIT, builder.selectLimit);
-        }
-
-        if (builder.after != null) {
-            addOption(SELECT_AFTER, builder.after);
-        }
-
-        if (builder.selectBatchSize != null) {
-            addOption(SELECT_BATCH_SIZE, builder.selectBatchSize);
-        }
-
-        if (builder.options != null) {
-            Object batchSize = builder.options.asMap().get(SELECT_BATCH_SIZE);
-            if (batchSize != null) {
-                addOption(SELECT_BATCH_SIZE, batchSize);
-            }
-        }
+        addOption(SELECT_LIMIT, builder.selectLimit);
+        addOption(SELECT_AFTER, builder.after);
+        addOption(SELECT_BATCH_SIZE, builder.selectBatchSize);
     }
 
     /**
@@ -47,23 +34,23 @@ final class CRUDSelectOptions extends CRUDBaseOptions {
      * @see CRUDAbstractOperationOptions.AbstractBuilder
      */
     protected abstract static
-    class AbstractBuilder<O extends CRUDSelectOptions, T extends AbstractBuilder<O, T>>
-        extends CRUDBaseOptions.AbstractBuilder<O, T> {
-        private Long selectLimit;
-        private Packable after;
-        private Long selectBatchSize;
+    class AbstractBuilder<T extends AbstractBuilder<T>>
+        extends CRUDBaseOptions.AbstractBuilder<CRUDSelectOptions, T> {
+        private Optional<Long> selectLimit = Optional.empty();
+        private Optional<Packable> after = Optional.empty();
+        private Optional<Integer> selectBatchSize = Optional.empty();
 
-        public T withSelectLimit(long selectLimit) {
+        public T withSelectLimit(Optional<Long> selectLimit) {
             this.selectLimit = selectLimit;
             return self();
         }
 
-        public T withSelectBatchSize(long selectBatchSize) {
+        public T withSelectBatchSize(Optional<Integer> selectBatchSize) {
             this.selectBatchSize = selectBatchSize;
             return self();
         }
 
-        public T withSelectAfter(Packable startTuple) {
+        public T withSelectAfter(Optional<Packable> startTuple) {
             this.after = startTuple;
             return self();
         }
@@ -72,8 +59,7 @@ final class CRUDSelectOptions extends CRUDBaseOptions {
     /**
      * Concrete Builder implementation for select cluster proxy operation options.
      */
-    protected static final class Builder
-        extends AbstractBuilder<CRUDSelectOptions, Builder> {
+    protected static final class Builder extends AbstractBuilder<Builder> {
 
         @Override
         Builder self() {

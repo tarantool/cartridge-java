@@ -51,6 +51,7 @@ import java.util.concurrent.Executors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -262,6 +263,78 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(tuple.getString(2), "John Doe");
         assertEquals(tuple.getInteger(3), 21);
         assertEquals(tuple.getInteger(4), 100);
+    }
+
+    @Test
+    public void test_insertMany_replaceMany() throws ExecutionException, InterruptedException {
+        truncateSpace(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = new ArrayList<>(3);
+        tarantoolTuples.addAll(Arrays.asList(
+            tupleFactory.create(Arrays.asList(123, null, "Jane Doe", 18, 999)),
+            tupleFactory.create(Arrays.asList(456, null, "Jack the Ripper", 33, 111))
+        ));
+
+        TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insertMany(tarantoolTuples).get();
+        assertEquals(insertTuples.size(), 2);
+        TarantoolTuple tuple = insertTuples.get(0);
+        assertEquals(tuple.size(), 5);
+        assertEquals(tuple.getInteger(0), 123);
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals(tuple.getString(2), "Jane Doe");
+        assertEquals(tuple.getInteger(3), 18);
+        assertEquals(tuple.getInteger(4), 999);
+        tuple = insertTuples.get(1);
+        assertEquals(tuple.size(), 5);
+        assertEquals(tuple.getInteger(0), 456);
+        assertEquals(tuple.getString(2), "Jack the Ripper");
+        assertEquals(tuple.getInteger(3), 33);
+        assertEquals(tuple.getInteger(4), 111);
+
+        tarantoolTuples.set(0, tupleFactory.create(Arrays.asList(123, null, "Jane Doe", 18, 990)));
+        tarantoolTuples.add(tupleFactory.create(Arrays.asList(777, null, "Ostap Bender", 99, 777)));
+
+        List<TarantoolTuple> duplicateTuples = Collections.unmodifiableList(tarantoolTuples);
+
+        // Repeat the insert with the same IDs
+        assertThrows(ExecutionException.class,
+                () -> profileSpace.insertMany(duplicateTuples).get(),
+                "Duplicate key exists in unique index 'primary' in space 'test_space'");
+
+        // The data wasn't changed
+        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(Conditions.any()).get();
+        assertEquals(2, selectResult.size());
+        assertEquals(selectResult.get(0).getInteger(4), 999);
+
+        // Replace
+        tarantoolTuples = Arrays.asList(
+            tupleFactory.create(Arrays.asList(123, null, "John Doe", 21, 100)),
+            tupleFactory.create(Arrays.asList(456, null, "Jack the Ripper", 44, 333)),
+            tupleFactory.create(Arrays.asList(777, null, "Ostap Bender", 99, 777))
+        );
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replaceMany(tarantoolTuples).get();
+        assertEquals(replaceResult.size(), 3);
+        tuple = replaceResult.get(0);
+        assertEquals(tuple.size(), 5);
+        assertEquals(tuple.getInteger(0), 123);
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals(tuple.getString(2), "John Doe");
+        assertEquals(tuple.getInteger(3), 21);
+        assertEquals(tuple.getInteger(4), 100);
+        tuple = replaceResult.get(1);
+        assertEquals(tuple.size(), 5);
+        assertEquals(tuple.getInteger(0), 456);
+        assertEquals(tuple.getString(2), "Jack the Ripper");
+        assertEquals(tuple.getInteger(3), 44);
+        assertEquals(tuple.getInteger(4), 333);
+        tuple = replaceResult.get(2);
+        assertEquals(tuple.size(), 5);
+        assertEquals(tuple.getInteger(0), 777);
+        assertEquals(tuple.getString(2), "Ostap Bender");
+        assertEquals(tuple.getInteger(3), 99);
+        assertEquals(tuple.getInteger(4), 777);
     }
 
     @Test

@@ -1,6 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
-import io.tarantool.driver.api.space.options.Options;
+import java.util.Optional;
 
 /**
  * This class is not part of the public API.
@@ -17,16 +17,7 @@ class CRUDBaseOptions extends CRUDAbstractOperationOptions {
     protected
     <O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
     CRUDBaseOptions(AbstractBuilder<O, T> builder) {
-        if (builder.timeout != null) {
-            addOption(TIMEOUT, builder.timeout);
-        }
-
-        if (builder.options != null) {
-            Object batchSize = builder.options.asMap().get(TIMEOUT);
-            if (batchSize != null) {
-                addOption(TIMEOUT, batchSize);
-            }
-        }
+        addOption(TIMEOUT, builder.timeout);
     }
 
     /**
@@ -37,16 +28,10 @@ class CRUDBaseOptions extends CRUDAbstractOperationOptions {
     protected abstract static
     class AbstractBuilder<O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
         extends CRUDAbstractOperationOptions.AbstractBuilder<O, T> {
-        protected Integer timeout;
-        protected Options options;
+        protected Optional<Integer> timeout = Optional.empty();
 
-        public T withTimeout(int timeout) {
+        public T withTimeout(Optional<Integer> timeout) {
             this.timeout = timeout;
-            return self();
-        }
-
-        public T withOptions(Options options) {
-            this.options = options;
             return self();
         }
     }

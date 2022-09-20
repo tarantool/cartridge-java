@@ -4,12 +4,15 @@
 
 ### Features
 - Added options parameter to Tarantool Space API ([#266](https://github.com/tarantool/cartridge-java/pull/266))
+- Added support for insert_many and replace_many CRUD operations ([#259](https://github.com/tarantool/cartridge-java/issues/259))
 
 ## [0.8.2] - 2022-09-16
 
 ### Features
-- Removed code duplication in *ProxyOperations builders ([#256](https://github.com/tarantool/cartridge-java/issues/256))
 - Added client EventLoopThreadsNumber property for control netty work threads ([#253](https://github.com/tarantool/cartridge-java/pull/253))
+
+### Misc
+- Removed code duplication in *ProxyOperations builders ([#256](https://github.com/tarantool/cartridge-java/issues/256))
 - Refactor CRUDOperationOptions to a hierarchy of classes ([#258](https://github.com/tarantool/cartridge-java/issues/258))
 
 ## [0.8.1] - 2022-08-18

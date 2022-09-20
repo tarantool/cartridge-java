@@ -12,7 +12,9 @@ public final class ProxyOperationsMappingConfig {
     public static final String SCHEMA_FUNCTION = "ddl.get_schema";
     public static final String DELETE_FUNCTION = CRUD_PREFIX + "delete";
     public static final String INSERT_FUNCTION = CRUD_PREFIX + "insert";
+    public static final String INSERT_MANY_FUNCTION = CRUD_PREFIX + "insert_many";
     public static final String REPLACE_FUNCTION = CRUD_PREFIX + "replace";
+    public static final String REPLACE_MANY_FUNCTION = CRUD_PREFIX + "replace_many";
     public static final String SELECT_FUNCTION = CRUD_PREFIX + "select";
     public static final String UPDATE_FUNCTION = CRUD_PREFIX + "update";
     public static final String UPSERT_FUNCTION = CRUD_PREFIX + "upsert";
@@ -21,7 +23,9 @@ public final class ProxyOperationsMappingConfig {
     private final String schemaFunctionName;
     private final String deleteFunctionName;
     private final String insertFunctionName;
+    private final String insertManyFunctionName;
     private final String replaceFunctionName;
+    private final String replaceManyFunctionName;
     private final String updateFunctionName;
     private final String upsertFunctionName;
     private final String selectFunctionName;
@@ -59,12 +63,32 @@ public final class ProxyOperationsMappingConfig {
     }
 
     /**
+     * Get API function name for performing the insert_many operation.
+     * The default value is <code>crud.insert_many</code>.
+     *
+     * @return a callable API function name
+     */
+    public String getInsertManyFunctionName() {
+        return insertManyFunctionName;
+    }
+
+    /**
      * Get API function name for performing the replace operation. The default value is <code>crud.replace</code>.
      *
      * @return a callable API function name
      */
     public String getReplaceFunctionName() {
         return replaceFunctionName;
+    }
+
+    /**
+     * Get API function name for performing the replace_many operation.
+     * The default value is <code>crud.replace_many</code>.
+     *
+     * @return a callable API function name
+     */
+    public String getReplaceManyFunctionName() {
+        return replaceManyFunctionName;
     }
 
     /**
@@ -104,13 +128,16 @@ public final class ProxyOperationsMappingConfig {
     }
 
     private ProxyOperationsMappingConfig(String schemaFunctionName, String deleteFunctionName,
-                                         String insertFunctionName, String replaceFunctionName,
+                                         String insertFunctionName, String insertManyFunctionName,
+                                         String replaceFunctionName, String replaceManyFunctionName,
                                          String updateFunctionName, String upsertFunctionName,
                                          String selectFunctionName, String truncateFunctionName) {
         this.schemaFunctionName = schemaFunctionName;
         this.deleteFunctionName = deleteFunctionName;
         this.insertFunctionName = insertFunctionName;
+        this.insertManyFunctionName = insertManyFunctionName;
         this.replaceFunctionName = replaceFunctionName;
+        this.replaceManyFunctionName = replaceManyFunctionName;
         this.updateFunctionName = updateFunctionName;
         this.upsertFunctionName = upsertFunctionName;
         this.selectFunctionName = selectFunctionName;
@@ -134,7 +161,9 @@ public final class ProxyOperationsMappingConfig {
         private String schemaFunctionName = SCHEMA_FUNCTION;
         private String deleteFunctionName = DELETE_FUNCTION;
         private String insertFunctionName = INSERT_FUNCTION;
+        private String insertManyFunctionName = INSERT_MANY_FUNCTION;
         private String replaceFunctionName = REPLACE_FUNCTION;
+        private String replaceManyFunctionName = REPLACE_MANY_FUNCTION;
         private String updateFunctionName = UPDATE_FUNCTION;
         private String upsertFunctionName = UPSERT_FUNCTION;
         private String selectFunctionName = SELECT_FUNCTION;
@@ -177,6 +206,17 @@ public final class ProxyOperationsMappingConfig {
         }
 
         /**
+         * Get API function name for performing the insert_many operation
+         *
+         * @param insertManyFunctionName name for stored function performing insert_many operation
+         * @return a callable API function name
+         */
+        public Builder withInsertManyFunctionName(String insertManyFunctionName) {
+            this.insertManyFunctionName = insertManyFunctionName;
+            return this;
+        }
+
+        /**
          * Get API function name for performing the replace operation
          *
          * @param replaceFunctionName name for stored function performing replace operation
@@ -184,6 +224,17 @@ public final class ProxyOperationsMappingConfig {
          */
         public Builder withReplaceFunctionName(String replaceFunctionName) {
             this.replaceFunctionName = replaceFunctionName;
+            return this;
+        }
+
+        /**
+         * Get API function name for performing the replace_many operation
+         *
+         * @param replaceManyFunctionName name for stored function performing replace_many operation
+         * @return a callable API function name
+         */
+        public Builder withReplaceManyFunctionName(String replaceManyFunctionName) {
+            this.replaceManyFunctionName = replaceManyFunctionName;
             return this;
         }
 
@@ -238,8 +289,8 @@ public final class ProxyOperationsMappingConfig {
          */
         public ProxyOperationsMappingConfig build() {
             return new ProxyOperationsMappingConfig(schemaFunctionName, deleteFunctionName, insertFunctionName,
-                    replaceFunctionName, updateFunctionName, upsertFunctionName, selectFunctionName,
-                    truncateFunctionName);
+                    insertManyFunctionName, replaceFunctionName, replaceManyFunctionName, updateFunctionName,
+                    upsertFunctionName, selectFunctionName, truncateFunctionName);
         }
     }
 }

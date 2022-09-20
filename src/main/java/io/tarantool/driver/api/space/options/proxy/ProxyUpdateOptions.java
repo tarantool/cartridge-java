@@ -13,6 +13,9 @@ public final class ProxyUpdateOptions extends ProxyBaseOptions<ProxyUpdateOption
     private ProxyUpdateOptions() {
     }
 
+    /**
+     * Create new instance.
+     */
     public static ProxyUpdateOptions create() {
         return new ProxyUpdateOptions();
     }

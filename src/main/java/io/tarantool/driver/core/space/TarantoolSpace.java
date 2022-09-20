@@ -85,6 +85,14 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         return insert(tuple, tupleResultMapper());
     }
 
+    @Override
+    public CompletableFuture<R> insertMany(Collection<T> tuples) throws TarantoolClientException {
+        // TODO: add support with interactive transactions if the node has the MVCC mode enabled
+        // TODO: add support in all other cases if https://github.com/tarantool/tarantool/issues/7691 is implemented
+        throw new UnsupportedOperationException(
+            "Standalone node API does not support inserting several tuples at once yet");
+    }
+
     private CompletableFuture<R> insert(T tuple, MessagePackValueMapper resultMapper)
             throws TarantoolClientException {
         try {
@@ -102,6 +110,14 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
         return replace(tuple, tupleResultMapper());
+    }
+
+    @Override
+    public CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException {
+        // TODO: add support with interactive transactions if the node has the MVCC mode enabled
+        // TODO: add support in all other cases if https://github.com/tarantool/tarantool/issues/7691 is implemented
+        throw new UnsupportedOperationException(
+            "Standalone node API does not support replacing several tuples at once yet");
     }
 
     private CompletableFuture<R> replace(T tuple, MessagePackValueMapper resultMapper)

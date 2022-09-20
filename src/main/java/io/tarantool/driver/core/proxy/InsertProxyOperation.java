@@ -2,6 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
+import io.tarantool.driver.api.space.options.InsertOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
@@ -32,7 +33,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-            extends GenericOperationsBuilder<R, Builder<T, R>> {
+            extends GenericOperationsBuilder<R, InsertOptions, Builder<T, R>> {
         private T tuple;
 
         public Builder() {
@@ -50,8 +51,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
 
         public InsertProxyOperation<T, R> build() {
             CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
-                    .withTimeout(requestTimeout)
-                    .withOptions(options)
+                    .withTimeout(options.getTimeout())
                     .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());

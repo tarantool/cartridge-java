@@ -7,7 +7,9 @@ import io.tarantool.driver.api.retry.RequestRetryPolicy;
 import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.ReplaceManyOptions;
 import io.tarantool.driver.api.space.options.ReplaceOptions;
 import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.options.UpdateOptions;
@@ -73,6 +75,17 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
+    public CompletableFuture<R> insertMany(Collection<T> tuples) throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.insertMany(tuples));
+    }
+
+    @Override
+    public CompletableFuture<R> insertMany(Collection<T> tuples, InsertManyOptions options)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.insertMany(tuples, options));
+    }
+
+    @Override
     public CompletableFuture<R> replace(T tuple)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replace(tuple));
@@ -82,6 +95,18 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     public CompletableFuture<R> replace(T tuple, ReplaceOptions options)
             throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replace(tuple, options));
+    }
+
+    @Override
+    public CompletableFuture<R> replaceMany(Collection<T> tuples)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.replaceMany(tuples));
+    }
+
+    @Override
+    public CompletableFuture<R> replaceMany(Collection<T> tuples, ReplaceManyOptions options)
+            throws TarantoolClientException {
+        return wrapOperation(() -> spaceOperations.replaceMany(tuples, options));
     }
 
     @Override

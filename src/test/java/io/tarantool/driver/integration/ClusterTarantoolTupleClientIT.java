@@ -179,6 +179,24 @@ public class ClusterTarantoolTupleClientIT {
     }
 
     @Test
+    public void test_insertMany_shouldThrowException() throws Exception {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
+
+        assertThrows(UnsupportedOperationException.class,
+                     () -> testSpace.insertMany(Collections.emptyList()));
+    }
+
+    @Test
+    public void test_replaceMany_shouldThrowException() throws Exception {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
+
+        assertThrows(UnsupportedOperationException.class,
+                     () -> testSpace.replaceMany(Collections.emptyList()));
+    }
+
+    @Test
     public void deleteRequest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
                 client.space(TEST_SPACE_NAME);

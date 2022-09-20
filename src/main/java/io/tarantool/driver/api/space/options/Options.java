@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space.options;
 
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * Marker interface for space operations options
@@ -11,7 +11,7 @@ import java.util.Map;
 public interface Options {
 
     /**
-     * Add named option
+     * Add named option.
      *
      * @param option name of option
      * @param value  value of option
@@ -19,9 +19,11 @@ public interface Options {
     void addOption(String option, Object value);
 
     /**
-     * Return serializable options representation.
+     * Return option value by name.
      *
-     * @return a map
+     * @param option option name
+     * @param optionClass option value type
+     * @return option value
      */
-    Map<String, Object> asMap();
+    <T> Optional<T> getOption(String option, Class<T> optionClass);
 }

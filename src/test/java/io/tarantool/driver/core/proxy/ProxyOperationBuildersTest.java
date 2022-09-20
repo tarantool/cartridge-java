@@ -3,11 +3,21 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyTruncateOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyUpdateOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyUpsertOptions;
+import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;
-import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
@@ -23,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class ProxyOperationBuildersTest {
@@ -36,6 +47,7 @@ public class ProxyOperationBuildersTest {
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
             defaultResultMapper = mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
             .withDefaultTupleValueConverter(defaultMapper, null);
+    private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
 
     @Test
     public void deleteOperationBuilderTest() {
@@ -50,7 +62,9 @@ public class ProxyOperationBuildersTest {
                         .withIndexQuery(indexQuery)
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyDeleteOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -66,7 +80,7 @@ public class ProxyOperationBuildersTest {
     @Test
     public void insertOperationBuilderTest() {
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
+        TarantoolTuple tarantoolTuple = factory.create(values);
 
         InsertProxyOperation<TarantoolTuple, TarantoolResult<TarantoolTuple>> insertOperation =
                 new InsertProxyOperation.Builder<TarantoolTuple, TarantoolResult<TarantoolTuple>>()
@@ -76,7 +90,9 @@ public class ProxyOperationBuildersTest {
                         .withTuple(tarantoolTuple)
                         .withArgumentsMapper(defaultMapper)
                         .withResultMapper(defaultResultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyInsertOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -89,9 +105,42 @@ public class ProxyOperationBuildersTest {
     }
 
     @Test
+    public void insertManyOperationBuilderTest() {
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+                factory.create(Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984)),
+                factory.create(Arrays.asList(44, "a44", "Silmarillion", "J. R. R. Tolkien", 1977))
+        );
+
+        InsertManyProxyOperation<TarantoolTuple, TarantoolResult<TarantoolTuple>> operation =
+                new InsertManyProxyOperation.Builder<TarantoolTuple, TarantoolResult<TarantoolTuple>>()
+                        .withClient(client)
+                        .withSpaceName("space1")
+                        .withFunctionName("function1")
+                        .withTuples(tarantoolTuples)
+                        .withResultMapper(defaultResultMapper)
+                        .withArgumentsMapper(defaultMapper)
+                        .withOptions(ProxyInsertManyOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                            .withRollbackOnError(true)
+                            .withStopOnError(false)
+                        )
+                        .build();
+
+        Map<String, Object> options = new HashMap<>();
+        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR, true);
+        options.put(CRUDBatchOptions.BATCH_STOP_ON_ERROR, false);
+
+        assertEquals(client, operation.getClient());
+        assertEquals("function1", operation.getFunctionName());
+        assertEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertEquals(defaultResultMapper, operation.getResultMapper());
+    }
+
+    @Test
     public void replaceOperationBuilderTest() {
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
+        TarantoolTuple tarantoolTuple = factory.create(values);
 
         ReplaceProxyOperation<TarantoolTuple, TarantoolResult<TarantoolTuple>> operation =
                 new ReplaceProxyOperation.Builder<TarantoolTuple, TarantoolResult<TarantoolTuple>>()
@@ -101,7 +150,9 @@ public class ProxyOperationBuildersTest {
                         .withTuple(tarantoolTuple)
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyReplaceOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -114,6 +165,40 @@ public class ProxyOperationBuildersTest {
     }
 
     @Test
+    public void replaceManyOperationBuilderTest() {
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+                factory.create(Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984)),
+                factory.create(Arrays.asList(44, "a44", "Silmarillion", "J. R. R. Tolkien", 1977))
+        );
+
+        ReplaceManyProxyOperation<TarantoolTuple, TarantoolResult<TarantoolTuple>> operation =
+                new ReplaceManyProxyOperation.Builder<TarantoolTuple, TarantoolResult<TarantoolTuple>>()
+                        .withClient(client)
+                        .withSpaceName("space1")
+                        .withFunctionName("function1")
+                        .withTuples(tarantoolTuples)
+                        .withResultMapper(defaultResultMapper)
+                        .withArgumentsMapper(defaultMapper)
+                        .withOptions(ProxyReplaceManyOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                            .withRollbackOnError(true)
+                            .withStopOnError(false)
+                        )
+                        .build();
+
+        Map<String, Object> options = new HashMap<>();
+        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR, true);
+        options.put(CRUDBatchOptions.BATCH_STOP_ON_ERROR, false);
+
+        assertEquals(client, operation.getClient());
+        assertEquals("function1", operation.getFunctionName());
+        assertEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertEquals(defaultResultMapper, operation.getResultMapper());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void selectOperationBuilderTest() {
         TarantoolMetadata testOperations = new TarantoolMetadata(new TestMetadataProvider());
 
@@ -132,12 +217,15 @@ public class ProxyOperationBuildersTest {
                         .withConditions(conditions)
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxySelectOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                            .withBatchSize(123456)
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
         options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
-        options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 100L);
+        options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 123456);
         options.put(CRUDSelectOptions.SELECT_LIMIT, 100L);
 
         assertEquals(client, op.getClient());
@@ -145,7 +233,8 @@ public class ProxyOperationBuildersTest {
         assertEquals(3, op.getArguments().size());
         assertEquals("space1", op.getArguments().get(0));
         assertEquals(selectArguments, op.getArguments().get(1));
-        assertEquals(options, op.getArguments().get(2));
+        Map<String, Object> actualOptions = (Map<String, Object>) op.getArguments().get(2);
+        assertEquals(options.toString(), actualOptions.toString());
         assertEquals(defaultResultMapper, op.getResultMapper());
     }
 
@@ -163,7 +252,9 @@ public class ProxyOperationBuildersTest {
                         .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyUpdateOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -187,7 +278,7 @@ public class ProxyOperationBuildersTest {
         indexQuery.withKeyValues(Collections.singletonList(10));
 
         List<Object> values = Arrays.asList(4, "a4", "Nineteen Eighty-Four", "George Orwell", 1984);
-        TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, defaultMapper);
+        TarantoolTuple tarantoolTuple = factory.create(values);
 
         UpsertProxyOperation<TarantoolTuple, TarantoolResult<TarantoolTuple>> operation =
                 new UpsertProxyOperation.Builder<TarantoolTuple, TarantoolResult<TarantoolTuple>>()
@@ -198,7 +289,9 @@ public class ProxyOperationBuildersTest {
                         .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
                         .withResultMapper(defaultResultMapper)
                         .withArgumentsMapper(defaultMapper)
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyUpsertOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         Map<String, Object> options = new HashMap<>();
@@ -220,7 +313,9 @@ public class ProxyOperationBuildersTest {
                         .withClient(client)
                         .withSpaceName("space1")
                         .withFunctionName("function1")
-                        .withRequestTimeout(client.getConfig().getRequestTimeout())
+                        .withOptions(ProxyTruncateOptions.create()
+                            .withTimeout(client.getConfig().getRequestTimeout())
+                        )
                         .build();
 
         // when prepare HashMap with options
