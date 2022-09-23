@@ -8,7 +8,7 @@ import io.tarantool.driver.api.space.options.DeleteOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyDeleteOptions extends ProxyBaseOptions<ProxyDeleteOptions> implements DeleteOptions {
+public final class ProxyDeleteOptions extends ProxyBucketIdOptions<ProxyDeleteOptions> implements DeleteOptions {
 
     private ProxyDeleteOptions() {
     }

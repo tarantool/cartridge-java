@@ -4,6 +4,7 @@
 
 ### Features
 - Added options parameter to Tarantool Space API ([#266](https://github.com/tarantool/cartridge-java/pull/266))
+- Added bucket id parameter to Tarantool Space API ([#270](https://github.com/tarantool/cartridge-java/pull/270))
 - Added support for insert_many and replace_many CRUD operations ([#259](https://github.com/tarantool/cartridge-java/issues/259))
 
 ## [0.8.2] - 2022-09-16

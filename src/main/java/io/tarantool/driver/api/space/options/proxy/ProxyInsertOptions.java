@@ -8,7 +8,7 @@ import io.tarantool.driver.api.space.options.InsertOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyInsertOptions extends ProxyBaseOptions<ProxyInsertOptions> implements InsertOptions {
+public final class ProxyInsertOptions extends ProxyBucketIdOptions<ProxyInsertOptions> implements InsertOptions {
 
     private ProxyInsertOptions() {
     }

@@ -8,7 +8,7 @@ import io.tarantool.driver.api.space.options.ReplaceOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyReplaceOptions extends ProxyBaseOptions<ProxyReplaceOptions> implements ReplaceOptions {
+public final class ProxyReplaceOptions extends ProxyBucketIdOptions<ProxyReplaceOptions> implements ReplaceOptions {
 
     private ProxyReplaceOptions() {
     }

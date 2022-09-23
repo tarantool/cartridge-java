@@ -5,6 +5,8 @@ local crud = require('crud')
 local uuid = require('uuid')
 local log = require('log')
 
+local crud_utils = require('utils.crud')
+
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
         return cartridge_rpc.call('app.roles.api_storage', 'get_schema', nil, { uri = instance_uri })
@@ -211,6 +213,8 @@ local function init()
     rawset(_G, 'get_routers_status', get_routers_status)
     rawset(_G, 'init_router_status', init_router_status)
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
+    rawset(_G, 'get_other_storage_bucket_id', crud_utils.get_other_storage_bucket_id)
+    rawset(_G, 'vshard', vshard)
 
     create_restricted_user()
 
