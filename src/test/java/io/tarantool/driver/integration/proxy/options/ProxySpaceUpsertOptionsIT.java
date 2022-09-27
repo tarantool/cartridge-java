@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Artyom Dubinin
@@ -95,5 +96,30 @@ public class ProxySpaceUpsertOptionsIT extends SharedCartridgeContainer {
         ).get();
         crudUpsertOpts = client.eval("return crud_upsert_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudUpsertOpts.get(0)).get("timeout"));
+    }
+
+    @Test
+    public void withBucketIdTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+
+        // without bucket id
+        profileSpace.upsert(conditions, tarantoolTuple, TupleOperations.set("age", 50)).get();
+        List<?> crudUpsertOpts = client.eval("return crud_upsert_opts").get();
+        assertNull(((HashMap) crudUpsertOpts.get(0)).get("bucket_id"));
+
+        // with bucket id
+        Integer bucketId = 1;
+        profileSpace.upsert(
+                conditions,
+                tarantoolTuple,
+                TupleOperations.set("age", 50),
+                ProxyUpsertOptions.create().withBucketId(bucketId)
+        ).get();
+        crudUpsertOpts = client.eval("return crud_upsert_opts").get();
+        assertEquals(bucketId, ((HashMap) crudUpsertOpts.get(0)).get("bucket_id"));
     }
 }

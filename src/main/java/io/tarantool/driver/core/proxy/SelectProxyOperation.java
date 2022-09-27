@@ -59,7 +59,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                     .withTimeout(options.getTimeout())
                     .withSelectBatchSize(options.getBatchSize())
                     .withSelectLimit(Optional.of(conditions.getLimit()))
-                    .withSelectAfter(Optional.ofNullable(conditions.getStartTuple()));
+                    .withSelectAfter(Optional.ofNullable(conditions.getStartTuple()))
+                    .withBucketId(options.getBucketId());
 
             List<?> arguments = Arrays.asList(
                     spaceName,

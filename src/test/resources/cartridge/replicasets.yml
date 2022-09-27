@@ -35,3 +35,13 @@ s1-storage:
   weight: 1
   all_rw: false
   vshard_group: default
+s2-storage:
+  instances:
+    - s2-master
+  roles:
+    - vshard-storage
+    - crud-storage
+    - app.roles.api_storage
+  weight: 1
+  all_rw: false
+  vshard_group: default

@@ -50,8 +50,9 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public InsertProxyOperation<T, R> build() {
-            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
+            CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
                     .withTimeout(options.getTimeout())
+                    .withBucketId(options.getBucketId())
                     .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());

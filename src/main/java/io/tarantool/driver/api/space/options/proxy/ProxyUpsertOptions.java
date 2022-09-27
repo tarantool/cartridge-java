@@ -8,7 +8,7 @@ import io.tarantool.driver.api.space.options.UpsertOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyUpsertOptions extends ProxyBaseOptions<ProxyUpsertOptions> implements UpsertOptions {
+public final class ProxyUpsertOptions extends ProxyBucketIdOptions<ProxyUpsertOptions> implements UpsertOptions {
 
     private ProxyUpsertOptions() {
     }

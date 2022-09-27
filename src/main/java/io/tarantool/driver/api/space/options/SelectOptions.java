@@ -8,7 +8,7 @@ import java.util.Optional;
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface SelectOptions extends OperationWithTimeoutOptions {
+public interface SelectOptions extends OperationWithBucketIdOptions {
     /**
      * Return the internal size of batch for transferring data between
      * storage and router nodes.

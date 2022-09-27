@@ -10,7 +10,7 @@ import io.tarantool.driver.api.space.options.SelectOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxySelectOptions extends ProxyBaseOptions<ProxySelectOptions> implements SelectOptions {
+public final class ProxySelectOptions extends ProxyBucketIdOptions<ProxySelectOptions> implements SelectOptions {
 
     public static final String BATCH_SIZE = "batch_size";
 

@@ -8,7 +8,7 @@ import io.tarantool.driver.api.space.options.UpdateOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyUpdateOptions extends ProxyBaseOptions<ProxyUpdateOptions> implements UpdateOptions {
+public final class ProxyUpdateOptions extends ProxyBucketIdOptions<ProxyUpdateOptions> implements UpdateOptions {
 
     private ProxyUpdateOptions() {
     }
