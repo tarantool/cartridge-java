@@ -13,7 +13,7 @@ public class TarantoolNullFieldTest {
 
     @Test
     public void test_hashCode_shouldReturnHashCode() {
-        TarantoolNullField nullField = new TarantoolNullField();
+        TarantoolNullField nullField = TarantoolNullField.empty();
 
         assertNotEquals(0, nullField.hashCode());
         assertEquals(nullField.hashCode(), nullField.hashCode());
@@ -22,7 +22,7 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_toString_shouldReturnString() {
         // given
-        TarantoolNullField nullField = new TarantoolNullField();
+        TarantoolNullField nullField = TarantoolNullField.empty();
 
         // when
         String str = nullField.toString();
@@ -36,8 +36,8 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_equals_shouldReturnTrue() {
         // given
-        TarantoolNullField nullField1 = new TarantoolNullField();
-        TarantoolNullField nullField2 = new TarantoolNullField();
+        TarantoolNullField nullField1 = TarantoolNullField.empty();
+        TarantoolNullField nullField2 = TarantoolNullField.empty();
 
         // then
         assertEquals(nullField1, nullField1);
@@ -47,7 +47,7 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_equals_shouldReturnFalse() {
         // given
-        TarantoolNullField nullField = new TarantoolNullField();
+        TarantoolNullField nullField = TarantoolNullField.empty();
         Object dummyObject = new Object() { };
 
         // then
@@ -58,8 +58,8 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_AddNullFieldsToHashSet_shouldCreateHashSetWithOneElements() {
         // given
-        TarantoolNullField nullField1 = new TarantoolNullField();
-        TarantoolNullField nullField2 = new TarantoolNullField();
+        TarantoolNullField nullField1 = TarantoolNullField.empty();
+        TarantoolNullField nullField2 = TarantoolNullField.empty();
 
         // when
         HashSet<TarantoolNullField> fieldsSet = new HashSet<>();

@@ -93,7 +93,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             this.fields.ensureCapacity(values.size());
             for (Object value : values) {
                 if (value == null) {
-                    this.fields.add(new TarantoolNullField());
+                    this.fields.add(TarantoolNullField.empty());
                 } else {
                     this.fields.add(new TarantoolFieldImpl(value));
                 }
@@ -127,7 +127,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
             this.fields.ensureCapacity(value.size());
             for (Value fieldValue : value) {
                 if (fieldValue.isNilValue()) {
-                    fields.add(new TarantoolNullField());
+                    fields.add(TarantoolNullField.empty());
                 } else {
                     fields.add(new TarantoolFieldImpl(fieldValue));
                 }
@@ -229,12 +229,12 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         }
 
         if (field == null) {
-            field = new TarantoolNullField();
+            field = TarantoolNullField.empty();
         }
 
         if (fields.size() < fieldPosition) {
             for (int i = fields.size(); i < fieldPosition; i++) {
-                fields.add(new TarantoolNullField());
+                fields.add(TarantoolNullField.empty());
             }
         }
 
@@ -258,7 +258,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(int fieldPosition, Object value) {
         TarantoolField tarantoolField = value == null ?
-                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value));
+				TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldPosition, tarantoolField);
     }
@@ -266,7 +266,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(String fieldName, Object value) {
         TarantoolField tarantoolField = value == null ?
-                new TarantoolNullField() : new TarantoolFieldImpl(mapper.toValue(value));
+				TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldName, tarantoolField);
     }
@@ -443,7 +443,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
         this.fields = new ArrayList<>(value.size());
         for (Value fieldValue : value) {
             if (fieldValue.isNilValue()) {
-                fields.add(new TarantoolNullField());
+                fields.add(TarantoolNullField.empty());
             } else {
                 fields.add(new TarantoolFieldImpl(fieldValue));
             }
