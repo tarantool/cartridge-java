@@ -258,7 +258,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(int fieldPosition, Object value) {
         TarantoolField tarantoolField = value == null ?
-				TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
+                TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldPosition, tarantoolField);
     }
@@ -266,7 +266,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(String fieldName, Object value) {
         TarantoolField tarantoolField = value == null ?
-				TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
+               TarantoolNullField.empty() : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldName, tarantoolField);
     }
