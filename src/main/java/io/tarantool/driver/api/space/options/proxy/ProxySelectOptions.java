@@ -17,6 +17,11 @@ public final class ProxySelectOptions extends ProxyBucketIdOptions<ProxySelectOp
     private ProxySelectOptions() {
     }
 
+    /**
+     * Create new instance.
+     *
+     * @return new options instance
+     */
     public static ProxySelectOptions create() {
         return new ProxySelectOptions();
     }

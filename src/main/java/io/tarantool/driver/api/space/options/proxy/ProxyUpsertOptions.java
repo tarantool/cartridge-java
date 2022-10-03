@@ -15,6 +15,8 @@ public final class ProxyUpsertOptions extends ProxyBucketIdOptions<ProxyUpsertOp
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyUpsertOptions create() {
         return new ProxyUpsertOptions();

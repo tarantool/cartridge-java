@@ -15,6 +15,8 @@ public final class ProxyReplaceOptions extends ProxyBucketIdOptions<ProxyReplace
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyReplaceOptions create() {
         return new ProxyReplaceOptions();

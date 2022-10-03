@@ -250,16 +250,16 @@ public class TarantoolClientConfig {
     }
 
     /**
-     * Get numbers of threads
+     * Get number of set up internal event loop threads.
      *
-     * @return
+     * @return a positive integer value
      */
     public int getEventLoopThreadsNumber() {
         return eventLoopThreadsNumber;
     }
 
     /**
-     * Set numbers of threads
+     * Set number of internal event loop threads.
      *
      * @param eventLoopThreadsNumber number of threads
      */

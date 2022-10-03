@@ -20,6 +20,8 @@ public final class ProxyReplaceManyOptions extends ProxyBaseOptions<ProxyReplace
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyReplaceManyOptions create() {
         return new ProxyReplaceManyOptions();
