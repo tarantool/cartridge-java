@@ -20,6 +20,8 @@ public final class ProxyInsertManyOptions extends ProxyBaseOptions<ProxyInsertMa
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyInsertManyOptions create() {
         return new ProxyInsertManyOptions();

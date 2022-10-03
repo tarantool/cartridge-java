@@ -15,6 +15,8 @@ public final class ProxyUpdateOptions extends ProxyBucketIdOptions<ProxyUpdateOp
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyUpdateOptions create() {
         return new ProxyUpdateOptions();

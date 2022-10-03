@@ -15,6 +15,8 @@ public final class ProxyInsertOptions extends ProxyBucketIdOptions<ProxyInsertOp
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyInsertOptions create() {
         return new ProxyInsertOptions();

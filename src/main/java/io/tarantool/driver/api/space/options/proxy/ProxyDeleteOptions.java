@@ -15,6 +15,8 @@ public final class ProxyDeleteOptions extends ProxyBucketIdOptions<ProxyDeleteOp
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyDeleteOptions create() {
         return new ProxyDeleteOptions();
