@@ -1,7 +1,9 @@
 # Changelog
 
 ## [Unreleased]
-- Changed TarantoolNullField class to singleton
+
+## [0.9.0] - 2022-10-03
+
 ### Features
 - Added options parameter to Tarantool Space API ([#266](https://github.com/tarantool/cartridge-java/pull/266))
 - Added bucket id parameter to Tarantool Space API ([#270](https://github.com/tarantool/cartridge-java/pull/270))

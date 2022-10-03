@@ -12,6 +12,8 @@ public final class ProxyTruncateOptions extends ProxyBaseOptions<ProxyTruncateOp
 
     /**
      * Create new instance.
+     *
+     * @return new options instance
      */
     public static ProxyTruncateOptions create() {
         return new ProxyTruncateOptions();
