@@ -19,7 +19,7 @@ public final class TarantoolNullField implements TarantoolField {
         this.value = value;
     }
 
-    public static TarantoolNullField empty() {
+    public static TarantoolNullField create() {
         return EMPTY;
     }
 

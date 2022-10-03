@@ -118,13 +118,13 @@ public class TupleOperationsTest {
         fieldNumbers = operations.asList().stream().map(TupleOperation::getFieldIndex)
                 .collect(Collectors.toList());
         assertEquals(Arrays.asList(0, 1, 2), fieldNumbers);
-        assertEquals(TarantoolNullField.empty(), operations.asList().get(1).getValue());
+        assertEquals(TarantoolNullField.create(), operations.asList().get(1).getValue());
 
         operations = TupleOperations.fromTarantoolTuple(tupleFactory.create("abc", null, null));
         fieldNumbers = operations.asList().stream().map(TupleOperation::getFieldIndex)
                 .collect(Collectors.toList());
         assertEquals(Arrays.asList(0, 1, 2), fieldNumbers);
-        assertEquals(TarantoolNullField.empty(), operations.asList().get(2).getValue());
+        assertEquals(TarantoolNullField.create(), operations.asList().get(2).getValue());
     }
 
     @Test
