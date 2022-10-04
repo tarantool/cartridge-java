@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 - Changed TarantoolNullField class to singleton ([#195](https://github.com/tarantool/cartridge-java/pull/275))
+
 ## [0.9.0] - 2022-10-03
 
 ### Features
