@@ -12,15 +12,9 @@ import org.msgpack.value.ValueFactory;
  */
 public final class TarantoolNullField implements TarantoolField {
 
-    private static final TarantoolNullField EMPTY = new TarantoolNullField(null);
-    private final TarantoolNullField value;
+    public static final TarantoolNullField EMPTY = new TarantoolNullField();
 
-    private TarantoolNullField(TarantoolNullField value) {
-        this.value = value;
-    }
-
-    public static TarantoolNullField create() {
-        return EMPTY;
+    private TarantoolNullField() {
     }
 
     @Override

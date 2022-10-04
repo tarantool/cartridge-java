@@ -13,7 +13,7 @@ public class TarantoolNullFieldTest {
 
     @Test
     public void test_hashCode_shouldReturnHashCode() {
-        TarantoolNullField nullField = TarantoolNullField.create();
+        TarantoolNullField nullField = TarantoolNullField.EMPTY;
 
         assertNotEquals(0, nullField.hashCode());
         assertEquals(nullField.hashCode(), nullField.hashCode());
@@ -22,7 +22,7 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_toString_shouldReturnString() {
         // given
-        TarantoolNullField nullField = TarantoolNullField.create();
+        TarantoolNullField nullField = TarantoolNullField.EMPTY;
 
         // when
         String str = nullField.toString();
@@ -36,8 +36,8 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_equals_shouldReturnTrue() {
         // given
-        TarantoolNullField nullField1 = TarantoolNullField.create();
-        TarantoolNullField nullField2 = TarantoolNullField.create();
+        TarantoolNullField nullField1 = TarantoolNullField.EMPTY;
+        TarantoolNullField nullField2 = TarantoolNullField.EMPTY;
 
         // then
         assertEquals(nullField1, nullField1);
@@ -47,7 +47,7 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_equals_shouldReturnFalse() {
         // given
-        TarantoolNullField nullField = TarantoolNullField.create();
+        TarantoolNullField nullField = TarantoolNullField.EMPTY;
         Object dummyObject = new Object() { };
 
         // then
@@ -58,8 +58,8 @@ public class TarantoolNullFieldTest {
     @Test
     public void test_AddNullFieldsToHashSet_shouldCreateHashSetWithOneElements() {
         // given
-        TarantoolNullField nullField1 = TarantoolNullField.create();
-        TarantoolNullField nullField2 = TarantoolNullField.create();
+        TarantoolNullField nullField1 = TarantoolNullField.EMPTY;
+        TarantoolNullField nullField2 = TarantoolNullField.EMPTY;
 
         // when
         HashSet<TarantoolNullField> fieldsSet = new HashSet<>();
