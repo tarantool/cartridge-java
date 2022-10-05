@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Features
+- Bump jackson-databind to 2.13.4 ([#279](https://github.com/tarantool/cartridge-java/pull/279))
+
 ## [0.9.0] - 2022-10-03
 
 ### Features
