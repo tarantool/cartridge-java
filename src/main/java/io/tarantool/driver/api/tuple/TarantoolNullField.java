@@ -12,6 +12,11 @@ import org.msgpack.value.ValueFactory;
  */
 public final class TarantoolNullField implements TarantoolField {
 
+    public static final TarantoolNullField INSTANCE = new TarantoolNullField();
+
+    private TarantoolNullField() {
+    }
+
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return ValueFactory.newNil();
