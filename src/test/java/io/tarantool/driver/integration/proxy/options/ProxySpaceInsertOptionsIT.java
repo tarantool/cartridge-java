@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -131,6 +132,29 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
         assertEquals(0, selectResult.size());
 
         ProxySelectOptions selectOptions = ProxySelectOptions.create().withBucketId(otherStorageBucketId);
+        selectResult = profileSpace.select(condition, selectOptions).get();
+        assertEquals(1, selectResult.size());
+    }
+
+    @Test
+    public void withBucketIdFromClientTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions condition = Conditions.equals(PK_FIELD_NAME, 1);
+
+        Integer bucketId = Utils.getBucketIdStrCRC32(client,
+                Collections.singletonList(tarantoolTuple.getInteger(0)));
+        InsertOptions insertOptions = ProxyInsertOptions.create().withBucketId(bucketId);
+
+        TarantoolResult<TarantoolTuple> insertResult = profileSpace.insert(tarantoolTuple, insertOptions).get();
+        assertEquals(1, insertResult.size());
+
+        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(condition).get();
+        assertEquals(1, selectResult.size());
+
+        SelectOptions selectOptions = ProxySelectOptions.create().withBucketId(bucketId);
         selectResult = profileSpace.select(condition, selectOptions).get();
         assertEquals(1, selectResult.size());
     }

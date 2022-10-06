@@ -81,6 +81,14 @@ public final class Utils {
         );
     }
 
+    /**
+     * Implementation of crc32 partially was taken from
+     * <a href="https://github.com/TheAlgorithms/Java/blob/master/src/main/java/com/thealgorithms/others/CRC32.java">
+     * github.com/TheAlgorithms</a>
+     *
+     * @param data input bytes array
+     * @return hash response in decimal view
+     */
     private static long crc32(byte[] data) {
         BitSet bitSet = BitSet.valueOf(data);
         int crc32 = 0xFFFFFFFF; // initial value

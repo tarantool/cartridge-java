@@ -244,6 +244,59 @@ class Scratch {
 }
 ```
 
+#### Using custom sharding function
+
+We can use your own sharding function to determine bucket id - location in cluster and use it in cluster operations.
+For this purpose you need:
+1) hash function  
+    For the example, equality of function from tarantool - [crc32](https://www.tarantool.io/en/doc/latest/reference/reference_lua/digest/#lua-function.digest.crc32) with specific polynomial value.
+    Java doesn't have crc32 out of the box with the ability to pass polynomial value, then we'll implement our own:
+    ```java
+    private static long crc32(byte[] data) {
+        BitSet bitSet = BitSet.valueOf(data);
+        int crc32 = 0xFFFFFFFF; // initial value
+        for (int i = 0; i < data.length * 8; i++) {
+            if (((crc32 >>> 31) & 1) != (bitSet.get(i) ? 1 : 0)) {
+                crc32 = (crc32 << 1) ^ 0x1EDC6F41; // xor with polynomial
+            } else {
+                crc32 = crc32 << 1;
+            }
+        }
+        crc32 = Integer.reverse(crc32); // result reflect
+        return crc32 & 0x00000000ffffffffL; // the unsigned java problem
+    }
+    ```
+2) number of buckets  
+   We can obtain number from tarantool via `vshard.router.bucket_count` function out of [vshard module](https://github.com/tarantool/vshard)
+    ```java
+   public static <T extends Packable, R extends Collection<T>> Integer getBucketCount(
+           TarantoolClient<T, R> client) throws ExecutionException, InterruptedException {
+       if (!bucketCount.isPresent()) {
+           bucketCount = Optional.ofNullable(
+                   client.callForSingleResult("vshard.router.bucket_count", Integer.class).get()
+           );
+       }
+       return bucketCount.get();
+   }
+    ```
+
+Then we can determine bucket id by passing your key through hash function and get the remainder of the division by number of buckets:
+```java
+byte[] key = ... // can be multipart
+Integer bucketId = (bucketIdcrc32(key) % getBucketCount(client)) + 1;
+```
+
+After that we may apply it in operations:
+```java
+InsertOptions insertOptions = ProxyInsertOptions.create().withBucketId(bucketId);
+insertResult = profileSpace.insert(tarantoolTuple, insertOptions).get();
+
+ProxySelectOptions selectOptions = ProxySelectOptions.create().withBucketId(bucketId);
+selectResult = profileSpace.select(condition, selectOptions).get();
+```
+
+You can see sources of example in [tests](src/test/java/io/tarantool/driver/integration/proxy/options/ProxySpaceInsertOptionsIT.java)
+
 ### Retrying Tarantool client
 
 For the cases of reliable communication with a Cartridge cluster under heavy load or in a case of some failure causing
