@@ -81,7 +81,7 @@ library for starting it automatically in tests.
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.9.0</version>
+  <version>0.9.1</version>
 </dependency>
 ```
 
