@@ -6,7 +6,7 @@ import org.msgpack.value.ValueFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DefaultShortConverterTest {
+class DefaultIntegerValueToShortConverterTest {
 
     @Test
     void should_fromValue_returnShortValue() {
