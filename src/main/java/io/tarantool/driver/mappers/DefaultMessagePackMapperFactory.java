@@ -78,11 +78,11 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
                         new DefaultExtensionValueToBigDecimalConverter())
                 .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
-                //TODO: add this when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
-                .withObjectConverter(Short.class, IntegerValue.class, new DefaultShortToIntegerValueConverter())
+                //TODO: Potential issue https://github.com/tarantool/cartridge-java/issues/118
                 .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
                 .withObjectConverter(String.class, StringValue.class, new DefaultStringToStringValueConverter())
                 .withObjectConverter(Long.class, IntegerValue.class, new DefaultLongToIntegerValueConverter())
+                .withObjectConverter(Short.class, IntegerValue.class, new DefaultShortToIntegerValueConverter())
                 .withObjectConverter(Integer.class, IntegerValue.class, new DefaultIntegerToIntegerValueConverter())
                 .withObjectConverter(byte[].class, BinaryValue.class, new DefaultByteArrayToBinaryValueConverter())
                 .withObjectConverter(Boolean.class, BooleanValue.class, new DefaultBooleanToBooleanValueConverter())
