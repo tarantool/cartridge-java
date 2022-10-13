@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.9.1] - 2022-10-13
+
 - Changed TarantoolNullField class to singleton ([#195](https://github.com/tarantool/cartridge-java/pull/275))
 - Bump netty to 4.1.78 ([#280](https://github.com/tarantool/cartridge-java/issues/280))
 - Enable Short to Integer converters ([#282](https://github.com/tarantool/cartridge-java/issues/282))
