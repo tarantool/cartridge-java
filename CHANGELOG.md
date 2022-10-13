@@ -1,10 +1,8 @@
 # Changelog
 
-- ### Misc
-- Bump netty to 4.1.78 ([#280](https://github.com/tarantool/cartridge-java/issues/280))
-
 ## [Unreleased]
 - Changed TarantoolNullField class to singleton ([#195](https://github.com/tarantool/cartridge-java/pull/275))
+- Bump netty to 4.1.78 ([#280](https://github.com/tarantool/cartridge-java/issues/280))
 
 ### Security
 - Bump jackson-databind to 2.13.4 ([#279](https://github.com/tarantool/cartridge-java/pull/279))
