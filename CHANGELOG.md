@@ -6,7 +6,7 @@
 - Enable Short to Integer converters ([#282](https://github.com/tarantool/cartridge-java/issues/282))
 
 ### Security
-- Bump jackson-databind to 2.13.4 ([#279](https://github.com/tarantool/cartridge-java/pull/279))
+- Bump jackson-databind to 2.14.1-rc1 ([#284](https://github.com/tarantool/cartridge-java/pull/284))
 
 ## [0.9.0] - 2022-10-03
 
