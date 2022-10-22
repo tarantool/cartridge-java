@@ -9,7 +9,11 @@ abstract class SharedTarantoolContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedTarantoolContainer.class);
 
-    protected static final TarantoolContainer container = new TarantoolContainer()
+    protected static final String tarantoolVersion = System.getenv().get("TARANTOOL_VERSION");
+    protected static final TarantoolContainer container =
+        new TarantoolContainer(
+            String.format("tarantool/tarantool:%s-centos7",
+                tarantoolVersion != null ? tarantoolVersion : "2.10.5"))
         .withScriptFileName("org/testcontainers/containers/server.lua")
         .withLogConsumer(new Slf4jLogConsumer(logger));
 
