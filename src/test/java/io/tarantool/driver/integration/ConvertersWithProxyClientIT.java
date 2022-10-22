@@ -15,10 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.testcontainers.shaded.org.apache.commons.lang3.ArrayUtils;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Artyom Dubinin
@@ -62,6 +64,23 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
 
         //then
         Assertions.assertEquals(uuid, fields.getUUID("uuid_field"));
+    }
+
+    @Test
+    @EnabledIf("io.tarantool.driver.TarantoolUtils#versionWithInstant")
+    public void test_crudSelect_shouldReturnTupleWithInstant() throws Exception {
+        //given
+        Instant instant = Instant.now();
+        client.space("space_with_instant")
+                .insert(tupleFactory.create(1, instant)).get();
+
+        //when
+        TarantoolTuple fields = client
+                .space("space_with_instant")
+                .select(Conditions.equals("id", 1)).get().get(0);
+
+        //then
+        Assertions.assertEquals(instant, fields.getInstant("instant_field"));
     }
 
     @Test

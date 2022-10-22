@@ -9,6 +9,7 @@
 - Add deep copy instead of shallow copy in default message pack mapper ([#166](https://github.com/tarantool/cartridge-java/issues/166))
 - Add a factory builder for constructing mapper hierarchies
 - Add "can convert value" check to TupleResultConverter
+- Support Datetime type ([#293](https://github.com/tarantool/cartridge-java/pull/293))
 
 ## [0.10.1] - 2023-01-13
 

@@ -18,6 +18,7 @@ import org.msgpack.value.Value;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -366,6 +367,16 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public UUID getUUID(String fieldName) {
         return getObject(fieldName, UUID.class).orElse(null);
+    }
+
+    @Override
+    public Instant getInstant(int fieldPosition) {
+        return getObject(fieldPosition, Instant.class).orElse(null);
+    }
+
+    @Override
+    public Instant getInstant(String fieldName) {
+        return getObject(fieldName, Instant.class).orElse(null);
     }
 
     @Override

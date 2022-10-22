@@ -15,7 +15,7 @@ public final class TarantoolUtils {
     private TarantoolUtils() {
     }
 
-    public static boolean versionGreaterThen(String tarantoolVersion) {
+    public static boolean versionGreaterOrEqualThen(String tarantoolVersion) {
         Assert.notNull(tarantoolVersion, "tarantoolVersion must not be null");
         String tarantoolCiVersion = java.lang.System.getenv(TARANTOOL_VERSION);
         if (StringUtils.isEmpty(tarantoolCiVersion)) {
@@ -23,29 +23,37 @@ public final class TarantoolUtils {
         }
         TarantoolVersion ciVersion = new TarantoolVersion(tarantoolCiVersion);
         TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
-        return ciVersion.getMajor() > version.getMajor() &&
-            ciVersion.getMinor() > version.getMinor();
+        return ciVersion.getMajor() >= version.getMajor() &&
+            ciVersion.getMinor() >= version.getMinor();
     }
 
     public static boolean versionWithUUID() {
-        return versionGreaterThen("2.4");
+        return versionGreaterOrEqualThen("2.4");
+    }
+
+    public static boolean versionWithInstant() {
+        return versionGreaterOrEqualThen("2.10");
     }
 
     public static boolean versionWithVarbinary() {
-        return versionGreaterThen("2.2.1");
+        return versionGreaterOrEqualThen("2.2.1");
     }
 
     public static class TarantoolVersion {
-        private final Integer major;
-        private final Integer minor;
+        private Integer major;
+        private Integer minor;
 
         public TarantoolVersion(String stringVersion) {
-            List<Integer> majorMinor = StringUtils.isEmpty(stringVersion) ? Collections.emptyList() :
+            List<String> majorMinor = StringUtils.isEmpty(stringVersion) ? Collections.emptyList() :
                 Arrays.stream(stringVersion.split("\\."))
-                    .map(Integer::parseInt)
                     .collect(Collectors.toList());
-            major = majorMinor.size() >= 1 ? majorMinor.get(0) : 0;
-            minor = majorMinor.size() >= 2 ? majorMinor.get(1) : 0;
+            if (majorMinor.size() >= 1) {
+                major = Integer.parseInt(majorMinor.get(0));
+            }
+            if (majorMinor.size() >= 2) {
+                String minorStr = majorMinor.get(1);
+                minor = minorStr.equals("x") ? 999 : Integer.parseInt(minorStr);
+            }
         }
 
         public Integer getMajor() {
