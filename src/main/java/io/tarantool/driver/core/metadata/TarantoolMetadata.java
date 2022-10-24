@@ -85,6 +85,8 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                     //This case is required to handle retry when instances are not initialized yet.
                     //See https://github.com/tarantool/cartridge-java/issues/170
                     throw (TarantoolNoSuchProcedureException) cause;
+                } else if (cause instanceof NullPointerException) {
+                    throw new TarantoolClientException("Failed to refresh spaces and indexes metadata: NullPointerException");
                 }
                 throw new TarantoolClientException("Failed to refresh spaces and indexes metadata", cause);
             }
