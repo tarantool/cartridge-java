@@ -21,7 +21,10 @@ public class DefaultArrayValueToLongArrayConverter implements ValueConverter<Arr
 
     @Override
     public boolean canConvertValue(ArrayValue value) {
-        return value.list().stream().allMatch(Value::isNumberValue);
+        if (value != null) {
+            return value.list().stream().allMatch(Value::isNumberValue);
+        }
+        return false;
     }
 
 }

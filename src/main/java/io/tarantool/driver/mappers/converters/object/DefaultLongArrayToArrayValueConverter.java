@@ -15,10 +15,10 @@ public class DefaultLongArrayToArrayValueConverter implements ObjectConverter<lo
 
     @Override
     public ArrayValue toValue(long[] object) {
-        return ValueFactory.newArray(toNumberValue(object), true);
+        return ValueFactory.newArray(toNumberValueArray(object), true);
     }
 
-    private Value[] toNumberValue(long[] object) {
+    private Value[] toNumberValueArray(long[] object) {
         return Arrays.stream(object).mapToObj(ImmutableLongValueImpl::new).toArray(Value[]::new);
     }
 }
