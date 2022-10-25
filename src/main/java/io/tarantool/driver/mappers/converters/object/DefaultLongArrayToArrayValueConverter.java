@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 /**
  * Default {@code long[]} to {@link ArrayValue} converter
+ *
+ * @author Anastasiia Romanova
  */
 public class DefaultLongArrayToArrayValueConverter implements ObjectConverter<long[], ArrayValue> {
 

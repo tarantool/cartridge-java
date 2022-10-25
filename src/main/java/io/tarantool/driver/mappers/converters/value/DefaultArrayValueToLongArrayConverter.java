@@ -2,11 +2,11 @@ package io.tarantool.driver.mappers.converters.value;
 
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.Value;
 
 /**
  * Default {@link ArrayValue} to {@code long[]} converter
  *
+ * @author Anastasiia Romanova
  */
 public class DefaultArrayValueToLongArrayConverter implements ValueConverter<ArrayValue, long[]> {
 
@@ -22,7 +22,10 @@ public class DefaultArrayValueToLongArrayConverter implements ValueConverter<Arr
     @Override
     public boolean canConvertValue(ArrayValue value) {
         if (value != null) {
-            return value.list().stream().allMatch(Value::isNumberValue);
+            if (value.size() > 0) {
+                return value.get(0).isNumberValue();
+            }
+            return true;
         }
         return false;
     }
