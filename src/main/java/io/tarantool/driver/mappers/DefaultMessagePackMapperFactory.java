@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.converters.object.DefaultInstantToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultNilValueToNullConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
@@ -18,6 +19,7 @@ import io.tarantool.driver.mappers.converters.value.DefaultArrayValueToLongArray
 import io.tarantool.driver.mappers.converters.value.DefaultBinaryValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultBooleanValueToBooleanConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToBigDecimalConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToInstantConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToUUIDConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToDoubleConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToFloatConverter;
@@ -42,6 +44,7 @@ import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueType;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -81,6 +84,7 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(ValueType.EXTENSION, UUID.class, new DefaultExtensionValueToUUIDConverter())
                 .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
                         new DefaultExtensionValueToBigDecimalConverter())
+                .withValueConverter(ValueType.EXTENSION, Instant.class, new DefaultExtensionValueToInstantConverter())
                 .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
                 //TODO: Potential issue https://github.com/tarantool/cartridge-java/issues/118
                 .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
@@ -96,6 +100,7 @@ public final class DefaultMessagePackMapperFactory {
                 .withObjectConverter(UUID.class, ExtensionValue.class, new DefaultUUIDToExtensionValueConverter())
                 .withObjectConverter(BigDecimal.class, ExtensionValue.class,
                         new DefaultBigDecimalToExtensionValueConverter())
+                .withObjectConverter(Instant.class, ExtensionValue.class, new DefaultInstantToExtensionValueConverter())
                 .build();
     }
 
