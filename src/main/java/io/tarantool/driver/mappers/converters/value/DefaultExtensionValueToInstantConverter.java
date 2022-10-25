@@ -9,7 +9,7 @@ import java.time.Instant;
 /**
  * Default {@link ExtensionValue} to {@link java.time.Instant} converter
  *
- * @author
+ * @author Anastasiia Romanova
  */
 public class DefaultExtensionValueToInstantConverter implements ValueConverter<ExtensionValue, Instant> {
     private static final byte DATETIME_TYPE = 0x04;

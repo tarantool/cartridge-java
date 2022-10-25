@@ -2,8 +2,8 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageTypeCastException;
@@ -16,6 +16,9 @@ import org.msgpack.value.impl.ImmutableLongValueImpl;
 import org.msgpack.value.impl.ImmutableStringValueImpl;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +78,10 @@ class DefaultMessagePackMapperTest {
         // uuid
         UUID uuid = UUID.fromString("84b56906-aeed-11ea-b3de-0242ac130004");
         assertEquals(uuid, mapper.fromValue(mapper.toValue(uuid)));
+
+        //instant
+        Instant instant = LocalDateTime.parse("2022-10-25T12:03:58").toInstant(ZoneOffset.UTC);
+        assertEquals(instant, mapper.fromValue(mapper.toValue(instant)));
 
         // null
         assertEquals(ValueFactory.newNil(), mapper.toValue(null));

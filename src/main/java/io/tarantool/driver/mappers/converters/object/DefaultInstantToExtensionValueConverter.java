@@ -10,7 +10,7 @@ import java.time.Instant;
 /**
  * Default {@link java.time.Instant} to {@link ExtensionValue} converter
  *
- * @author
+ * @author Anastasiia Romanova
  */
 public class DefaultInstantToExtensionValueConverter implements ObjectConverter<Instant, ExtensionValue> {
 
