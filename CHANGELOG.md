@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Adding default mapper for long arrays ([#290](https://github.com/tarantool/cartridge-java/pull/290))
+
 ## [0.9.1] - 2022-10-13
 
 - Changed TarantoolNullField class to singleton ([#195](https://github.com/tarantool/cartridge-java/pull/275))

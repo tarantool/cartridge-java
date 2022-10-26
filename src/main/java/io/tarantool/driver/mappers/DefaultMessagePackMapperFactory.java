@@ -2,6 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.object.DefaultNilValueToNullConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBooleanToBooleanValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultByteArrayToBinaryValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultCharacterToStringValueConverter;
@@ -13,6 +14,7 @@ import io.tarantool.driver.mappers.converters.object.DefaultPackableObjectConver
 import io.tarantool.driver.mappers.converters.object.DefaultShortToIntegerValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultStringToStringValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultUUIDToExtensionValueConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultArrayValueToLongArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultBinaryValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultBooleanValueToBooleanConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToBigDecimalConverter;
@@ -30,6 +32,7 @@ import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToShortCo
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToCharacterConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToStringConverter;
+import org.msgpack.value.ArrayValue;
 import org.msgpack.value.BinaryValue;
 import org.msgpack.value.BooleanValue;
 import org.msgpack.value.ExtensionValue;
@@ -68,6 +71,7 @@ public final class DefaultMessagePackMapperFactory {
                 .withValueConverter(ValueType.INTEGER, Long.class, new DefaultIntegerValueToLongConverter())
                 .withValueConverter(ValueType.INTEGER, Integer.class, new DefaultIntegerValueToIntegerConverter())
                 .withValueConverter(ValueType.BINARY, byte[].class, new DefaultBinaryValueToByteArrayConverter())
+                .withValueConverter(ValueType.ARRAY, long[].class, new DefaultArrayValueToLongArrayConverter())
                 .withValueConverter(ValueType.BOOLEAN, Boolean.class, new DefaultBooleanValueToBooleanConverter())
                 .withValueConverter(ValueType.FLOAT, Short.class, new DefaultFloatValueToShortConverter())
                 .withValueConverter(ValueType.FLOAT, Long.class, new DefaultFloatValueToLongConverter())
@@ -85,6 +89,7 @@ public final class DefaultMessagePackMapperFactory {
                 .withObjectConverter(Short.class, IntegerValue.class, new DefaultShortToIntegerValueConverter())
                 .withObjectConverter(Integer.class, IntegerValue.class, new DefaultIntegerToIntegerValueConverter())
                 .withObjectConverter(byte[].class, BinaryValue.class, new DefaultByteArrayToBinaryValueConverter())
+                .withObjectConverter(long[].class, ArrayValue.class, new DefaultLongArrayToArrayValueConverter())
                 .withObjectConverter(Boolean.class, BooleanValue.class, new DefaultBooleanToBooleanValueConverter())
                 .withObjectConverter(Float.class, FloatValue.class, new DefaultFloatToFloatValueConverter())
                 .withObjectConverter(Double.class, FloatValue.class, new DefaultDoubleToFloatValueConverter())

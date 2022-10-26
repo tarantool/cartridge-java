@@ -6,11 +6,14 @@ import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.junit.jupiter.api.Test;
+import org.msgpack.core.MessageTypeCastException;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.MapValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 import org.msgpack.value.ValueType;
+import org.msgpack.value.impl.ImmutableLongValueImpl;
+import org.msgpack.value.impl.ImmutableStringValueImpl;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -86,6 +89,10 @@ class DefaultMessagePackMapperTest {
         ArrayValue expectedValue = ValueFactory.newArray(
                 ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         assertEquals(expectedValue, mapper.toValue(testList));
+
+        expectedValue = ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L));
+        assertEquals(expectedValue, mapper.toValue(new long[]{1L, 2L}));
+
         Map<Integer, String> testMap = new HashMap<>();
         testMap.put(1, "Hello");
         testMap.put(2, "World");
@@ -99,6 +106,11 @@ class DefaultMessagePackMapperTest {
                 ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         List<Object> expectedList = Arrays.asList("Hello", 111);
         assertEquals(expectedList, mapper.fromValue(testValue));
+
+        long[] expectedArray =
+                mapper.fromValue(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)), long[].class);
+        assertArrayEquals(new long[]{ 4_000_000_000_000L }, expectedArray);
+
         Map<Value, Value> testMap1 = new HashMap<>();
         expectedMap.put(ValueFactory.newInteger(1), ValueFactory.newString("Hello"));
         expectedMap.put(ValueFactory.newInteger(2), ValueFactory.newString("World"));
@@ -234,5 +246,22 @@ class DefaultMessagePackMapperTest {
         TarantoolTuple tuple = tupleFactory.create(ValueFactory.newInteger((long) Integer.MAX_VALUE + 1));
 
         assertThrows(MessagePackValueMapperException.class, () -> tuple.getObject(0, Integer.class).get());
+    }
+
+    @Test
+    void should_getObject_returnLongArray() {
+        TarantoolTuple tuple = tupleFactory.create(
+                ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L))
+        );
+        assertEquals(long[].class, tuple.getObject(0, long[].class).get().getClass());
+        assertEquals(4_000_000_000_000L, tuple.getObject(0, long[].class).get()[0]);
+    }
+
+    @Test
+    void should_getObject_throwMessageTypeCastException_ifArrayValue_ContainsNotLong() {
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newArray(
+                new ImmutableLongValueImpl(1L), new ImmutableStringValueImpl("notLong")
+        ));
+        assertThrows(MessageTypeCastException.class, () -> tuple.getObject(0, long[].class).get());
     }
 }
