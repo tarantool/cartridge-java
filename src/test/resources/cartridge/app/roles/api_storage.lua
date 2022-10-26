@@ -145,6 +145,23 @@ local function init_space()
         space_with_varbinary:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
     end
 
+    if major >= 2 and minor >= 10 and patch > 1 then
+        -- test space for check instant
+        local space_with_instant = box.schema.space.create(
+                'space_with_instant',
+                {
+                    format = {
+                        { 'id', 'unsigned' },
+                        { 'instant_field', 'instant',},
+                        { 'bucket_id', 'unsigned' },
+                    },
+                    if_not_exists = true,
+                }
+        )
+        space_with_instant:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+        space_with_instant:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+    end
+
     local space_with_string = box.schema.space.create(
             'space_with_string',
             {
