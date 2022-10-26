@@ -114,7 +114,7 @@ if major >= 2 and minor >= 10 and patch > 1 then
             {
                 format = {
                     { 'id', 'unsigned' },
-                    { 'instant_field', 'instant',},
+                    { 'instant_field', 'datetime',},
                 },
                 if_not_exists = true,
             }

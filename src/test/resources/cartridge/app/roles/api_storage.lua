@@ -152,7 +152,7 @@ local function init_space()
                 {
                     format = {
                         { 'id', 'unsigned' },
-                        { 'instant_field', 'instant',},
+                        { 'instant_field', 'datetime',},
                         { 'bucket_id', 'unsigned' },
                     },
                     if_not_exists = true,
