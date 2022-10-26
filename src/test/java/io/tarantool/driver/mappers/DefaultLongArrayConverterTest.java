@@ -22,7 +22,9 @@ class DefaultLongArrayConverterTest {
     void should_fromValue_returnLongArrayValue() {
         DefaultArrayValueToLongArrayConverter converter = new DefaultArrayValueToLongArrayConverter();
 
-        ImmutableArrayValue arrayValue = ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L), new ImmutableLongValueImpl(3L));
+        ImmutableArrayValue arrayValue = ValueFactory.newArray(
+                new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L), new ImmutableLongValueImpl(3L)
+        );
         assertTrue(converter.canConvertValue(arrayValue));
 
         long[] longs = converter.fromValue(arrayValue);
@@ -43,7 +45,9 @@ class DefaultLongArrayConverterTest {
     void should_throwException_ifArrayValueContainsNotFirstString() {
         DefaultArrayValueToLongArrayConverter converter = new DefaultArrayValueToLongArrayConverter();
 
-        ImmutableArrayValue arrayValue = ValueFactory.newArray(new ImmutableLongValueImpl(2L), new ImmutableStringValueImpl("string"), new ImmutableLongValueImpl(3L));
+        ImmutableArrayValue arrayValue = ValueFactory.newArray(
+                new ImmutableLongValueImpl(2L), new ImmutableStringValueImpl("string"), new ImmutableLongValueImpl(3L)
+        );
         assertTrue(converter.canConvertValue(arrayValue));
 
         assertThrows(MessageTypeCastException.class, () -> converter.fromValue(arrayValue));
@@ -53,7 +57,7 @@ class DefaultLongArrayConverterTest {
     void should_fromLongArray_returnArrayValue() {
         DefaultLongArrayToArrayValueConverter converter = new DefaultLongArrayToArrayValueConverter();
 
-        ArrayValue result = converter.toValue(new long[]{1L, 2L, 3L});
-        assertEquals(ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L), new ImmutableLongValueImpl(3L)), result);
+        ArrayValue result = converter.toValue(new long[]{1L, 2L});
+        assertEquals(ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L)), result);
     }
 }

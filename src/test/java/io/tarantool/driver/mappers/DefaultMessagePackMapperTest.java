@@ -107,7 +107,8 @@ class DefaultMessagePackMapperTest {
         List<Object> expectedList = Arrays.asList("Hello", 111);
         assertEquals(expectedList, mapper.fromValue(testValue));
 
-        long[] expectedArray = mapper.fromValue(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)), long[].class);
+        long[] expectedArray =
+                mapper.fromValue(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)), long[].class);
         assertArrayEquals(new long[]{ 4_000_000_000_000L }, expectedArray);
 
         Map<Value, Value> testMap1 = new HashMap<>();
@@ -249,15 +250,18 @@ class DefaultMessagePackMapperTest {
 
     @Test
     void should_getObject_returnLongArray() {
-        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)));
-
+        TarantoolTuple tuple = tupleFactory.create(
+                ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L))
+        );
         assertEquals(long[].class, tuple.getObject(0, long[].class).get().getClass());
         assertEquals(4_000_000_000_000L, tuple.getObject(0, long[].class).get()[0]);
     }
 
     @Test
     void should_getObject_throwMessageTypeCastException_ifArrayValue_ContainsNotLong() {
-        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableStringValueImpl("notLong")));
+        TarantoolTuple tuple = tupleFactory.create(ValueFactory.newArray(
+                new ImmutableLongValueImpl(1L), new ImmutableStringValueImpl("notLong")
+        ));
         assertThrows(MessageTypeCastException.class, () -> tuple.getObject(0, long[].class).get());
     }
 }
