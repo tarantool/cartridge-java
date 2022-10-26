@@ -14,12 +14,12 @@ import java.time.Instant;
  */
 public class DefaultInstantToExtensionValueConverter implements ObjectConverter<Instant, ExtensionValue> {
 
-    private static final long serialVersionUID = 20220418L;
+    private static final long serialVersionUID = 20221025L;
 
     private static final byte DATETIME_TYPE = 0x04;
 
     private byte[] toBytes(Instant value) {
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[8]);
         buffer.putLong(0, value.getEpochSecond());
         return buffer.array();
     }

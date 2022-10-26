@@ -12,6 +12,8 @@ import java.time.Instant;
  * @author Anastasiia Romanova
  */
 public class DefaultExtensionValueToInstantConverter implements ValueConverter<ExtensionValue, Instant> {
+
+    private static final long serialVersionUID = 20221025L;
     private static final byte DATETIME_TYPE = 0x04;
 
     private Instant fromBytes(byte[] bytes) {

@@ -32,7 +32,7 @@ class DefaultInstantConverterTest {
         Base64.Encoder encoder = Base64.getEncoder();
         Instant instant = LocalDateTime.parse("2022-10-25T12:03:58").toInstant(ZoneOffset.UTC);
         byte[] result = ((MessageBufferPacker) packer.packValue(converter.toValue(instant))).toByteArray();
-        assertEquals("2AQAAAAAY1fQrgAAAAAAAAAA", encoder.encodeToString(result));
+        assertEquals("1wQAAAAAY1fQrg==", encoder.encodeToString(result));
     }
 
     @Test
@@ -40,7 +40,7 @@ class DefaultInstantConverterTest {
         DefaultExtensionValueToInstantConverter converter = new DefaultExtensionValueToInstantConverter();
         Base64.Decoder base64decoder = Base64.getDecoder();
         Instant instant = LocalDateTime.parse("2022-10-25T12:03:58").toInstant(ZoneOffset.UTC);
-        byte[] packed = base64decoder.decode("2AQAAAAAY1fQrgAAAAAAAAAA");
+        byte[] packed = base64decoder.decode("1wQAAAAAY1fQrg==");
         ExtensionValue value = MessagePack.newDefaultUnpacker(packed).unpackValue().asExtensionValue();
         assertEquals(instant, converter.fromValue(value));
     }
