@@ -295,7 +295,7 @@ ProxySelectOptions selectOptions = ProxySelectOptions.create().withBucketId(buck
 selectResult = profileSpace.select(condition, selectOptions).get();
 ```
 
-You can see sources of example in [tests](src/test/java/io/tarantool/driver/integration/proxy/options/ProxySpaceInsertOptionsIT.java)
+You can see the sources of this example in the [tests](src/test/java/io/tarantool/driver/integration/proxy/options/ProxySpaceInsertOptionsIT.java)
 
 ### Retrying Tarantool client
 
