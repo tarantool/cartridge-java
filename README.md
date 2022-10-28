@@ -266,7 +266,7 @@ For this purpose you need:
         return crc32 & 0x00000000ffffffffL; // the unsigned java problem
     }
     ```
-2) number of buckets  
+2) the number of buckets  
    We can obtain number from tarantool via `vshard.router.bucket_count` function out of [vshard module](https://github.com/tarantool/vshard)
     ```java
    public static <T extends Packable, R extends Collection<T>> Integer getBucketCount(
