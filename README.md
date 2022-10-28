@@ -267,7 +267,7 @@ For this purpose you need:
     }
     ```
 2) the number of buckets  
-   We can obtain number from tarantool via `vshard.router.bucket_count` function out of [vshard module](https://github.com/tarantool/vshard)
+   This number can be obtained from Tarantool via `vshard.router.bucket_count` function out of [vshard module](https://github.com/tarantool/vshard)
     ```java
    public static <T extends Packable, R extends Collection<T>> Integer getBucketCount(
            TarantoolClient<T, R> client) throws ExecutionException, InterruptedException {
