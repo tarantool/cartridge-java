@@ -250,7 +250,7 @@ A custom sharding function can be used to determine the bucket number - location
 For this purpose you need:
 1) hash function  
     As an example, a default function from tarantool/vshard - [crc32](https://www.tarantool.io/en/doc/latest/reference/reference_lua/digest/#lua-function.digest.crc32) with specific polynomial value.
-    Java doesn't have crc32 out of the box with the ability to pass polynomial value, then we'll implement our own:
+    Java doesn't have crc32 out of the box with the ability to pass a polynomial value, so we'll implement our own:
     ```java
     private static long crc32(byte[] data) {
         BitSet bitSet = BitSet.valueOf(data);
