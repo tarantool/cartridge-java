@@ -5,6 +5,9 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.protocol.Packable;
 
 import java.io.ByteArrayOutputStream;
@@ -51,7 +54,7 @@ public final class Utils {
                     client.callForSingleResult("vshard.router.bucket_count", Integer.class).get()
             );
         }
-        return bucketCount.get();
+        return bucketCount.orElseThrow(() -> new TarantoolClientException("Failed to get bucket count"));
     }
 
     /**

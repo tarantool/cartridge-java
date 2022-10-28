@@ -276,14 +276,15 @@ For this purpose you need:
                    client.callForSingleResult("vshard.router.bucket_count", Integer.class).get()
            );
        }
-       return bucketCount.get();
+       bucketCount.orElseThrow(() -> new TarantoolClientException("Failed to get bucket count"));
    }
     ```
 
 Then we can determine bucket id by passing your key through hash function and get the remainder of the division by number of buckets:
 ```java
-byte[] key = ... // can be multipart
-Integer bucketId = (bucketIdcrc32(key) % getBucketCount(client)) + 1;
+TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+byte[] key = getBytesFromList(Arrays.asList(tarantoolTuple.getInteger(0), tarantoolTuple.getInteger(2)));
+Integer bucketId = (crc32(key) % getBucketCount(client)) + 1;
 ```
 
 After that we may apply it in operations:
