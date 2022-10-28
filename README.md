@@ -246,7 +246,7 @@ class Scratch {
 
 #### Using custom sharding function
 
-We can use your own sharding function to determine bucket id - location in cluster and use it in cluster operations.
+A custom sharding function can be used to determine the bucket number - location in the cluster - and used further in the cluster operations.
 For this purpose you need:
 1) hash function  
     For the example, equality of function from tarantool - [crc32](https://www.tarantool.io/en/doc/latest/reference/reference_lua/digest/#lua-function.digest.crc32) with specific polynomial value.
