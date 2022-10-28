@@ -249,7 +249,7 @@ class Scratch {
 A custom sharding function can be used to determine the bucket number - location in the cluster - and used further in the cluster operations.
 For this purpose you need:
 1) hash function  
-    For the example, equality of function from tarantool - [crc32](https://www.tarantool.io/en/doc/latest/reference/reference_lua/digest/#lua-function.digest.crc32) with specific polynomial value.
+    As an example, a default function from tarantool/vshard - [crc32](https://www.tarantool.io/en/doc/latest/reference/reference_lua/digest/#lua-function.digest.crc32) with specific polynomial value.
     Java doesn't have crc32 out of the box with the ability to pass polynomial value, then we'll implement our own:
     ```java
     private static long crc32(byte[] data) {
