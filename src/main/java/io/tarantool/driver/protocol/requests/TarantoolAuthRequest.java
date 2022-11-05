@@ -34,7 +34,7 @@ public final class TarantoolAuthRequest extends TarantoolRequest {
      */
     public static class Builder {
 
-        private Map<Integer, Object> authMap;
+        private final Map<Integer, Object> authMap;
 
         /**
          * Basic constructor.

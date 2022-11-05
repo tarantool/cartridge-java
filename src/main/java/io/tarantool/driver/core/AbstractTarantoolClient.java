@@ -69,7 +69,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
     private final SpacesMetadataProvider metadataProvider;
     private final ScheduledExecutorService timeoutScheduler;
-    private TarantoolConnectionManager connectionManager;
+    private volatile TarantoolConnectionManager connectionManager;
 
     /**
      * Create a client.

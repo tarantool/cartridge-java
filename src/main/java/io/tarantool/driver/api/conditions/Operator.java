@@ -38,7 +38,7 @@ public enum Operator {
     @Override
     public String toString() {
         return "Operator{" +
-                "opCode=" + code.toString() +
+                "opCode=" + code +
                 '}';
     }
 }

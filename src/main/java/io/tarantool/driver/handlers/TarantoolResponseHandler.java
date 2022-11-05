@@ -52,6 +52,9 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
                         } catch (Throwable e) {
                             requestFuture.completeExceptionally(e);
                         }
+                    default:
+                        log.error("unexpected response type " +
+                                tarantoolResponse.getResponseType());
                 }
             }
         } else {

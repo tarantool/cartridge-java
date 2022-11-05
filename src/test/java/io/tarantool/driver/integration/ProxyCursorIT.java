@@ -217,7 +217,8 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
 
     @Test
     public void countAll_batchByOneElement() {
-        TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
+                client.space(TEST_SPACE_NAME);
         Conditions conditions = Conditions.any();
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
@@ -236,13 +237,13 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         assertEquals(100, countTotal);
 
         cursor = testSpace.cursor(conditions, 1);
-        List<Integer> tupleIds = new ArrayList<>();
+
         assertTrue(cursor.next());
         countTotal = 0;
         do {
             countTotal++;
             TarantoolTuple t = cursor.get();
-            tupleIds.add(t.getInteger(0));
+
             hasNext = cursor.next();
             //protect from infinite loop
             assertTrue(countTotal <= 1000);

@@ -922,14 +922,12 @@ public final class Conditions implements Serializable {
                 .orElseThrow(() -> new TarantoolClientException(
                         "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
-        Optional<TarantoolIndexMetadata> coveringIndex = allIndexes.values().stream()
+        return allIndexes.values().stream()
                 .map(metadata -> new AbstractMap.SimpleEntry<Long, TarantoolIndexMetadata>(
                         calculateCoverage(metadata, selectedFields), metadata))
                 .filter(entry -> entry.getKey() > 0)
                 .max(Comparator.comparingLong(AbstractMap.SimpleEntry::getKey))
                 .map(AbstractMap.SimpleEntry::getValue);
-
-        return coveringIndex;
     }
 
     private static long calculateCoverage(TarantoolIndexMetadata metadata,
@@ -955,12 +953,10 @@ public final class Conditions implements Serializable {
                 .orElseThrow(() -> new TarantoolClientException(
                         "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
-        TarantoolIndexMetadata suitableIndex = allIndexes.values().stream()
+        return allIndexes.values().stream()
                 .filter(metadata -> isSuitableIndex(metadata, selectedFields))
                 .min(Comparator.comparingInt(m -> m.getIndexParts().size()))
                 .orElseThrow(() -> new TarantoolClientException("No indexes that fit the passed fields are found"));
-
-        return suitableIndex;
     }
 
     private static boolean isSuitableIndex(TarantoolIndexMetadata indexMetadata,

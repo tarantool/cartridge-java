@@ -38,6 +38,7 @@ public class MessagePackFrameDecoder extends ReplayingDecoder<MessagePackFrameDe
                         checkpoint(DecoderState.BODY);
                     }
                     lenBuf.release();
+                    // fall through is intentional
                 case BODY:
                     if (size > 0) {
                         if (byteBuf.readableBytes() < size) {

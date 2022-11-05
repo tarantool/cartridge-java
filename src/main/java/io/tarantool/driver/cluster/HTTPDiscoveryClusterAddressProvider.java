@@ -229,7 +229,7 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
     private static class SimpleHttpClientInitializer extends ChannelInitializer<SocketChannel> {
 
-        private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
+        private final CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
         private final SslContext sslCtx;
 
         SimpleHttpClientInitializer(SslContext sslCtx,
@@ -255,8 +255,8 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
     private static class SimpleHttpClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
-        private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
-        private ObjectMapper objectMapper = new ObjectMapper();
+        private final CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleHttpClientHandler(CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
             super();

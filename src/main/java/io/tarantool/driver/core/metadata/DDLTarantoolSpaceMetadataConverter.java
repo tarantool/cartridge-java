@@ -71,13 +71,14 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
         spacesMap = spacesMap.get(SPACES_KEY).asMapValue().map();
 
         ProxyTarantoolMetadataContainer proxyMetadata = new ProxyTarantoolMetadataContainer();
-        for (Value nameValue : spacesMap.keySet()) {
+        for (Map.Entry<Value, Value> entry : spacesMap.entrySet()) {
+            Value nameValue = entry.getKey();
             if (!nameValue.isStringValue()) {
                 throw new TarantoolClientException(
                         "Unsupported metadata format: the spaces map keys must be of string type");
             }
 
-            Value spaceValue = spacesMap.get(nameValue);
+            Value spaceValue = entry.getValue();
             if (!spaceValue.isMapValue()) {
                 throw new TarantoolClientException(
                         "Unsupported metadata format: the spaces map values must be of map type");

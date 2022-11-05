@@ -26,9 +26,9 @@ import java.util.List;
 
 @State(Scope.Benchmark)
 public class TarantoolSetup {
-    public Logger log = LoggerFactory.getLogger(TarantoolSetup.class);
+    public final Logger log = LoggerFactory.getLogger(TarantoolSetup.class);
 
-    public TarantoolContainer tarantoolContainer = new TarantoolContainer()
+    public final TarantoolContainer tarantoolContainer = new TarantoolContainer()
             .withScriptFileName("org/testcontainers/containers/benchmark.lua")
             .withLogConsumer(new Slf4jLogConsumer(log));
 
@@ -63,7 +63,7 @@ public class TarantoolSetup {
         arraysWithNestedArrays = new ArrayList<>();
         arraysWithNestedMaps = new ArrayList<>();
 
-        HashMap<String, Object> hm = new HashMap<String, Object>();
+        HashMap<String, Object> hm = new HashMap<>();
         hm.put("hello", "world");
         hm.put("d", 2);
 

@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TarantoolErrorsIT extends SharedCartridgeContainer {
 
     public static String USER_NAME;
-    public static String RESTRICTED_USER = "restricted_user";
+    public static final String RESTRICTED_USER = "restricted_user";
     public static String PASSWORD;
-    public static String RESTRICTED_PASSWORD = "restricted_secret";
+    public static final String RESTRICTED_PASSWORD = "restricted_secret";
 
     @BeforeAll
     public static void setUp() {

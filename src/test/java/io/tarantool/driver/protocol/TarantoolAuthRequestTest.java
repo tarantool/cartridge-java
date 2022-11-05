@@ -32,10 +32,10 @@ class TarantoolAuthRequestTest {
         TarantoolAuthRequest request = new TarantoolAuthRequest.Builder()
                 .withUsername("user")
                 .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1, 2, 3, 4}).build();
-        MessagePacker packer = MessagePack.newDefaultBufferPacker();
+        MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         request.toMessagePack(packer, DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
         packer.flush();
-        byte[] bytes = ((MessageBufferPacker) packer).toByteArray();
+        byte[] bytes = packer.toByteArray();
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
         // check header
         TarantoolHeader authHeader = TarantoolHeader.fromMessagePackValue(unpacker.unpackValue());

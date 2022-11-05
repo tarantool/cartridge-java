@@ -2,8 +2,6 @@ package io.tarantool.driver.mappers.converters;
 
 import org.msgpack.value.Value;
 
-import java.io.Serializable;
-
 /**
  * Basic interface for converters from Java objects to MessagePack entities for a particular class
  *
