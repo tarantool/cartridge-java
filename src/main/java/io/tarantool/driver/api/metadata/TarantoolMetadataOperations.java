@@ -19,6 +19,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Refresh metadata cache
+     *
      * @return future with empty value for tracking the refresh progress
      * @throws TarantoolClientException if fetching data failed with error
      */
@@ -26,6 +27,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for the space specified by name
+     *
      * @param spaceName the space name, must not be null or empty
      * @return nullable space metadata wrapped in {@link Optional}
      */
@@ -33,7 +35,8 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for index from the specified space by name
-     * @param spaceId the space ID, must be greater than 0
+     *
+     * @param spaceId   the space ID, must be greater than 0
      * @param indexName index name, must not be null or empty
      * @return nullable index metadata wrapped in {@link Optional}
      */
@@ -41,6 +44,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for index from the specified space by name
+     *
      * @param spaceName the space name, must not be null or empty
      * @param indexName index name, must not be null or empty
      * @return nullable index metadata wrapped in {@link Optional}
@@ -49,14 +53,16 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for index from the specified space by index ID
+     *
      * @param spaceName the space name, must not be null or empty
-     * @param indexId index ID, must not be  must be greater or equal than 0
+     * @param indexId   index ID, must not be  must be greater or equal than 0
      * @return nullable index metadata wrapped in {@link Optional}
      */
     Optional<TarantoolIndexMetadata> getIndexById(String spaceName, int indexId);
 
     /**
      * Get metadata for index from the specified space by index ID
+     *
      * @param spaceId the space ID, must be greater than 0
      * @param indexId index ID, must not be  must be greater or equal than 0
      * @return nullable index metadata wrapped in {@link Optional}
@@ -65,6 +71,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for the space specified by id
+     *
      * @param spaceId the space ID, must be greater than 0
      * @return nullable space metadata wrapped in {@link Optional}
      */
@@ -72,6 +79,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for all indexes for space specified by id
+     *
      * @param spaceId the space ID, must be greater than 0
      * @return nullable map of index names to index metadata wrapped in {@link Optional}
      */
@@ -79,6 +87,7 @@ public interface TarantoolMetadataOperations {
 
     /**
      * Get metadata for all indexes for space specified by name
+     *
      * @param spaceName the space name, must not be null or empty
      * @return nullable map of index names to index metadata wrapped in {@link Optional}
      */
