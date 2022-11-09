@@ -2,7 +2,19 @@
 
 ## [Unreleased]
 
+## [0.9.2] - 2022-11-15
+
 - Adding default mapper for long arrays ([#290](https://github.com/tarantool/cartridge-java/pull/290))
+- Add dependency management ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump testcontainers-java-tarantool to 0.5.3 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump slf4j-api to 2.0.3 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump jackson-databind to 2.14.0 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump jackson-annotations to 2.14.0 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump org.testcontainers:junit-jupiter to 1.17.4 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Add junit class ordering according the order before junit-jupiter 5.8.0 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Bump logback-classic to 1.3.4  ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Remove org.junit.jupiter:junit-jupiter  ([#296](https://github.com/tarantool/cartridge-java/pull/296))
+- Remove jmh-generator-annprocess  ([#296](https://github.com/tarantool/cartridge-java/pull/296))
 
 ## [0.9.1] - 2022-10-13
 

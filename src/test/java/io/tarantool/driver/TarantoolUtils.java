@@ -1,7 +1,7 @@
 package io.tarantool.driver;
 
 import io.tarantool.driver.utils.Assert;
-import org.testcontainers.shaded.org.apache.commons.lang.StringUtils;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;

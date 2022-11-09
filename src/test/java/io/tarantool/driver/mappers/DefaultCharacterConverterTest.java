@@ -3,6 +3,8 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.converters.object.DefaultCharacterToStringValueConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultStringValueToCharacterConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;
@@ -15,21 +17,21 @@ class DefaultCharacterConverterTest {
 
     @Test
     void test_toValue_shouldReturnStringValue_s() {
-        DefaultCharacterConverter converter = new DefaultCharacterConverter();
+        DefaultCharacterToStringValueConverter converter = new DefaultCharacterToStringValueConverter();
         StringValue result = converter.toValue('s');
         assertEquals(ValueFactory.newString("s"), result);
     }
 
     @Test
     void test_fromValue_shouldReturnCharacter_s() {
-        DefaultCharacterConverter converter = new DefaultCharacterConverter();
+        DefaultStringValueToCharacterConverter converter = new DefaultStringValueToCharacterConverter();
         Character result = converter.fromValue(ValueFactory.newString("s"));
         assertEquals('s', result);
     }
 
     @Test
     void test_canConvertValue_shouldReturnTrue_ifStringConsistsOfOneSymbol() {
-        DefaultCharacterConverter converter = new DefaultCharacterConverter();
+        DefaultStringValueToCharacterConverter converter = new DefaultStringValueToCharacterConverter();
         assertTrue(converter.canConvertValue(ValueFactory.newString("s")));
         assertFalse(converter.canConvertValue(ValueFactory.newString("string")));
         assertFalse(converter.canConvertValue(ValueFactory.newString("")));
