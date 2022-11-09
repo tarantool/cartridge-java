@@ -15,7 +15,7 @@ import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Disabled;
-import org.testcontainers.shaded.org.apache.commons.lang.ArrayUtils;
+import org.testcontainers.shaded.org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

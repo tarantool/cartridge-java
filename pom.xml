@@ -53,6 +53,7 @@
     </scm>
 
     <properties>
+        <jackson.version>2.14.0</jackson.version>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
         <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml</checkstyle.suppressions>
         <logging.config>${project.basedir}/src/test/resources/logback-test.xml</logging.config>
@@ -192,6 +193,26 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>2.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
@@ -206,48 +227,34 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.14.0-rc1</version>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.3.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.7.2</version>
+            <version>1.17.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.tarantool</groupId>
+            <artifactId>testcontainers-java-tarantool</artifactId>
+            <version>0.5.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>1.35</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-annprocess</artifactId>
-            <version>1.35</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>1.16.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.tarantool</groupId>
-            <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>0.5.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
