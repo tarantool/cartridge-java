@@ -52,6 +52,9 @@ public interface MessagePackValueMapper {
         ValueType valueType, Class<? extends O> objectClass,
         ValueConverter<V, ? extends O> converter);
 
+    <V extends Value, O> void registerValueConverterWithoutTargetClass(
+        ValueType valueType, ValueConverter<V, ? extends O> converter);
+
     /**
      * Get a converter capable of converting from the source entity class to the target class
      *

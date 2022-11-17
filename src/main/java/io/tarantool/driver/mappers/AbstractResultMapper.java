@@ -36,11 +36,26 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
 
     public AbstractResultMapper(
         MessagePackValueMapper valueMapper,
+        ValueConverter<? extends Value, ? extends T> resultConverter) {
+        this.valueMapper = valueMapper;
+        valueMapper.registerValueConverterWithoutTargetClass(ValueType.ARRAY, resultConverter);
+    }
+
+    public AbstractResultMapper(
+        MessagePackValueMapper valueMapper,
         ValueType valueType,
         ValueConverter<? extends Value, ? extends T> resultConverter,
         Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
         valueMapper.registerValueConverter(valueType, resultClass, resultConverter);
+    }
+
+    public AbstractResultMapper(
+        MessagePackValueMapper valueMapper,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends T> resultConverter) {
+        this.valueMapper = valueMapper;
+        valueMapper.registerValueConverterWithoutTargetClass(valueType, resultConverter);
     }
 
     public AbstractResultMapper(
@@ -53,6 +68,18 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
             valueMapper.registerValueConverter(
                 converter.getValueType(),
                 resultClass,
+                converter.getValueConverter());
+        }
+    }
+
+    public AbstractResultMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<T>> converters) {
+        this.valueMapper = valueMapper;
+        for (ValueConverterWithInputTypeWrapper<T> converter :
+            converters) {
+            valueMapper.registerValueConverterWithoutTargetClass(
+                converter.getValueType(),
                 converter.getValueConverter());
         }
     }
@@ -73,6 +100,12 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
         Class<? extends O> objectClass,
         ValueConverter<V, ? extends O> converter) {
         valueMapper.registerValueConverter(valueType, objectClass, converter);
+    }
+
+    @Override
+    public <V extends Value, O> void registerValueConverterWithoutTargetClass(
+        ValueType valueType, ValueConverter<V, ? extends O> converter) {
+        valueMapper.registerValueConverterWithoutTargetClass(valueType, converter);
     }
 
     @Override

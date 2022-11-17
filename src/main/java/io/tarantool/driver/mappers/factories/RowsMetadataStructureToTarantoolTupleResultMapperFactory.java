@@ -10,6 +10,8 @@ import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleResultConverter;
 import io.tarantool.driver.mappers.converters.value.MapValueToTarantoolTupleResultConverter;
+import org.msgpack.value.ArrayValue;
+import org.msgpack.value.MapValue;
 import org.msgpack.value.ValueType;
 
 import java.util.Arrays;
@@ -44,119 +46,55 @@ public class RowsMetadataStructureToTarantoolTupleResultMapperFactory
 
     public TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
         ArrayValueToTarantoolTupleConverter tupleConverter) {
-        ValueConverter valueConverter =
-            new ArrayValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
+        return withConverterWithoutTargetClass(
             messagePackMapper.copy(),
             ValueType.ARRAY,
-            valueConverter
+            new ArrayValueToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 
     public TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
         MessagePackValueMapper valueMapper,
         ArrayValueToTarantoolTupleConverter tupleConverter) {
-        ValueConverter valueConverter =
-            new ArrayValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
+        return withConverterWithoutTargetClass(
             valueMapper,
             ValueType.ARRAY,
-            valueConverter
-        );
-    }
-
-    public TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
-        ArrayValueToTarantoolTupleConverter tupleConverter,
-        Class<? extends TarantoolResult<TarantoolTuple>> resultClass) {
-        ValueConverter valueConverter =
-            new ArrayValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
-            messagePackMapper.copy(),
-            ValueType.ARRAY,
-            valueConverter,
-            resultClass
-        );
-    }
-
-    public TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
-        MessagePackValueMapper valueMapper,
-        ArrayValueToTarantoolTupleConverter tupleConverter,
-        Class<? extends TarantoolResult<TarantoolTuple>> resultClass) {
-        ValueConverter valueConverter =
-            new ArrayValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
-            valueMapper,
-            ValueType.ARRAY,
-            valueConverter,
-            resultClass
+            new ArrayValueToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 
     public TarantoolResultMapper<TarantoolTuple> withMapValueToTarantoolTupleResultConverter(
         ArrayValueToTarantoolTupleConverter tupleConverter) {
-        ValueConverter valueConverter =
-            new MapValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
+        return withConverterWithoutTargetClass(
             messagePackMapper.copy(),
             ValueType.MAP,
-            valueConverter
+            new MapValueToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 
     public TarantoolResultMapper<TarantoolTuple> withMapValueToTarantoolTupleResultConverter(
         MessagePackValueMapper valueMapper,
         ArrayValueToTarantoolTupleConverter tupleConverter) {
-        ValueConverter valueConverter =
-            new MapValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
+        return withConverterWithoutTargetClass(
             valueMapper,
             ValueType.MAP,
-            valueConverter
-        );
-    }
-
-    public TarantoolResultMapper<TarantoolTuple> withMapValueToTarantoolTupleResultConverter(
-        ArrayValueToTarantoolTupleConverter tupleConverter,
-        Class<? extends TarantoolResult<TarantoolTuple>> resultClass) {
-        ValueConverter valueConverter =
-            new MapValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
-            messagePackMapper.copy(),
-            ValueType.MAP,
-            valueConverter,
-            resultClass
-        );
-    }
-
-    public TarantoolResultMapper<TarantoolTuple> withMapValueToTarantoolTupleResultConverter(
-        MessagePackValueMapper valueMapper,
-        ArrayValueToTarantoolTupleConverter tupleConverter,
-        Class<? extends TarantoolResult<TarantoolTuple>> resultClass) {
-        ValueConverter valueConverter =
-            new MapValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverter(
-            valueMapper,
-            ValueType.MAP,
-            valueConverter,
-            resultClass
+            new MapValueToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 
     public TarantoolResultMapper<TarantoolTuple> withTarantoolTupleResultMapper(
         ArrayValueToTarantoolTupleConverter tupleConverter,
         Class<? extends TarantoolResult<TarantoolTuple>> resultClass) {
-        // We need cast because we can't use TarantoolResult<TarantoolTuple> in generic
-        ValueConverter arrayConverter =
+        ValueConverter<ArrayValue, TarantoolResult<TarantoolTuple>> arrayConverter =
             new ArrayValueToTarantoolTupleResultConverter(tupleConverter);
-        ValueConverter mapValueConverter =
+        ValueConverter<MapValue, TarantoolResult<TarantoolTuple>> mapValueConverter =
             new MapValueToTarantoolTupleResultConverter(tupleConverter);
-        return withConverters(
+        return withConverterWithoutTargetClass(
             messagePackMapper.copy(),
             Arrays.asList(
                 new ValueConverterWithInputTypeWrapper<>(ValueType.ARRAY, arrayConverter),
                 new ValueConverterWithInputTypeWrapper<>(ValueType.MAP, mapValueConverter)
-            ),
-            resultClass
+            )
         );
     }
 }

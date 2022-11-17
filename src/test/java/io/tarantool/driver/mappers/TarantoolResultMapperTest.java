@@ -58,7 +58,7 @@ class TarantoolResultMapperTest {
             tuple.setId(values.get(0).asIntegerValue().asInt());
             tuple.setName(values.get(1).asStringValue().asString());
             return tuple;
-        }, CustomTupleResult.class);
+        });
         CustomTuple tupleOne = new CustomTuple(1, "abcd");
         CustomTuple tupleTwo = new CustomTuple(2, "efgh");
         ArrayValue testTuples =

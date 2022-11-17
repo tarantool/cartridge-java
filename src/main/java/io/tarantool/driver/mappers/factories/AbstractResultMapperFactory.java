@@ -44,8 +44,17 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
 
     protected abstract T createMapper(
         MessagePackValueMapper valueMapper,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends O> valueConverter);
+
+    protected abstract T createMapper(
+        MessagePackValueMapper valueMapper,
         List<ValueConverterWithInputTypeWrapper<O>> converters,
         Class<? extends O> resultClass);
+
+    protected abstract T createMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<O>> converters);
 
     /**
      * Create {@link AbstractResultMapper} instance with the passed converter.
@@ -69,6 +78,12 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
         } catch (InterfaceParameterClassNotFoundException e) {
             throw new TarantoolClientException(e);
         }
+    }
+
+    public T withConverterWithoutTargetClass(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends O> valueConverter) {
+        return createMapper(valueMapper, valueType, valueConverter);
     }
 
     /**
@@ -114,6 +129,12 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
         List<ValueConverterWithInputTypeWrapper<O>> converters,
         Class<? extends O> resultClass) {
         return createMapper(valueMapper, converters, resultClass);
+    }
+
+    public T withConverterWithoutTargetClass(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<O>> converters) {
+        return createMapper(valueMapper, converters);
     }
 
 }

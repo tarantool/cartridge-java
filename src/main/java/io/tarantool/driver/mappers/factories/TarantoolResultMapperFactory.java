@@ -38,9 +38,23 @@ public class TarantoolResultMapperFactory<T> extends
 
     @Override
     protected TarantoolResultMapper<T> createMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> valueConverter) {
+        return new TarantoolResultMapper<>(valueMapper, valueType, valueConverter);
+    }
+
+    @Override
+    protected TarantoolResultMapper<T> createMapper(
         MessagePackValueMapper valueMapper,
         List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> converters,
         Class<? extends TarantoolResult<T>> resultClass) {
         return new TarantoolResultMapper<>(valueMapper, converters, resultClass);
+    }
+
+    @Override
+    protected TarantoolResultMapper<T> createMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> converters) {
+        return new TarantoolResultMapper<>(valueMapper, converters);
     }
 }
