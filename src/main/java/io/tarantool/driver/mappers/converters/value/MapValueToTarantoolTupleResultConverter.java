@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Artyom Dubinin
  */
 public class MapValueToTarantoolTupleResultConverter
-    implements ValueConverter<MapValue, TarantoolResult<?>> {
+    implements ValueConverter<MapValue, TarantoolResult<TarantoolTuple>> {
 
     private static final long serialVersionUID = -5228606294087295535L;
 

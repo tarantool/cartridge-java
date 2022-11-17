@@ -15,26 +15,48 @@ import java.util.List;
  * @author Alexey Kuzin
  */
 public class TarantoolResultMapper<T> extends AbstractResultMapper<TarantoolResult<T>> {
-    /**
-     * Basic constructor
-     *
-     * @param valueMapper    value mapper to be used for result rows
-     * @param valueType      MessagePack source type
-     * @param valueConverter MessagePack result array to TarantoolResult with inner specified structure
-     * @param resultClass    tuple result class
-     */
     public TarantoolResultMapper(
         MessagePackValueMapper valueMapper,
-        ValueType valueType,
-        ValueConverter<? extends Value, ? extends TarantoolResult<T>> valueConverter,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> resultConverter,
         Class<? extends TarantoolResult<T>> resultClass) {
-        super(valueMapper, valueType, valueConverter, resultClass);
+        super(valueMapper, resultConverter, resultClass);
     }
 
     public TarantoolResultMapper(
         MessagePackValueMapper valueMapper,
-        List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> valueConverters,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> resultConverter) {
+        super(valueMapper, resultConverter);
+    }
+
+    /**
+     * Basic constructor
+     *
+     * @param valueMapper     value mapper to be used for result rows
+     * @param valueType       MessagePack source type
+     * @param resultConverter MessagePack result array to TarantoolResult with inner specified structure
+     * @param resultClass     tuple result class
+     */
+    public TarantoolResultMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> resultConverter,
         Class<? extends TarantoolResult<T>> resultClass) {
-        super(valueMapper, valueConverters, resultClass);
+        super(valueMapper, valueType, resultConverter, resultClass);
+    }
+
+    public TarantoolResultMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> resultConverter) {
+        super(valueMapper, valueType, resultConverter);
+    }
+
+    public TarantoolResultMapper(
+        MessagePackValueMapper valueMapper, List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> converters,
+        Class<? extends TarantoolResult<T>> resultClass) {
+        super(valueMapper, converters, resultClass);
+    }
+
+    public TarantoolResultMapper(
+        MessagePackValueMapper valueMapper, List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> converters) {
+        super(valueMapper, converters);
     }
 }

@@ -43,13 +43,13 @@ public class TarantoolTupleResultMapperFactory
     public TarantoolResultMapper<TarantoolTuple> withFlattenTupleMapper(
         MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withArrayValueToTarantoolTupleResultConverter(
-            new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata), TarantoolTupleResult.class);
+            new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata));
     }
 
     public TarantoolResultMapper<TarantoolTuple> withUnflattenTupleMapper(
         MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withMapValueToTarantoolTupleResultConverter(
-            new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata), TarantoolTupleResult.class);
+            new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata));
     }
 
     public MessagePackValueMapper withTarantoolTupleMapper(

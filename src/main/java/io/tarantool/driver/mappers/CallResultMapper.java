@@ -4,6 +4,7 @@ import io.tarantool.driver.api.CallResult;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
 import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
 
 import java.util.List;
 
@@ -28,16 +29,36 @@ public class CallResultMapper<T, R extends CallResult<T>> extends AbstractResult
      * @param resultClass     tuple result class
      */
     public CallResultMapper(
-        MessagePackValueMapper valueMapper,
-        ValueConverter<? extends Value, ? extends R> resultConverter,
+        MessagePackValueMapper valueMapper, ValueConverter<? extends Value, ? extends R> resultConverter,
         Class<? extends R> resultClass) {
         super(valueMapper, resultConverter, resultClass);
     }
 
     public CallResultMapper(
-        MessagePackValueMapper valueMapper,
-        List<ValueConverterWithInputTypeWrapper<R>> converters,
+        MessagePackValueMapper valueMapper, ValueConverter<? extends Value, ? extends R> resultConverter) {
+        super(valueMapper, resultConverter);
+    }
+
+    public CallResultMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends R> resultConverter, Class<? extends R> resultClass) {
+        super(valueMapper, valueType, resultConverter, resultClass);
+    }
+
+    public CallResultMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends R> resultConverter) {
+        super(valueMapper, valueType, resultConverter);
+    }
+
+    public CallResultMapper(
+        MessagePackValueMapper valueMapper, List<ValueConverterWithInputTypeWrapper<R>> converters,
         Class<? extends R> resultClass) {
         super(valueMapper, converters, resultClass);
+    }
+
+    public CallResultMapper(
+        MessagePackValueMapper valueMapper, List<ValueConverterWithInputTypeWrapper<R>> converters) {
+        super(valueMapper, converters);
     }
 }

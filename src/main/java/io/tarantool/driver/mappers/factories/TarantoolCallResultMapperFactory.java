@@ -41,4 +41,17 @@ public class TarantoolCallResultMapperFactory<T, R extends CallResult<T>> extend
         List<ValueConverterWithInputTypeWrapper<R>> converters, Class<? extends R> resultClass) {
         return new CallResultMapper<>(valueMapper, converters, resultClass);
     }
+
+    @Override
+    protected CallResultMapper<T, R> createMapper(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends R> valueConverter) {
+        return new CallResultMapper<>(valueMapper, valueType, valueConverter);
+    }
+
+    @Override
+    protected CallResultMapper<T, R> createMapper(
+        MessagePackValueMapper valueMapper, List<ValueConverterWithInputTypeWrapper<R>> converters) {
+        return new CallResultMapper<>(valueMapper, converters);
+    }
 }
