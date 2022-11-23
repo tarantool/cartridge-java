@@ -1,10 +1,11 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueType;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,10 +28,33 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
      */
     public AbstractResultMapper(
         MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends T> resultConverter,
+        ValueConverter<? extends Value, ? extends T> resultConverter,
         Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
         valueMapper.registerValueConverter(ValueType.ARRAY, resultClass, resultConverter);
+    }
+
+    public AbstractResultMapper(
+        MessagePackValueMapper valueMapper,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends T> resultConverter,
+        Class<? extends T> resultClass) {
+        this.valueMapper = valueMapper;
+        valueMapper.registerValueConverter(valueType, resultClass, resultConverter);
+    }
+
+    public AbstractResultMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<T>> converters,
+        Class<? extends T> resultClass) {
+        this.valueMapper = valueMapper;
+        for (ValueConverterWithInputTypeWrapper<T> converter :
+            converters) {
+            valueMapper.registerValueConverter(
+                converter.getValueType(),
+                resultClass,
+                converter.getValueConverter());
+        }
     }
 
     @Override

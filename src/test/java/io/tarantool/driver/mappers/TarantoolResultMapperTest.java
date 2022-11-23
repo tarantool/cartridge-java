@@ -6,9 +6,10 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
+import io.tarantool.driver.mappers.factories.RowsMetadataStructureToTarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
-import io.tarantool.driver.mappers.factories.TupleResultMapperFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -23,9 +24,10 @@ class TarantoolResultMapperTest {
     @Test
     void testWithTarantoolTuple() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
+        ResultMapperFactoryFactoryImpl
+            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
         TarantoolResultMapper<TarantoolTuple> mapper = mapperFactoryFactory
-            .defaultTupleResultMapperFactory().withDefaultTupleValueConverter(defaultMapper, null);
+            .tupleResultMapperFactory().withFlattenTupleMapper(defaultMapper, null);
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
         TarantoolTuple tupleOne = new TarantoolTupleImpl(Arrays.asList("abc", 1234, nestedList1), defaultMapper);
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
@@ -47,9 +49,10 @@ class TarantoolResultMapperTest {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
         defaultMapper.registerObjectConverter(CustomTuple.class, ArrayValue.class, t ->
             ValueFactory.newArray(ValueFactory.newInteger(t.getId()), ValueFactory.newString(t.getName())));
-        DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
-        TupleResultMapperFactory<CustomTuple> mapperFactory = mapperFactoryFactory.tupleResultMapperFactory();
-        TarantoolResultMapper<CustomTuple> mapper = mapperFactory.withTupleValueConverter(v -> {
+        ResultMapperFactoryFactory mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+        RowsMetadataStructureToTarantoolResultMapperFactory<CustomTuple> mapperFactory
+            = mapperFactoryFactory.rowsMetadataStructureResultMapperFactory();
+        TarantoolResultMapper<CustomTuple> mapper = mapperFactory.withArrayValueToTarantoolResultConverter(v -> {
             CustomTuple tuple = new CustomTuple();
             List<Value> values = v.list();
             tuple.setId(values.get(0).asIntegerValue().asInt());

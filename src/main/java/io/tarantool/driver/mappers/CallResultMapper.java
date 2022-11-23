@@ -2,7 +2,10 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.CallResult;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
+import org.msgpack.value.Value;
+
+import java.util.List;
 
 /**
  * Special tuple mapper for API function call results.
@@ -26,8 +29,15 @@ public class CallResultMapper<T, R extends CallResult<T>> extends AbstractResult
      */
     public CallResultMapper(
         MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends R> resultConverter,
+        ValueConverter<? extends Value, ? extends R> resultConverter,
         Class<? extends R> resultClass) {
         super(valueMapper, resultConverter, resultClass);
+    }
+
+    public CallResultMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<R>> converters,
+        Class<? extends R> resultClass) {
+        super(valueMapper, converters, resultClass);
     }
 }

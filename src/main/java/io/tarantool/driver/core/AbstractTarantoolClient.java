@@ -29,7 +29,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
@@ -66,7 +66,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final TarantoolConnectionFactory connectionFactory;
     private final TarantoolConnectionListeners listeners;
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
-    private final DefaultResultMapperFactoryFactory mapperFactoryFactory;
+    private final ResultMapperFactoryFactoryImpl mapperFactoryFactory;
     private final SpacesMetadataProvider metadataProvider;
     private final ScheduledExecutorService timeoutScheduler;
     private TarantoolConnectionManager connectionManager;
@@ -110,7 +110,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Assert.notNull(listeners, "Tarantool connection listeners must not be null");
 
         this.config = config;
-        this.mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
+        this.mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
         this.eventLoopGroup = new NioEventLoopGroup(config.getEventLoopThreadsNumber());
         this.bootstrap = new Bootstrap()
             .group(eventLoopGroup)

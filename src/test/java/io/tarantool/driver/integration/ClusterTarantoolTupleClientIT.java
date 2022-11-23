@@ -20,7 +20,7 @@ import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -391,14 +391,14 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void callForTarantoolResultTest() throws Exception {
         MessagePackMapper defaultMapper = client.getConfig().getMessagePackMapper();
-        DefaultResultMapperFactoryFactory factory = new DefaultResultMapperFactoryFactory();
+        ResultMapperFactoryFactoryImpl factory = new ResultMapperFactoryFactoryImpl();
         TarantoolSpaceMetadata spaceMetadata = client.metadata().getSpaceByName("test_space").get();
         TarantoolResult<TarantoolTuple> result = client.call(
             "user_function_complex_query",
             Collections.singletonList(1000),
             defaultMapper,
-            factory.defaultTupleSingleResultMapperFactory()
-                .withDefaultTupleValueConverter(defaultMapper, spaceMetadata)
+            factory.singleValueTupleResultMapperFactory()
+                .withSingleValueTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
         ).get();
 
         assertTrue(result.size() >= 3);

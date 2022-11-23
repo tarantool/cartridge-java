@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
-import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToBigDecimalConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToBigDecimalConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;

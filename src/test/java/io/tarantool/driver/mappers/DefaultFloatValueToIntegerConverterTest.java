@@ -1,6 +1,6 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToIntegerConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultFloatValueToIntegerConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 

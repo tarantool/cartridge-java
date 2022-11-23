@@ -63,7 +63,7 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
         throws TarantoolClientException {
         CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper =
             client.getResultMapperFactoryFactory().<T>singleValueTarantoolResultMapperFactory()
-                .withTarantoolResultConverter(resultConverter, resultClass);
+                .withSingleValueArrayTarantoolResultConverter(resultConverter, resultClass);
         return client.call(selectCmd, resultMapper);
     }
 }

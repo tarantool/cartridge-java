@@ -4,7 +4,11 @@ import io.tarantool.driver.api.CallResult;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
+
+import java.util.List;
 
 /**
  * Factory for {@link CallResultMapper} instances used for calling API functions on Tarantool instance
@@ -25,9 +29,16 @@ public class TarantoolCallResultMapperFactory<T, R extends CallResult<T>> extend
 
     @Override
     protected CallResultMapper<T, R> createMapper(
-        MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends R> valueConverter,
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends R> valueConverter,
         Class<? extends R> resultClass) {
         return new CallResultMapper<>(valueMapper, valueConverter, resultClass);
+    }
+
+    @Override
+    protected CallResultMapper<T, R> createMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<R>> converters, Class<? extends R> resultClass) {
+        return new CallResultMapper<>(valueMapper, converters, resultClass);
     }
 }

@@ -51,8 +51,8 @@ public class TarantoolTupleSpace extends
 
     @Override
     protected MessagePackValueMapper tupleResultMapper() {
-        return client.getResultMapperFactoryFactory().defaultTupleResultMapperFactory()
-            .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
+        return client.getResultMapperFactoryFactory().tupleResultMapperFactory()
+            .withFlattenTupleMapper(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.mappers.converters.value.DefaultStringValueToByteArrayConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultStringValueToByteArrayConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 

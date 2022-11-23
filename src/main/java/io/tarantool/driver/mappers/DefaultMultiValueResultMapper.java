@@ -2,7 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import io.tarantool.driver.mappers.converters.value.custom.MultiValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToMultiValueCallResultSimpleConverter;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.msgpack.value.ArrayValue;
 
@@ -35,6 +35,6 @@ public class DefaultMultiValueResultMapper<T, R extends List<T>>
 
     private static <T, R extends List<T>> ValueConverter<ArrayValue, ? extends MultiValueCallResult<T, R>>
     defaultValueConverter(MessagePackValueMapper valueMapper) {
-        return new MultiValueCallResultConverter<>(valueMapper::fromValue);
+        return new ArrayValueToMultiValueCallResultSimpleConverter<>(valueMapper::fromValue);
     }
 }
