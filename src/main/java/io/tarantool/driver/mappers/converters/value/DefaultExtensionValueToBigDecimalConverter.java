@@ -36,7 +36,7 @@ public class DefaultExtensionValueToBigDecimalConverter implements ValueConverte
         unpacker.close();
         if (scale > DECIMAL_MAX_DIGITS || scale < -DECIMAL_MAX_DIGITS) {
             throw new IOException(
-                    String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
+                String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
         }
         if (!buffer.hasRemaining()) {
             throw new IOException("Not enough bytes in the packed data");
@@ -99,7 +99,7 @@ public class DefaultExtensionValueToBigDecimalConverter implements ValueConverte
             return fromBytes(value.getData());
         } catch (IOException e) {
             throw new MessagePackValueMapperException(
-                    String.format("Failed to unpack BigDecimal from MessagePack entity %s", value), e);
+                String.format("Failed to unpack BigDecimal from MessagePack entity %s", value), e);
         }
     }
 

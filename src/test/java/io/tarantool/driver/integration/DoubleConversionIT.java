@@ -26,7 +26,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -40,12 +40,12 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
         //given
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = setupClient();
         client.space("test_space_with_double_field")
-                .insert(tupleFactory.create(1, 1, Double.MAX_VALUE, 2.4)).get();
+            .insert(tupleFactory.create(1, 1, Double.MAX_VALUE, 2.4)).get();
 
         //when
         TarantoolTuple fields = client
-                .space("test_space_with_double_field")
-                .select(Conditions.equals("id", 1)).get().get(0);
+            .space("test_space_with_double_field")
+            .select(Conditions.equals("id", 1)).get().get(0);
 
         //then
         Assertions.assertNotNull(fields);
@@ -59,7 +59,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
-                .insert(tupleFactory.create(2, 1, 2.4, 2.4)).get().get(0);
+            .insert(tupleFactory.create(2, 1, 2.4, 2.4)).get().get(0);
 
         //then
         Assertions.assertNotNull(tuple);
@@ -73,14 +73,14 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
-                .insert(tupleFactory.create(3, 1, 2.4f, 2.4f)).get().get(0);
+            .insert(tupleFactory.create(3, 1, 2.4f, 2.4f)).get().get(0);
 
         //then
         Assertions.assertNotNull(tuple);
         Double doubleField = tuple.getDouble("double_field");
         double actualTruncated = BigDecimal.valueOf(doubleField)
-                .setScale(1, RoundingMode.HALF_DOWN)
-                .doubleValue();
+            .setScale(1, RoundingMode.HALF_DOWN)
+            .doubleValue();
 
         Assertions.assertEquals(2.4d, actualTruncated);
         Assertions.assertEquals(2.4f, tuple.getDouble("number_field"));
@@ -93,7 +93,7 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
 
         //when
         TarantoolTuple tuple = client.space("test_space_with_double_field")
-                .insert(tupleFactory.create(4, 1, 1.1, 1)).get().get(0);
+            .insert(tupleFactory.create(4, 1, 1.1, 1)).get().get(0);
 
         //then
         Assertions.assertNotNull(tuple);
@@ -111,14 +111,14 @@ public class DoubleConversionIT extends SharedCartridgeContainer {
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
         return TarantoolClientFactory.createClient()
-                .withAddress(container.getHost(), container.getPort())
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .withProxyMethodMapping()
-                .withRetryingByNumberOfAttempts(10,
-                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
-                        b -> b.withDelay(100))
-                .build();
+            .withAddress(container.getHost(), container.getPort())
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .withProxyMethodMapping()
+            .withRetryingByNumberOfAttempts(10,
+                TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                b -> b.withDelay(100))
+            .build();
     }
 }

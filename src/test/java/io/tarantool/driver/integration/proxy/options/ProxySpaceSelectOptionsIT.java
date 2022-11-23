@@ -5,13 +5,13 @@ import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Artyom Dubinin
@@ -32,7 +33,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -50,13 +51,13 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
 
     private static void initClient() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getRouterHost(), container.getRouterPort());
+            config, container.getRouterHost(), container.getRouterPort());
         client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
@@ -72,7 +73,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBatchSizeTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple;
 
@@ -87,7 +88,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(conditions).get();
         assertEquals(10, selectResult.size());
         List<?> crudSelectOpts = client.eval("return crud_select_opts").get();
-        assertEquals(null, ((HashMap) crudSelectOpts.get(0)).get("batch_size"));
+        assertNull(((HashMap) crudSelectOpts.get(0)).get("batch_size"));
 
         // with batchSize
         selectResult = profileSpace.select(
@@ -102,7 +103,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withTimeout() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         int requestConfigTimeout = client.getConfig().getRequestTimeout();
         int customRequestTimeout = requestConfigTimeout * 2;
@@ -114,8 +115,8 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
 
         // with option timeout
         profileSpace.select(
-                Conditions.any(),
-                ProxySelectOptions.create().withTimeout(customRequestTimeout)
+            Conditions.any(),
+            ProxySelectOptions.create().withTimeout(customRequestTimeout)
         ).get();
         crudSelectOpts = client.eval("return crud_select_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudSelectOpts.get(0)).get("timeout"));

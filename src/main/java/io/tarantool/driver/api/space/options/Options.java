@@ -21,9 +21,9 @@ public interface Options {
     /**
      * Return option value by name.
      *
-     * @param option option name
+     * @param option      option name
      * @param optionClass option value class
-     * @param <T> option value type
+     * @param <T>         option value type
      * @return option value
      */
     <T> Optional<T> getOption(String option, Class<T> optionClass);

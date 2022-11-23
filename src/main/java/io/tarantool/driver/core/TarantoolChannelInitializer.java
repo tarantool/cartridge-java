@@ -36,10 +36,11 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
     private final CompletableFuture<Channel> connectionFuture;
     private final RequestFutureManager futureManager;
 
-    public TarantoolChannelInitializer(TarantoolClientConfig config,
-                                       RequestFutureManager futureManager,
-                                       TarantoolVersionHolder versionHolder,
-                                       CompletableFuture<Channel> connectionFuture) {
+    public TarantoolChannelInitializer(
+        TarantoolClientConfig config,
+        RequestFutureManager futureManager,
+        TarantoolVersionHolder versionHolder,
+        CompletableFuture<Channel> connectionFuture) {
         this.config = config;
         this.versionHolder = versionHolder;
         this.connectionFuture = connectionFuture;
@@ -57,21 +58,21 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
         // greeting and authentication (will be removed after successful authentication)
         pipeline.addLast("TarantoolAuthenticationHandler",
                 new TarantoolAuthenticationHandler<>(
-                        connectionFuture,
-                        versionHolder,
-                        (SimpleTarantoolCredentials) config.getCredentials(),
-                        new ChapSha1TarantoolAuthenticator()))
-                // frame encoder and decoder
-                .addLast("MessagePackFrameDecoder", new MessagePackFrameDecoder())
-                .addLast("MessagePackFrameEncoder", new MessagePackFrameEncoder(
-                        DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper()))
-                // outbound
-                .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
-                // inbound auth response handler
-                .addLast("TarantoolAuthenticationResponseHandler", new TarantoolAuthenticationResponseHandler(
-                        connectionFuture))
-                // inbound
-                .addLast("TarantoolResponseHandler", new TarantoolResponseHandler(futureManager));
+                    connectionFuture,
+                    versionHolder,
+                    (SimpleTarantoolCredentials) config.getCredentials(),
+                    new ChapSha1TarantoolAuthenticator()))
+            // frame encoder and decoder
+            .addLast("MessagePackFrameDecoder", new MessagePackFrameDecoder())
+            .addLast("MessagePackFrameEncoder", new MessagePackFrameEncoder(
+                DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper()))
+            // outbound
+            .addLast("TarantoolRequestHandler", new TarantoolRequestHandler(futureManager))
+            // inbound auth response handler
+            .addLast("TarantoolAuthenticationResponseHandler", new TarantoolAuthenticationResponseHandler(
+                connectionFuture))
+            // inbound
+            .addLast("TarantoolResponseHandler", new TarantoolResponseHandler(futureManager));
     }
 
     private void wrapForSecure(SocketChannel socketChannel, ChannelPipeline pipeline) {

@@ -40,7 +40,7 @@ public class CustomTuple {
         }
         CustomTuple that = (CustomTuple) o;
         return id == that.id &&
-                Objects.equals(name, that.name);
+            Objects.equals(name, that.name);
     }
 
     @Override

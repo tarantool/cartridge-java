@@ -21,11 +21,12 @@ import java.util.List;
  */
 public final class InsertProxyOperation<T extends Packable, R extends Collection<T>> extends AbstractProxyOperation<R> {
 
-    private InsertProxyOperation(TarantoolCallOperations client,
-                                 String functionName,
-                                 List<?> arguments,
-                                 MessagePackObjectMapper argumentsMapper,
-                                 CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
+    private InsertProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -33,7 +34,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-            extends GenericOperationsBuilder<R, InsertOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, InsertOptions, Builder<T, R>> {
         private T tuple;
 
         public Builder() {
@@ -51,14 +52,14 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
 
         public InsertProxyOperation<T, R> build() {
             CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withBucketId(options.getBucketId())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withBucketId(options.getBucketId())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());
 
             return new InsertProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

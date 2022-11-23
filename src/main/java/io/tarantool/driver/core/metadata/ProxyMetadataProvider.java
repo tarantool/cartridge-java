@@ -27,20 +27,22 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
     /**
      * Basic constructor
      *
-     * @param client configured Tarantool client to make requests with
+     * @param client               configured Tarantool client to make requests with
      * @param metadataFunctionName the stored function name
-     * @param metadataConverter converter to {@link TarantoolMetadataContainer} aware of the function call result format
-     * @param resultClass result class
+     * @param metadataConverter    converter to {@link TarantoolMetadataContainer}
+     *                             aware of the function call result format
+     * @param resultClass          result class
      */
-    public ProxyMetadataProvider(TarantoolCallOperations client,
-                                 String metadataFunctionName,
-                                 ValueConverter<Value, TarantoolMetadataContainer> metadataConverter,
-                                 Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {
+    public ProxyMetadataProvider(
+        TarantoolCallOperations client,
+        String metadataFunctionName,
+        ValueConverter<Value, TarantoolMetadataContainer> metadataConverter,
+        Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {
         this.metadataFunctionName = metadataFunctionName;
         this.client = client;
         this.mapper = client.getResultMapperFactoryFactory()
-                .<TarantoolMetadataContainer>singleValueResultMapperFactory()
-                        .withSingleValueResultConverter(metadataConverter, resultClass);
+            .<TarantoolMetadataContainer>singleValueResultMapperFactory()
+            .withSingleValueResultConverter(metadataConverter, resultClass);
     }
 
     @Override

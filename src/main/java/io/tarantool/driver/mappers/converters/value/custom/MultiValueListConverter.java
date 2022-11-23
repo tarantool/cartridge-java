@@ -23,7 +23,7 @@ public class MultiValueListConverter<T, R extends List<T>, V extends Value> impl
     /**
      * Basic constructor
      *
-     * @param valueConverter converter for result items
+     * @param valueConverter    converter for result items
      * @param containerSupplier supplier for an empty collection of the result type
      */
     public MultiValueListConverter(ValueConverter<V, T> valueConverter, Supplier<R> containerSupplier) {
@@ -34,7 +34,7 @@ public class MultiValueListConverter<T, R extends List<T>, V extends Value> impl
     @Override
     public R fromValue(ArrayValue value) {
         return value.list().stream()
-                .map(v -> valueConverter.fromValue((V) v))
-                .collect(Collectors.toCollection(containerSupplier));
+            .map(v -> valueConverter.fromValue((V) v))
+            .collect(Collectors.toCollection(containerSupplier));
     }
 }

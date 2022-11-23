@@ -16,7 +16,7 @@ import java.util.Collection;
  * @author Alexey Kuzin
  */
 public interface TarantoolClient<T extends Packable, R extends Collection<T>>
-        extends AutoCloseable, TarantoolCallOperations, TarantoolEvalOperations {
+    extends AutoCloseable, TarantoolCallOperations, TarantoolEvalOperations {
     /**
      * Provides implementation of retrieving the metadata for spaces and instances from Tarantool servers
      *

@@ -60,9 +60,9 @@ public class TarantoolServerAddressTest {
         assertEquals("localhost", tarantoolServerAddress.getHost());
         assertEquals(3301, tarantoolServerAddress.getPort());
         assertEquals("localhost",
-                tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
+            tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
         assertEquals("0:0:0:0:0:0:0:1",
-                tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
+            tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
     }
 
     @Test
@@ -74,39 +74,39 @@ public class TarantoolServerAddressTest {
         assertEquals("localhost", tarantoolServerAddress.getHost());
         assertEquals(3301, tarantoolServerAddress.getPort());
         assertEquals("localhost",
-                tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
+            tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
         assertEquals("0:0:0:0:0:0:0:1",
-                tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
+            tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
     }
 
     @Test
     public void test_should_parseIPv4Address() {
         //when
         final TarantoolServerAddress tarantoolServerAddress =
-                new TarantoolServerAddress("127.0.0.1", 3301);
+            new TarantoolServerAddress("127.0.0.1", 3301);
 
         //then
         assertEquals("localhost", tarantoolServerAddress.getHost());
         assertEquals(3301, tarantoolServerAddress.getPort());
         assertEquals("localhost",
-                tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
+            tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
         assertEquals("127.0.0.1",
-                tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
+            tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
     }
 
     @Test
     public void test_should_parseLocalhost() {
         //when
         final TarantoolServerAddress tarantoolServerAddress =
-                new TarantoolServerAddress("localhost", 3301);
+            new TarantoolServerAddress("localhost", 3301);
 
         //then
         assertEquals("localhost", tarantoolServerAddress.getHost());
         assertEquals(3301, tarantoolServerAddress.getPort());
         assertEquals("localhost",
-                tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
+            tarantoolServerAddress.getSocketAddress().getAddress().getCanonicalHostName());
         assertEquals("127.0.0.1",
-                tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
+            tarantoolServerAddress.getSocketAddress().getAddress().getHostAddress());
     }
 
     @Test

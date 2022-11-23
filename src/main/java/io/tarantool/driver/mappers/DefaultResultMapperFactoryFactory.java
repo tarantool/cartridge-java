@@ -4,8 +4,8 @@ import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.converters.value.custom.MultiValueListConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.value.custom.MultiValueListConverter;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueType;
 
@@ -67,46 +67,41 @@ public final class DefaultResultMapperFactoryFactory implements ResultMapperFact
         return new MultiValueTarantoolResultMapperFactory<>();
     }
 
-    public
-    <T> CallResultMapper<T, SingleValueCallResult<T>>
+    public <T> CallResultMapper<T, SingleValueCallResult<T>>
     getSingleValueResultMapper(ValueConverter<Value, T> valueConverter) {
         return this.<T>singleValueResultMapperFactory().withSingleValueResultConverter(
-                valueConverter, (Class<SingleValueCallResult<T>>) (Class<?>) SingleValueCallResult.class);
+            valueConverter, (Class<SingleValueCallResult<T>>) (Class<?>) SingleValueCallResult.class);
     }
 
-    public
-    <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
+    public <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
     getMultiValueResultMapper(Supplier<R> containerSupplier, ValueConverter<Value, T> valueConverter) {
         return this.<T, R>multiValueResultMapperFactory().withMultiValueResultConverter(
-                new MultiValueListConverter<>(valueConverter, containerSupplier),
-                (Class<MultiValueCallResult<T, R>>) (Class<?>) MultiValueCallResult.class);
+            new MultiValueListConverter<>(valueConverter, containerSupplier),
+            (Class<MultiValueCallResult<T, R>>) (Class<?>) MultiValueCallResult.class);
     }
 
-    public
-    <T> CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
+    public <T> CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
     getTarantoolResultMapper(MessagePackMapper mapper, Class<T> tupleClass) {
         return this.<T>singleValueTarantoolResultMapperFactory()
-                .withTarantoolResultConverter(getConverter(mapper, ValueType.ARRAY, tupleClass));
+            .withTarantoolResultConverter(getConverter(mapper, ValueType.ARRAY, tupleClass));
     }
 
-    public
-    <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
+    public <T, R extends List<T>> CallResultMapper<R, MultiValueCallResult<T, R>>
     getDefaultMultiValueMapper(MessagePackMapper mapper, Class<T> tupleClass) {
         return new DefaultMultiValueResultMapper<>(mapper, tupleClass);
     }
 
-    public
-    <T> CallResultMapper<T, SingleValueCallResult<T>>
+    public <T> CallResultMapper<T, SingleValueCallResult<T>>
     getDefaultSingleValueMapper(MessagePackMapper mapper, Class<T> tupleClass) {
         return new DefaultSingleValueResultMapper<>(mapper, tupleClass);
     }
 
     private <V extends Value, T> ValueConverter<V, T> getConverter(
-            MessagePackMapper mapper, ValueType valueType, Class<T> tupleClass) {
+        MessagePackMapper mapper, ValueType valueType, Class<T> tupleClass) {
         Optional<? extends ValueConverter<V, T>> converter = mapper.getValueConverter(valueType, tupleClass);
         if (!converter.isPresent()) {
             throw new TarantoolClientException(
-                    "No converter for value type %s and type %s is present", valueType, tupleClass);
+                "No converter for value type %s and type %s is present", valueType, tupleClass);
         }
         return converter.get();
     }

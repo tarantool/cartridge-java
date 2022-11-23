@@ -2,8 +2,8 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.CustomTuple;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageTypeCastException;
@@ -30,7 +30,7 @@ class DefaultMessagePackMapperTest {
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     @Test
     void getDefaultConverter() throws MessagePackValueMapperException {
@@ -58,7 +58,7 @@ class DefaultMessagePackMapperTest {
         assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000f), Integer.class));
         assertEquals(Integer.valueOf(1000), mapper.fromValue(ValueFactory.newFloat(1000d), Integer.class));
         assertEquals(Double.valueOf(Float.MAX_VALUE * 10D),
-                mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
+            mapper.fromValue(ValueFactory.newFloat(Float.MAX_VALUE * 10D)));
         assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newFloat(111.0F), Double.class));
         assertEquals(Double.valueOf(111.0D), mapper.fromValue(ValueFactory.newInteger(111L), Double.class));
         assertEquals(Float.valueOf(111.0F), mapper.fromValue(ValueFactory.newFloat(111.0D), Float.class));
@@ -87,7 +87,7 @@ class DefaultMessagePackMapperTest {
         // check default complex type Value converters
         List<Object> testList = Arrays.asList("Hello", 111);
         ArrayValue expectedValue = ValueFactory.newArray(
-                ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
+            ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         assertEquals(expectedValue, mapper.toValue(testList));
 
         expectedValue = ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L));
@@ -103,13 +103,13 @@ class DefaultMessagePackMapperTest {
 
         // check default complex type Object converters
         ArrayValue testValue =
-                ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
+            ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         List<Object> expectedList = Arrays.asList("Hello", 111);
         assertEquals(expectedList, mapper.fromValue(testValue));
 
         long[] expectedArray =
-                mapper.fromValue(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)), long[].class);
-        assertArrayEquals(new long[]{ 4_000_000_000_000L }, expectedArray);
+            mapper.fromValue(ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L)), long[].class);
+        assertArrayEquals(new long[]{4_000_000_000_000L}, expectedArray);
 
         Map<Value, Value> testMap1 = new HashMap<>();
         expectedMap.put(ValueFactory.newInteger(1), ValueFactory.newString("Hello"));
@@ -122,8 +122,8 @@ class DefaultMessagePackMapperTest {
         // what about array of arrays?
         List<List<Object>> complexList = Arrays.asList(Arrays.asList("Hello", 111), Arrays.asList("World", 222));
         ArrayValue complexValue = ValueFactory.newArray(
-                ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111)),
-                ValueFactory.newArray(ValueFactory.newString("World"), ValueFactory.newInteger(222)));
+            ValueFactory.newArray(ValueFactory.newString("Hello"), ValueFactory.newInteger(111)),
+            ValueFactory.newArray(ValueFactory.newString("World"), ValueFactory.newInteger(222)));
         assertEquals(complexValue, mapper.toValue(complexList));
         assertEquals(complexList, mapper.fromValue(complexValue));
 
@@ -139,9 +139,9 @@ class DefaultMessagePackMapperTest {
 
         // map with nil values
         MapValue nilMap = ValueFactory.newMap(
-                ValueFactory.newString("a"), ValueFactory.newInteger(123),
-                ValueFactory.newString("b"), ValueFactory.newNil(),
-                ValueFactory.newString("c"), ValueFactory.newInteger(456)
+            ValueFactory.newString("a"), ValueFactory.newInteger(123),
+            ValueFactory.newString("b"), ValueFactory.newNil(),
+            ValueFactory.newString("c"), ValueFactory.newInteger(456)
         );
         Map<String, Integer> notNilMap = new HashMap<>();
         notNilMap.put("a", 123);
@@ -158,13 +158,13 @@ class DefaultMessagePackMapperTest {
         testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
         assertThrows(MessagePackValueMapperException.class, () -> mapper.fromValue(ValueFactory.newMap(testValue)));
         mapper.registerValueConverter(ValueType.MAP, CustomTuple.class,
-                (ValueConverter<MapValue, CustomTuple>) v -> {
-            CustomTuple tuple = new CustomTuple();
-            Map<Value, Value> keyValue = v.map();
-            tuple.setId(keyValue.get(ValueFactory.newString("id")).asIntegerValue().asInt());
-            tuple.setName(keyValue.get(ValueFactory.newString("name")).asStringValue().asString());
-            return tuple;
-        });
+            (ValueConverter<MapValue, CustomTuple>) v -> {
+                CustomTuple tuple = new CustomTuple();
+                Map<Value, Value> keyValue = v.map();
+                tuple.setId(keyValue.get(ValueFactory.newString("id")).asIntegerValue().asInt());
+                tuple.setName(keyValue.get(ValueFactory.newString("name")).asStringValue().asString());
+                return tuple;
+            });
         assertEquals(testTuple, mapper.fromValue(ValueFactory.newMap(testValue)));
     }
 
@@ -251,7 +251,7 @@ class DefaultMessagePackMapperTest {
     @Test
     void should_getObject_returnLongArray() {
         TarantoolTuple tuple = tupleFactory.create(
-                ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L))
+            ValueFactory.newArray(new ImmutableLongValueImpl(4_000_000_000_000L))
         );
         assertEquals(long[].class, tuple.getObject(0, long[].class).get().getClass());
         assertEquals(4_000_000_000_000L, tuple.getObject(0, long[].class).get()[0]);
@@ -260,7 +260,7 @@ class DefaultMessagePackMapperTest {
     @Test
     void should_getObject_throwMessageTypeCastException_ifArrayValue_ContainsNotLong() {
         TarantoolTuple tuple = tupleFactory.create(ValueFactory.newArray(
-                new ImmutableLongValueImpl(1L), new ImmutableStringValueImpl("notLong")
+            new ImmutableLongValueImpl(1L), new ImmutableStringValueImpl("notLong")
         ));
         assertThrows(MessageTypeCastException.class, () -> tuple.getObject(0, long[].class).get());
     }

@@ -1,15 +1,15 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.mappers.converters.object.DefaultNilValueToNullConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
-import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBooleanToBooleanValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultByteArrayToBinaryValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultCharacterToStringValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultDoubleToFloatValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultFloatToFloatValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultIntegerToIntegerValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultLongToIntegerValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultNilValueToNullConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultPackableObjectConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultShortToIntegerValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultStringToStringValueConverter;
@@ -24,9 +24,9 @@ import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToFloatConv
 import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToIntegerConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToLongConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultFloatValueToShortConverter;
-import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToIntegerConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToDoubleConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToFloatConverter;
+import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToIntegerConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToLongConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToShortConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToByteArrayConverter;
@@ -61,42 +61,42 @@ public final class DefaultMessagePackMapperFactory {
      */
     private DefaultMessagePackMapperFactory() {
         defaultSimpleTypesMapper = new DefaultMessagePackMapper.Builder()
-                // converters for primitive values
-                .withValueConverter(ValueType.STRING, byte[].class, new DefaultStringValueToByteArrayConverter())
-                .withValueConverter(ValueType.STRING, Character.class, new DefaultStringValueToCharacterConverter())
-                .withValueConverter(ValueType.STRING, String.class, new DefaultStringValueToStringConverter())
-                .withValueConverter(ValueType.INTEGER, Short.class, new DefaultIntegerValueToShortConverter())
-                .withValueConverter(ValueType.INTEGER, Float.class, new DefaultIntegerValueToFloatConverter())
-                .withValueConverter(ValueType.INTEGER, Double.class, new DefaultIntegerValueToDoubleConverter())
-                .withValueConverter(ValueType.INTEGER, Long.class, new DefaultIntegerValueToLongConverter())
-                .withValueConverter(ValueType.INTEGER, Integer.class, new DefaultIntegerValueToIntegerConverter())
-                .withValueConverter(ValueType.BINARY, byte[].class, new DefaultBinaryValueToByteArrayConverter())
-                .withValueConverter(ValueType.ARRAY, long[].class, new DefaultArrayValueToLongArrayConverter())
-                .withValueConverter(ValueType.BOOLEAN, Boolean.class, new DefaultBooleanValueToBooleanConverter())
-                .withValueConverter(ValueType.FLOAT, Short.class, new DefaultFloatValueToShortConverter())
-                .withValueConverter(ValueType.FLOAT, Long.class, new DefaultFloatValueToLongConverter())
-                .withValueConverter(ValueType.FLOAT, Integer.class, new DefaultFloatValueToIntegerConverter())
-                .withValueConverter(ValueType.FLOAT, Float.class, new DefaultFloatValueToFloatConverter())
-                .withValueConverter(ValueType.FLOAT, Double.class, new DefaultFloatValueToDoubleConverter())
-                .withValueConverter(ValueType.EXTENSION, UUID.class, new DefaultExtensionValueToUUIDConverter())
-                .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
-                        new DefaultExtensionValueToBigDecimalConverter())
-                .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
-                //TODO: Potential issue https://github.com/tarantool/cartridge-java/issues/118
-                .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
-                .withObjectConverter(String.class, StringValue.class, new DefaultStringToStringValueConverter())
-                .withObjectConverter(Long.class, IntegerValue.class, new DefaultLongToIntegerValueConverter())
-                .withObjectConverter(Short.class, IntegerValue.class, new DefaultShortToIntegerValueConverter())
-                .withObjectConverter(Integer.class, IntegerValue.class, new DefaultIntegerToIntegerValueConverter())
-                .withObjectConverter(byte[].class, BinaryValue.class, new DefaultByteArrayToBinaryValueConverter())
-                .withObjectConverter(long[].class, ArrayValue.class, new DefaultLongArrayToArrayValueConverter())
-                .withObjectConverter(Boolean.class, BooleanValue.class, new DefaultBooleanToBooleanValueConverter())
-                .withObjectConverter(Float.class, FloatValue.class, new DefaultFloatToFloatValueConverter())
-                .withObjectConverter(Double.class, FloatValue.class, new DefaultDoubleToFloatValueConverter())
-                .withObjectConverter(UUID.class, ExtensionValue.class, new DefaultUUIDToExtensionValueConverter())
-                .withObjectConverter(BigDecimal.class, ExtensionValue.class,
-                        new DefaultBigDecimalToExtensionValueConverter())
-                .build();
+            // converters for primitive values
+            .withValueConverter(ValueType.STRING, byte[].class, new DefaultStringValueToByteArrayConverter())
+            .withValueConverter(ValueType.STRING, Character.class, new DefaultStringValueToCharacterConverter())
+            .withValueConverter(ValueType.STRING, String.class, new DefaultStringValueToStringConverter())
+            .withValueConverter(ValueType.INTEGER, Short.class, new DefaultIntegerValueToShortConverter())
+            .withValueConverter(ValueType.INTEGER, Float.class, new DefaultIntegerValueToFloatConverter())
+            .withValueConverter(ValueType.INTEGER, Double.class, new DefaultIntegerValueToDoubleConverter())
+            .withValueConverter(ValueType.INTEGER, Long.class, new DefaultIntegerValueToLongConverter())
+            .withValueConverter(ValueType.INTEGER, Integer.class, new DefaultIntegerValueToIntegerConverter())
+            .withValueConverter(ValueType.BINARY, byte[].class, new DefaultBinaryValueToByteArrayConverter())
+            .withValueConverter(ValueType.ARRAY, long[].class, new DefaultArrayValueToLongArrayConverter())
+            .withValueConverter(ValueType.BOOLEAN, Boolean.class, new DefaultBooleanValueToBooleanConverter())
+            .withValueConverter(ValueType.FLOAT, Short.class, new DefaultFloatValueToShortConverter())
+            .withValueConverter(ValueType.FLOAT, Long.class, new DefaultFloatValueToLongConverter())
+            .withValueConverter(ValueType.FLOAT, Integer.class, new DefaultFloatValueToIntegerConverter())
+            .withValueConverter(ValueType.FLOAT, Float.class, new DefaultFloatValueToFloatConverter())
+            .withValueConverter(ValueType.FLOAT, Double.class, new DefaultFloatValueToDoubleConverter())
+            .withValueConverter(ValueType.EXTENSION, UUID.class, new DefaultExtensionValueToUUIDConverter())
+            .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
+                new DefaultExtensionValueToBigDecimalConverter())
+            .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
+            //TODO: Potential issue https://github.com/tarantool/cartridge-java/issues/118
+            .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
+            .withObjectConverter(String.class, StringValue.class, new DefaultStringToStringValueConverter())
+            .withObjectConverter(Long.class, IntegerValue.class, new DefaultLongToIntegerValueConverter())
+            .withObjectConverter(Short.class, IntegerValue.class, new DefaultShortToIntegerValueConverter())
+            .withObjectConverter(Integer.class, IntegerValue.class, new DefaultIntegerToIntegerValueConverter())
+            .withObjectConverter(byte[].class, BinaryValue.class, new DefaultByteArrayToBinaryValueConverter())
+            .withObjectConverter(long[].class, ArrayValue.class, new DefaultLongArrayToArrayValueConverter())
+            .withObjectConverter(Boolean.class, BooleanValue.class, new DefaultBooleanToBooleanValueConverter())
+            .withObjectConverter(Float.class, FloatValue.class, new DefaultFloatToFloatValueConverter())
+            .withObjectConverter(Double.class, FloatValue.class, new DefaultDoubleToFloatValueConverter())
+            .withObjectConverter(UUID.class, ExtensionValue.class, new DefaultUUIDToExtensionValueConverter())
+            .withObjectConverter(BigDecimal.class, ExtensionValue.class,
+                new DefaultBigDecimalToExtensionValueConverter())
+            .build();
     }
 
     /**
@@ -108,7 +108,7 @@ public final class DefaultMessagePackMapperFactory {
         // internal types converter
         DefaultMessagePackMapper simpleTypesMapper = new DefaultMessagePackMapper(defaultSimpleTypesMapper);
         simpleTypesMapper.registerObjectConverter(
-                new DefaultPackableObjectConverter(simpleTypesMapper));
+            new DefaultPackableObjectConverter(simpleTypesMapper));
         return simpleTypesMapper;
     }
 
@@ -120,16 +120,16 @@ public final class DefaultMessagePackMapperFactory {
      */
     public DefaultMessagePackMapper defaultComplexTypesMapper() {
         DefaultMessagePackMapper defaultComplexTypesMapper =
-                new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
-                        .withDefaultListObjectConverter()
-                        .withDefaultArrayValueConverter()
-                        .withDefaultMapObjectConverter()
-                        .withDefaultMapValueConverter()
-                        .build();
+            new DefaultMessagePackMapper.Builder(defaultSimpleTypesMapper)
+                .withDefaultListObjectConverter()
+                .withDefaultArrayValueConverter()
+                .withDefaultMapObjectConverter()
+                .withDefaultMapValueConverter()
+                .build();
 
         // internal types converter
         defaultComplexTypesMapper.registerObjectConverter(
-                new DefaultPackableObjectConverter(defaultComplexTypesMapper));
+            new DefaultPackableObjectConverter(defaultComplexTypesMapper));
         return defaultComplexTypesMapper;
     }
 

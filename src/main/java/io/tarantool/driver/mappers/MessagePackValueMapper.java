@@ -16,7 +16,8 @@ import java.util.Optional;
 public interface MessagePackValueMapper {
     /**
      * Create Java object out of its MessagePack representation.
-     * @param v MessagePack entity
+     *
+     * @param v   MessagePack entity
      * @param <V> source MessagePack entity type
      * @param <O> target object type
      * @return Java object
@@ -27,10 +28,11 @@ public interface MessagePackValueMapper {
     /**
      * Create Java object out of its MessagePack representation. Converters will be checked to match the target
      * object type.
-     * @param v MessagePack entity
+     *
+     * @param v           MessagePack entity
      * @param targetClass Java object class
-     * @param <V> source MessagePack entity type
-     * @param <O> target object type
+     * @param <V>         source MessagePack entity type
+     * @param <O>         target object type
      * @return Java object
      * @throws MessagePackValueMapperException if the corresponding conversion cannot be performed
      */
@@ -38,18 +40,21 @@ public interface MessagePackValueMapper {
 
     /**
      * Adds a MessagePack entity converter to this mappers instance.
-     * @param valueType  MessagePack source type
+     *
+     * @param valueType   MessagePack source type
      * @param objectClass target object class
-     * @param converter object-to-entity converter
-     * @param <V>       MessagePack's entity type that the converter accepts and/or returns
-     * @param <O>       java object's type that the converter accepts and/or returns
+     * @param converter   object-to-entity converter
+     * @param <V>         MessagePack's entity type that the converter accepts and/or returns
+     * @param <O>         java object's type that the converter accepts and/or returns
      * @see ValueConverter
      */
-    <V extends Value, O> void registerValueConverter(ValueType valueType, Class<? extends O> objectClass,
-                                                     ValueConverter<V, ? extends O> converter);
+    <V extends Value, O> void registerValueConverter(
+        ValueType valueType, Class<? extends O> objectClass,
+        ValueConverter<V, ? extends O> converter);
 
     /**
      * Get a converter capable of converting from the source entity class to the target class
+     *
      * @param valueType   MessagePack source type
      * @param objectClass the target conversion class
      * @param <V>         MessagePack's entity type that the converter accepts and/or returns

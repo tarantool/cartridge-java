@@ -24,10 +24,10 @@ public class TarantoolClientConfigTest {
 
         //when
         final TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withSslContext(SslContextBuilder.forClient().build())
-                .withSecure(false)
-                .withCredentials(credentials)
-                .build();
+            .withSslContext(SslContextBuilder.forClient().build())
+            .withSecure(false)
+            .withCredentials(credentials)
+            .build();
 
         final ClusterTarantoolTupleClient clientWithSsl = new ClusterTarantoolTupleClient(config, address);
 

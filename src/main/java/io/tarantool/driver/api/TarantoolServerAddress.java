@@ -46,7 +46,7 @@ public class TarantoolServerAddress implements Serializable {
             int idx = address.indexOf("]");
             if (idx == -1) {
                 throw new IllegalArgumentException(
-                        "An IPV6 address must be enclosed with '[' and ']' according to RFC 2732.");
+                    "An IPV6 address must be enclosed with '[' and ']' according to RFC 2732.");
             }
 
             int portIdx = address.indexOf("]:");
@@ -88,7 +88,7 @@ public class TarantoolServerAddress implements Serializable {
 
         if (split.length > 2) {
             throw new IllegalArgumentException(
-                    String.format("Incorrect address for connecting to Tarantool: %s", hostToUse));
+                String.format("Incorrect address for connecting to Tarantool: %s", hostToUse));
         }
         if (split.length == 2) {
             hostToUse = split[1];

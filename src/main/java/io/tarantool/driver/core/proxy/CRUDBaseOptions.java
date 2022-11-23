@@ -4,7 +4,7 @@ import java.util.Optional;
 
 /**
  * This class is not part of the public API.
- *
+ * <p>
  * Represent basic options for all cluster operations
  *
  * @author Alexey Kuzin
@@ -14,8 +14,7 @@ class CRUDBaseOptions extends CRUDAbstractOperationOptions {
 
     public static final String TIMEOUT = "timeout";
 
-    protected
-    <O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
+    protected <O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
     CRUDBaseOptions(AbstractBuilder<O, T> builder) {
         addOption(TIMEOUT, builder.timeout);
     }

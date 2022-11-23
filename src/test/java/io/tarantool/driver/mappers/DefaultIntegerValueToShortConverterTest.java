@@ -4,7 +4,8 @@ import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToShortCo
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DefaultIntegerValueToShortConverterTest {
 

@@ -45,10 +45,10 @@ public interface MessagePackMapperBuilder {
     /**
      * Configure the mapper with a specified MessagePack entity-to-object converter
      *
-     * @param valueType  MessagePack source type
-     * @param converter  MessagePack entity-to-object and object-to-entity converter
-     * @param <V>        MessagePack's entity type that the converter accepts and/or returns
-     * @param <O>        java object's type that the converter accepts and/or returns
+     * @param valueType MessagePack source type
+     * @param converter MessagePack entity-to-object and object-to-entity converter
+     * @param <V>       MessagePack's entity type that the converter accepts and/or returns
+     * @param <O>       java object's type that the converter accepts and/or returns
      * @return builder
      * @see io.tarantool.driver.mappers.DefaultMessagePackMapper#registerValueConverter(ValueType, ValueConverter)
      */
@@ -66,9 +66,10 @@ public interface MessagePackMapperBuilder {
      * @return builder
      * @see DefaultMessagePackMapper#registerValueConverter(ValueType, Class, ValueConverter)
      */
-    <V extends Value, O> MessagePackMapperBuilder withValueConverter(ValueType valueType,
-                                                                     Class<O> objectClass,
-                                                                     ValueConverter<V, O> converter);
+    <V extends Value, O> MessagePackMapperBuilder withValueConverter(
+        ValueType valueType,
+        Class<O> objectClass,
+        ValueConverter<V, O> converter);
 
     /**
      * Configure the mapper with a specified MessagePack object-to-entity converter
@@ -89,8 +90,9 @@ public interface MessagePackMapperBuilder {
      * @param <O>         java object's type that the converter accepts and/or returns
      * @return builder
      */
-    <V extends Value, O> MessagePackMapperBuilder withObjectConverter(Class<O> objectClass,
-                                                                      ObjectConverter<O, V> converter);
+    <V extends Value, O> MessagePackMapperBuilder withObjectConverter(
+        Class<O> objectClass,
+        ObjectConverter<O, V> converter);
 
     /**
      * Configure the mapper with a specified MessagePack object-to-entity converter
@@ -102,8 +104,9 @@ public interface MessagePackMapperBuilder {
      * @param <O>         object type
      * @return builder
      */
-    <V extends Value, O> MessagePackMapperBuilder withObjectConverter(Class<O> objectClass, Class<V> valueClass,
-                                                                      ObjectConverter<O, V> converter);
+    <V extends Value, O> MessagePackMapperBuilder withObjectConverter(
+        Class<O> objectClass, Class<V> valueClass,
+        ObjectConverter<O, V> converter);
 
     /**
      * Build the mapper instance

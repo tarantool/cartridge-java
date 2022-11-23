@@ -26,9 +26,9 @@ public class RoundRobinStrategyTest {
     @Test
     public void testGetAddress() {
         List<TarantoolConnection> connections = Arrays.asList(
-                new CustomConnection("127.0.0.1", 3001),
-                new CustomConnection("127.0.0.2", 3002),
-                new CustomConnection("127.0.0.3", 3003)
+            new CustomConnection("127.0.0.1", 3001),
+            new CustomConnection("127.0.0.2", 3002),
+            new CustomConnection("127.0.0.3", 3003)
         );
 
         TarantoolClientConfig config = new TarantoolClientConfig();
@@ -46,9 +46,9 @@ public class RoundRobinStrategyTest {
         TarantoolClientConfig config = new TarantoolClientConfig();
 
         assertThrows(IllegalArgumentException.class,
-                () -> RoundRobinStrategyFactory.INSTANCE.create(config, null));
+            () -> RoundRobinStrategyFactory.INSTANCE.create(config, null));
         assertThrows(NoAvailableConnectionsException.class,
-                () -> RoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
+            () -> RoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
 
         connections.add(new CustomConnection("127.0.0.1", 3001));
         ConnectionSelectionStrategy strategy = RoundRobinStrategyFactory.INSTANCE.create(config, connections);
@@ -63,8 +63,8 @@ public class RoundRobinStrategyTest {
     @Test
     public void testParallelGetAddress() {
         List<TarantoolConnection> connections = IntStream.range(1, 11)
-                .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
-                .collect(Collectors.toList());
+            .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
+            .collect(Collectors.toList());
 
         TarantoolClientConfig config = new TarantoolClientConfig();
         ConnectionSelectionStrategy strategy = RoundRobinStrategyFactory.INSTANCE.create(config, connections);
@@ -98,13 +98,13 @@ public class RoundRobinStrategyTest {
     @Test
     public void testSkipConnections() {
         List<TarantoolConnection> connections = IntStream.range(1, 11)
-                .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
-                .peek(c -> {
-                    if (c.getPort() < 3006) {
-                        c.setConnected(false);
-                    }
-                })
-                .collect(Collectors.toList());
+            .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
+            .peek(c -> {
+                if (c.getPort() < 3006) {
+                    c.setConnected(false);
+                }
+            })
+            .collect(Collectors.toList());
 
         TarantoolClientConfig config = new TarantoolClientConfig();
         ConnectionSelectionStrategy strategy = RoundRobinStrategyFactory.INSTANCE.create(config, connections);

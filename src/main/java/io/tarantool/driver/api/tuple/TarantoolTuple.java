@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
     /**
      * Get a tuple field by its position
+     *
      * @param fieldPosition the field position from the the tuple start, starting from 0
      * @return field or empty optional if the field position is out of tuple length
      */
@@ -38,33 +39,37 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
 
     /**
      * Get a tuple field value by its position specifying the target value type
+     *
      * @param fieldPosition field position from the the tuple start, starting from 0
-     * @param objectClass target value type class
-     * @param <O> target value type
+     * @param objectClass   target value type class
+     * @param <O>           target value type
      * @return nullable value of a field wrapped in Optional, possibly converted to a Java type
      */
     <O> Optional<O> getObject(int fieldPosition, Class<O> objectClass);
 
     /**
      * Check if a tuple field exists and can be converted to the target value type
+     *
      * @param fieldPosition field position from the the tuple start, starting from 0
-     * @param objectClass target value type class
+     * @param objectClass   target value type class
      * @return true, if the field exists and can be converted to the given type, false otherwise
      */
     boolean canGetObject(int fieldPosition, Class<?> objectClass);
 
     /**
      * Get a tuple field value by its name specifying the target value type
-     * @param fieldName field name, should not be null
+     *
+     * @param fieldName   field name, should not be null
      * @param objectClass target value type class
-     * @param <O> target value type
+     * @param <O>         target value type
      * @return nullable value of a field wrapped in Optional, possibly converted to a Java type
      */
     <O> Optional<O> getObject(String fieldName, Class<O> objectClass);
 
     /**
      * Check if a tuple field exists and can be converted to the target value type
-     * @param fieldName field name, should not be null
+     *
+     * @param fieldName   field name, should not be null
      * @param objectClass target value type class
      * @return true, if the field exists and can be converted to the given type, false otherwise
      */
@@ -72,6 +77,7 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
 
     /**
      * Get a tuple field value as a raw object
+     *
      * @param fieldPosition field position from the the tuple start, starting from 0
      * @return nullable value of a field wrapped in Optional
      */
@@ -79,6 +85,7 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
 
     /**
      * Get a tuple field value as a raw object
+     *
      * @param fieldName field name, should not be null
      * @return nullable value of a field wrapped in Optional
      */
@@ -95,7 +102,7 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * Set a tuple field by field position
      *
      * @param fieldPosition the field position from the the tuple start, starting from 0
-     * @param field new field
+     * @param field         new field
      */
     void setField(int fieldPosition, TarantoolField field);
 
@@ -103,7 +110,7 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * Set a tuple field by field name
      *
      * @param fieldName the field name, must be not null
-     * @param field new field
+     * @param field     new field
      */
     void setField(String fieldName, TarantoolField field);
 
@@ -111,17 +118,17 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * Set a tuple field value from an object by field position
      *
      * @param fieldPosition the field position from the the tuple start, starting from 0
-     * @param value new field value
+     * @param value         new field value
      */
-     void putObject(int fieldPosition, Object value);
+    void putObject(int fieldPosition, Object value);
 
     /**
      * Set a tuple field value from an object by field name
      *
      * @param fieldName the field name, must not be null
-     * @param value new field value
+     * @param value     new field value
      */
-     void putObject(String fieldName, Object value);
+    void putObject(String fieldName, Object value);
 
     /**
      * Get the field value converted to {@code byte[]}

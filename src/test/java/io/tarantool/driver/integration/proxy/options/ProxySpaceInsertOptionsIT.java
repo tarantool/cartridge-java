@@ -7,6 +7,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertOptions;
 import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -14,7 +15,6 @@ import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.integration.Utils;
@@ -41,7 +41,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -59,13 +59,13 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
 
     private static void initClient() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getRouterHost(), container.getRouterPort());
+            config, container.getRouterHost(), container.getRouterPort());
         client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
@@ -81,7 +81,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withTimeout() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         int requestConfigTimeout = client.getConfig().getRequestTimeout();
         int customRequestTimeout = requestConfigTimeout * 2;
@@ -96,8 +96,8 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
         // with option timeout
         profileSpace.delete(Conditions.equals(PK_FIELD_NAME, 1)).get();
         profileSpace.insert(
-                tarantoolTuple,
-                ProxyInsertOptions.create().withTimeout(customRequestTimeout)
+            tarantoolTuple,
+            ProxyInsertOptions.create().withTimeout(customRequestTimeout)
         ).get();
         crudInsertOpts = client.eval("return crud_insert_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudInsertOpts.get(0)).get("timeout"));
@@ -106,7 +106,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBucketIdTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
         Conditions condition = Conditions.equals(PK_FIELD_NAME, 1);
@@ -121,9 +121,9 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
 
         // with bucket id
         Integer otherStorageBucketId = client.callForSingleResult(
-                "get_other_storage_bucket_id",
-                Collections.singletonList(tarantoolTuple.getInteger(0)),
-                Integer.class).get();
+            "get_other_storage_bucket_id",
+            Collections.singletonList(tarantoolTuple.getInteger(0)),
+            Integer.class).get();
         InsertOptions insertOptions = ProxyInsertOptions.create().withBucketId(otherStorageBucketId);
         insertResult = profileSpace.insert(tarantoolTuple, insertOptions).get();
         assertEquals(1, insertResult.size());
@@ -139,13 +139,13 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBucketIdFromClientTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
         Conditions condition = Conditions.equals(PK_FIELD_NAME, 1);
 
         Integer bucketId = Utils.getBucketIdStrCRC32(client,
-                Collections.singletonList(tarantoolTuple.getInteger(0)));
+            Collections.singletonList(tarantoolTuple.getInteger(0)));
         InsertOptions insertOptions = ProxyInsertOptions.create().withBucketId(bucketId);
 
         TarantoolResult<TarantoolTuple> insertResult = profileSpace.insert(tarantoolTuple, insertOptions).get();
@@ -161,18 +161,18 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
 
     private Integer getBucketIdFromTarantool(List<Object> key) throws ExecutionException, InterruptedException {
         return client.callForSingleResult(
-                "vshard.router.bucket_id_strcrc32",
-                Collections.singletonList(key),
-                Integer.class
+            "vshard.router.bucket_id_strcrc32",
+            Collections.singletonList(key),
+            Integer.class
         ).get();
     }
 
     @Test
     public void withBucketIdClientComputationTest() throws ExecutionException, InterruptedException {
         List<List<Object>> keys = Arrays.asList(
-                Collections.singletonList(1),
-                Arrays.asList(1, "FIO"),
-                Arrays.asList(1, true, "FIO", 'm', 100.123)
+            Collections.singletonList(1),
+            Arrays.asList(1, "FIO"),
+            Arrays.asList(1, true, "FIO", 'm', 100.123)
         );
 
         for (List<Object> key : keys) {
@@ -183,7 +183,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBucketIdMoreThanLimitTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
 
@@ -200,7 +200,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBucketIdNull() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
         Conditions condition = Conditions.equals(PK_FIELD_NAME, 1);
@@ -217,7 +217,7 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withBucketIdWithNegativeValues() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
 

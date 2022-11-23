@@ -55,7 +55,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -72,13 +72,13 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
         int attempt = 0;
         int delay = 500;
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withProxyMethodMapping()
-                .withAddress(container.getRouterHost(), container.getMappedPort(port))
-                .build();
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withRequestTimeout(DEFAULT_TIMEOUT)
+            .withProxyMethodMapping()
+            .withAddress(container.getRouterHost(), container.getMappedPort(port))
+            .build();
 
         try {
             while (attempt * delay / 1000.0 < timeoutSec) {
@@ -117,46 +117,46 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(credentials)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .build();
+            .withCredentials(credentials)
+            .withRequestTimeout(DEFAULT_TIMEOUT)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .build();
 
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withClientConfig(config)
-                .withEntryFunction("get_routers")
-                .withEndpointProvider(() -> Collections.singletonList(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
-                .build();
+            .withClientConfig(config)
+            .withEntryFunction("get_routers")
+            .withEndpointProvider(() -> Collections.singletonList(
+                new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
+            .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .withDelay(100)
-                .build();
+            .withEndpoint(endpoint)
+            .withDelay(100)
+            .build();
 
         return new TestWrappedClusterAddressProvider(
-                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
-                container);
+            new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
+            container);
     }
 
     public static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClient() {
         return TarantoolClientFactory.createClient()
-                .withCredentials(USER_NAME, PASSWORD)
-                .withAddressProvider(getClusterAddressProvider())
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withProxyMethodMapping()
-                .withRetryingByNumberOfAttempts(
-                        10,
-                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors()
-                                .or(TarantoolRequestRetryPolicies.retryNetworkErrors())
-                                //todo: remove this, after solving the original problem
-                                .or(ex -> ex.getMessage().contains("attempt to index local 'data1' (a nil value)")),
-                        b -> b.withDelay(100)
-                )
-                .build();
+            .withCredentials(USER_NAME, PASSWORD)
+            .withAddressProvider(getClusterAddressProvider())
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withRequestTimeout(DEFAULT_TIMEOUT)
+            .withProxyMethodMapping()
+            .withRetryingByNumberOfAttempts(
+                10,
+                TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors()
+                    .or(TarantoolRequestRetryPolicies.retryNetworkErrors())
+                    //todo: remove this, after solving the original problem
+                    .or(ex -> ex.getMessage().contains("attempt to index local 'data1' (a nil value)")),
+                b -> b.withDelay(100)
+            )
+            .build();
     }
 
     @Test
@@ -171,10 +171,10 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
         assertEquals(5, spaceMetadata.getSpaceFormatMetadata().size());
         assertEquals(3, spaceMetadata.getFieldPositionByName("age"));
         assertEquals("unsigned", spaceMetadata.getFieldByName("age")
-                .orElseGet(Assertions::fail).getFieldType());
+            .orElseGet(Assertions::fail).getFieldType());
 
         Optional<TarantoolIndexMetadata> indexMeta = metadataOperations
-                .getIndexByName(TEST_SPACE_NAME, "bucket_id");
+            .getIndexByName(TEST_SPACE_NAME, "bucket_id");
         assertTrue(indexMeta.isPresent());
         TarantoolIndexMetadata indexMetadata = indexMeta.get();
         assertEquals("bucket_id", indexMetadata.getIndexName());
@@ -186,7 +186,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     @Test
     public void clusterInsertSelectTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                initClient().space(TEST_SPACE_NAME);
+            initClient().space(TEST_SPACE_NAME);
 
         TarantoolTuple tarantoolTuple;
 
@@ -222,7 +222,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     @Test
     public void clusterInsertDeleteTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                initClient().space(TEST_SPACE_NAME);
+            initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(100, null, "fio", 10, 100);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -260,7 +260,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     @Test
     public void replaceTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                initClient().space(TEST_SPACE_NAME);
+            initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(123, null, "Jane Doe", 18, 999);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -292,7 +292,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     @Test
     public void clusterUpdateTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                initClient().space(TEST_SPACE_NAME);
+            initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(223, null, "Jane Doe", 10, 10);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -318,7 +318,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
     @Test
     public void clusterUpsertTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                initClient().space(TEST_SPACE_NAME);
+            initClient().space(TEST_SPACE_NAME);
 
         List<Object> values = Arrays.asList(301, null, "Jack Sparrow", 30, 0);
         TarantoolTuple tarantoolTuple = tupleFactory.create(values);
@@ -329,7 +329,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
 
         //first time tuple not exist
         profileSpace.upsert(conditions,
-                tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
+            tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
 
         upsertResult = profileSpace.select(conditions).get();
         assertEquals(1, upsertResult.size());
@@ -342,7 +342,7 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
 
         //second time tuple exist
         profileSpace.upsert(conditions,
-                tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
+            tarantoolTuple, TupleOperations.add(3, 5).andBitwiseOr(4, 7)).get();
 
         upsertResult = profileSpace.select(conditions).get();
         tuple = upsertResult.get(0);
@@ -366,18 +366,18 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
 
         MessagePackValueMapper valueMapper = client.getConfig().getMessagePackMapper();
         CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>> mapper =
-                client.getResultMapperFactoryFactory().<TestComposite>singleValueResultMapperFactory()
-                        .withSingleValueResultConverter(v -> {
-                            Map<String, Object> valueMap = valueMapper.fromValue(v);
-                            TestComposite composite = new TestComposite();
-                            composite.field1 = (String) valueMap.get("field1");
-                            composite.field2 = (Integer) valueMap.get("field2");
-                            composite.field3 = (Boolean) valueMap.get("field3");
-                            composite.field4 = (Double) valueMap.get("field4");
-                            return composite;
-                        }, TestCompositeCallResult.class);
+            client.getResultMapperFactoryFactory().<TestComposite>singleValueResultMapperFactory()
+                .withSingleValueResultConverter(v -> {
+                    Map<String, Object> valueMap = valueMapper.fromValue(v);
+                    TestComposite composite = new TestComposite();
+                    composite.field1 = (String) valueMap.get("field1");
+                    composite.field2 = (Integer) valueMap.get("field2");
+                    composite.field3 = (Boolean) valueMap.get("field3");
+                    composite.field4 = (Double) valueMap.get("field4");
+                    return composite;
+                }, TestCompositeCallResult.class);
         TestComposite actual =
-                client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapper).get();
+            client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapper).get();
 
         assertEquals("Jane Doe", actual.field1);
         assertEquals(999, actual.field2);

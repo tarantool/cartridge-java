@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * @author Alexey Kuzin
  */
 public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>>
-        implements TarantoolSpaceOperations<T, R> {
+    implements TarantoolSpaceOperations<T, R> {
 
     private final int spaceId;
     private final TarantoolClientConfig config;
@@ -47,10 +47,11 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     private final TarantoolSpaceMetadata spaceMetadata;
     private final TarantoolMetadataOperations metadataOperations;
 
-    public TarantoolSpace(TarantoolClientConfig config,
-                          TarantoolConnectionManager connectionManager,
-                          TarantoolMetadataOperations metadataOperations,
-                          TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolSpace(
+        TarantoolClientConfig config,
+        TarantoolConnectionManager connectionManager,
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
         this.spaceId = spaceMetadata.getSpaceId();
         this.config = config;
         this.connectionManager = connectionManager;
@@ -64,15 +65,15 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     }
 
     private CompletableFuture<R> delete(Conditions conditions, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
             TarantoolDeleteRequest request = new TarantoolDeleteRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withIndexId(indexQuery.getIndexId())
-                    .withKeyValues(indexQuery.getKeyValues())
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withIndexId(indexQuery.getIndexId())
+                .withKeyValues(indexQuery.getKeyValues())
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -94,12 +95,12 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     }
 
     private CompletableFuture<R> insert(T tuple, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         try {
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withTuple(tuple)
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withTuple(tuple)
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -121,12 +122,12 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     }
 
     private CompletableFuture<R> replace(T tuple, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         try {
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withTuple(tuple)
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withTuple(tuple)
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -140,17 +141,17 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     }
 
     private CompletableFuture<R> select(Conditions conditions, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
             TarantoolSelectRequest request = new TarantoolSelectRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withIndexId(indexQuery.getIndexId())
-                    .withIteratorType(indexQuery.getIteratorType())
-                    .withKeyValues(indexQuery.getKeyValues())
-                    .withLimit(conditions.getLimit())
-                    .withOffset(conditions.getOffset())
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withIndexId(indexQuery.getIndexId())
+                .withIteratorType(indexQuery.getIteratorType())
+                .withKeyValues(indexQuery.getKeyValues())
+                .withLimit(conditions.getLimit())
+                .withOffset(conditions.getOffset())
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -176,26 +177,27 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         return update(conditions, operations, tupleResultMapper());
     }
 
-    private CompletableFuture<R> update(Conditions conditions,
-                                        TupleOperations operations,
-                                        MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+    private CompletableFuture<R> update(
+        Conditions conditions,
+        TupleOperations operations,
+        MessagePackValueMapper resultMapper)
+        throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
             Optional<TarantoolIndexMetadata> indexMetadata =
-                    metadataOperations.getIndexById(spaceId, indexQuery.getIndexId());
+                metadataOperations.getIndexById(spaceId, indexQuery.getIndexId());
 
             if (!indexMetadata.isPresent() || !indexMetadata.get().isUnique()) {
                 throw new TarantoolSpaceOperationException("Index must be primary or unique for update operation");
             }
 
             TarantoolUpdateRequest request = new TarantoolUpdateRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withIndexId(indexQuery.getIndexId())
-                    .withKeyValues(indexQuery.getKeyValues())
-                    .withTupleOperations(fillFieldIndexFromMetadata(operations))
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withIndexId(indexQuery.getIndexId())
+                .withKeyValues(indexQuery.getKeyValues())
+                .withTupleOperations(fillFieldIndexFromMetadata(operations))
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -208,20 +210,21 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         return upsert(conditions, tuple, operations, tupleResultMapper());
     }
 
-    private CompletableFuture<R> upsert(Conditions conditions,
-                                        T tuple,
-                                        TupleOperations operations,
-                                        MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+    private CompletableFuture<R> upsert(
+        Conditions conditions,
+        T tuple,
+        TupleOperations operations,
+        MessagePackValueMapper resultMapper)
+        throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
             TarantoolUpsertRequest request = new TarantoolUpsertRequest.Builder()
-                    .withSpaceId(spaceId)
-                    .withKeyValues(indexQuery.getKeyValues())
-                    .withTuple(tuple)
-                    .withTupleOperations(fillFieldIndexFromMetadata(operations))
-                    .build(config.getMessagePackMapper());
+                .withSpaceId(spaceId)
+                .withKeyValues(indexQuery.getKeyValues())
+                .withTuple(tuple)
+                .withTupleOperations(fillFieldIndexFromMetadata(operations))
+                .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapper);
         } catch (TarantoolProtocolException e) {
@@ -235,14 +238,14 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     }
 
     private CompletableFuture<Void> truncate(MessagePackValueMapper resultMapper)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         try {
             String spaceName = spaceMetadata.getSpaceName();
             TarantoolCallRequest request = new TarantoolCallRequest.Builder()
-                    .withFunctionName("box.space." + spaceName + ":truncate")
-                    .build(config.getMessagePackMapper());
+                .withFunctionName("box.space." + spaceName + ":truncate")
+                .build(config.getMessagePackMapper());
             return sendRequest(request, resultMapper)
-                    .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
+                .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -268,20 +271,20 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     @Override
     public String toString() {
         return String.format(
-                "StandaloneTarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
+            "StandaloneTarantoolSpace %s [%d]", spaceMetadata.getSpaceName(), spaceMetadata.getSpaceId());
     }
 
     private List<TupleOperation> fillFieldIndexFromMetadata(TupleOperations operations) {
         return operations.asList().stream()
-                .map(operation -> {
-                    if (operation.getFieldIndex() == null) {
-                        String fieldName = operation.getFieldName();
-                        int fieldMetadataIndex = this.spaceMetadata.getFieldByName(fieldName)
-                                .orElseThrow(() -> new TarantoolSpaceFieldNotFoundException(fieldName))
-                                .getFieldPosition();
-                        return operation.cloneWithIndex(fieldMetadataIndex);
-                    }
-                    return operation;
-                }).collect(Collectors.toList());
+            .map(operation -> {
+                if (operation.getFieldIndex() == null) {
+                    String fieldName = operation.getFieldName();
+                    int fieldMetadataIndex = this.spaceMetadata.getFieldByName(fieldName)
+                        .orElseThrow(() -> new TarantoolSpaceFieldNotFoundException(fieldName))
+                        .getFieldPosition();
+                    return operation.cloneWithIndex(fieldMetadataIndex);
+                }
+                return operation;
+            }).collect(Collectors.toList());
     }
 }

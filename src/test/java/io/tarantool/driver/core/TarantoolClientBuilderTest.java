@@ -33,13 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TarantoolClientBuilderTest {
 
     private final TarantoolCredentials SAMPLE_CREDENTIALS =
-            new SimpleTarantoolCredentials("root", "passwd");
+        new SimpleTarantoolCredentials("root", "passwd");
 
     private final DefaultMessagePackMapper SAMPLE_MAPPER =
-            new DefaultMessagePackMapper.Builder().build();
+        new DefaultMessagePackMapper.Builder().build();
 
     private final TarantoolServerAddress SAMPLE_ADDRESS =
-            new TarantoolServerAddress("123.123.123.123", 32123);
+        new TarantoolServerAddress("123.123.123.123", 32123);
 
     private final int SAMPLE_CONNECTIONS = 3;
     private final int SAMPLE_CONNECT_TIMEOUT = 5000;
@@ -51,16 +51,16 @@ public class TarantoolClientBuilderTest {
     void test_should_createClient() {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(SAMPLE_ADDRESS)
-                        .withCredentials(SAMPLE_CREDENTIALS)
-                        .withMessagePackMapper(SAMPLE_MAPPER)
-                        .withConnections(SAMPLE_CONNECTIONS)
-                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withAddresses(SAMPLE_ADDRESS)
+                .withCredentials(SAMPLE_CREDENTIALS)
+                .withMessagePackMapper(SAMPLE_MAPPER)
+                .withConnections(SAMPLE_CONNECTIONS)
+                .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+                .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+                .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+                .build();
 
         //then
         assertClientParams(client);
@@ -69,21 +69,21 @@ public class TarantoolClientBuilderTest {
     @Test
     void test_should_createClient_withSslContext() throws SSLException {
         final SslContext sslContext = SslContextBuilder.forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                .build();
+            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+            .build();
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(SAMPLE_ADDRESS)
-                        .withCredentials(SAMPLE_CREDENTIALS)
-                        .withMessagePackMapper(SAMPLE_MAPPER)
-                        .withConnections(SAMPLE_CONNECTIONS)
-                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
-                        .withSslContext(sslContext)
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withAddresses(SAMPLE_ADDRESS)
+                .withCredentials(SAMPLE_CREDENTIALS)
+                .withMessagePackMapper(SAMPLE_MAPPER)
+                .withConnections(SAMPLE_CONNECTIONS)
+                .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+                .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+                .withReadTimeout(SAMPLE_READ_TIMEOUT)
+                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+                .withSslContext(sslContext)
+                .build();
 
         //then
         assertClientParams(client);
@@ -94,28 +94,8 @@ public class TarantoolClientBuilderTest {
     void test_should_configureClient() {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(SAMPLE_ADDRESS)
-                        .withCredentials(SAMPLE_CREDENTIALS)
-                        .withMessagePackMapper(SAMPLE_MAPPER)
-                        .withConnections(SAMPLE_CONNECTIONS)
-                        .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                        .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                        .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
-                        .build();
-
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
-                TarantoolClientFactory.configureClient(client).build();
-
-        //then
-        assertClientParams(configuredClient);
-    }
-
-    @Test
-    void test_should_createClient_withConfig() {
-        //given
-        final TarantoolClientConfig config = TarantoolClientConfig.builder()
+            TarantoolClientFactory.createClient()
+                .withAddresses(SAMPLE_ADDRESS)
                 .withCredentials(SAMPLE_CREDENTIALS)
                 .withMessagePackMapper(SAMPLE_MAPPER)
                 .withConnections(SAMPLE_CONNECTIONS)
@@ -125,16 +105,36 @@ public class TarantoolClientBuilderTest {
                 .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
                 .build();
 
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
+            TarantoolClientFactory.configureClient(client).build();
+
+        //then
+        assertClientParams(configuredClient);
+    }
+
+    @Test
+    void test_should_createClient_withConfig() {
+        //given
+        final TarantoolClientConfig config = TarantoolClientConfig.builder()
+            .withCredentials(SAMPLE_CREDENTIALS)
+            .withMessagePackMapper(SAMPLE_MAPPER)
+            .withConnections(SAMPLE_CONNECTIONS)
+            .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+            .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+            .withReadTimeout(SAMPLE_READ_TIMEOUT)
+            .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+            .build();
+
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(SAMPLE_ADDRESS)
-                        .withConnections(123123)
-                        .withTarantoolClientConfig(config)
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withAddresses(SAMPLE_ADDRESS)
+                .withConnections(123123)
+                .withTarantoolClientConfig(config)
+                .build();
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
-                TarantoolClientFactory.configureClient(client).build();
+            TarantoolClientFactory.configureClient(client).build();
 
         //then
         assertClientParams(configuredClient);
@@ -147,25 +147,25 @@ public class TarantoolClientBuilderTest {
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = TarantoolClientFactory.createClient()
-                .withAddresses(SAMPLE_ADDRESS)
-                .withCredentials(SAMPLE_CREDENTIALS)
-                .withDefaultMessagePackMapperConfiguration(mapperBuilder ->
-                        mapperBuilder.withObjectConverter(String.class, StringValue.class,
-                                object ->
-                                        ValueFactory.newString(expectedMappingResult))
-                )
-                .withConnections(SAMPLE_CONNECTIONS)
-                .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
-                .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
-                .withReadTimeout(SAMPLE_READ_TIMEOUT)
-                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
-                .build();
+            .withAddresses(SAMPLE_ADDRESS)
+            .withCredentials(SAMPLE_CREDENTIALS)
+            .withDefaultMessagePackMapperConfiguration(mapperBuilder ->
+                mapperBuilder.withObjectConverter(String.class, StringValue.class,
+                    object ->
+                        ValueFactory.newString(expectedMappingResult))
+            )
+            .withConnections(SAMPLE_CONNECTIONS)
+            .withConnectTimeout(SAMPLE_CONNECT_TIMEOUT)
+            .withRequestTimeout(SAMPLE_REQUEST_TIMEOUT)
+            .withReadTimeout(SAMPLE_READ_TIMEOUT)
+            .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+            .build();
 
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> configuredClient =
-                TarantoolClientFactory.configureClient(client).build();
+            TarantoolClientFactory.configureClient(client).build();
 
         String convertedTest = configuredClient.getConfig().getMessagePackMapper()
-                .toValue("Test").asStringValue().asString();
+            .toValue("Test").asStringValue().asString();
 
         //then
         assertEquals(expectedMappingResult, convertedTest);
@@ -173,7 +173,7 @@ public class TarantoolClientBuilderTest {
         TarantoolClientConfig config = configuredClient.getConfig();
 
         assertTrue(((ClusterTarantoolTupleClient) client).getAddressProvider()
-                .getAddresses().contains(SAMPLE_ADDRESS));
+            .getAddresses().contains(SAMPLE_ADDRESS));
 
         assertNotEquals(SAMPLE_MAPPER, config.getMessagePackMapper());
 
@@ -189,8 +189,8 @@ public class TarantoolClientBuilderTest {
     void test_should_createClient_with_default_threads() {
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .build();
+            TarantoolClientFactory.createClient()
+                .build();
 
         //then
         assertEquals(client.getConfig().getEventLoopThreadsNumber(), 0);
@@ -201,9 +201,9 @@ public class TarantoolClientBuilderTest {
         //when
         int customThreadsNumber = 10;
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withEventLoopThreadsNumber(SAMPLE_EVENT_LOOP_THREADS_NUMBER)
+                .build();
 
         //then
         assertEquals(client.getConfig().getEventLoopThreadsNumber(), 4);
@@ -213,9 +213,9 @@ public class TarantoolClientBuilderTest {
     void test_should_createClient_with_illegal_threads() {
         assertThrows(IllegalArgumentException.class, () -> {
             TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                    TarantoolClientFactory.createClient()
-                            .withEventLoopThreadsNumber(-1)
-                            .build();
+                TarantoolClientFactory.createClient()
+                    .withEventLoopThreadsNumber(-1)
+                    .build();
         });
     }
 
@@ -224,7 +224,7 @@ public class TarantoolClientBuilderTest {
         TarantoolClientConfig config = client.getConfig();
 
         assertTrue(((ClusterTarantoolTupleClient) client).getAddressProvider()
-                .getAddresses().contains(SAMPLE_ADDRESS));
+            .getAddresses().contains(SAMPLE_ADDRESS));
 
         assertEquals(SAMPLE_CREDENTIALS, config.getCredentials());
         assertEquals(SAMPLE_MAPPER, config.getMessagePackMapper());

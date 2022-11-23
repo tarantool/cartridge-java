@@ -28,7 +28,7 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
     public AbstractDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig discoveryConfig) {
         this.discoveryConfig = discoveryConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-                new TarantoolDaemonThreadFactory("tarantool-discovery"));
+            new TarantoolDaemonThreadFactory("tarantool-discovery"));
         this.refreshCallback = new AtomicReference<>(() -> {
         });
     }
@@ -41,8 +41,8 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
                 setAddresses(addresses);
 
                 if (currentAddresses != null
-                        && addresses.size() != currentAddresses.size()
-                        || !addresses.equals(currentAddresses)) {
+                    && addresses.size() != currentAddresses.size()
+                    || !addresses.equals(currentAddresses)) {
                     this.refreshCallback.get().run();
                 }
             } finally {
@@ -53,10 +53,10 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
         };
 
         this.scheduledExecutorService.scheduleWithFixedDelay(
-                discoveryTask,
-                0,
-                discoveryConfig.getServiceDiscoveryDelay(),
-                TimeUnit.MILLISECONDS
+            discoveryTask,
+            0,
+            discoveryConfig.getServiceDiscoveryDelay(),
+            TimeUnit.MILLISECONDS
         );
     }
 

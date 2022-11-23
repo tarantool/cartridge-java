@@ -1,18 +1,18 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.cursor.TarantoolCursor;
+import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
@@ -30,10 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Testcontainers
-public class OffsetCursorIT  {
+public class OffsetCursorIT {
 
     private static final String TEST_SPACE_NAME = "cursor_test_space";
     private static final String TEST_MULTIPART_KEY_SPACE_NAME = "cursor_test_space_multi_part_key";
@@ -42,7 +46,7 @@ public class OffsetCursorIT  {
 
     @Container
     private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua");
+        .withScriptFileName("org/testcontainers/containers/server.lua");
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -54,10 +58,10 @@ public class OffsetCursorIT  {
 
         try {
             insertToTestSpace(TEST_SPACE_NAME, 100,
-                    i -> Arrays.asList(i, i + "abc", i * 10)
+                i -> Arrays.asList(i, i + "abc", i * 10)
             );
             insertToTestSpace(TEST_MULTIPART_KEY_SPACE_NAME, 50,
-                    i -> Arrays.asList(i / 10, i + "abc", i * 10)
+                i -> Arrays.asList(i / 10, i + "abc", i * 10)
             );
         } catch (ExecutionException | InterruptedException ignored) {
             fail();
@@ -71,17 +75,17 @@ public class OffsetCursorIT  {
 
     private static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            tarantoolContainer.getHost(), tarantoolContainer.getPort());
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
+            .withCredentials(credentials)
+            .withConnectTimeout(1000 * 5)
+            .withReadTimeout(1000 * 5)
+            .withRequestTimeout(1000 * 5)
+            .build();
 
         log.info("Attempting connect to Tarantool");
         client = new ClusterTarantoolTupleClient(config, serverAddress);
@@ -92,17 +96,18 @@ public class OffsetCursorIT  {
         List<Object> generate(int index);
     }
 
-    private static void insertToTestSpace(String spaceName,
-                                          int count,
-                                          ElementGenerator gen
+    private static void insertToTestSpace(
+        String spaceName,
+        int count,
+        ElementGenerator gen
     )
-            throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations testSpace = client.space(spaceName);
         for (int i = 1; i <= count; i++) {
             testSpace.insert(
                     new TarantoolTupleImpl(
-                            gen.generate(i), mapperFactory.defaultComplexTypesMapper()))
-                    .get();
+                        gen.generate(i), mapperFactory.defaultComplexTypesMapper()))
+                .get();
         }
     }
 
@@ -129,8 +134,8 @@ public class OffsetCursorIT  {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         Conditions conditions = Conditions
-                .indexGreaterOrEquals("primary", Collections.singletonList(12))
-                .withLimit(13);
+            .indexGreaterOrEquals("primary", Collections.singletonList(12))
+            .withLimit(13);
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
@@ -155,8 +160,8 @@ public class OffsetCursorIT  {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         Conditions conditions = Conditions
-                .indexLessThan("primary", Collections.singletonList(53))
-                .withLimit(14);
+            .indexLessThan("primary", Collections.singletonList(53))
+            .withLimit(14);
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 

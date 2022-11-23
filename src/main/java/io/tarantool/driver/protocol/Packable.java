@@ -13,6 +13,7 @@ import java.io.Serializable;
 public interface Packable extends Serializable {
     /**
      * Convert this instance into a corresponding MessagePack {@link Value}
+     *
      * @param mapper configured Java objects to entities mapper
      * @return MessagePack entity
      */

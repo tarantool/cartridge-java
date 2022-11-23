@@ -37,7 +37,7 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -61,46 +61,46 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(credentials)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .build();
+            .withCredentials(credentials)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .build();
 
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withClientConfig(config)
-                .withEntryFunction("get_routers")
-                .withEndpointProvider(() -> Collections.singletonList(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
-                .build();
+            .withClientConfig(config)
+            .withEntryFunction("get_routers")
+            .withEndpointProvider(() -> Collections.singletonList(
+                new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
+            .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .withDelay(1)
-                .build();
+            .withEndpoint(endpoint)
+            .withDelay(1)
+            .build();
 
         return new TestWrappedClusterAddressProvider(
-                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
-                container);
+            new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
+            container);
     }
 
     public static void initClient() {
         client = TarantoolClientFactory.createClient()
-                .withCredentials(USER_NAME, PASSWORD)
-                .withAddressProvider(getClusterAddressProvider())
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withProxyMethodMapping()
-                .withRetryingByNumberOfAttempts(10,
-                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
-                        b -> b.withDelay(100))
-                .build();
+            .withCredentials(USER_NAME, PASSWORD)
+            .withAddressProvider(getClusterAddressProvider())
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withRequestTimeout(DEFAULT_TIMEOUT)
+            .withProxyMethodMapping()
+            .withRetryingByNumberOfAttempts(10,
+                TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                b -> b.withDelay(100))
+            .build();
     }
 
     @Test
     public void test_truncate2TimesOneSpace_shouldNotThrowExceptionsAndSpaceShouldBeEmptyAfterEachCall() {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         // call truncate then space is empty
         testSpace.truncate().join();
@@ -126,7 +126,7 @@ public class ProxyTruncateIT extends SharedCartridgeContainer {
     @Test
     public void test_truncateEmptySpace_shouldNotThrowExceptionsAndSpaceShouldBeEmpty() {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         // truncate space to make sure it is empty
         testSpace.truncate().join();

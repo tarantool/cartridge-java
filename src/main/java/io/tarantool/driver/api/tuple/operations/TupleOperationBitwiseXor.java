@@ -18,19 +18,20 @@ public class TupleOperationBitwiseXor extends TupleUpdateOperation {
         checkValue(value);
     }
 
-    private TupleOperationBitwiseXor(TarantoolUpdateOperationType operationType, Integer fieldIndex,
-                                     String fieldName, Object value, boolean isProxyOperation) {
+    private TupleOperationBitwiseXor(
+        TarantoolUpdateOperationType operationType, Integer fieldIndex,
+        String fieldName, Object value, boolean isProxyOperation) {
         super(operationType, fieldIndex, fieldName, value, isProxyOperation);
     }
 
     @Override
     public TupleOperation toProxyTupleOperation() {
         return new TupleOperationBitwiseXor(
-                this.getOperationType(),
-                this.getFieldNumber(),
-                this.getFieldName(),
-                this.getValue(),
-                true
+            this.getOperationType(),
+            this.getFieldNumber(),
+            this.getFieldName(),
+            this.getValue(),
+            true
         );
     }
 
@@ -43,11 +44,11 @@ public class TupleOperationBitwiseXor extends TupleUpdateOperation {
     @Override
     public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
         return new TupleOperationBitwiseXor(
-                this.getOperationType(),
-                fieldMetadataIndex,
-                this.getFieldName(),
-                this.getValue(),
-                this.isProxyOperation()
+            this.getOperationType(),
+            fieldMetadataIndex,
+            this.getFieldName(),
+            this.getValue(),
+            this.isProxyOperation()
         );
     }
 }

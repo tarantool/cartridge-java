@@ -96,12 +96,12 @@ public class TarantoolSpaceMetadataImpl implements TarantoolSpaceMetadata {
     @Override
     public String toString() {
         return "TarantoolSpaceMetadata{" +
-                "spaceId=" + spaceId +
-                ", ownerId=" + ownerId +
-                ", spaceName='" + spaceName + '\'' +
-                ", spaceFormatMetadata=" + spaceFormatMetadata +
-                ", spaceFormatMetadataAsList=" + spaceFormatMetadataAsList +
-                '}';
+            "spaceId=" + spaceId +
+            ", ownerId=" + ownerId +
+            ", spaceName='" + spaceName + '\'' +
+            ", spaceFormatMetadata=" + spaceFormatMetadata +
+            ", spaceFormatMetadataAsList=" + spaceFormatMetadataAsList +
+            '}';
     }
 
     @Override
@@ -114,10 +114,10 @@ public class TarantoolSpaceMetadataImpl implements TarantoolSpaceMetadata {
         }
         TarantoolSpaceMetadataImpl that = (TarantoolSpaceMetadataImpl) o;
         return spaceId == that.spaceId &&
-                ownerId == that.ownerId &&
-                spaceName.equals(that.spaceName) &&
-                Objects.equals(spaceFormatMetadata, that.spaceFormatMetadata) &&
-                Objects.equals(spaceFormatMetadataAsList, that.spaceFormatMetadataAsList);
+            ownerId == that.ownerId &&
+            spaceName.equals(that.spaceName) &&
+            Objects.equals(spaceFormatMetadata, that.spaceFormatMetadata) &&
+            Objects.equals(spaceFormatMetadataAsList, that.spaceFormatMetadataAsList);
     }
 
     @Override

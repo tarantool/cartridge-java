@@ -8,6 +8,7 @@ package io.tarantool.driver.mappers;
 public class InterfaceParameterTypeNotFoundException extends Exception {
     /**
      * Create the exception with a message template
+     *
      * @param format template format
      * @param params template parameters
      */

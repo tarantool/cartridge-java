@@ -66,9 +66,9 @@ final class ServerNodeInfo {
         }
         ServerNodeInfo that = (ServerNodeInfo) o;
         return Objects.equals(uuid, that.uuid) &&
-                Objects.equals(uri, that.uri) &&
-                Objects.equals(status, that.status) &&
-                Objects.equals(priority, that.priority);
+            Objects.equals(uri, that.uri) &&
+            Objects.equals(status, that.status) &&
+            Objects.equals(priority, that.priority);
     }
 
     @Override

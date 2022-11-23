@@ -20,7 +20,7 @@ import io.tarantool.driver.mappers.CallResultMapper;
  * @author Alexey Kuzin
  */
 public class ProxyTarantoolTupleSpace
-        extends ProxyTarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+    extends ProxyTarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 
     private final TarantoolClientConfig config;
     private final TarantoolCallOperations client;
@@ -34,11 +34,12 @@ public class ProxyTarantoolTupleSpace
      * @param spaceMetadata      current space metadata
      * @param metadataOperations metadata operations
      */
-    public ProxyTarantoolTupleSpace(TarantoolClientConfig config,
-                                    TarantoolCallOperations client,
-                                    ProxyOperationsMappingConfig mappingConfig,
-                                    TarantoolSpaceMetadata spaceMetadata,
-                                    TarantoolMetadataOperations metadataOperations) {
+    public ProxyTarantoolTupleSpace(
+        TarantoolClientConfig config,
+        TarantoolCallOperations client,
+        ProxyOperationsMappingConfig mappingConfig,
+        TarantoolSpaceMetadata spaceMetadata,
+        TarantoolMetadataOperations metadataOperations) {
         super(config, client, mappingConfig, metadataOperations, spaceMetadata);
         this.config = config;
         this.client = client;
@@ -53,7 +54,7 @@ public class ProxyTarantoolTupleSpace
     protected CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     tupleResultMapper() {
         return client.getResultMapperFactoryFactory().defaultTupleSingleResultMapperFactory()
-                .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
+            .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override

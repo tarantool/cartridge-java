@@ -15,33 +15,33 @@ box.schema.user.grant('empty_password_user', 'read,write,execute', 'universe')
 -- create test space
 s = box.schema.space.create('test_space')
 s:format({
-    {name = 'id', type = 'unsigned'},
-    {name = 'unique_key', type = 'string'},
-    {name = 'book_name', type = 'string'},
-    {name = 'author', type = 'string'},
-    {name = 'year', type = 'unsigned',is_nullable=true},
-    {name = 'test_delete', type = 'unsigned',is_nullable=true},
-    {name = 'test_delete_2', type = 'unsigned',is_nullable=true},
-    {name = 'number_field', type = 'number', is_nullable=true},
+    { name = 'id', type = 'unsigned' },
+    { name = 'unique_key', type = 'string' },
+    { name = 'book_name', type = 'string' },
+    { name = 'author', type = 'string' },
+    { name = 'year', type = 'unsigned', is_nullable = true },
+    { name = 'test_delete', type = 'unsigned', is_nullable = true },
+    { name = 'test_delete_2', type = 'unsigned', is_nullable = true },
+    { name = 'number_field', type = 'number', is_nullable = true },
 })
 s:create_index('primary', {
     type = 'tree',
-    parts = {'id'}
+    parts = { 'id' }
 })
 s:create_index('inx_author', {
     type = 'tree',
     unique = false,
-    parts = {'author'}
+    parts = { 'author' }
 })
 s:create_index('secondary', {
     type = 'hash',
     unique = true,
-    parts = {'unique_key'}
+    parts = { 'unique_key' }
 })
 
-s:insert{1, 'a1', 'Don Quixote', 'Miguel de Cervantes', 1605}
-s:insert{2, 'a2', 'The Great Gatsby', 'F. Scott Fitzgerald', 1925}
-s:insert{3, 'a3', 'War and Peace', 'Leo Tolstoy', 1869}
+s:insert { 1, 'a1', 'Don Quixote', 'Miguel de Cervantes', 1605 }
+s:insert { 2, 'a2', 'The Great Gatsby', 'F. Scott Fitzgerald', 1925 }
+s:insert { 3, 'a3', 'War and Peace', 'Leo Tolstoy', 1869 }
 
 -- cursor test spaces
 c = box.schema.space.create('cursor_test_space')
@@ -52,7 +52,7 @@ c:format({
 });
 c:create_index('primary', {
     type = 'tree',
-    parts = {'id'}
+    parts = { 'id' }
 })
 
 m = box.schema.space.create('cursor_test_space_multi_part_key')
@@ -64,7 +64,7 @@ m:format({
 
 m:create_index('primary', {
     type = 'tree',
-    parts = {'id', 'name'}
+    parts = { 'id', 'name' }
 })
 
 local function tarantool_version()
@@ -82,28 +82,28 @@ local major, minor, patch = tarantool_version()
 if major >= 2 and minor >= 4 and patch > 1 then
     -- test space for check uuid
     local space_with_uuid = box.schema.space.create(
-            'space_with_uuid',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'uuid_field', 'uuid',},
-                },
-                if_not_exists = true,
-            }
+        'space_with_uuid',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'uuid_field', 'uuid', },
+            },
+            if_not_exists = true,
+        }
     )
     space_with_uuid:create_index('id', { parts = { 'id' }, if_not_exists = true, })
 end
 if major >= 2 and minor >= 2 and patch > 1 then
     -- test space for check varbinary
     local space_with_varbinary = box.schema.space.create(
-            'space_with_varbinary',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'varbinary_field', 'varbinary',},
-                },
-                if_not_exists = true,
-            }
+        'space_with_varbinary',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'varbinary_field', 'varbinary', },
+            },
+            if_not_exists = true,
+        }
     )
     space_with_varbinary:create_index('id', { parts = { 'id' }, if_not_exists = true, })
 end
@@ -115,17 +115,19 @@ function user_function_no_param()
 end
 
 function user_function_two_param(a, b)
-    return a, b, 'Hello, '..a..' '..b;
+    return a, b, 'Hello, ' .. a .. ' ' .. b;
 end
 
 function user_function_return_long_value()
     local s = {}
-    for i = 1,2800*3 do
+    for i = 1, 2800 * 3 do
         table.insert(s, 1)
     end
     return s
 end
 
 function user_function_complex_query(year)
-    return s:pairs():filter(function(b) return b.year > year end):totable()
+    return s:pairs():filter(function(b)
+        return b.year > year
+    end)    :totable()
 end

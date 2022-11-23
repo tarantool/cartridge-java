@@ -15,10 +15,11 @@ import java.util.Objects;
  */
 public class TarantoolFieldImpl implements TarantoolField {
 
-    private Object value;
+    private final Object value;
 
     /**
      * Deserializing constructor
+     *
      * @param value MessagePack value.
      */
     TarantoolFieldImpl(Value value) {
@@ -27,8 +28,9 @@ public class TarantoolFieldImpl implements TarantoolField {
 
     /**
      * Serializing constructor
+     *
      * @param object entity object
-     * @param <O> entity type
+     * @param <O>    entity type
      */
     <O> TarantoolFieldImpl(O object) {
         this.value = object;
@@ -63,7 +65,7 @@ public class TarantoolFieldImpl implements TarantoolField {
             return (O) value;
         }
         throw new UnsupportedOperationException(
-                String.format("Cannot convert field value of type %s to type %s", value.getClass(), targetClass));
+            String.format("Cannot convert field value of type %s to type %s", value.getClass(), targetClass));
     }
 
     @Override

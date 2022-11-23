@@ -17,6 +17,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
     /**
      * Get config of service discovery endpoint
+     *
      * @return a {@link TarantoolClusterDiscoveryEndpoint} instance
      */
     public TarantoolClusterDiscoveryEndpoint getEndpoint() {
@@ -25,6 +26,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
     /**
      * Set service discovery endpoint config and enable cluster connection
+     *
      * @param endpoint a {@link TarantoolClusterDiscoveryEndpoint} instance
      */
     public void setEndpoint(TarantoolClusterDiscoveryEndpoint endpoint) {
@@ -33,6 +35,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
     /**
      * Get cluster discovery delay
+     *
      * @return cluster discovery delay, milliseconds
      */
     public int getServiceDiscoveryDelay() {
@@ -41,6 +44,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
     /**
      * Set scan period (in milliseconds) of receiving a new list of instances
+     *
      * @param serviceDiscoveryDelay period of receiving a new list of instances
      */
     public void setServiceDiscoveryDelay(int serviceDiscoveryDelay) {
@@ -49,6 +53,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
     /**
      * Create a builder instance.
+     *
      * @return a builder
      */
     public static Builder builder() {
@@ -60,7 +65,7 @@ public final class TarantoolClusterDiscoveryConfig {
      */
     public static class Builder {
 
-        private TarantoolClusterDiscoveryConfig config;
+        private final TarantoolClusterDiscoveryConfig config;
 
         public Builder() {
             this.config = new TarantoolClusterDiscoveryConfig();
@@ -68,6 +73,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
         /**
          * Specify scan period of receiving a new list of instances
+         *
          * @param delay period of receiving a new list of instances, in milliseconds
          * @return this builder instance
          * @see TarantoolClusterDiscoveryConfig#setServiceDiscoveryDelay(int)
@@ -82,6 +88,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
         /**
          * Specify service discovery config and enable using service discovery
+         *
          * @param endpoint discovery endpoint config, should not be null
          * @return this builder instance
          * @see TarantoolClusterDiscoveryConfig#setEndpoint(TarantoolClusterDiscoveryEndpoint)
@@ -97,6 +104,7 @@ public final class TarantoolClusterDiscoveryConfig {
 
         /**
          * Build a {@link TarantoolClusterDiscoveryConfig} instance
+         *
          * @return configured instance
          */
         public TarantoolClusterDiscoveryConfig build() {

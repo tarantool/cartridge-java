@@ -22,11 +22,12 @@ import java.util.List;
  */
 public final class UpsertProxyOperation<T extends Packable, R extends Collection<T>> extends AbstractProxyOperation<R> {
 
-    UpsertProxyOperation(TarantoolCallOperations client,
-                         String functionName,
-                         List<?> arguments,
-                         MessagePackObjectMapper argumentsMapper,
-                         CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
+    UpsertProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -34,7 +35,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-            extends GenericOperationsBuilder<R, UpsertOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, UpsertOptions, Builder<T, R>> {
         private T tuple;
         private TupleOperations operations;
 
@@ -58,19 +59,19 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
 
         public UpsertProxyOperation<T, R> build() {
             CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withBucketId(options.getBucketId())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withBucketId(options.getBucketId())
+                .build();
 
             List<?> arguments = Arrays.asList(
-                    spaceName,
-                    tuple,
-                    operations.asProxyOperationList(),
-                    requestOptions.asMap()
+                spaceName,
+                tuple,
+                operations.asProxyOperationList(),
+                requestOptions.asMap()
             );
 
             return new UpsertProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

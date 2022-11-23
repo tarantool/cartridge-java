@@ -1,9 +1,9 @@
 package io.tarantool.driver.api.space.options.proxy;
 
-import java.util.Optional;
-
 import io.tarantool.driver.api.space.options.AbstractOptions;
 import io.tarantool.driver.api.space.options.OperationWithTimeoutOptions;
+
+import java.util.Optional;
 
 /**
  * Represent options for all proxy functions

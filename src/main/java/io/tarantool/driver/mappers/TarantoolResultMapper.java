@@ -14,13 +14,14 @@ public class TarantoolResultMapper<T> extends AbstractResultMapper<TarantoolResu
     /**
      * Basic constructor
      *
-     * @param valueMapper value mapper to be used for result rows
+     * @param valueMapper    value mapper to be used for result rows
      * @param tupleConverter MessagePack result array to tuple result converter
-     * @param resultClass tuple result class
+     * @param resultClass    tuple result class
      */
-    public TarantoolResultMapper(MessagePackValueMapper valueMapper,
-                                 ValueConverter<ArrayValue, ? extends TarantoolResult<T>> tupleConverter,
-                                 Class<? extends TarantoolResult<T>> resultClass) {
+    public TarantoolResultMapper(
+        MessagePackValueMapper valueMapper,
+        ValueConverter<ArrayValue, ? extends TarantoolResult<T>> tupleConverter,
+        Class<? extends TarantoolResult<T>> resultClass) {
         super(valueMapper, tupleConverter, resultClass);
     }
 }

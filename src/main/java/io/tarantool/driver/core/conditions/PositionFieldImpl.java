@@ -33,8 +33,9 @@ public class PositionFieldImpl implements PositionField {
     }
 
     @Override
-    public TarantoolFieldMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolFieldMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
 
         Optional<TarantoolFieldMetadata> fieldMetadata = spaceMetadata.getFieldByPosition(position);
         if (!fieldMetadata.isPresent()) {

@@ -24,7 +24,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
 
     private final Logger log = LoggerFactory.getLogger(TarantoolResponseHandler.class);
     private final TarantoolErrors.TarantoolBoxErrorFactory boxErrorFactory
-            = new TarantoolErrors.TarantoolBoxErrorFactory();
+        = new TarantoolErrors.TarantoolBoxErrorFactory();
     private final RequestFutureManager futureManager;
 
     public TarantoolResponseHandler(RequestFutureManager futureManager) {
@@ -41,13 +41,13 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
                 switch (tarantoolResponse.getResponseType()) {
                     case IPROTO_NOT_OK:
                         TarantoolErrorResult errorResult = new TarantoolErrorResult(tarantoolResponse.getSyncId(),
-                                tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
+                            tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
                         requestFuture.completeExceptionally(boxErrorFactory.create(errorResult));
                         break;
                     case IPROTO_OK:
                         try {
                             TarantoolOkResult okResult = new TarantoolOkResult(tarantoolResponse.getSyncId(),
-                                    tarantoolResponse.getBody().getData());
+                                tarantoolResponse.getBody().getData());
                             requestFuture.complete(requestMeta.getMapper().fromValue(okResult.getData()));
                         } catch (Throwable e) {
                             requestFuture.completeExceptionally(e);

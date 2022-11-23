@@ -62,12 +62,12 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         try {
             truncateSpace(TEST_SPACE_NAME);
             insertToTestSpace(TEST_SPACE_NAME, 100,
-                    i -> Arrays.asList(i, i + "abc", i * 10)
+                i -> Arrays.asList(i, i + "abc", i * 10)
             );
 
             truncateSpace(TEST_MULTIPART_KEY_SPACE_NAME);
             insertToTestSpace(TEST_MULTIPART_KEY_SPACE_NAME, 50,
-                    i -> Arrays.asList(i / 10, i + "abc", i * 10)
+                i -> Arrays.asList(i / 10, i + "abc", i * 10)
             );
         } catch (ExecutionException | InterruptedException ex) {
             log.error("Error: ", ex);
@@ -87,57 +87,58 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
     private static TarantoolClusterAddressProvider getClusterAddressProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(USER_NAME, PASSWORD);
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(credentials)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .build();
+            .withCredentials(credentials)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .build();
 
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withClientConfig(config)
-                .withEntryFunction("get_routers")
-                .withEndpointProvider(() -> Collections.singletonList(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
-                .build();
+            .withClientConfig(config)
+            .withEntryFunction("get_routers")
+            .withEndpointProvider(() -> Collections.singletonList(
+                new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
+            .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .withDelay(1)
-                .build();
+            .withEndpoint(endpoint)
+            .withDelay(1)
+            .build();
 
         return new TestWrappedClusterAddressProvider(
-                new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
-                container);
+            new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig),
+            container);
     }
 
     public static void initClient() {
         client = TarantoolClientFactory.createClient()
-                .withAddressProvider(getClusterAddressProvider())
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnectTimeout(DEFAULT_TIMEOUT)
-                .withReadTimeout(DEFAULT_TIMEOUT)
-                .withRequestTimeout(DEFAULT_TIMEOUT)
-                .withProxyMethodMapping()
-                .withRetryingByNumberOfAttempts(10,
-                        TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
-                        b -> b.withDelay(100))
-                .build();
+            .withAddressProvider(getClusterAddressProvider())
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnectTimeout(DEFAULT_TIMEOUT)
+            .withReadTimeout(DEFAULT_TIMEOUT)
+            .withRequestTimeout(DEFAULT_TIMEOUT)
+            .withProxyMethodMapping()
+            .withRetryingByNumberOfAttempts(10,
+                TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors(),
+                b -> b.withDelay(100))
+            .build();
     }
 
     private interface ElementGenerator {
         List<Object> generate(int index);
     }
 
-    private static void insertToTestSpace(String spaceName,
-                                          int count,
-                                          ElementGenerator gen
+    private static void insertToTestSpace(
+        String spaceName,
+        int count,
+        ElementGenerator gen
     )
-            throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations testSpace = client.space(spaceName);
         for (int i = 1; i <= count; i++) {
             testSpace.insert(
                     new TarantoolTupleImpl(
-                            gen.generate(i), mapperFactory.defaultComplexTypesMapper()))
-                    .get();
+                        gen.generate(i), mapperFactory.defaultComplexTypesMapper()))
+                .get();
         }
     }
 
@@ -164,8 +165,8 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         Conditions conditions = Conditions
-                .indexGreaterOrEquals("primary", Collections.singletonList(12))
-                .withLimit(13);
+            .indexGreaterOrEquals("primary", Collections.singletonList(12))
+            .withLimit(13);
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 
@@ -192,8 +193,8 @@ public class ProxyCursorIT extends SharedCartridgeContainer {
         TarantoolSpaceOperations testSpace = client.space(TEST_SPACE_NAME);
 
         Conditions conditions = Conditions
-                .indexLessThan("primary", Collections.singletonList(53))
-                .withLimit(14);
+            .indexLessThan("primary", Collections.singletonList(53))
+            .withLimit(14);
 
         TarantoolCursor<TarantoolTuple> cursor = testSpace.cursor(conditions, 3);
 

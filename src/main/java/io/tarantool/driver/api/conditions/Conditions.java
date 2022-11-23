@@ -729,8 +729,9 @@ public final class Conditions implements Serializable {
         return this;
     }
 
-    public List<?> toProxyQuery(TarantoolMetadataOperations operations,
-                                TarantoolSpaceMetadata spaceMetadata) {
+    public List<?> toProxyQuery(
+        TarantoolMetadataOperations operations,
+        TarantoolSpaceMetadata spaceMetadata) {
 
         if (offset > 0) {
             throw new TarantoolClientException("Offset is not supported");
@@ -743,16 +744,16 @@ public final class Conditions implements Serializable {
         for (Condition condition : conditions) {
             if (condition instanceof IndexValueConditionImpl) {
                 TarantoolIndexMetadata indexMetadata =
-                        (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
+                    (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<IndexValueCondition> current = indexConditions.computeIfAbsent(
-                        indexMetadata.getIndexName(), name -> new LinkedList<>());
+                    indexMetadata.getIndexName(), name -> new LinkedList<>());
 
                 current.add(convertIndexIfNecessary((IndexValueCondition) condition, indexMetadata.getIndexName()));
             } else {
                 TarantoolFieldMetadata fieldMetadata =
-                        (TarantoolFieldMetadata) condition.field().metadata(operations, spaceMetadata);
+                    (TarantoolFieldMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<FieldValueCondition> current = fieldConditions
-                        .computeIfAbsent(fieldMetadata.getFieldPosition(), f -> new LinkedList<>());
+                    .computeIfAbsent(fieldMetadata.getFieldPosition(), f -> new LinkedList<>());
 
                 current.add((FieldValueCondition) condition);
                 selectedFields.putIfAbsent(fieldMetadata.getFieldPosition(), fieldMetadata);
@@ -766,13 +767,13 @@ public final class Conditions implements Serializable {
         List<List<?>> allConditions = new ArrayList<>();
         if (indexConditions.size() > 0) {
             allConditions.addAll(
-                    conditionsListToLists(indexConditions.values().iterator().next(), operations, spaceMetadata));
+                conditionsListToLists(indexConditions.values().iterator().next(), operations, spaceMetadata));
             for (List<FieldValueCondition> conditionList : fieldConditions.values()) {
                 allConditions.addAll(conditionsListToLists(conditionList, operations, spaceMetadata));
             }
         } else {
             Optional<TarantoolIndexMetadata> suitableIndex = findCoveringIndex(
-                    operations, spaceMetadata, selectedFields.values());
+                operations, spaceMetadata, selectedFields.values());
 
             if (suitableIndex.isPresent()) {
                 for (TarantoolIndexPartMetadata part : suitableIndex.get().getIndexParts()) {
@@ -786,29 +787,32 @@ public final class Conditions implements Serializable {
 
             for (List<FieldValueCondition> conditionList : fieldConditions.values()) {
                 allConditions.addAll(
-                        conditionsListToLists(conditionList, operations, spaceMetadata));
+                    conditionsListToLists(conditionList, operations, spaceMetadata));
             }
         }
 
         return allConditions;
     }
 
-    private IndexValueCondition convertIndexIfNecessary(IndexValueCondition condition,
-                                                        String indexName) {
+    private IndexValueCondition convertIndexIfNecessary(
+        IndexValueCondition condition,
+        String indexName) {
         if (!(condition.field() instanceof IdIndexImpl)) {
             return condition;
         }
         return new IndexValueConditionImpl(condition.operator(), new NamedIndexImpl(indexName), condition.value());
     }
 
-    private List<List<?>> conditionsListToLists(List<? extends Condition> conditionsList,
-                                                TarantoolMetadataOperations operations,
-                                                TarantoolSpaceMetadata spaceMetadata) {
+    private List<List<?>> conditionsListToLists(
+        List<? extends Condition> conditionsList,
+        TarantoolMetadataOperations operations,
+        TarantoolSpaceMetadata spaceMetadata) {
         return conditionsList.stream().map(c -> c.toList(operations, spaceMetadata)).collect(Collectors.toList());
     }
 
-    public TarantoolIndexQuery toIndexQuery(TarantoolMetadataOperations operations,
-                                            TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolIndexQuery toIndexQuery(
+        TarantoolMetadataOperations operations,
+        TarantoolSpaceMetadata spaceMetadata) {
         if (startTuple != null) {
             throw new TarantoolClientException("'startAfter' is not supported");
         }
@@ -821,9 +825,9 @@ public final class Conditions implements Serializable {
         for (Condition condition : conditions) {
             if (condition instanceof IndexValueConditionImpl) {
                 TarantoolIndexMetadata indexMetadata =
-                        (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
+                    (TarantoolIndexMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<IndexValueCondition> current = indexConditions.computeIfAbsent(
-                        indexMetadata.getIndexName(), name -> new LinkedList<>());
+                    indexMetadata.getIndexName(), name -> new LinkedList<>());
 
                 if (current.size() > 0) {
                     throw new TarantoolClientException("Multiple conditions for one index are not supported");
@@ -833,9 +837,9 @@ public final class Conditions implements Serializable {
                 selectedIndexes.putIfAbsent(indexMetadata.getIndexName(), indexMetadata);
             } else {
                 TarantoolFieldMetadata fieldMetadata =
-                        (TarantoolFieldMetadata) condition.field().metadata(operations, spaceMetadata);
+                    (TarantoolFieldMetadata) condition.field().metadata(operations, spaceMetadata);
                 List<FieldValueCondition> current = fieldConditions
-                        .computeIfAbsent(fieldMetadata.getFieldName(), f -> new LinkedList<>());
+                    .computeIfAbsent(fieldMetadata.getFieldName(), f -> new LinkedList<>());
 
                 if (current.size() > 0) {
                     throw new TarantoolClientException("Multiple conditions for one field are not supported");
@@ -862,31 +866,33 @@ public final class Conditions implements Serializable {
         } else {
             if (selectedFields.size() > 0) {
                 TarantoolIndexMetadata suitableIndex = findSuitableIndex(
-                        operations, spaceMetadata, selectedFields.values());
+                    operations, spaceMetadata, selectedFields.values());
 
                 query = indexQueryFromFieldValues(suitableIndex, fieldConditions, selectedFields);
             } else {
                 query = new TarantoolIndexQuery(TarantoolIndexQuery.PRIMARY)
-                        .withIteratorType(descending ? TarantoolIteratorType.ITER_REQ : TarantoolIteratorType.ITER_EQ);
+                    .withIteratorType(descending ? TarantoolIteratorType.ITER_REQ : TarantoolIteratorType.ITER_EQ);
             }
         }
 
         return query;
     }
 
-    private TarantoolIndexQuery indexQueryFromIndexValues(Map<String, List<IndexValueCondition>> indexConditions,
-                                                          Map<String, TarantoolIndexMetadata> selectedIndexes) {
+    private TarantoolIndexQuery indexQueryFromIndexValues(
+        Map<String, List<IndexValueCondition>> indexConditions,
+        Map<String, TarantoolIndexMetadata> selectedIndexes) {
         IndexValueCondition condition = indexConditions.values().iterator().next().get(0);
         TarantoolIndexMetadata indexMetadata = selectedIndexes.values().iterator().next();
         TarantoolIteratorType iteratorType = condition.operator().toIteratorType();
         return new TarantoolIndexQuery(indexMetadata.getIndexId())
-                .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
-                .withKeyValues(condition.value());
+            .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
+            .withKeyValues(condition.value());
     }
 
-    private TarantoolIndexQuery indexQueryFromFieldValues(TarantoolIndexMetadata suitableIndex,
-                                                          Map<String, List<FieldValueCondition>> fieldConditions,
-                                                          Map<String, TarantoolFieldMetadata> selectedFields) {
+    private TarantoolIndexQuery indexQueryFromFieldValues(
+        TarantoolIndexMetadata suitableIndex,
+        Map<String, List<FieldValueCondition>> fieldConditions,
+        Map<String, TarantoolFieldMetadata> selectedFields) {
         Operator selectedOperator = null;
         List<Object> fieldValues = Arrays.asList(new Object[suitableIndex.getIndexParts().size()]);
         for (Map.Entry<String, List<FieldValueCondition>> conditions : fieldConditions.entrySet()) {
@@ -896,75 +902,78 @@ public final class Conditions implements Serializable {
             } else {
                 if (!condition.operator().equals(selectedOperator)) {
                     throw new TarantoolClientException(
-                            "Different conditions for index parts are not supported");
+                        "Different conditions for index parts are not supported");
                 }
             }
             TarantoolFieldMetadata field = selectedFields.get(conditions.getKey());
             int partPosition = suitableIndex
-                    .getIndexPartPositionByFieldPosition(field.getFieldPosition())
-                    .orElseThrow(() -> new TarantoolClientException(
-                            "Field %s not found in index %s", field.getFieldName(), suitableIndex.getIndexName()));
+                .getIndexPartPositionByFieldPosition(field.getFieldPosition())
+                .orElseThrow(() -> new TarantoolClientException(
+                    "Field %s not found in index %s", field.getFieldName(), suitableIndex.getIndexName()));
             fieldValues.set(partPosition, condition.value());
         }
         TarantoolIteratorType iteratorType = selectedOperator != null ?
-                selectedOperator.toIteratorType() :
-                TarantoolIteratorType.ITER_EQ;
+            selectedOperator.toIteratorType() :
+            TarantoolIteratorType.ITER_EQ;
         return new TarantoolIndexQuery(suitableIndex.getIndexId())
-                .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
-                .withKeyValues(fieldValues);
+            .withIteratorType(descending ? iteratorType.reverse() : iteratorType)
+            .withKeyValues(fieldValues);
     }
 
     private static Optional<TarantoolIndexMetadata> findCoveringIndex(
-            TarantoolMetadataOperations operations,
-            TarantoolSpaceMetadata spaceMetadata,
-            Collection<TarantoolFieldMetadata> selectedFields) {
+        TarantoolMetadataOperations operations,
+        TarantoolSpaceMetadata spaceMetadata,
+        Collection<TarantoolFieldMetadata> selectedFields) {
         Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
-                .orElseThrow(() -> new TarantoolClientException(
-                        "Metadata for space %s not found", spaceMetadata.getSpaceName()));
+            .orElseThrow(() -> new TarantoolClientException(
+                "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
         Optional<TarantoolIndexMetadata> coveringIndex = allIndexes.values().stream()
-                .map(metadata -> new AbstractMap.SimpleEntry<Long, TarantoolIndexMetadata>(
-                        calculateCoverage(metadata, selectedFields), metadata))
-                .filter(entry -> entry.getKey() > 0)
-                .max(Comparator.comparingLong(AbstractMap.SimpleEntry::getKey))
-                .map(AbstractMap.SimpleEntry::getValue);
+            .map(metadata -> new AbstractMap.SimpleEntry<Long, TarantoolIndexMetadata>(
+                calculateCoverage(metadata, selectedFields), metadata))
+            .filter(entry -> entry.getKey() > 0)
+            .max(Comparator.comparingLong(AbstractMap.SimpleEntry::getKey))
+            .map(AbstractMap.SimpleEntry::getValue);
 
         return coveringIndex;
     }
 
-    private static long calculateCoverage(TarantoolIndexMetadata metadata,
-                                          Collection<TarantoolFieldMetadata> selectedFields) {
+    private static long calculateCoverage(
+        TarantoolIndexMetadata metadata,
+        Collection<TarantoolFieldMetadata> selectedFields) {
         AtomicBoolean firstFieldIsSet = new AtomicBoolean(false);
         long count = selectedFields.stream()
-                .map(f -> metadata.getIndexPartPositionByFieldPosition(f.getFieldPosition()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .peek(indexPosition -> {
-                    if (indexPosition == 0) {
-                        firstFieldIsSet.set(true);
-                    }
-                })
-                .count();
+            .map(f -> metadata.getIndexPartPositionByFieldPosition(f.getFieldPosition()))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .peek(indexPosition -> {
+                if (indexPosition == 0) {
+                    firstFieldIsSet.set(true);
+                }
+            })
+            .count();
         return firstFieldIsSet.get() ? count : 0;
     }
 
-    private static TarantoolIndexMetadata findSuitableIndex(TarantoolMetadataOperations operations,
-                                                            TarantoolSpaceMetadata spaceMetadata,
-                                                            Collection<TarantoolFieldMetadata> selectedFields) {
+    private static TarantoolIndexMetadata findSuitableIndex(
+        TarantoolMetadataOperations operations,
+        TarantoolSpaceMetadata spaceMetadata,
+        Collection<TarantoolFieldMetadata> selectedFields) {
         Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
-                .orElseThrow(() -> new TarantoolClientException(
-                        "Metadata for space %s not found", spaceMetadata.getSpaceName()));
+            .orElseThrow(() -> new TarantoolClientException(
+                "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
         TarantoolIndexMetadata suitableIndex = allIndexes.values().stream()
-                .filter(metadata -> isSuitableIndex(metadata, selectedFields))
-                .min(Comparator.comparingInt(m -> m.getIndexParts().size()))
-                .orElseThrow(() -> new TarantoolClientException("No indexes that fit the passed fields are found"));
+            .filter(metadata -> isSuitableIndex(metadata, selectedFields))
+            .min(Comparator.comparingInt(m -> m.getIndexParts().size()))
+            .orElseThrow(() -> new TarantoolClientException("No indexes that fit the passed fields are found"));
 
         return suitableIndex;
     }
 
-    private static boolean isSuitableIndex(TarantoolIndexMetadata indexMetadata,
-                                           Collection<TarantoolFieldMetadata> selectedFields) {
+    private static boolean isSuitableIndex(
+        TarantoolIndexMetadata indexMetadata,
+        Collection<TarantoolFieldMetadata> selectedFields) {
         Map<Integer, TarantoolIndexPartMetadata> indexParts = indexMetadata.getIndexPartsByPosition();
 
         if (indexParts.size() < selectedFields.size()) {
@@ -1006,10 +1015,10 @@ public final class Conditions implements Serializable {
         }
         Conditions that = (Conditions) o;
         return isDescending() == that.isDescending() &&
-                getLimit() == that.getLimit() &&
-                getOffset() == that.getOffset()
-                && conditions.equals(that.conditions) &&
-                Objects.equals(getStartTuple(), that.getStartTuple());
+            getLimit() == that.getLimit() &&
+            getOffset() == that.getOffset()
+            && conditions.equals(that.conditions) &&
+            Objects.equals(getStartTuple(), that.getStartTuple());
     }
 
     @Override

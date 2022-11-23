@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public interface TarantoolConnectionListener {
     /**
      * The operation to perform when the connection is ready
+     *
      * @param connection established connection to the Tarantool server
      * @return operation result future
      */

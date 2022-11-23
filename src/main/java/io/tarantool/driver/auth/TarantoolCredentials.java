@@ -8,6 +8,7 @@ package io.tarantool.driver.auth;
 public interface TarantoolCredentials {
     /**
      * Return the username to authenticate with its identity
+     *
      * @return not empty username
      */
     String getUsername();

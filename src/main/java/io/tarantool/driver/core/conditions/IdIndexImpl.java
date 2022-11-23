@@ -33,10 +33,11 @@ public class IdIndexImpl implements IdIndex {
     }
 
     @Override
-    public TarantoolIndexMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolIndexMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
         Optional<TarantoolIndexMetadata> indexMetadata =
-                metadataOperations.getIndexById(spaceMetadata.getSpaceName(), position);
+            metadataOperations.getIndexById(spaceMetadata.getSpaceName(), position);
         if (!indexMetadata.isPresent()) {
             throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), position);
         }

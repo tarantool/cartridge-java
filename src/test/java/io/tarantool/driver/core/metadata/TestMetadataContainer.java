@@ -44,7 +44,7 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
         testPrimaryIndexMetadata.setIndexName("primary");
         testPrimaryIndexMetadata.setSpaceId(512);
         testPrimaryIndexMetadata.setIndexParts(Collections.singletonList(
-                new TarantoolIndexPartMetadataImpl(0, "string"))
+            new TarantoolIndexPartMetadataImpl(0, "string"))
         );
 
         testIndexMetadata2 = new TarantoolIndexMetadataImpl();

@@ -20,11 +20,12 @@ import java.util.List;
  */
 public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
-    UpdateProxyOperation(TarantoolCallOperations client,
-                         String functionName,
-                         List<?> arguments,
-                         MessagePackObjectMapper argumentsMapper,
-                         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+    UpdateProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -56,17 +57,17 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public UpdateProxyOperation<T> build() {
             CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withBucketId(options.getBucketId())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withBucketId(options.getBucketId())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName,
-                    indexQuery.getKeyValues(),
-                    operations.asProxyOperationList(),
-                    requestOptions.asMap());
+                indexQuery.getKeyValues(),
+                operations.asProxyOperationList(),
+                requestOptions.asMap());
 
             return new UpdateProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

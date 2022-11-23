@@ -1,8 +1,8 @@
 package io.tarantool.driver.api.space.options.proxy;
 
-import java.util.Optional;
-
 import io.tarantool.driver.api.space.options.SelectOptions;
+
+import java.util.Optional;
 
 /**
  * Represent options for select cluster proxy operation

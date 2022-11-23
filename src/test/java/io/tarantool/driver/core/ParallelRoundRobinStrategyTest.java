@@ -26,17 +26,17 @@ public class ParallelRoundRobinStrategyTest {
     @Test
     public void testGetAddress() {
         List<TarantoolConnection> connections = Arrays.asList(
-                new CustomConnection("127.0.0.1", 3001),
-                new CustomConnection("127.0.0.2", 3002),
-                new CustomConnection("127.0.0.3", 3003),
-                new CustomConnection("127.0.0.4", 3004),
-                new CustomConnection("127.0.0.5", 3005),
-                new CustomConnection("127.0.0.6", 3006)
+            new CustomConnection("127.0.0.1", 3001),
+            new CustomConnection("127.0.0.2", 3002),
+            new CustomConnection("127.0.0.3", 3003),
+            new CustomConnection("127.0.0.4", 3004),
+            new CustomConnection("127.0.0.5", 3005),
+            new CustomConnection("127.0.0.6", 3006)
         );
 
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withConnections(2)
-                .build();
+            .withConnections(2)
+            .build();
         ConnectionSelectionStrategy strategy = ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections);
 
         assertEquals("127.0.0.1", ((CustomConnection) strategy.next()).getHost());
@@ -54,9 +54,9 @@ public class ParallelRoundRobinStrategyTest {
         TarantoolClientConfig config = new TarantoolClientConfig();
 
         assertThrows(IllegalArgumentException.class,
-                () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, null));
+            () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, null));
         assertThrows(NoAvailableConnectionsException.class,
-                () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
+            () -> ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections).next());
 
         connections.add(new CustomConnection("127.0.0.1", 3001));
         ConnectionSelectionStrategy strategy = ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections);
@@ -71,8 +71,8 @@ public class ParallelRoundRobinStrategyTest {
     @Test
     public void testParallelGetAddress() {
         List<TarantoolConnection> connections = IntStream.range(1, 11)
-                .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
-                .collect(Collectors.toList());
+            .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
+            .collect(Collectors.toList());
 
         TarantoolClientConfig config = new TarantoolClientConfig();
         ConnectionSelectionStrategy strategy = ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections);
@@ -106,13 +106,13 @@ public class ParallelRoundRobinStrategyTest {
     @Test
     public void testSkipConnections() {
         List<TarantoolConnection> connections = IntStream.range(1, 11)
-                .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
-                .peek(c -> {
-                    if (c.getPort() < 3006) {
-                        c.setConnected(false);
-                    }
-                })
-                .collect(Collectors.toList());
+            .mapToObj(i -> new CustomConnection(String.format("127.0.0.%d", i), 3000 + i))
+            .peek(c -> {
+                if (c.getPort() < 3006) {
+                    c.setConnected(false);
+                }
+            })
+            .collect(Collectors.toList());
 
         TarantoolClientConfig config = new TarantoolClientConfig();
         ConnectionSelectionStrategy strategy = ParallelRoundRobinStrategyFactory.INSTANCE.create(config, connections);

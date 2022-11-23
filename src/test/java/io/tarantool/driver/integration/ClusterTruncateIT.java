@@ -40,8 +40,8 @@ public class ClusterTruncateIT {
 
     @Container
     private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua")
-            .withLogConsumer(new Slf4jLogConsumer(log));
+        .withScriptFileName("org/testcontainers/containers/server.lua")
+        .withLogConsumer(new Slf4jLogConsumer(log));
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
@@ -59,17 +59,17 @@ public class ClusterTruncateIT {
 
     private static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            tarantoolContainer.getHost(), tarantoolContainer.getPort());
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
+            .withCredentials(credentials)
+            .withConnectTimeout(1000 * 5)
+            .withReadTimeout(1000 * 5)
+            .withRequestTimeout(1000 * 5)
+            .build();
 
         log.info("Attempting connect to Tarantool");
         client = new ClusterTarantoolTupleClient(config, serverAddress);
@@ -79,7 +79,7 @@ public class ClusterTruncateIT {
     @Test
     public void test_truncate2TimesOneSpace_shouldNotThrowExceptionsAndSpaceShouldBeEmptyAfterEtchCall() {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         // call truncate then space is empty
         testSpace.truncate().join();
@@ -106,7 +106,7 @@ public class ClusterTruncateIT {
     @Test
     public void test_truncateEmptySpace_shouldNotThrowExceptionsAndSpaceShouldBeEmpty() {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         // truncate space to make sure it is empty
         testSpace.truncate().join();

@@ -47,7 +47,7 @@ public interface TarantoolEvalOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException;
+        throws TarantoolClientException;
 
     /**
      * Execute a Lua expression in the Tarantool instance. If a result is expected, the expression must start with
@@ -61,7 +61,7 @@ public interface TarantoolEvalOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     CompletableFuture<List<?>> eval(String expression, List<?> arguments, MessagePackValueMapper resultMapper)
-            throws TarantoolClientException;
+        throws TarantoolClientException;
 
     /**
      * Execute a Lua expression in the Tarantool instance. If a result is expected, the expression must start with
@@ -74,8 +74,9 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<?>> eval(String expression,
-                                    List<?> arguments,
-                                    MessagePackObjectMapper argumentsMapper,
-                                    MessagePackValueMapper resultMapper) throws TarantoolClientException;
+    CompletableFuture<List<?>> eval(
+        String expression,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        MessagePackValueMapper resultMapper) throws TarantoolClientException;
 }

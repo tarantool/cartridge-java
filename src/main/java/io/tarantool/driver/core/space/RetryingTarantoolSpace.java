@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * @author Alexey Kuzin
  */
 public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
-        implements TarantoolSpaceOperations<T, R> {
+    implements TarantoolSpaceOperations<T, R> {
 
     private final TarantoolSpaceOperations<T, R> spaceOperations;
     private final RequestRetryPolicyFactory retryPolicyFactory;
@@ -44,9 +44,10 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
      * @param retryPolicyFactory request retrying policy factory
      * @param executor           executor service for retry callbacks
      */
-    public RetryingTarantoolSpace(TarantoolSpaceOperations<T, R> spaceOperations,
-                                  RequestRetryPolicyFactory retryPolicyFactory,
-                                  Executor executor) {
+    public RetryingTarantoolSpace(
+        TarantoolSpaceOperations<T, R> spaceOperations,
+        RequestRetryPolicyFactory retryPolicyFactory,
+        Executor executor) {
         this.spaceOperations = spaceOperations;
         this.retryPolicyFactory = retryPolicyFactory;
         this.executor = executor;
@@ -54,13 +55,13 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.delete(conditions));
     }
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions, DeleteOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.delete(conditions, options));
     }
 
@@ -81,43 +82,43 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
 
     @Override
     public CompletableFuture<R> insertMany(Collection<T> tuples, InsertManyOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.insertMany(tuples, options));
     }
 
     @Override
     public CompletableFuture<R> replace(T tuple)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replace(tuple));
     }
 
     @Override
     public CompletableFuture<R> replace(T tuple, ReplaceOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replace(tuple, options));
     }
 
     @Override
     public CompletableFuture<R> replaceMany(Collection<T> tuples)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replaceMany(tuples));
     }
 
     @Override
     public CompletableFuture<R> replaceMany(Collection<T> tuples, ReplaceManyOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.replaceMany(tuples, options));
     }
 
     @Override
     public CompletableFuture<R> select(Conditions conditions)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.select(conditions));
     }
 
     @Override
     public CompletableFuture<R> select(Conditions conditions, SelectOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return wrapOperation(() -> spaceOperations.select(conditions, options));
     }
 
@@ -147,8 +148,9 @@ public class RetryingTarantoolSpace<T extends Packable, R extends Collection<T>>
     }
 
     @Override
-    public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
-                                       UpsertOptions options) {
+    public CompletableFuture<R> upsert(
+        Conditions conditions, T tuple, TupleOperations operations,
+        UpsertOptions options) {
         return wrapOperation(() -> spaceOperations.upsert(conditions, tuple, operations, options));
     }
 

@@ -55,9 +55,10 @@ public class RequestFutureManager implements AutoCloseable {
      * @param <T>            target response body type
      * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
      */
-    public <T> CompletableFuture<T> submitRequest(TarantoolRequest request,
-                                                  int requestTimeout,
-                                                  MessagePackValueMapper resultMapper) {
+    public <T> CompletableFuture<T> submitRequest(
+        TarantoolRequest request,
+        int requestTimeout,
+        MessagePackValueMapper resultMapper) {
         CompletableFuture<T> requestFuture = new CompletableFuture<>();
         long requestId = request.getHeader().getSync();
         requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
@@ -65,7 +66,7 @@ public class RequestFutureManager implements AutoCloseable {
         timeoutScheduler.schedule(() -> {
             if (!requestFuture.isDone()) {
                 requestFuture.completeExceptionally(new TimeoutException(String.format(
-                        "Failed to get response for request id: %d within %d ms", requestId, requestTimeout)));
+                    "Failed to get response for request id: %d within %d ms", requestId, requestTimeout)));
             }
         }, requestTimeout, TimeUnit.MILLISECONDS);
         return requestFuture;

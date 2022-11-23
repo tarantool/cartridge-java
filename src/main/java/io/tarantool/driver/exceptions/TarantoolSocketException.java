@@ -12,9 +12,9 @@ public class TarantoolSocketException extends TarantoolClientException {
     private final TarantoolServerAddress tarantoolServerAddress;
 
     /**
-     * @param message the message
+     * @param message                the message
      * @param tarantoolServerAddress the address
-     * @param cause the cause
+     * @param cause                  the cause
      */
     public TarantoolSocketException(String message, TarantoolServerAddress tarantoolServerAddress, Throwable cause) {
         super(message, cause);
@@ -22,7 +22,7 @@ public class TarantoolSocketException extends TarantoolClientException {
     }
 
     /**
-     * @param message the message
+     * @param message                the message
      * @param tarantoolServerAddress the cause
      */
     public TarantoolSocketException(String message, TarantoolServerAddress tarantoolServerAddress) {
@@ -32,6 +32,7 @@ public class TarantoolSocketException extends TarantoolClientException {
 
     /**
      * Get {@link TarantoolServerAddress} for this exception
+     *
      * @return the address
      */
     public TarantoolServerAddress getTarantoolServerAddress() {

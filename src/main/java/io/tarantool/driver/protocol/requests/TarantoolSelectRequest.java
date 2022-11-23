@@ -15,10 +15,9 @@ import java.util.Map;
 /**
  * Select request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>,
- *     <a href="https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select">
- *         https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select</a>
- *
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>,
+ * <a href="https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select">
+ * https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-select</a>
  */
 public final class TarantoolSelectRequest extends TarantoolRequest {
 
@@ -39,6 +38,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify tarantool space ID for operation
+         *
          * @param spaceId tarantool space ID
          * @return builder
          */
@@ -49,6 +49,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify tarantool index ID for operation
+         *
          * @param indexId tarantool index ID
          * @return builder
          */
@@ -59,6 +60,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify the maximum number of tuples returned by the request.
+         *
          * @param limit number
          * @return builder
          */
@@ -69,6 +71,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify the offset of the first tuple returned by the request
+         *
          * @param offset number
          * @return builder
          */
@@ -79,6 +82,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify iterator type
+         *
          * @param iteratorType iterator type
          * @return builder
          */
@@ -89,6 +93,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Specify key values to be matched against the index key
+         *
          * @param keyValues key value
          * @return builder
          */
@@ -99,6 +104,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
 
         /**
          * Build a {@link TarantoolSelectRequest} instance
+         *
          * @param mapper configured {@link MessagePackObjectMapper} instance
          * @return instance of select request
          * @throws TarantoolProtocolException if some required params is missing

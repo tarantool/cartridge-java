@@ -33,18 +33,19 @@ public class ProxyTarantoolTupleClient extends ProxyTarantoolClient<TarantoolTup
      * @param decoratedClient configured Tarantool client
      * @param mappingConfig   config for proxy operations mapping
      */
-    public ProxyTarantoolTupleClient(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
-                                     ProxyOperationsMappingConfig mappingConfig) {
+    public ProxyTarantoolTupleClient(
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
+        ProxyOperationsMappingConfig mappingConfig) {
         super(decoratedClient, mappingConfig);
     }
 
     @Override
     protected TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> spaceOperations(
-            TarantoolClientConfig config,
-            TarantoolCallOperations client,
-            ProxyOperationsMappingConfig mappingConfig,
-            TarantoolMetadataOperations metadata,
-            TarantoolSpaceMetadata spaceMetadata) {
+        TarantoolClientConfig config,
+        TarantoolCallOperations client,
+        ProxyOperationsMappingConfig mappingConfig,
+        TarantoolMetadataOperations metadata,
+        TarantoolSpaceMetadata spaceMetadata) {
         return new ProxyTarantoolTupleSpace(config, client, mappingConfig, spaceMetadata, metadata);
     }
 }

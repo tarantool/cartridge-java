@@ -23,7 +23,7 @@ class DefaultLongArrayConverterTest {
         DefaultArrayValueToLongArrayConverter converter = new DefaultArrayValueToLongArrayConverter();
 
         ImmutableArrayValue arrayValue = ValueFactory.newArray(
-                new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L), new ImmutableLongValueImpl(3L)
+            new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L), new ImmutableLongValueImpl(3L)
         );
         assertTrue(converter.canConvertValue(arrayValue));
 
@@ -46,7 +46,7 @@ class DefaultLongArrayConverterTest {
         DefaultArrayValueToLongArrayConverter converter = new DefaultArrayValueToLongArrayConverter();
 
         ImmutableArrayValue arrayValue = ValueFactory.newArray(
-                new ImmutableLongValueImpl(2L), new ImmutableStringValueImpl("string"), new ImmutableLongValueImpl(3L)
+            new ImmutableLongValueImpl(2L), new ImmutableStringValueImpl("string"), new ImmutableLongValueImpl(3L)
         );
         assertTrue(converter.canConvertValue(arrayValue));
 

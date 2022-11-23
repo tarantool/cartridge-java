@@ -25,11 +25,11 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     protected final CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
 
     AbstractProxyOperation(
-            TarantoolCallOperations client,
-            String functionName,
-            List<?> arguments,
-            MessagePackObjectMapper argumentsMapper,
-            CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         this.client = client;
         this.argumentsMapper = argumentsMapper;
         this.arguments = arguments;

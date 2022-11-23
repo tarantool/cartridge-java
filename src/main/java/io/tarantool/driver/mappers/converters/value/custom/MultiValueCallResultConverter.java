@@ -13,7 +13,7 @@ import java.util.List;
  * @author Alexey Kuzin
  */
 public class MultiValueCallResultConverter<T, R extends List<T>>
-        implements ValueConverter<ArrayValue, MultiValueCallResult<T, R>> {
+    implements ValueConverter<ArrayValue, MultiValueCallResult<T, R>> {
 
     private static final long serialVersionUID = 20200708L;
 

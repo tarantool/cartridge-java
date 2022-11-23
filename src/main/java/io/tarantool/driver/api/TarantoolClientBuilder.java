@@ -179,7 +179,7 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
-            ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory);
+        ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory);
 
     /**
      * Select a built-in connection selection strategy factory. The default strategy types include simple round-robin
@@ -190,7 +190,7 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      * @return this instance of builder {@link TarantoolClientBuilder}
      */
     TarantoolClientBuilder withConnectionSelectionStrategy(
-            TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
+        TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType);
 
     /**
      * Specify SslContext with settings for establishing SSL/TLS connection between Tarantool

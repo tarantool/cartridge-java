@@ -16,30 +16,31 @@ public class TupleOperationSubtract extends TupleUpdateOperation {
         super(TarantoolUpdateOperationType.SUBTRACT, fieldName, value);
     }
 
-    private TupleOperationSubtract(TarantoolUpdateOperationType operationType, Integer fieldIndex,
-                                   String fieldName, Object value, boolean isProxyOperation) {
+    private TupleOperationSubtract(
+        TarantoolUpdateOperationType operationType, Integer fieldIndex,
+        String fieldName, Object value, boolean isProxyOperation) {
         super(operationType, fieldIndex, fieldName, value, isProxyOperation);
     }
 
     @Override
     public TupleOperation toProxyTupleOperation() {
         return new TupleOperationSubtract(
-                this.getOperationType(),
-                this.getFieldNumber(),
-                this.getFieldName(),
-                this.getValue(),
-                true
+            this.getOperationType(),
+            this.getFieldNumber(),
+            this.getFieldName(),
+            this.getValue(),
+            true
         );
     }
 
     @Override
     public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
         return new TupleOperationSubtract(
-                this.getOperationType(),
-                fieldMetadataIndex,
-                this.getFieldName(),
-                this.getValue(),
-                this.isProxyOperation()
+            this.getOperationType(),
+            fieldMetadataIndex,
+            this.getFieldName(),
+            this.getValue(),
+            this.isProxyOperation()
         );
     }
 }

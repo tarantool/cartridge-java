@@ -23,7 +23,7 @@ class CRUDBucketIdOptions extends CRUDBaseOptions {
 
     protected abstract static
     class AbstractBuilder<O extends CRUDBucketIdOptions, B extends AbstractBuilder<O, B>>
-            extends CRUDBaseOptions.AbstractBuilder<O, B> {
+        extends CRUDBaseOptions.AbstractBuilder<O, B> {
         private Optional<Integer> bucketId = Optional.empty();
 
         public B withBucketId(Optional<Integer> bucketId) {

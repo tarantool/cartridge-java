@@ -19,12 +19,12 @@ abstract class CartridgeMixedInstancesContainer {
         final HashMap<String, String> buildArgs = new HashMap<>();
         buildArgs.put("TARANTOOL_INSTANCES_FILE", "./instances_mixed.yml");
         container = new TarantoolCartridgeContainer(
-                "cartridge/instances_mixed.yml",
-                "cartridge/topology_mixed.lua", buildArgs)
-                .withDirectoryBinding("cartridge")
-                .withLogConsumer(new Slf4jLogConsumer(logger))
-                .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 3))
-                .withStartupTimeout(Duration.ofMinutes(2));
+            "cartridge/instances_mixed.yml",
+            "cartridge/topology_mixed.lua", buildArgs)
+            .withDirectoryBinding("cartridge")
+            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 3))
+            .withStartupTimeout(Duration.ofMinutes(2));
     }
 
     protected static void startCluster() {

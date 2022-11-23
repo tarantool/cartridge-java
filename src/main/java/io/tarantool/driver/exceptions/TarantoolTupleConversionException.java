@@ -10,6 +10,6 @@ import org.msgpack.value.Value;
 public class TarantoolTupleConversionException extends TarantoolClientException {
     public TarantoolTupleConversionException(Value messagePackValue, Throwable cause) {
         super(String.format("Failed to convert MessagePack value of type %s to tuple",
-                messagePackValue.getValueType()), cause);
+            messagePackValue.getValueType()), cause);
     }
 }

@@ -53,14 +53,14 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
     private HTTPDiscoveryClusterAddressProvider getHttpProvider() {
         String discoveryAddress = "http://" + container.getAPIHost() + ":" + container.getAPIPort() + "/routers";
         HTTPClusterDiscoveryEndpoint endpoint = new HTTPClusterDiscoveryEndpoint.Builder()
-                .withURI(discoveryAddress)
-                .withReadTimeout(1000 * 5)
-                .withConnectTimeout(1000 * 5)
-                .build();
+            .withURI(discoveryAddress)
+            .withReadTimeout(1000 * 5)
+            .withConnectTimeout(1000 * 5)
+            .build();
 
         TarantoolClusterDiscoveryConfig config = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .build();
+            .withEndpoint(endpoint)
+            .build();
 
         return new HTTPDiscoveryClusterAddressProvider(config);
     }
@@ -78,25 +78,25 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
     private TarantoolClusterAddressProvider getBinaryProvider() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                container.getUsername(), container.getPassword());
+            container.getUsername(), container.getPassword());
 
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(credentials)
-                .withReadTimeout(1000 * 5)
-                .withConnectTimeout(1000 * 5)
-                .build();
+            .withCredentials(credentials)
+            .withReadTimeout(1000 * 5)
+            .withConnectTimeout(1000 * 5)
+            .build();
 
         BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
-                .withClientConfig(config)
-                .withEntryFunction("get_routers")
-                .withEndpointProvider(() -> Collections.singletonList(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
-                .build();
+            .withClientConfig(config)
+            .withEntryFunction("get_routers")
+            .withEndpointProvider(() -> Collections.singletonList(
+                new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
+            .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
-                .withEndpoint(endpoint)
-                .withDelay(1)
-                .build();
+            .withEndpoint(endpoint)
+            .withDelay(1)
+            .build();
 
         return new BinaryDiscoveryClusterAddressProvider(clusterDiscoveryConfig);
     }
@@ -104,15 +104,15 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
     @Test
     public void connectWithBinaryClusterDiscovery() throws TarantoolClientException {
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
+            .withConnectTimeout(1000 * 5)
+            .withReadTimeout(1000 * 5)
+            .withRequestTimeout(1000 * 5)
+            .build();
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
-                config,
-                new TestWrappedClusterAddressProvider(getBinaryProvider(), container));
+            config,
+            new TestWrappedClusterAddressProvider(getBinaryProvider(), container));
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");
@@ -121,15 +121,15 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
     @Test
     public void connectWithHttpClusterDiscovery() throws TarantoolClientException {
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(container.getUsername(), container.getPassword()))
+            .withConnectTimeout(1000 * 5)
+            .withReadTimeout(1000 * 5)
+            .withRequestTimeout(1000 * 5)
+            .build();
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(
-                config,
-                new TestWrappedClusterAddressProvider(getHttpProvider(), container));
+            config,
+            new TestWrappedClusterAddressProvider(getHttpProvider(), container));
 
         assertNotNull(client.getVersion(), "Version must not be null");
         assertTrue(client.getVersion().toString().contains("Tarantool"), "Version must contain Tarantool");

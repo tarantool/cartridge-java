@@ -4,16 +4,15 @@ import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     public static String USER_NAME;
     public static String PASSWORD;
@@ -50,13 +49,13 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
 
     private static void initClient() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getRouterHost(), container.getRouterPort());
+            config, container.getRouterHost(), container.getRouterPort());
         client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
@@ -72,7 +71,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withStopOnError_withRollbackOnError() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<TarantoolTuple> tarantoolTuples = Arrays.asList(
             tupleFactory.create(1, null, "FIO", 50, 100),
@@ -105,7 +104,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
     @Test
     public void withTimeout() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         int requestConfigTimeout = client.getConfig().getRequestTimeout();
         int customRequestTimeout = requestConfigTimeout * 2;

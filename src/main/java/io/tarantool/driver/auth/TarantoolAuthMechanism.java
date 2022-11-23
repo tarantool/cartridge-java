@@ -8,7 +8,7 @@ package io.tarantool.driver.auth;
 public enum TarantoolAuthMechanism {
     CHAPSHA1("chap-sha1");
 
-    private String signature;
+    private final String signature;
 
     TarantoolAuthMechanism(String signature) {
         this.signature = signature;

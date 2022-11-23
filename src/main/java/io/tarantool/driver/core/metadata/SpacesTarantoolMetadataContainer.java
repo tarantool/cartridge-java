@@ -19,8 +19,9 @@ public class SpacesTarantoolMetadataContainer implements TarantoolMetadataContai
     private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new HashMap<>();
     private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
 
-    public SpacesTarantoolMetadataContainer(TarantoolResult<TarantoolSpaceMetadata> spacesCollection,
-                                            TarantoolResult<TarantoolIndexMetadata> indexesCollection) {
+    public SpacesTarantoolMetadataContainer(
+        TarantoolResult<TarantoolSpaceMetadata> spacesCollection,
+        TarantoolResult<TarantoolIndexMetadata> indexesCollection) {
         spacesCollection.forEach(meta -> {
             spaceMetadataByName.put(meta.getSpaceName(), meta);
             spaceMetadataById.put(meta.getSpaceId(), meta);

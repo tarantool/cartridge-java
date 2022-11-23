@@ -34,10 +34,11 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> exten
     private T currentValue;
     private T lastTuple;
 
-    public StartAfterCursor(TarantoolSpaceOperations<T, R> space,
-                            Conditions conditions,
-                            int batchSize,
-                            MessagePackMapper mapper) {
+    public StartAfterCursor(
+        TarantoolSpaceOperations<T, R> space,
+        Conditions conditions,
+        int batchSize,
+        MessagePackMapper mapper) {
         this.space = space;
         this.initConditions = conditions;
         this.batchSize = batchSize;
@@ -53,7 +54,7 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> exten
         }
 
         Conditions conditions = new Conditions(initConditions)
-                .withLimit(limit);
+            .withLimit(limit);
 
         if (lastTuple != null) {
             conditions.startAfter(lastTuple, mapper::toValue);
@@ -61,9 +62,9 @@ public class StartAfterCursor<T extends Packable, R extends Collection<T>> exten
 
         try {
             resultIter = space
-                    .select(conditions)
-                    .get()
-                    .iterator();
+                .select(conditions)
+                .get()
+                .iterator();
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);
         }

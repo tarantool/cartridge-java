@@ -11,6 +11,7 @@ public class TarantoolVersionHolder {
 
     /**
      * Reads Tarantool version from a {@code String}. The version may be later retrieved using {@link #getVersion()}
+     *
      * @param versionString string containing the Tarantool version
      * @throws InvalidVersionException if the version is invalid or unsupported
      */
@@ -20,6 +21,7 @@ public class TarantoolVersionHolder {
 
     /**
      * Get Tarantool server version
+     *
      * @return an instance of {@link TarantoolVersion}
      */
     public TarantoolVersion getVersion() {

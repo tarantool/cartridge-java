@@ -13,10 +13,12 @@ import java.util.Collection;
  * @author Vladimir Rogach
  */
 public abstract class TarantoolCursorBase<T extends Packable, R extends Collection<T>>
-        implements TarantoolCursor<T> {
+    implements TarantoolCursor<T> {
 
     protected abstract void fetchNextTuples();
+
     protected abstract boolean advanceIterator();
+
     protected abstract T getCurrentValue();
 
     /**
@@ -51,7 +53,7 @@ public abstract class TarantoolCursorBase<T extends Packable, R extends Collecti
     public T get() throws TarantoolSpaceOperationException {
         if (getCurrentValue() == null) {
             throw new TarantoolSpaceOperationException(
-                    "Unexpected cursor state: check that next() is called");
+                "Unexpected cursor state: check that next() is called");
         }
         return getCurrentValue();
     }

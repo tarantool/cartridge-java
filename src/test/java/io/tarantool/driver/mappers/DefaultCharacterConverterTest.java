@@ -1,8 +1,8 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
-import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.converters.object.DefaultCharacterToStringValueConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToCharacterConverter;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,10 @@ import org.msgpack.value.ValueFactory;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DefaultCharacterConverterTest {
 
@@ -41,7 +44,7 @@ class DefaultCharacterConverterTest {
     void test_characterConverter_shouldReturnProperCharacter_ifIndexExists() {
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         TarantoolTupleFactory tupleFactory =
-                new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
         TarantoolTuple tarantoolTuple = tupleFactory.create(ValueFactory.newString("a"), ValueFactory.newString("б"));
         assertEquals('a', tarantoolTuple.getCharacter(0)); // Latin letter

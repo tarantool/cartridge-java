@@ -4,7 +4,7 @@ import java.util.Optional;
 
 /**
  * This class is not part of the public API.
- *
+ * <p>
  * Represent options for proxy cluster batch operations
  *
  * @author Alexey Kuzin
@@ -14,8 +14,7 @@ public final class CRUDBatchOptions extends CRUDBaseOptions {
     public static final String BATCH_STOP_ON_ERROR = "stop_on_error";
     public static final String BATCH_ROLLBACK_ON_ERROR = "rollback_on_error";
 
-    protected
-    <T extends AbstractBuilder<T>>
+    private <T extends AbstractBuilder<T>>
     CRUDBatchOptions(AbstractBuilder<T> builder) {
         super(builder);
 

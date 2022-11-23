@@ -11,65 +11,65 @@ end
 
 local function init_space()
     local profile = box.schema.space.create(
-            'test__profile',
-            {
-                format = {
-                    { 'profile_id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'fio', 'string' },
-                    { 'age', 'unsigned' },
-                    { 'balance', 'unsigned', is_nullable = true }
-                },
-                if_not_exists = true,
-            }
+        'test__profile',
+        {
+            format = {
+                { 'profile_id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'fio', 'string' },
+                { 'age', 'unsigned' },
+                { 'balance', 'unsigned', is_nullable = true }
+            },
+            if_not_exists = true,
+        }
     )
 
     profile:create_index('profile_id', { parts = { 'profile_id' }, if_not_exists = true, })
     profile:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     local test_space = box.schema.space.create(
-            'test_space',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'field1', 'string' },
-                    { 'field2', 'unsigned' },
-                },
-                if_not_exists = true,
-            }
+        'test_space',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'field1', 'string' },
+                { 'field2', 'unsigned' },
+            },
+            if_not_exists = true,
+        }
     )
 
     test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     local second_test_space = box.schema.space.create(
-            'second_test_space',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'field1', 'string' },
-                    { 'field2', 'unsigned' },
-                },
-                if_not_exists = true,
-            }
+        'second_test_space',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'field1', 'string' },
+                { 'field2', 'unsigned' },
+            },
+            if_not_exists = true,
+        }
     )
 
     second_test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
     second_test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     local test_space_to_join = box.schema.space.create(
-            'test_space_to_join',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'field3', 'boolean' },
-                    { 'field4', 'number' },
-                },
-                if_not_exists = true,
-            }
+        'test_space_to_join',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'field3', 'boolean' },
+                { 'field4', 'number' },
+            },
+            if_not_exists = true,
+        }
     )
 
     test_space_to_join:create_index('id', { parts = { 'id' }, if_not_exists = true, })
@@ -77,33 +77,34 @@ local function init_space()
 
     -- test space for check double (cdata) field in it
     local test_space_with_double_field = box.schema.space.create(
-            'test_space_with_double_field',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'double_field', get_field_type_by_version() },
-                    { 'number_field', 'number' },
-                },
-                if_not_exists = true,
-            }
+        'test_space_with_double_field',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'double_field', get_field_type_by_version() },
+                { 'number_field', 'number' },
+            },
+            if_not_exists = true,
+        }
     )
 
     test_space_with_double_field:create_index('id', { parts = { 'id' }, if_not_exists = true, })
-    test_space_with_double_field:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+    test_space_with_double_field:create_index('bucket_id',
+        { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     local instances_info = box.schema.space.create(
-            'instances_info',
-            {
-                format = {
-                    { 'id', 'unsigned' },
-                    { 'bucket_id', 'unsigned' },
-                    { 'uuid', 'string' },
-                    { 'status', 'string' },
-                    { 'uri', 'string' },
-                },
-                if_not_exists = true,
-            }
+        'instances_info',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'uuid', 'string' },
+                { 'status', 'string' },
+                { 'uri', 'string' },
+            },
+            if_not_exists = true,
+        }
     )
 
     instances_info:create_index('id', { parts = { 'id' }, if_not_exists = true, })
@@ -113,15 +114,15 @@ local function init_space()
     if major >= 2 and minor >= 4 and patch > 1 then
         -- test space for check uuid
         local space_with_uuid = box.schema.space.create(
-                'space_with_uuid',
-                {
-                    format = {
-                        { 'id', 'unsigned' },
-                        { 'uuid_field', 'uuid',},
-                        { 'bucket_id', 'unsigned' },
-                    },
-                    if_not_exists = true,
-                }
+            'space_with_uuid',
+            {
+                format = {
+                    { 'id', 'unsigned' },
+                    { 'uuid_field', 'uuid', },
+                    { 'bucket_id', 'unsigned' },
+                },
+                if_not_exists = true,
+            }
         )
         space_with_uuid:create_index('id', { parts = { 'id' }, if_not_exists = true, })
         space_with_uuid:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
@@ -130,31 +131,32 @@ local function init_space()
     if major >= 2 and minor >= 2 and patch > 1 then
         -- test space for check varbinary
         local space_with_varbinary = box.schema.space.create(
-                'space_with_varbinary',
-                {
-                    format = {
-                        { 'id', 'unsigned' },
-                        { 'varbinary_field', 'varbinary',},
-                        { 'bucket_id', 'unsigned' },
-                    },
-                    if_not_exists = true,
-                }
-        )
-
-        space_with_varbinary:create_index('id', { parts = { 'id' }, if_not_exists = true, })
-        space_with_varbinary:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
-    end
-
-    local space_with_string = box.schema.space.create(
-            'space_with_string',
+            'space_with_varbinary',
             {
                 format = {
                     { 'id', 'unsigned' },
-                    { 'string_field', 'string',},
+                    { 'varbinary_field', 'varbinary', },
                     { 'bucket_id', 'unsigned' },
                 },
                 if_not_exists = true,
             }
+        )
+
+        space_with_varbinary:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+        space_with_varbinary:create_index('bucket_id',
+            { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
+    end
+
+    local space_with_string = box.schema.space.create(
+        'space_with_string',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'string_field', 'string', },
+                { 'bucket_id', 'unsigned' },
+            },
+            if_not_exists = true,
+        }
     )
 
     space_with_string:create_index('id', { parts = { 'id' }, if_not_exists = true, })
@@ -181,7 +183,7 @@ local function init_space()
     })
 
     local cursor_test_space_multi_part_key = box.schema.space.create(
-            'cursor_test_space_multi_part_key', { if_not_exists = true })
+        'cursor_test_space_multi_part_key', { if_not_exists = true })
     cursor_test_space_multi_part_key:format({
         { name = 'id', type = 'unsigned' },
         { name = 'name', type = 'string' },

@@ -16,7 +16,7 @@ public interface FieldIdentifier<T, O> extends Serializable {
      * Returns metadata object corresponding to the field identifier type
      *
      * @param metadataOperations for retrieving the operand metadata and checking the filed or index availability
-     * @param spaceMetadata space metadata this field or index belongs to
+     * @param spaceMetadata      space metadata this field or index belongs to
      * @return name to be used in filter condition
      */
     T metadata(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);

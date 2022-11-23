@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- TODO copyright here -->
 <!DOCTYPE module PUBLIC
-        "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
-        "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
 <module name="Checker">
     <module name="SuppressionFilter">
-        <property name="file" value="${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml" />
+        <property name="file" value="${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml"/>
     </module>
     <module name="FileTabCharacter"/>
     <module name="JavadocPackage"/>
-    <module name="NewlineAtEndOfFile" />
+    <module name="NewlineAtEndOfFile"/>
     <!-- Copyright headers -->
     <!--<module name="RegexpSingleline">-->
-        <!--<property name="format" value="^(\s|\*|#)*Copyright\s+[0-9]+\s+The Tarantool team\s*$"/>-->
-        <!--<property name="minimum" value="1"/>-->
-        <!--<property name="maximum" value="1"/>-->
-        <!--<property name="message" value="missing copyright header"/>-->
+    <!--<property name="format" value="^(\s|\*|#)*Copyright\s+[0-9]+\s+The Tarantool team\s*$"/>-->
+    <!--<property name="minimum" value="1"/>-->
+    <!--<property name="maximum" value="1"/>-->
+    <!--<property name="message" value="missing copyright header"/>-->
     <!--</module>-->
     <!-- IDE-generated comment -->
     <module name="RegexpSingleline">
@@ -45,13 +45,14 @@
     <module name="LineLength">
         <property name="max" value="120"/>
         <property name="fileExtensions" value="java"/>
-        <property name="ignorePattern" value="https?://www" />
+        <property name="ignorePattern" value="https?://www"/>
     </module>
 
     <module name="TreeWalker">
         <module name="WhitespaceAfter"/>
         <module name="WhitespaceAround">
-            <property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LITERAL_ASSERT, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, TYPE_EXTENSION_AND"/>
+            <property name="tokens"
+                      value="ASSIGN, BAND, BAND_ASSIGN, BOR, BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, DIV, DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LITERAL_ASSERT, LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY, LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SYNCHRONIZED, LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, RCURLY, SL, SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN, TYPE_EXTENSION_AND"/>
         </module>
         <!-- Commented out due to false positives.
         <module name="MissingDeprecated"/>
@@ -112,7 +113,7 @@
         <module name="ParenPad"/>
         <module name="TypecastParenPad"/>
         <module name="ParameterName">
-            <property name="format" value="^(?!arg[0-9])[_a-z][_a-zA-Z0-9]*$" />
+            <property name="format" value="^(?!arg[0-9])[_a-z][_a-zA-Z0-9]*$"/>
         </module>
     </module>
 </module>

@@ -24,8 +24,9 @@ public class MessagePackFrameEncoder extends MessageToByteEncoder<TarantoolReque
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, TarantoolRequest tarantoolRequest,
-                          ByteBuf byteBuf) throws Exception {
+    protected void encode(
+        ChannelHandlerContext ctx, TarantoolRequest tarantoolRequest,
+        ByteBuf byteBuf) throws Exception {
         MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
         tarantoolRequest.toMessagePack(packer, mapper);
         long outputSize = packer.getTotalWrittenBytes();

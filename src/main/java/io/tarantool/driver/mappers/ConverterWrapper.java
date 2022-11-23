@@ -1,8 +1,8 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.Converter;
-import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.ObjectConverter;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 
 import java.io.Serializable;
 

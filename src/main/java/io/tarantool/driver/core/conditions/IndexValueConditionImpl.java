@@ -21,8 +21,8 @@ public class IndexValueConditionImpl extends BaseCondition implements IndexValue
     /**
      * Basic constructor
      *
-     * @param operator the filtering operator
-     * @param field the filtering index
+     * @param operator    the filtering operator
+     * @param field       the filtering index
      * @param indexValues the index parts values
      */
     public IndexValueConditionImpl(Operator operator, FieldIdentifier<?, ?> field, List<?> indexValues) {
@@ -45,8 +45,8 @@ public class IndexValueConditionImpl extends BaseCondition implements IndexValue
         }
         IndexValueConditionImpl that = (IndexValueConditionImpl) o;
         return indexValues.equals(that.indexValues) &&
-                operator() == that.operator() &&
-                field().equals(that.field());
+            operator() == that.operator() &&
+            field().equals(that.field());
     }
 
     @Override

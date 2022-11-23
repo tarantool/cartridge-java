@@ -28,7 +28,7 @@ import java.util.function.UnaryOperator;
  * @author Oleg Kuznetsov
  */
 public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<TarantoolClientBuilder>
-        implements TarantoolClientBuilder {
+    implements TarantoolClientBuilder {
 
     private final TarantoolClientConfig.Builder configBuilder;
 
@@ -120,7 +120,7 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
 
     @Override
     public TarantoolClientBuilder withConnectionSelectionStrategy(
-            TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType) {
+        TarantoolConnectionSelectionStrategyType connectionSelectionStrategyType) {
         return withConnectionSelectionStrategy(connectionSelectionStrategyType.value());
     }
 
@@ -138,7 +138,7 @@ public class TarantoolClientBuilderImpl extends TarantoolClientConfiguratorImpl<
 
     @Override
     public TarantoolClientBuilder withConnectionSelectionStrategy(
-            ConnectionSelectionStrategyFactory connectionSelectionStrategy) {
+        ConnectionSelectionStrategyFactory connectionSelectionStrategy) {
         this.configBuilder.withConnectionSelectionStrategyFactory(connectionSelectionStrategy);
         return this;
     }

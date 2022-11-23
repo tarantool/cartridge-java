@@ -18,9 +18,9 @@ public class DefaultShortToIntegerValueConverterTest {
         DefaultShortToIntegerValueConverter converter = new DefaultShortToIntegerValueConverter();
 
         //when
-        IntegerValue actual = converter.toValue(new Short("1"));
+        IntegerValue actual = converter.toValue(Short.valueOf("1"));
 
         //then
-        assertEquals(ValueFactory.newInteger(new Short("1")), actual);
+        assertEquals(ValueFactory.newInteger(Short.valueOf("1")), actual);
     }
 }

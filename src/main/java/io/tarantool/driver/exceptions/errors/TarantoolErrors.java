@@ -31,10 +31,10 @@ public class TarantoolErrors {
      */
     public static class TarantoolErrorsErrorFactory implements TarantoolErrorFactory {
         private static final Pattern NETWORK_ERROR_PATTERN = Pattern.compile(
-                "(?=.*\"type\":\"" + CLIENT_ERROR_TYPE + "\")"
-                        + "(?=.*\"code\":"
-                        + "[" + ErrorCode.NO_CONNECTION.getCode() + "|" + ErrorCode.TIMEOUT.getCode() + "])",
-                Pattern.DOTALL);
+            "(?=.*\"type\":\"" + CLIENT_ERROR_TYPE + "\")"
+                + "(?=.*\"code\":"
+                + "[" + ErrorCode.NO_CONNECTION.getCode() + "|" + ErrorCode.TIMEOUT.getCode() + "])",
+            Pattern.DOTALL);
 
         public TarantoolErrorsErrorFactory() {
         }
@@ -68,7 +68,7 @@ public class TarantoolErrors {
          */
         private Boolean isNetworkError(Map<Value, Value> errorMap) {
             String err = errorMap.containsKey(ErrorsErrorKey.ERR.getMsgPackKey()) ?
-                    errorMap.get(ErrorsErrorKey.ERR.getMsgPackKey()).toString() : null;
+                errorMap.get(ErrorsErrorKey.ERR.getMsgPackKey()).toString() : null;
 
             if (err == null) {
                 return false;
@@ -161,7 +161,7 @@ public class TarantoolErrors {
 
             // 77 or 78 code
             return (code == ErrorCode.NO_CONNECTION.getCode() || code == ErrorCode.TIMEOUT.getCode())
-                    && type != null && type.equals(CLIENT_ERROR_TYPE);
+                && type != null && type.equals(CLIENT_ERROR_TYPE);
         }
 
         /**
@@ -173,7 +173,7 @@ public class TarantoolErrors {
         private Boolean isNetworkError(Long code) {
             // 77 or 78 code
             return code.equals(ErrorCode.NO_CONNECTION.getCode())
-                    || code.equals(ErrorCode.TIMEOUT.getCode());
+                || code.equals(ErrorCode.TIMEOUT.getCode());
         }
 
         /**
@@ -184,7 +184,7 @@ public class TarantoolErrors {
          */
         private Boolean isBoxError(Map<Value, Value> errorMap) {
             return errorMap.containsKey(BoxErrorKey.CODE.getMsgPackKey())
-                    && errorMap.containsKey(BoxErrorKey.MESSAGE.getMsgPackKey());
+                && errorMap.containsKey(BoxErrorKey.MESSAGE.getMsgPackKey());
         }
     }
 

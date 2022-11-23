@@ -19,11 +19,12 @@ import java.util.List;
  */
 public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
 
-    private DeleteProxyOperation(TarantoolCallOperations client,
-                                 String functionName,
-                                 List<?> arguments,
-                                 MessagePackObjectMapper argumentsMapper,
-                                 CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+    private DeleteProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -49,14 +50,14 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public DeleteProxyOperation<T> build() {
             CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withBucketId(options.getBucketId())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withBucketId(options.getBucketId())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), requestOptions.asMap());
 
             return new DeleteProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

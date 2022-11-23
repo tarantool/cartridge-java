@@ -15,13 +15,13 @@ public abstract class SharedCartridgeContainer {
     private static final Logger logger = LoggerFactory.getLogger(SharedCartridgeContainer.class);
 
     protected static final TarantoolCartridgeContainer container =
-            new TarantoolCartridgeContainer(
-                    "cartridge/instances.yml",
-                    "cartridge/topology.lua")
-                    .withDirectoryBinding("cartridge")
-                    .withLogConsumer(new Slf4jLogConsumer(logger))
-                    .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
-                    .withStartupTimeout(Duration.ofMinutes(2));
+        new TarantoolCartridgeContainer(
+            "cartridge/instances.yml",
+            "cartridge/topology.lua")
+            .withDirectoryBinding("cartridge")
+            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
+            .withStartupTimeout(Duration.ofMinutes(2));
 
     protected static void startCluster() {
         if (!container.isRunning()) {
@@ -51,7 +51,7 @@ public abstract class SharedCartridgeContainer {
 
     protected static void startInstance(String instanceName) throws IOException, InterruptedException {
         container.execInContainer(
-                "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", instanceName);
+            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", instanceName);
     }
 
     protected static void stopInstance(String instanceName) throws IOException, InterruptedException {

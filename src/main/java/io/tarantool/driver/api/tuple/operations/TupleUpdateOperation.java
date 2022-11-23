@@ -9,10 +9,9 @@ import java.util.Objects;
 /**
  * An operation specifies one value.
  *
- * @see <a href="https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update">
- *     https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update</a>
- *
  * @author Sergey Volgin
+ * @see <a href="https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update">
+ * https://www.tarantool.io/en/doc/2.5/reference/reference_lua/box_space/#box-space-update</a>
  */
 abstract class TupleUpdateOperation implements TupleOperation {
 
@@ -26,8 +25,8 @@ abstract class TupleUpdateOperation implements TupleOperation {
      * Create instance
      *
      * @param operationType operation type
-     * @param fieldIndex field index starting with 0
-     * @param value operation value
+     * @param fieldIndex    field index starting with 0
+     * @param value         operation value
      */
     TupleUpdateOperation(TarantoolUpdateOperationType operationType, int fieldIndex, Object value) {
         this(operationType, fieldIndex, null, value, false);
@@ -37,18 +36,19 @@ abstract class TupleUpdateOperation implements TupleOperation {
      * Create instance
      *
      * @param operationType operation type
-     * @param fieldName field name
-     * @param value operation value
+     * @param fieldName     field name
+     * @param value         operation value
      */
     TupleUpdateOperation(TarantoolUpdateOperationType operationType, String fieldName, Object value) {
         this(operationType, null, fieldName, value, false);
     }
 
-    TupleUpdateOperation(TarantoolUpdateOperationType operationType,
-                                   Integer fieldIndex,
-                                   String fieldName,
-                                   Object value,
-                                   boolean isProxyOperation) {
+    TupleUpdateOperation(
+        TarantoolUpdateOperationType operationType,
+        Integer fieldIndex,
+        String fieldName,
+        Object value,
+        boolean isProxyOperation) {
         if (fieldIndex == null && (fieldName == null || fieldName.isEmpty())) {
             throw new IllegalArgumentException("Field name must be not empty");
         }
@@ -62,9 +62,9 @@ abstract class TupleUpdateOperation implements TupleOperation {
     @Override
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
         return mapper.toValue(
-                Arrays.asList(getOperationType().toString(),
-                        getFieldIndex() != null ? getFieldIndex() : getFieldName(),
-                        getValue()));
+            Arrays.asList(getOperationType().toString(),
+                getFieldIndex() != null ? getFieldIndex() : getFieldName(),
+                getValue()));
     }
 
     @Override
@@ -114,9 +114,9 @@ abstract class TupleUpdateOperation implements TupleOperation {
         }
         TupleUpdateOperation that = (TupleUpdateOperation) o;
         return operationType == that.operationType &&
-                Objects.equals(fieldIndex, that.fieldIndex) &&
-                Objects.equals(fieldName, that.fieldName) &&
-                value.equals(that.value);
+            Objects.equals(fieldIndex, that.fieldIndex) &&
+            Objects.equals(fieldName, that.fieldName) &&
+            value.equals(that.value);
     }
 
     @Override

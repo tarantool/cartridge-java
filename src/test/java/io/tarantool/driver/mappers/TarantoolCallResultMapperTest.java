@@ -16,18 +16,20 @@ import org.msgpack.value.ValueFactory;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TarantoolCallResultMapperTest {
 
     private static final MessagePackMapper defaultMapper =
-            DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private final DefaultResultMapperFactoryFactory mapperFactoryFactory =
-            new DefaultResultMapperFactoryFactory();
+        new DefaultResultMapperFactoryFactory();
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-            defaultResultMapper = mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
-            .withDefaultTupleValueConverter(defaultMapper, null);
+        defaultResultMapper = mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
+        .withDefaultTupleValueConverter(defaultMapper, null);
 
     private static List<Object> nestedList1;
     private static TarantoolTuple tupleOne;
@@ -47,9 +49,9 @@ public class TarantoolCallResultMapperTest {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
         DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
-                SingleValueCallResult<TarantoolResult<TarantoolTuple>>> mapper =
-                mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
-                        .withDefaultTupleValueConverter(defaultMapper, null);
+            SingleValueCallResult<TarantoolResult<TarantoolTuple>>> mapper =
+            mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
+                .withDefaultTupleValueConverter(defaultMapper, null);
 
         //[nil, message]
         ArrayValue errorResult = ValueFactory.newArray(ValueFactory.newNil(), ValueFactory.newString("ERROR"));
@@ -57,10 +59,10 @@ public class TarantoolCallResultMapperTest {
 
         //[nil, {str=message, stack=stacktrace}]
         MapValue error = ValueFactory.newMap(
-                ValueFactory.newString("str"),
-                ValueFactory.newString("ERROR"),
-                ValueFactory.newString("stack"),
-                ValueFactory.newString("stacktrace")
+            ValueFactory.newString("str"),
+            ValueFactory.newString("ERROR"),
+            ValueFactory.newString("stack"),
+            ValueFactory.newString("stacktrace")
         );
         ArrayValue errorResult1 = ValueFactory.newArray(ValueFactory.newNil(), error);
         assertThrows(TarantoolInternalException.class, () -> mapper.fromValue(errorResult1));
@@ -71,7 +73,7 @@ public class TarantoolCallResultMapperTest {
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
         TarantoolTuple tupleTwo = new TarantoolTupleImpl(Arrays.asList("def", 5678, nestedList2), defaultMapper);
         ArrayValue testTuples = ValueFactory.newArray(
-                tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
+            tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
         ArrayValue callResult = ValueFactory.newArray(testTuples);
         SingleValueCallResult<TarantoolResult<TarantoolTuple>> result = mapper.fromValue(callResult);
         TarantoolResult<TarantoolTuple> tuples = result.value();
@@ -88,7 +90,7 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testDefaultTarantoolTupleResponse_singleResultShouldThrowException() {
         ArrayValue testTuples = ValueFactory.newArray(
-                tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
+            tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
 
         assertThrows(TarantoolTupleConversionException.class, () -> defaultResultMapper.fromValue(testTuples));
     }
@@ -98,9 +100,9 @@ public class TarantoolCallResultMapperTest {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
         DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
-                MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>> mapper =
-                mapperFactoryFactory.defaultTupleMultiResultMapperFactory()
-                        .withDefaultTupleValueConverter(defaultMapper, null);
+            MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>> mapper =
+            mapperFactoryFactory.defaultTupleMultiResultMapperFactory()
+                .withDefaultTupleValueConverter(defaultMapper, null);
 
         //[[], ...]
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
@@ -108,7 +110,7 @@ public class TarantoolCallResultMapperTest {
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
         TarantoolTuple tupleTwo = new TarantoolTupleImpl(Arrays.asList("def", 5678, nestedList2), defaultMapper);
         ArrayValue testTuples = ValueFactory.newArray(
-                tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
+            tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
 
         MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>> result = mapper.fromValue(testTuples);
         TarantoolResult<TarantoolTuple> tuples = result.value();
@@ -125,11 +127,11 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testResponseWithError() {
         ArrayValue resultWithError = ValueFactory.newArray(
-                ValueFactory.newNil(), ValueFactory.newString("Error message from server")
+            ValueFactory.newNil(), ValueFactory.newString("Error message from server")
         );
 
         TarantoolInternalException e = assertThrows(TarantoolInternalException.class,
-                () -> defaultResultMapper.fromValue(resultWithError));
+            () -> defaultResultMapper.fromValue(resultWithError));
         assertEquals("Error message from server", e.getMessage());
     }
 
@@ -145,13 +147,13 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testNotUnpackedTable() {
         ArrayValue testTuples = ValueFactory.newArray(
-                tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
+            tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
 
         //[[[], [], ...]]
         ArrayValue resultNotUnpacked = ValueFactory.newArray(testTuples);
 
         SingleValueCallResult<TarantoolResult<TarantoolTuple>> result =
-                defaultResultMapper.fromValue(resultNotUnpacked);
+            defaultResultMapper.fromValue(resultNotUnpacked);
         TarantoolResult<TarantoolTuple> tuples = result.value();
         assertEquals(2, tuples.size());
         assertEquals("abc", tuples.get(0).getString(0));

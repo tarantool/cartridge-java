@@ -22,6 +22,7 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
 
     /**
      * Returns the supported {@link TarantoolAuthMechanism}
+     *
      * @return {@code TarantoolAuthMechanism.CHAPSHA1}
      */
     @Override
@@ -31,6 +32,7 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
 
     /**
      * Check if the passed instance of {@link SimpleTarantoolCredentials} can be used for authentication
+     *
      * @param credentials Tarantool user credentials
      * @return true, if the username and password are not empty
      */
@@ -41,6 +43,7 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
 
     /**
      * Check if the passed instance of {@link SimpleTarantoolCredentials} can be used for authentication
+     *
      * @param credentials Tarantool user credentials
      * @return true, if the guest is implicit
      */
@@ -52,17 +55,19 @@ public class ChapSha1TarantoolAuthenticator implements TarantoolAuthenticator<Si
     /**
      * Take the salt from the server connect response, write the authentication data based on the provided
      * {@link SimpleTarantoolCredentials}.
-     *
+     * <p>
      * See <a
      * href="https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication">
-     *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
+     * https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-authentication</a>
+     *
      * @param serverAuthData the auth data responded by server to the connect request
-     * @param credentials Tarantool user credentials
+     * @param credentials    Tarantool user credentials
      * @return binary data for authentication request according to the chap-sha1 algorithm
      */
     @Override
-    public byte[] prepareUserAuthData(byte[] serverAuthData,
-                                      SimpleTarantoolCredentials credentials) throws TarantoolAuthenticationException {
+    public byte[] prepareUserAuthData(
+        byte[] serverAuthData,
+        SimpleTarantoolCredentials credentials) throws TarantoolAuthenticationException {
         Assert.notNull(serverAuthData, "Server response must not be null");
         Assert.notNull(credentials, "Credentials must not be null");
 

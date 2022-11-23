@@ -14,8 +14,9 @@ public class TarantoolOkResult {
 
     /**
      * Basic constructor.
+     *
      * @param syncId the request ID passed back from Tarantool server
-     * @param body response body containing the result data
+     * @param body   response body containing the result data
      */
     public TarantoolOkResult(Long syncId, Value body) {
         this.syncId = syncId;
@@ -24,6 +25,7 @@ public class TarantoolOkResult {
 
     /**
      * Get request ID a.k.a. sync ID
+     *
      * @return a number
      */
     public Long getSyncId() {
@@ -32,6 +34,7 @@ public class TarantoolOkResult {
 
     /**
      * Get response data
+     *
      * @return a MessagePack entity
      */
     public Value getData() {

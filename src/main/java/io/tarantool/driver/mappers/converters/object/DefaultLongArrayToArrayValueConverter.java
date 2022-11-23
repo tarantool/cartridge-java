@@ -16,6 +16,7 @@ import java.util.Arrays;
 public class DefaultLongArrayToArrayValueConverter implements ObjectConverter<long[], ArrayValue> {
 
     private static final long serialVersionUID = 20221022L;
+
     @Override
     public ArrayValue toValue(long[] object) {
         return ValueFactory.newArray(toNumberValueArray(object), true);

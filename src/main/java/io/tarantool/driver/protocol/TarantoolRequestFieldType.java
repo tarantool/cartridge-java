@@ -17,7 +17,7 @@ public enum TarantoolRequestFieldType {
     IPROTO_EXPRESSION(0x27),
     IPROTO_OPS(0x28);
 
-    private int code;
+    private final int code;
 
     TarantoolRequestFieldType(int code) {
         this.code = code;

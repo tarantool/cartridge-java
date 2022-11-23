@@ -16,30 +16,31 @@ public class TupleOperationInsert extends TupleUpdateOperation {
         super(TarantoolUpdateOperationType.INSERT, fieldName, value);
     }
 
-    private TupleOperationInsert(TarantoolUpdateOperationType operationType, Integer fieldIndex,
-                                 String fieldName, Object value, boolean isProxyOperation) {
+    private TupleOperationInsert(
+        TarantoolUpdateOperationType operationType, Integer fieldIndex,
+        String fieldName, Object value, boolean isProxyOperation) {
         super(operationType, fieldIndex, fieldName, value, isProxyOperation);
     }
 
     @Override
     public TupleOperation toProxyTupleOperation() {
         return new TupleOperationInsert(
-                this.getOperationType(),
-                this.getFieldNumber(),
-                this.getFieldName(),
-                this.getValue(),
-                true
+            this.getOperationType(),
+            this.getFieldNumber(),
+            this.getFieldName(),
+            this.getValue(),
+            true
         );
     }
 
     @Override
     public TupleOperation cloneWithIndex(int fieldMetadataIndex) {
         return new TupleOperationInsert(
-                this.getOperationType(),
-                fieldMetadataIndex,
-                this.getFieldName(),
-                this.getValue(),
-                this.isProxyOperation()
+            this.getOperationType(),
+            fieldMetadataIndex,
+            this.getFieldName(),
+            this.getValue(),
+            this.isProxyOperation()
         );
     }
 }

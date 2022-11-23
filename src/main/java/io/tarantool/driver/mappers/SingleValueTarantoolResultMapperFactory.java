@@ -2,8 +2,8 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.mappers.converters.value.custom.TarantoolResultConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.value.custom.TarantoolResultConverter;
 import org.msgpack.value.ArrayValue;
 
 /**
@@ -46,12 +46,13 @@ public class SingleValueTarantoolResultMapperFactory<T> extends SingleValueResul
      * Get {@link TarantoolResult} mapper for the Lua function call with single result
      *
      * @param valueConverter the result content converter
-     * @param resultClass full result type class
+     * @param resultClass    full result type class
      * @return call result mapper
      */
     public CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>>
-    withTarantoolResultConverter(ValueConverter<ArrayValue, T> valueConverter,
-                                 Class<? extends SingleValueCallResult<TarantoolResult<T>>> resultClass) {
+    withTarantoolResultConverter(
+        ValueConverter<ArrayValue, T> valueConverter,
+        Class<? extends SingleValueCallResult<TarantoolResult<T>>> resultClass) {
         return withSingleValueResultConverter(new TarantoolResultConverter<>(valueConverter), resultClass);
     }
 }

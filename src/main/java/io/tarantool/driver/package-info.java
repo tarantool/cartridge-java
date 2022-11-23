@@ -1,6 +1,6 @@
 /**
  * Tarantool Client implementation based on the Netty transport and official MessagePack serializer implementation.
- *
+ * <p>
  * Usage example:
  *
  * <pre>{@code

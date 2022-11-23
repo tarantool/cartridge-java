@@ -36,8 +36,8 @@ public class TarantoolTupleResultMapperFactory extends TupleResultMapperFactory<
      * @return default mapper instance configured with {@link TarantoolTupleConverter} instance
      */
     public TarantoolResultMapper<TarantoolTuple> withDefaultTupleValueConverter(
-            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+        MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withTupleValueConverter(
-                new TarantoolTupleConverter(messagePackMapper, spaceMetadata), TarantoolTupleResult.class);
+            new TarantoolTupleConverter(messagePackMapper, spaceMetadata), TarantoolTupleResult.class);
     }
 }

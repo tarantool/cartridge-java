@@ -19,13 +19,14 @@ import java.util.List;
  * @author Alexey Kuzin
  */
 public final class InsertManyProxyOperation<T extends Packable, R extends Collection<T>>
-        extends AbstractProxyOperation<R> {
+    extends AbstractProxyOperation<R> {
 
-    InsertManyProxyOperation(TarantoolCallOperations client,
-                          String functionName,
-                          List<?> arguments,
-                          MessagePackObjectMapper argumentsMapper,
-                          CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
+    InsertManyProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -55,15 +56,15 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
             }
 
             CRUDBatchOptions requestOptions = new CRUDBatchOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withStopOnError(options.getStopOnError())
-                    .withRollbackOnError(options.getRollbackOnError())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withStopOnError(options.getStopOnError())
+                .withRollbackOnError(options.getRollbackOnError())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuples, requestOptions.asMap());
 
             return new InsertManyProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

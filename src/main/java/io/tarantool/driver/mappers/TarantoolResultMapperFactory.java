@@ -12,7 +12,7 @@ import org.msgpack.value.ArrayValue;
  * @author Alexey Kuzin
  */
 public class TarantoolResultMapperFactory<T> extends
-        AbstractResultMapperFactory<TarantoolResult<T>, TarantoolResultMapper<T>> {
+    AbstractResultMapperFactory<TarantoolResult<T>, TarantoolResultMapper<T>> {
 
     /**
      * Basic constructor
@@ -23,9 +23,9 @@ public class TarantoolResultMapperFactory<T> extends
 
     @Override
     protected TarantoolResultMapper<T> createMapper(
-            MessagePackValueMapper valueMapper,
-            ValueConverter<ArrayValue, ? extends TarantoolResult<T>> valueConverter,
-            Class<? extends TarantoolResult<T>> resultClass) {
+        MessagePackValueMapper valueMapper,
+        ValueConverter<ArrayValue, ? extends TarantoolResult<T>> valueConverter,
+        Class<? extends TarantoolResult<T>> resultClass) {
         return new TarantoolResultMapper<>(valueMapper, valueConverter, resultClass);
     }
 }

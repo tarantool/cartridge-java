@@ -86,12 +86,12 @@ public interface TarantoolClientFactory {
      * Configure an existing client instance and return a copy of it. Provides a builder interface.
      *
      * @param client client instance
-     * @param <T> configurator builder type
+     * @param <T>    configurator builder type
      * @return Tarantool client configurator {@link TarantoolClientConfigurator}
      */
     @SuppressWarnings("unchecked")
     static <T extends TarantoolClientConfigurator<T>> T configureClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
         return (T) new TarantoolClientConfiguratorImpl<>(client);
     }
 }

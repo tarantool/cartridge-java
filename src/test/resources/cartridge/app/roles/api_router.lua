@@ -31,7 +31,7 @@ local function patch_crud_methods_for_tests()
     for _, name in ipairs(crud_methods_to_patch) do
         local real_method = crud[name]
         crud[name] = function(...)
-            local args = {...}
+            local args = { ... }
             rawset(_G, ('crud_%s_opts'):format(name), args[#args])
             return real_method(...)
         end
@@ -124,9 +124,9 @@ local function long_running_function(values)
     -- need using number instead field name as string in update function for compatibility with tarantool 1.10
     box.space.request_counters:update(1, { { '+', 2, 1 } })
     log.info('Executing long-running function ' ..
-            tostring(box.space.request_counters:get(1)[2]) ..
-            "(name: " .. disabled_router_name ..
-            "; sleep: " .. seconds_to_sleep .. ")")
+        tostring(box.space.request_counters:get(1)[2]) ..
+        "(name: " .. disabled_router_name ..
+        "; sleep: " .. seconds_to_sleep .. ")")
     if get_router_name() == disabled_router_name then
         return nil, "Disabled by client; router_name = " .. disabled_router_name
     end

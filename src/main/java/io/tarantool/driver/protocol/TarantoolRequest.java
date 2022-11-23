@@ -20,7 +20,7 @@ public class TarantoolRequest {
 
     private static final AtomicLong syncId = new AtomicLong(0);
     private static final Supplier<Long> syncIdSupplier =
-            () -> syncId.updateAndGet(n -> (n >= Long.MAX_VALUE) ? 1 : n + 1);
+        () -> syncId.updateAndGet(n -> (n >= Long.MAX_VALUE) ? 1 : n + 1);
 
     private final TarantoolHeader header;
     private final TarantoolRequestBody body;
@@ -63,7 +63,7 @@ public class TarantoolRequest {
      * @throws TarantoolDecoderException if encoding failed
      */
     public void toMessagePack(MessagePacker packer, MessagePackObjectMapper mapper)
-            throws TarantoolDecoderException {
+        throws TarantoolDecoderException {
         try {
             packer.packValue(header.toMessagePackValue(mapper));
             packer.packValue(body.toMessagePackValue(mapper));

@@ -13,7 +13,7 @@ import io.tarantool.driver.mappers.converters.value.custom.TarantoolTupleConvert
  * @author Alexey Kuzin
  */
 public class TarantoolTupleSingleResultMapperFactory
-        extends SingleValueTarantoolResultMapperFactory<TarantoolTuple> {
+    extends SingleValueTarantoolResultMapperFactory<TarantoolTuple> {
 
     /**
      * Basic constructor
@@ -41,7 +41,7 @@ public class TarantoolTupleSingleResultMapperFactory
     public CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     withDefaultTupleValueConverter(MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withTarantoolResultConverter(
-                new TarantoolTupleConverter(messagePackMapper, spaceMetadata),
-                TarantoolTupleSingleResult.class);
+            new TarantoolTupleConverter(messagePackMapper, spaceMetadata),
+            TarantoolTupleSingleResult.class);
     }
 }

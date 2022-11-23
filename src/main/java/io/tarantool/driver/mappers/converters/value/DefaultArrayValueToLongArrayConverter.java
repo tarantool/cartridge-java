@@ -11,6 +11,7 @@ import org.msgpack.value.ArrayValue;
 public class DefaultArrayValueToLongArrayConverter implements ValueConverter<ArrayValue, long[]> {
 
     private static final long serialVersionUID = 20221022L;
+
     @Override
     public long[] fromValue(ArrayValue value) {
         long[] values = new long[value.size()];
