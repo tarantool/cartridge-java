@@ -95,8 +95,8 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
             List<?> functionResult = client.call(endpoint.getDiscoveryFunction(), Collections.emptyList()).get();
             String valueAsString = objectMapper.writeValueAsString(functionResult.get(0));
             TypeReference<HashMap<String, ServerNodeInfo>> typeReference =
-                    new TypeReference<HashMap<String, ServerNodeInfo>>() {
-                    };
+                new TypeReference<HashMap<String, ServerNodeInfo>>() {
+                };
 
             Map<String, ServerNodeInfo> responseMap;
             try {
@@ -106,9 +106,9 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
             }
 
             return responseMap.values().stream()
-                    .filter(ServerNodeInfo::isAvailable)
-                    .map(v -> new TarantoolServerAddress(v.getUri()))
-                    .collect(Collectors.toList());
+                .filter(ServerNodeInfo::isAvailable)
+                .map(v -> new TarantoolServerAddress(v.getUri()))
+                .collect(Collectors.toList());
         } catch (Exception e) {
             throw new TarantoolClientException("Cluster discovery task error", e);
         }

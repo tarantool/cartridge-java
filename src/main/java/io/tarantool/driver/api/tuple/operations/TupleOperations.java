@@ -24,7 +24,7 @@ public final class TupleOperations {
     private TupleOperations(List<TupleOperation> operations) {
         this.operations.addAll(operations);
         this.proxyOperations.addAll(
-                operations.stream().map(TupleOperation::toProxyTupleOperation).collect(Collectors.toList()));
+            operations.stream().map(TupleOperation::toProxyTupleOperation).collect(Collectors.toList()));
     }
 
     private TupleOperations(TupleOperation operation) {
@@ -55,7 +55,7 @@ public final class TupleOperations {
 
         if (existField.isPresent()) {
             throw new TarantoolSpaceOperationException("Double update of the same field (%s)",
-                    fieldIndex != null ? fieldIndex : fieldName);
+                fieldIndex != null ? fieldIndex : fieldName);
         }
 
         addOperationToList(operation);

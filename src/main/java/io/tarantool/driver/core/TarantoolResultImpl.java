@@ -41,7 +41,7 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
             Map<Value, Value> tupleMap = value.asMapValue().map();
             if (!hasRowsAndMetadata(tupleMap)) {
                 throw new TarantoolClientException("The received tuple map has wrong format, " +
-                        "expected {\"metadata\" : [...], \"rows\": [...]}, got %s", value.toString());
+                    "expected {\"metadata\" : [...], \"rows\": [...]}, got %s", value.toString());
             }
             Value tupleArray = tupleMap.get(RESULT_ROWS);
             if (!tupleArray.isArrayValue()) {
@@ -53,7 +53,7 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
             this.tuples = new ArrayList<>();
         } else {
             throw new TarantoolClientException("The received result cannot be converted to an array of tuples: %s",
-                    value.toString());
+                value.toString());
         }
     }
 

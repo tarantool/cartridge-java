@@ -10,12 +10,14 @@ import org.msgpack.value.Value;
 public interface TarantoolResponseBody {
     /**
      * Get response body type
+     *
      * @return the type of response body
      */
     TarantoolResponseBodyType getResponseBodyType();
 
     /**
      * Get response body data
+     *
      * @return a MessagePack entity
      */
     Value getData();

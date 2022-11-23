@@ -29,13 +29,13 @@ public class TarantoolSetup {
     public Logger log = LoggerFactory.getLogger(TarantoolSetup.class);
 
     public TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/benchmark.lua")
-            .withLogConsumer(new Slf4jLogConsumer(log));
+        .withScriptFileName("org/testcontainers/containers/benchmark.lua")
+        .withLogConsumer(new Slf4jLogConsumer(log));
 
     TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
     MessagePackMapper defaultMapper;
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-            resultMapper;
+        resultMapper;
     List<List<Object>> arraysWithDiffElements;
     List<List<Object>> arraysWithNestedArrays;
     List<List<Object>> arraysWithNestedMaps;
@@ -43,17 +43,17 @@ public class TarantoolSetup {
     private void initClient() {
         log.info("Attempting connect to Tarantool");
         tarantoolClient = TarantoolClientFactory.createClient()
-                .withAddress(tarantoolContainer.getHost(), tarantoolContainer.getPort())
-                .withCredentials(tarantoolContainer.getUsername(), tarantoolContainer.getPassword())
-                .build();
+            .withAddress(tarantoolContainer.getHost(), tarantoolContainer.getPort())
+            .withCredentials(tarantoolContainer.getUsername(), tarantoolContainer.getPassword())
+            .build();
 
         DefaultResultMapperFactoryFactory factory = new DefaultResultMapperFactoryFactory();
         TarantoolSpaceMetadata spaceMetadata = tarantoolClient.metadata().getSpaceByName("test_space").get();
 
         defaultMapper = tarantoolClient.getConfig().getMessagePackMapper();
         resultMapper = factory
-                .defaultTupleSingleResultMapperFactory()
-                .withDefaultTupleValueConverter(defaultMapper, spaceMetadata);
+            .defaultTupleSingleResultMapperFactory()
+            .withDefaultTupleValueConverter(defaultMapper, spaceMetadata);
 
         log.info("Successfully connected to Tarantool, version = {}", tarantoolClient.getVersion());
     }
@@ -68,21 +68,21 @@ public class TarantoolSetup {
         hm.put("d", 2);
 
         List<Object> arrayOfDiffElements = new ArrayList<>(Arrays.asList(
-                'a',
-                null,
-                "bbbbb",
-                false,
-                99,
-                "cccccc",
-                3.4654F,
-                3.4654D,
-                'a',
-                -123312,
-                new ArrayList<>(Arrays.asList(0, "asdsad", 1, false, 2.2)),
-                hm,
-                true,
-                9223372036854775807L,
-                -9223372036854775807L
+            'a',
+            null,
+            "bbbbb",
+            false,
+            99,
+            "cccccc",
+            3.4654F,
+            3.4654D,
+            'a',
+            -123312,
+            new ArrayList<>(Arrays.asList(0, "asdsad", 1, false, 2.2)),
+            hm,
+            true,
+            9223372036854775807L,
+            -9223372036854775807L
         ));
 
         List<Object> arrayOfNestedArrays = new ArrayList<>();

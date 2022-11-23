@@ -37,7 +37,7 @@ public interface Condition extends Serializable {
      * Serializes the condition into a form of Java list
      *
      * @param metadataOperations metadata operations
-     * @param spaceMetadata space metadata
+     * @param spaceMetadata      space metadata
      * @return list of serialized conditions
      */
     List<?> toList(TarantoolMetadataOperations metadataOperations, TarantoolSpaceMetadata spaceMetadata);

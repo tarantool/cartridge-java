@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
  * @author Alexey Kuzin
  */
 public class RetryingTarantoolTupleClient
-        extends RetryingTarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+    extends RetryingTarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
     /**
      * Basic constructor
      *
@@ -23,8 +23,8 @@ public class RetryingTarantoolTupleClient
      * @param retryPolicyFactory request retrying policy settings
      */
     public RetryingTarantoolTupleClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
-            RequestRetryPolicyFactory retryPolicyFactory) {
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
+        RequestRetryPolicyFactory retryPolicyFactory) {
         super(decoratedClient, retryPolicyFactory);
     }
 
@@ -36,16 +36,17 @@ public class RetryingTarantoolTupleClient
      * @param executor           executor service for retry callbacks
      */
     public RetryingTarantoolTupleClient(
-            TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
-            RequestRetryPolicyFactory retryPolicyFactory,
-            Executor executor) {
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedClient,
+        RequestRetryPolicyFactory retryPolicyFactory,
+        Executor executor) {
         super(decoratedClient, retryPolicyFactory, executor);
     }
 
     @Override
     protected RetryingTarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>>
-    spaceOperations(TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedSpaceOperations,
-                    RequestRetryPolicyFactory retryPolicyFactory, Executor executor) {
+    spaceOperations(
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> decoratedSpaceOperations,
+        RequestRetryPolicyFactory retryPolicyFactory, Executor executor) {
         return new RetryingTarantoolSpace<>(decoratedSpaceOperations, retryPolicyFactory, executor);
     }
 }

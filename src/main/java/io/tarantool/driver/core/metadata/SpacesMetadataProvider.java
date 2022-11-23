@@ -34,11 +34,12 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
     /**
      * Basic constructor
      *
-     * @param client configured client instance
+     * @param client            configured client instance
      * @param messagePackMapper MessagePack mapper configured for the caller client
      */
-    public SpacesMetadataProvider(TarantoolCallOperations client,
-                                  MessagePackMapper messagePackMapper) {
+    public SpacesMetadataProvider(
+        TarantoolCallOperations client,
+        MessagePackMapper messagePackMapper) {
         this.client = client;
         this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(messagePackMapper);
         this.indexMetadataMapper = new TarantoolIndexMetadataConverter(messagePackMapper);
@@ -48,21 +49,21 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
     public CompletableFuture<TarantoolMetadataContainer> getMetadata() throws TarantoolClientException {
 
         CompletableFuture<TarantoolResult<TarantoolSpaceMetadata>> spaces =
-                select(VSPACE_SELECT_CMD, spaceMetadataMapper, TarantoolSpaceMetadataResult.class);
+            select(VSPACE_SELECT_CMD, spaceMetadataMapper, TarantoolSpaceMetadataResult.class);
         CompletableFuture<TarantoolResult<TarantoolIndexMetadata>> indexes =
-                select(VINDEX_SELECT_CMD, indexMetadataMapper, TarantoolIndexMetadataResult.class);
+            select(VINDEX_SELECT_CMD, indexMetadataMapper, TarantoolIndexMetadataResult.class);
 
         return spaces.thenCombine(indexes, SpacesTarantoolMetadataContainer::new);
     }
 
     private <T> CompletableFuture<TarantoolResult<T>> select(
-            String selectCmd,
-            ValueConverter<ArrayValue, T> resultConverter,
-            Class<? extends SingleValueCallResult<TarantoolResult<T>>> resultClass)
-            throws TarantoolClientException {
+        String selectCmd,
+        ValueConverter<ArrayValue, T> resultConverter,
+        Class<? extends SingleValueCallResult<TarantoolResult<T>>> resultClass)
+        throws TarantoolClientException {
         CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper =
-                client.getResultMapperFactoryFactory().<T>singleValueTarantoolResultMapperFactory()
-                        .withTarantoolResultConverter(resultConverter, resultClass);
+            client.getResultMapperFactoryFactory().<T>singleValueTarantoolResultMapperFactory()
+                .withTarantoolResultConverter(resultConverter, resultClass);
         return client.call(selectCmd, resultMapper);
     }
 }

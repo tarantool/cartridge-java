@@ -27,6 +27,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Creates a query for index with specified ID.
+     *
      * @param indexId index ID in the space
      */
     public TarantoolIndexQuery(int indexId) {
@@ -37,6 +38,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Get index ID
+     *
      * @return a number
      */
     public int getIndexId() {
@@ -45,6 +47,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Get iterator type
+     *
      * @return {@code TarantoolIteratorType.ITER_EQ} by default
      */
     public TarantoolIteratorType getIteratorType() {
@@ -53,6 +56,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Set iterator type
+     *
      * @param iteratorType new iterator type
      * @return this query instance with new iterator type
      */
@@ -63,6 +67,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Get list of key values
+     *
      * @return list of key values to be matched with index key parts
      */
     public List<?> getKeyValues() {
@@ -71,6 +76,7 @@ public class TarantoolIndexQuery {
 
     /**
      * Set list of key values to be matched with index key parts
+     *
      * @param keyValues new list of key values
      * @return this query instance with new list of key values
      */
@@ -91,8 +97,8 @@ public class TarantoolIndexQuery {
         }
         TarantoolIndexQuery that = (TarantoolIndexQuery) o;
         return getIndexId() == that.getIndexId() &&
-                getIteratorType() == that.getIteratorType() &&
-                getKeyValues().equals(that.getKeyValues());
+            getIteratorType() == that.getIteratorType() &&
+            getKeyValues().equals(that.getKeyValues());
     }
 
     @Override
@@ -103,9 +109,9 @@ public class TarantoolIndexQuery {
     @Override
     public String toString() {
         return "TarantoolIndexQuery{" +
-                "indexId=" + indexId +
-                ", iteratorType=" + iteratorType +
-                ", keyValues=" + keyValues +
-                '}';
+            "indexId=" + indexId +
+            ", iteratorType=" + iteratorType +
+            ", keyValues=" + keyValues +
+            '}';
     }
 }

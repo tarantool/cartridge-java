@@ -6,7 +6,7 @@ import java.util.Optional;
 
 /**
  * This class is not part of the public API.
- *
+ * <p>
  * An abstract class necessary for implementing CRT (curiously recurring template)
  * pattern for the cluster proxy operation options builders.
  *

@@ -24,18 +24,18 @@ public class DefaultUUIDToExtensionValueConverter implements ObjectConverter<UUI
 
         long mostSignificant = value.getMostSignificantBits();
         buffer.putInt((int) (mostSignificant >>> 32))
-                .putShort((short) ((mostSignificant & 0x00000000FFFFFFFFL) >>> 16))
-                .putShort((short) (mostSignificant & 0x000000000000FFFFL));
+            .putShort((short) ((mostSignificant & 0x00000000FFFFFFFFL) >>> 16))
+            .putShort((short) (mostSignificant & 0x000000000000FFFFL));
 
         long leastSignificant = value.getLeastSignificantBits();
         buffer.put((byte) (leastSignificant >>> 56))
-                .put((byte) ((leastSignificant & 0x00FF000000000000L) >>> 48))
-                .put((byte) ((leastSignificant & 0x0000FF0000000000L) >>> 40))
-                .put((byte) ((leastSignificant & 0x000000FF00000000L) >>> 32))
-                .put((byte) ((leastSignificant & 0x00000000FF000000L) >>> 24))
-                .put((byte) ((leastSignificant & 0x0000000000FF0000L) >>> 16))
-                .put((byte) ((leastSignificant & 0x000000000000FF00L) >>> 8))
-                .put((byte) (leastSignificant & 0x00000000000000FFL));
+            .put((byte) ((leastSignificant & 0x00FF000000000000L) >>> 48))
+            .put((byte) ((leastSignificant & 0x0000FF0000000000L) >>> 40))
+            .put((byte) ((leastSignificant & 0x000000FF00000000L) >>> 32))
+            .put((byte) ((leastSignificant & 0x00000000FF000000L) >>> 24))
+            .put((byte) ((leastSignificant & 0x0000000000FF0000L) >>> 16))
+            .put((byte) ((leastSignificant & 0x000000000000FF00L) >>> 8))
+            .put((byte) (leastSignificant & 0x00000000000000FFL));
         return buffer.array();
     }
 

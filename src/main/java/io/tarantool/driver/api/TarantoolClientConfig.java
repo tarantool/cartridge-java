@@ -34,9 +34,9 @@ public class TarantoolClientConfig {
     private int connections = DEFAULT_CONNECTIONS;
     private int eventLoopThreadsNumber = DEFAULT_EVENT_LOOP_THREADS_NUMBER;
     private MessagePackMapper messagePackMapper =
-            DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
-            TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE;
+        TarantoolConnectionSelectionStrategies.ParallelRoundRobinStrategyFactory.INSTANCE;
     private final AtomicBoolean isSecure = new AtomicBoolean(false);
     private SslContext sslContext;
 
@@ -227,7 +227,7 @@ public class TarantoolClientConfig {
      * @param connectionSelectionStrategyFactory connection selection strategy factory instance
      */
     public void setConnectionSelectionStrategyFactory(
-            ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory) {
+        ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory) {
         this.connectionSelectionStrategyFactory = connectionSelectionStrategyFactory;
     }
 

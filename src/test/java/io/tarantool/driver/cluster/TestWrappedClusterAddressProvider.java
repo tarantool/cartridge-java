@@ -13,8 +13,9 @@ public class TestWrappedClusterAddressProvider implements TarantoolClusterAddres
     private final TarantoolClusterAddressProvider provider;
     private final TarantoolCartridgeContainer container;
 
-    public TestWrappedClusterAddressProvider(TarantoolClusterAddressProvider provider,
-                                             TarantoolCartridgeContainer container) {
+    public TestWrappedClusterAddressProvider(
+        TarantoolClusterAddressProvider provider,
+        TarantoolCartridgeContainer container) {
         this.provider = provider;
         this.container = container;
     }
@@ -28,10 +29,10 @@ public class TestWrappedClusterAddressProvider implements TarantoolClusterAddres
         }
 
         return addresses.stream().map(a ->
-                new TarantoolServerAddress(
-                        a.getHost(),
-                        container.getMappedPort(a.getPort())
-                )
+            new TarantoolServerAddress(
+                a.getHost(),
+                container.getMappedPort(a.getPort())
+            )
         ).collect(Collectors.toList());
     }
 

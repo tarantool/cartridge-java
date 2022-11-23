@@ -34,7 +34,7 @@ public final class ProxyOperationsMappingConfig {
     /**
      * Get API function name for getting the spaces and indexes schema. The default value is
      * <code>ddl.get_schema</code>.
-     *
+     * <p>
      * See <a href="https://github.com/tarantool/ddl/blob/eaa24b8931b3abba850e37a287091b67512e5d6c/ddl.lua#L127">
      * the DDL module API</a> for details on the desired schema metadata format.
      *
@@ -127,11 +127,12 @@ public final class ProxyOperationsMappingConfig {
         return truncateFunctionName;
     }
 
-    private ProxyOperationsMappingConfig(String schemaFunctionName, String deleteFunctionName,
-                                         String insertFunctionName, String insertManyFunctionName,
-                                         String replaceFunctionName, String replaceManyFunctionName,
-                                         String updateFunctionName, String upsertFunctionName,
-                                         String selectFunctionName, String truncateFunctionName) {
+    private ProxyOperationsMappingConfig(
+        String schemaFunctionName, String deleteFunctionName,
+        String insertFunctionName, String insertManyFunctionName,
+        String replaceFunctionName, String replaceManyFunctionName,
+        String updateFunctionName, String upsertFunctionName,
+        String selectFunctionName, String truncateFunctionName) {
         this.schemaFunctionName = schemaFunctionName;
         this.deleteFunctionName = deleteFunctionName;
         this.insertFunctionName = insertFunctionName;
@@ -171,7 +172,7 @@ public final class ProxyOperationsMappingConfig {
 
         /**
          * Set API function name for getting the spaces and indexes schema.
-         *
+         * <p>
          * See <a href="https://github.com/tarantool/ddl/blob/eaa24b8931b3abba850e37a287091b67512e5d6c/ddl.lua#L127">
          * the DDL module API</a> for details on the desired schema metadata format.
          *
@@ -289,8 +290,8 @@ public final class ProxyOperationsMappingConfig {
          */
         public ProxyOperationsMappingConfig build() {
             return new ProxyOperationsMappingConfig(schemaFunctionName, deleteFunctionName, insertFunctionName,
-                    insertManyFunctionName, replaceFunctionName, replaceManyFunctionName, updateFunctionName,
-                    upsertFunctionName, selectFunctionName, truncateFunctionName);
+                insertManyFunctionName, replaceFunctionName, replaceManyFunctionName, updateFunctionName,
+                upsertFunctionName, selectFunctionName, truncateFunctionName);
         }
     }
 }

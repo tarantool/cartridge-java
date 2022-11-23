@@ -41,13 +41,13 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
 
     private ProxyTarantoolTupleClient setupClient(String userName, String password) {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(userName, password))
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(userName, password))
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getRouterHost(), container.getRouterPort());
+            config, container.getRouterHost(), container.getRouterPort());
         return new ProxyTarantoolTupleClient(clusterClient);
     }
 
@@ -83,9 +83,9 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             ProxyTarantoolTupleClient client = setupAdminClient();
 
             client.callForMultiResult("box_error_unpack_timeout",
-                    Collections.singletonList("Some error"),
-                    ArrayList::new,
-                    String.class).get();
+                Collections.singletonList("Some error"),
+                ArrayList::new,
+                String.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
             String message = e.getCause().getMessage();
@@ -104,9 +104,9 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
             ProxyTarantoolTupleClient client = setupAdminClient();
 
             client.callForMultiResult("box_error_timeout",
-                    Collections.singletonList("Some error"),
-                    ArrayList::new,
-                    String.class).get();
+                Collections.singletonList("Some error"),
+                ArrayList::new,
+                String.class).get();
             fail("Exception must be thrown after last retry attempt.");
         } catch (Throwable e) {
             String message = e.getCause().getMessage();
@@ -179,8 +179,8 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
         client.eval("rawset(_G, 'crud', nil)").join();
 
         CompletionException exception =
-                assertThrows(CompletionException.class,
-                        () -> client.space("test_space").select(Conditions.any()).join());
+            assertThrows(CompletionException.class,
+                () -> client.space("test_space").select(Conditions.any()).join());
 
         assertTrue(exception.getCause() instanceof TarantoolNoSuchProcedureException);
         assertTrue(exception.getCause().getMessage().contains("Procedure 'crud.select' is not defined"));
@@ -197,20 +197,20 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
 
         // Both users have access to "returning_number" function
         assertEquals(
-                2,
-                adminClient.callForSingleResult("returning_number", Integer.class).join());
+            2,
+            adminClient.callForSingleResult("returning_number", Integer.class).join());
         assertEquals(
-                2,
-                restrictedClient.callForSingleResult("returning_number", Integer.class).join());
+            2,
+            restrictedClient.callForSingleResult("returning_number", Integer.class).join());
 
         // Only admin user has access to "ddl.get_schema"
         assertDoesNotThrow(() -> adminClient.metadata().getSpaceByName("test_space"));
         TarantoolClientException exception = assertThrows(
-                TarantoolClientException.class,
-                () -> restrictedClient.metadata().getSpaceByName("test_space"));
+            TarantoolClientException.class,
+            () -> restrictedClient.metadata().getSpaceByName("test_space"));
         Throwable cause = exception.getCause();
         assertTrue(cause instanceof TarantoolAccessDeniedException);
         assertTrue(cause.getMessage()
-                .contains("Execute access to function 'ddl.get_schema' is denied for user 'restricted_user'"));
+            .contains("Execute access to function 'ddl.get_schema' is denied for user 'restricted_user'"));
     }
 }

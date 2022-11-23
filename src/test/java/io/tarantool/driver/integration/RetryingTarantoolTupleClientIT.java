@@ -45,21 +45,21 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
 
     private ProxyTarantoolTupleClient setupClient() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
-                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                .withConnectTimeout(1000)
-                .withReadTimeout(1000)
-                .build();
+            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+            .withConnectTimeout(1000)
+            .withReadTimeout(1000)
+            .build();
 
         ClusterTarantoolTupleClient clusterClient = new ClusterTarantoolTupleClient(
-                config, container.getRouterHost(), container.getRouterPort());
+            config, container.getRouterHost(), container.getRouterPort());
         return new ProxyTarantoolTupleClient(clusterClient);
     }
 
     private RetryingTarantoolTupleClient retrying(ProxyTarantoolTupleClient client, int retries) {
         return new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies.byNumberOfAttempts(
-                        retries, e -> e.getMessage().contains("Unsuccessful attempt")
-                ).build());
+            TarantoolRequestRetryPolicies.byNumberOfAttempts(
+                retries, e -> e.getMessage().contains("Unsuccessful attempt")
+            ).build());
     }
 
     @Test
@@ -94,10 +94,10 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         client.call("reset_request_counters");
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies
-                        .byNumberOfAttempts(0)
-                        .withRequestTimeout(1000)
-                        .build());
+            TarantoolRequestRetryPolicies
+                .byNumberOfAttempts(0)
+                .withRequestTimeout(1000)
+                .build());
 
         try {
             retryingClient.call("long_running_function", Collections.singletonList(10)).get();
@@ -113,15 +113,15 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         ProxyTarantoolTupleClient client = setupClient();
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies
-                        .unbound(e -> e.getMessage().contains("Unsuccessful attempt"))
-                        .withRequestTimeout(200) //requestTimeout
-                        .withOperationTimeout(2000)  //operationTimeout
-                        .build());
+            TarantoolRequestRetryPolicies
+                .unbound(e -> e.getMessage().contains("Unsuccessful attempt"))
+                .withRequestTimeout(200) //requestTimeout
+                .withOperationTimeout(2000)  //operationTimeout
+                .build());
 
         client.call("setup_retrying_function", Collections.singletonList(3));
         CompletableFuture<String> f = retryingClient
-                .callForSingleResult("retrying_function", String.class);
+            .callForSingleResult("retrying_function", String.class);
 
         assertEquals("Success", f.get());
     }
@@ -137,17 +137,17 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
 
         AtomicLong counter = new AtomicLong(0);
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies
-                        .unbound(e -> {
-                            counter.incrementAndGet();
-                            return !(e instanceof TarantoolFunctionCallException);
-                        })
-                        .withRequestTimeout(10) //requestTimeout
-                        .withOperationTimeout(200)  //operationTimeout
-                        .build());
+            TarantoolRequestRetryPolicies
+                .unbound(e -> {
+                    counter.incrementAndGet();
+                    return !(e instanceof TarantoolFunctionCallException);
+                })
+                .withRequestTimeout(10) //requestTimeout
+                .withOperationTimeout(200)  //operationTimeout
+                .build());
 
         CompletableFuture<List<?>> f = retryingClient
-                .call("long_running_function", Collections.singletonList(10));
+            .call("long_running_function", Collections.singletonList(10));
 
         assertThrows(TimeoutException.class, () -> f.get(100, TimeUnit.MILLISECONDS));
         assertFalse(f.isDone());
@@ -174,11 +174,11 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         ProxyTarantoolTupleClient client = setupClient();
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies
-                        .unbound(t -> true)
-                        .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(1000)  //operationTimeout
-                        .build());
+            TarantoolRequestRetryPolicies
+                .unbound(t -> true)
+                .withRequestTimeout(20) //requestTimeout
+                .withOperationTimeout(1000)  //operationTimeout
+                .build());
 
         try {
             retryingClient.call("raising_error").get();
@@ -188,9 +188,9 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
             assertTrue(e.getCause().getMessage().contains("Operation timeout value exceeded after"));
             assertEquals(TarantoolInternalException.class, e.getCause().getCause().getClass());
             assertTrue(e.getCause().getCause().getMessage().contains(
-                    "InnerErrorMessage:\n" +
-                            "code: 32\n" +
-                            "message:"));
+                "InnerErrorMessage:\n" +
+                    "code: 32\n" +
+                    "message:"));
         }
     }
 
@@ -199,15 +199,15 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
         ProxyTarantoolTupleClient client = setupClient();
 
         RetryingTarantoolTupleClient retryingClient = new RetryingTarantoolTupleClient(client,
-                TarantoolRequestRetryPolicies
-                        .unbound()
-                        .withRequestTimeout(20) //requestTimeout
-                        .withOperationTimeout(200)  //operationTimeout
-                        .build());
+            TarantoolRequestRetryPolicies
+                .unbound()
+                .withRequestTimeout(20) //requestTimeout
+                .withOperationTimeout(200)  //operationTimeout
+                .build());
 
         client.call("reset_request_counters");
         CompletableFuture<List<?>> f = retryingClient
-                .call("long_running_function", Collections.singletonList(10));
+            .call("long_running_function", Collections.singletonList(10));
 
         try {
             f.get();

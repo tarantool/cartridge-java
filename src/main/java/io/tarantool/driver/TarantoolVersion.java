@@ -14,6 +14,7 @@ public class TarantoolVersion implements Serializable {
 
     /**
      * Constructor
+     *
      * @param versionString a string containing Tarantool server version
      */
     TarantoolVersion(String versionString) {
@@ -22,6 +23,7 @@ public class TarantoolVersion implements Serializable {
 
     /**
      * Constructs version from a string
+     *
      * @param versionString a string containing Tarantool server version
      * @return new {@link TarantoolVersion} instance incapsulating the specified version
      * @throws InvalidVersionException if the passed version string is invalid

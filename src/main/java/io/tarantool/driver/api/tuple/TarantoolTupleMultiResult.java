@@ -10,5 +10,5 @@ import io.tarantool.driver.api.TarantoolResult;
  * @see TarantoolTupleResult
  */
 public interface TarantoolTupleMultiResult
-        extends MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+    extends MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 }

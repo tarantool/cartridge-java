@@ -19,7 +19,8 @@ public class TarantoolAuthenticationResponseHandler extends SimpleChannelInbound
 
     private final CompletableFuture<Channel> connectionFuture;
     private final TarantoolErrors.TarantoolBoxErrorFactory boxErrorFactory
-            = new TarantoolErrors.TarantoolBoxErrorFactory();
+        = new TarantoolErrors.TarantoolBoxErrorFactory();
+
     public TarantoolAuthenticationResponseHandler(CompletableFuture<Channel> connectionFuture) {
         super();
         this.connectionFuture = connectionFuture;
@@ -31,7 +32,7 @@ public class TarantoolAuthenticationResponseHandler extends SimpleChannelInbound
             switch (tarantoolResponse.getResponseType()) {
                 case IPROTO_NOT_OK:
                     TarantoolErrorResult errorResult = new TarantoolErrorResult(tarantoolResponse.getSyncId(),
-                            tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
+                        tarantoolResponse.getResponseCode(), tarantoolResponse.getBody().getData());
                     connectionFuture.completeExceptionally(boxErrorFactory.create(errorResult));
                     break;
                 case IPROTO_OK:

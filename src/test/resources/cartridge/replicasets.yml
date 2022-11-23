@@ -1,37 +1,37 @@
 app-router:
   instances:
-  - router
+    - router
   roles:
-  - vshard-router
-  - crud-router
-  - app.roles.api_router
-  - app.roles.custom
+    - vshard-router
+    - crud-router
+    - app.roles.api_router
+    - app.roles.custom
   all_rw: false
 app-router-second:
   instances:
-  - second-router
+    - second-router
   roles:
-  - vshard-router
-  - crud-router
-  - app.roles.api_router
-  - app.roles.custom
+    - vshard-router
+    - crud-router
+    - app.roles.api_router
+    - app.roles.custom
   all_rw: false
 app-router-third:
   instances:
-  - third-router
+    - third-router
   roles:
-  - vshard-router
-  - crud-router
-  - app.roles.api_router
-  - app.roles.custom
+    - vshard-router
+    - crud-router
+    - app.roles.api_router
+    - app.roles.custom
   all_rw: false
 s1-storage:
   instances:
-  - s1-master
+    - s1-master
   roles:
-  - vshard-storage
-  - crud-storage
-  - app.roles.api_storage
+    - vshard-storage
+    - crud-storage
+    - app.roles.api_storage
   weight: 1
   all_rw: false
   vshard_group: default

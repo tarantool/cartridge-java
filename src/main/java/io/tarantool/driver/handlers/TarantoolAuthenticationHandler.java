@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Alexey Kuzin
  */
 public class TarantoolAuthenticationHandler<S extends TarantoolCredentials, T extends TarantoolAuthenticator<S>>
-        extends SimpleChannelInboundHandler<ByteBuf> {
+    extends SimpleChannelInboundHandler<ByteBuf> {
 
     private static final Logger log = LoggerFactory.getLogger(TarantoolAuthenticationHandler.class);
     private static final int VERSION_LENGTH = 64; // bytes
@@ -35,14 +35,16 @@ public class TarantoolAuthenticationHandler<S extends TarantoolCredentials, T ex
 
     /**
      * Basic constructor.
+     *
      * @param connectionFuture future for tracking the authentication progress
-     * @param versionHolder reads and holds the Tarantool server version received in the greeting
-     * @param credentials Tarantool user credentials for authentication
-     * @param authenticator an instance of {@link TarantoolAuthenticator} implementing authentication mechanism
+     * @param versionHolder    reads and holds the Tarantool server version received in the greeting
+     * @param credentials      Tarantool user credentials for authentication
+     * @param authenticator    an instance of {@link TarantoolAuthenticator} implementing authentication mechanism
      */
-    public TarantoolAuthenticationHandler(CompletableFuture<Channel> connectionFuture,
-                                          TarantoolVersionHolder versionHolder,
-                                          S credentials, T authenticator) {
+    public TarantoolAuthenticationHandler(
+        CompletableFuture<Channel> connectionFuture,
+        TarantoolVersionHolder versionHolder,
+        S credentials, T authenticator) {
         this.connectionFuture = connectionFuture;
         this.versionHolder = versionHolder;
         this.credentials = credentials;
@@ -63,12 +65,12 @@ public class TarantoolAuthenticationHandler<S extends TarantoolCredentials, T ex
             in.readBytes(array).skipBytes(VERSION_LENGTH - SALT_LENGTH);
             byte[] authData = authenticator.prepareUserAuthData(array, credentials);
             TarantoolAuthRequest authRequest = new TarantoolAuthRequest.Builder()
-                    .withUsername(credentials.getUsername())
-                    .withAuthData(authenticator.getMechanism(), authData).build();
+                .withUsername(credentials.getUsername())
+                .withAuthData(authenticator.getMechanism(), authData).build();
             ctx.channel().writeAndFlush(authRequest).addListener(f -> {
                 if (!f.isSuccess()) {
                     connectionFuture.completeExceptionally(
-                            new RuntimeException("Failed to write the auth request to channel", f.cause()));
+                        new RuntimeException("Failed to write the auth request to channel", f.cause()));
                 }
             });
         } else if (authenticator.canSkipAuth(credentials)) {

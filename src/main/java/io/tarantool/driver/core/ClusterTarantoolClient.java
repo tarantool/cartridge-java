@@ -22,7 +22,7 @@ import java.util.Collection;
  * @author Alexey Kuzin
  */
 public abstract class ClusterTarantoolClient<T extends Packable, R extends Collection<T>>
-        extends AbstractTarantoolClient<T, R> {
+    extends AbstractTarantoolClient<T, R> {
 
     private final TarantoolClusterAddressProvider addressProvider;
 
@@ -33,8 +33,9 @@ public abstract class ClusterTarantoolClient<T extends Packable, R extends Colle
      * @param addressProvider provides Tarantool server address for connection
      * @see TarantoolClientConfig
      */
-    public ClusterTarantoolClient(TarantoolClientConfig config,
-                                  TarantoolClusterAddressProvider addressProvider) {
+    public ClusterTarantoolClient(
+        TarantoolClientConfig config,
+        TarantoolClusterAddressProvider addressProvider) {
         super(config);
 
         Assert.notNull(addressProvider, "Address provider must not be null");
@@ -43,9 +44,10 @@ public abstract class ClusterTarantoolClient<T extends Packable, R extends Colle
     }
 
     @Override
-    protected TarantoolConnectionManager connectionManager(TarantoolClientConfig config,
-                                                           TarantoolConnectionFactory connectionFactory,
-                                                           TarantoolConnectionListeners listeners) {
+    protected TarantoolConnectionManager connectionManager(
+        TarantoolClientConfig config,
+        TarantoolConnectionFactory connectionFactory,
+        TarantoolConnectionListeners listeners) {
         return new TarantoolClusterConnectionManager(config, connectionFactory, listeners, addressProvider);
     }
 

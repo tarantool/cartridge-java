@@ -44,7 +44,7 @@ public interface RequestRetryPolicy {
 
     /**
      * Wrap a generic operation taking an arbitrary number of arguments and returning a {@link CompletableFuture}.
-     *
+     * <p>
      * Each operation attempt is limited with a timeout returned by {@link #getRequestTimeout()}.
      * See {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy} for example of implementation.
      *

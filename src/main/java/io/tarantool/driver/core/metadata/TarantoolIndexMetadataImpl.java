@@ -95,7 +95,7 @@ class TarantoolIndexMetadataImpl implements TarantoolIndexMetadata {
     public void setIndexParts(List<TarantoolIndexPartMetadata> indexParts) {
         this.indexParts = indexParts;
         this.indexPartsByPosition = indexParts.stream()
-                .collect(Collectors.toMap(TarantoolIndexPartMetadata::getFieldIndex, Function.identity()));
+            .collect(Collectors.toMap(TarantoolIndexPartMetadata::getFieldIndex, Function.identity()));
         this.fieldPositionToKeyPosition = new HashMap<>();
         int index = 0;
         for (TarantoolIndexPartMetadata meta : indexParts) {

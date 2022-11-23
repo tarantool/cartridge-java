@@ -53,12 +53,12 @@ public class ClusterTarantoolTupleClientIT {
     private static final Logger log = LoggerFactory.getLogger(ClusterTarantoolTupleClientIT.class);
 
     @Container
-    private static TarantoolContainer tarantoolContainer = new TarantoolContainer()
-            .withScriptFileName("org/testcontainers/containers/server.lua")
-            .withLogConsumer(new Slf4jLogConsumer(log));
+    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
+        .withScriptFileName("org/testcontainers/containers/server.lua")
+        .withLogConsumer(new Slf4jLogConsumer(log));
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
-    private static DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
@@ -73,17 +73,17 @@ public class ClusterTarantoolTupleClientIT {
 
     private static void initClient() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            tarantoolContainer.getHost(), tarantoolContainer.getPort());
 
         TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                .withCredentials(credentials)
-                .withConnectTimeout(1000 * 5)
-                .withReadTimeout(1000 * 5)
-                .withRequestTimeout(1000 * 5)
-                .build();
+            .withCredentials(credentials)
+            .withConnectTimeout(1000 * 5)
+            .withReadTimeout(1000 * 5)
+            .withRequestTimeout(1000 * 5)
+            .build();
 
         log.info("Attempting connect to Tarantool");
         client = new ClusterTarantoolTupleClient(config, serverAddress);
@@ -93,7 +93,7 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void insertAndSelectRequests() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         //make select request
         Conditions conditions = Conditions.any();
@@ -120,18 +120,18 @@ public class ClusterTarantoolTupleClientIT {
 
         //repeat insert same data
         assertThrows(ExecutionException.class,
-                () -> testSpace.insert(tarantoolTuple).get(),
-                "Duplicate key exists in unique index 'primary' in space 'test_space'");
+            () -> testSpace.insert(tarantoolTuple).get(),
+            "Duplicate key exists in unique index 'primary' in space 'test_space'");
 
         //repeat select request
         TarantoolResult<TarantoolTuple> selectAfterInsertResult =
-                testSpace.select(conditions).get();
+            testSpace.select(conditions).get();
 
         assertEquals(countBeforeInsert + 1, selectAfterInsertResult.size());
 
         TarantoolTuple newTuple = selectAfterInsertResult.stream()
-                .filter(e -> e.getInteger(0) == 4)
-                .findFirst().get();
+            .filter(e -> e.getInteger(0) == 4)
+            .findFirst().get();
         assertEquals(4, newTuple.getInteger(0));
         assertEquals("Nineteen Eighty-Four", newTuple.getString(2));
         assertEquals("George Orwell", newTuple.getString(3));
@@ -141,10 +141,10 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void replaceRequest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<Object> arrayValue = Arrays.asList(200, 'a',
-                "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
+            "Harry Potter and the Philosopher's Stone", "J. K. Rowling", 1997);
         DefaultMessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(arrayValue, mapper);
         TarantoolResult<TarantoolTuple> insertTuples = testSpace.replace(tarantoolTuple).get();
@@ -181,25 +181,25 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void test_insertMany_shouldThrowException() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         assertThrows(UnsupportedOperationException.class,
-                     () -> testSpace.insertMany(Collections.emptyList()));
+            () -> testSpace.insertMany(Collections.emptyList()));
     }
 
     @Test
     public void test_replaceMany_shouldThrowException() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         assertThrows(UnsupportedOperationException.class,
-                     () -> testSpace.replaceMany(Collections.emptyList()));
+            () -> testSpace.replaceMany(Collections.emptyList()));
     }
 
     @Test
     public void deleteRequest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
         int deletedId = 2;
 
         //select request
@@ -219,7 +219,7 @@ public class ClusterTarantoolTupleClientIT {
         TarantoolResult<TarantoolTuple> selectAfterDeleteResult = testSpace.select(conditions).get();
 
         Optional<TarantoolTuple> deletedValue = selectAfterDeleteResult.stream()
-                .filter(v -> v.getInteger(0) == deletedId).findFirst();
+            .filter(v -> v.getInteger(0) == deletedId).findFirst();
         assertEquals(0, selectAfterDeleteResult.size());
         assertFalse(deletedValue.isPresent());
     }
@@ -227,7 +227,7 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void updateOperationsTest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(123, "a123", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -271,7 +271,7 @@ public class ClusterTarantoolTupleClientIT {
     @Test
     public void updateOperationByUniqueIndexTest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(166, "a166", "The Lord of the Rings", "J. R. R. Tolkien", 1968);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
@@ -298,16 +298,16 @@ public class ClusterTarantoolTupleClientIT {
         Conditions queryByNotUniqIndex = Conditions.indexEquals(1, Collections.singletonList("J. R. R. Tolkien"));
 
         assertThrows(TarantoolSpaceOperationException.class, () -> testSpace.update(queryByNotUniqIndex,
-                TupleOperations.add(4, 12)).join());
+            TupleOperations.add(4, 12)).join());
     }
 
     @Test
     public void updateByFieldName() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<Object> newValues =
-                Arrays.asList(105534, "a120654", "The Jungle Book", "Sir Joseph Rudyard Kipling", 1893);
+            Arrays.asList(105534, "a120654", "The Jungle Book", "Sir Joseph Rudyard Kipling", 1893);
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(newValues, mapperFactory.defaultComplexTypesMapper());
         testSpace.insert(tarantoolTuple);
 
@@ -324,14 +324,14 @@ public class ClusterTarantoolTupleClientIT {
 
         // an attempt to update by the name of a non-existed field
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
-                () -> testSpace.update(conditions,
-                        TupleOperations.add("non-existed-field", 17)).get());
+            () -> testSpace.update(conditions,
+                TupleOperations.add("non-existed-field", 17)).get());
     }
 
     @Test
     public void upsertTest() throws Exception {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> testSpace =
-                client.space(TEST_SPACE_NAME);
+            client.space(TEST_SPACE_NAME);
 
         List<Object> newValues = Arrays.asList(255, "q255", "Animal Farm: A Fairy Story", "George Orwell", 1945);
 
@@ -340,8 +340,8 @@ public class ClusterTarantoolTupleClientIT {
         Conditions conditions = Conditions.equals("id", 255);
 
         TupleOperations ops = TupleOperations.set(4, 2020)
-                .andSplice(2, 5, 1, "aaa")
-                .andSet("author", "Leo Tolstoy");
+            .andSplice(2, 5, 1, "aaa")
+            .andSet("author", "Leo Tolstoy");
         assertNull(ops.asList().get(2).getFieldIndex());
 
         // run upsert first time tuple
@@ -369,8 +369,8 @@ public class ClusterTarantoolTupleClientIT {
 
         // an attempt to upsert by the name of a non-existed field
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
-                () -> testSpace.upsert(conditions, tarantoolTuple,
-                        TupleOperations.set("non-existed-field", 17)).get());
+            () -> testSpace.upsert(conditions, tarantoolTuple,
+                TupleOperations.set("non-existed-field", 17)).get());
     }
 
     @Test
@@ -394,11 +394,11 @@ public class ClusterTarantoolTupleClientIT {
         DefaultResultMapperFactoryFactory factory = new DefaultResultMapperFactoryFactory();
         TarantoolSpaceMetadata spaceMetadata = client.metadata().getSpaceByName("test_space").get();
         TarantoolResult<TarantoolTuple> result = client.call(
-                "user_function_complex_query",
-                Collections.singletonList(1000),
-                defaultMapper,
-                factory.defaultTupleSingleResultMapperFactory()
-                        .withDefaultTupleValueConverter(defaultMapper, spaceMetadata)
+            "user_function_complex_query",
+            Collections.singletonList(1000),
+            defaultMapper,
+            factory.defaultTupleSingleResultMapperFactory()
+                .withDefaultTupleValueConverter(defaultMapper, spaceMetadata)
         ).get();
 
         assertTrue(result.size() >= 3);
@@ -427,7 +427,7 @@ public class ClusterTarantoolTupleClientIT {
 
         MathContext mathContext = new MathContext(1, RoundingMode.HALF_UP);
         assertEquals(0, new BigDecimal("4.2", mathContext)
-                .compareTo(new BigDecimal(String.valueOf(result.get(0)), mathContext)));
+            .compareTo(new BigDecimal(String.valueOf(result.get(0)), mathContext)));
     }
 
     @Test

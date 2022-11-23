@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 /**
  * Tarantool server address provider with service discovery via HTTP.
  * Gets list of nodes from API endpoint in json format.
- *
+ * <p>
  * Expected response format example:
  * <pre>
  * <code>
@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
  * }
  * </code>
  * </pre>
- *
+ * <p>
  * Tarantool cartridge application lua http endpoint example:
  * <pre>
  * <code>
@@ -137,7 +137,7 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
             if ("https".equalsIgnoreCase(scheme)) {
                 sslContext = SslContextBuilder.forClient()
-                        .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             } else {
                 sslContext = null;
             }
@@ -147,10 +147,10 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
         this.eventLoopGroup = new NioEventLoopGroup();
         this.bootstrap = new Bootstrap()
-                .group(this.eventLoopGroup)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, endpoint.getConnectTimeout());
+            .group(this.eventLoopGroup)
+            .channel(NioSocketChannel.class)
+            .option(ChannelOption.SO_REUSEADDR, true)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, endpoint.getConnectTimeout());
         startDiscoveryTask();
     }
 
@@ -182,8 +182,8 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
             Map<String, ServerNodeInfo> addressMap = completableFuture.get();
 
             return addressMap.values().stream()
-                    .filter(ServerNodeInfo::isAvailable)
-                    .map(v -> new TarantoolServerAddress(v.getUri())).collect(Collectors.toList());
+                .filter(ServerNodeInfo::isAvailable)
+                .map(v -> new TarantoolServerAddress(v.getUri())).collect(Collectors.toList());
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException("Cluster discovery task error", e);
         }
@@ -197,17 +197,17 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
         getExecutorService().schedule(() -> {
             if (!completableFuture.isDone()) {
                 completableFuture.completeExceptionally(new TimeoutException(String.format(
-                        "Failed to get response for request in %d ms", endpoint.getReadTimeout())));
+                    "Failed to get response for request in %d ms", endpoint.getReadTimeout())));
             }
         }, endpoint.getReadTimeout(), TimeUnit.MILLISECONDS);
 
         Bootstrap bootstrap = this.bootstrap.clone()
-                .handler(new SimpleHttpClientInitializer(sslContext, completableFuture));
+            .handler(new SimpleHttpClientInitializer(sslContext, completableFuture));
 
         Channel ch = bootstrap.connect(host, port).sync().channel();
 
         HttpRequest request = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getRawPath(), Unpooled.EMPTY_BUFFER);
+            HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getRawPath(), Unpooled.EMPTY_BUFFER);
         request.headers().set(HttpHeaderNames.HOST, host);
         request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
         request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
@@ -229,11 +229,12 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
     private static class SimpleHttpClientInitializer extends ChannelInitializer<SocketChannel> {
 
-        private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
+        private final CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
         private final SslContext sslCtx;
 
-        SimpleHttpClientInitializer(SslContext sslCtx,
-                                    CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
+        SimpleHttpClientInitializer(
+            SslContext sslCtx,
+            CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
             this.sslCtx = sslCtx;
             this.completableFuture = completableFuture;
         }
@@ -255,8 +256,8 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
 
     private static class SimpleHttpClientHandler extends SimpleChannelInboundHandler<HttpObject> {
 
-        private CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
-        private ObjectMapper objectMapper = new ObjectMapper();
+        private final CompletableFuture<Map<String, ServerNodeInfo>> completableFuture;
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleHttpClientHandler(CompletableFuture<Map<String, ServerNodeInfo>> completableFuture) {
             super();
@@ -270,8 +271,8 @@ public class HTTPDiscoveryClusterAddressProvider extends AbstractDiscoveryCluste
                 String contentString = content.content().toString(CharsetUtil.UTF_8);
 
                 TypeReference<HashMap<String, ServerNodeInfo>> typeReference =
-                        new TypeReference<HashMap<String, ServerNodeInfo>>() {
-                        };
+                    new TypeReference<HashMap<String, ServerNodeInfo>>() {
+                    };
 
                 Map<String, ServerNodeInfo> responseMap;
                 try {

@@ -50,8 +50,8 @@ public final class TarantoolRequestRetryPolicies {
 
     private static boolean isNetworkError(Throwable e) {
         return e instanceof TimeoutException ||
-                e instanceof TarantoolConnectionException ||
-                e instanceof TarantoolInternalNetworkException;
+            e instanceof TarantoolConnectionException ||
+            e instanceof TarantoolInternalNetworkException;
     }
 
     private TarantoolRequestRetryPolicies() {
@@ -81,7 +81,7 @@ public final class TarantoolRequestRetryPolicies {
         public InfiniteRetryPolicy(long requestTimeout, long operationTimeout, long delay, T exceptionCheck) {
             Assert.state(requestTimeout >= 0, "Timeout must be greater or equal than 0!");
             Assert.state(operationTimeout >= requestTimeout,
-                    "Operation timeout must be greater or equal than requestTimeout!");
+                "Operation timeout must be greater or equal than requestTimeout!");
             Assert.state(delay >= 0, "Delay must be greater or equal than 0!");
             Assert.notNull(exceptionCheck, "Exception checking callback must not be null!");
 
@@ -133,8 +133,8 @@ public final class TarantoolRequestRetryPolicies {
                     timeElapsed = timeElapsed + (System.nanoTime() - tStart) / 1_000_000L;
                     if (timeElapsed >= getOperationTimeout()) {
                         ex = new TarantoolTimeoutException(
-                                timeElapsed,
-                                ex);
+                            timeElapsed,
+                            ex);
                         break;
                     }
                 } while (this.canRetryRequest(ex));
@@ -149,7 +149,7 @@ public final class TarantoolRequestRetryPolicies {
      * @param <T> exception checking predicate type
      */
     public static final class InfiniteRetryPolicyFactory<T extends Predicate<Throwable>>
-            implements RequestRetryPolicyFactory {
+        implements RequestRetryPolicyFactory {
 
         private final T callback;
         private final long delay; //ms
@@ -352,8 +352,8 @@ public final class TarantoolRequestRetryPolicies {
                     }
                     if (attempts == 0) {
                         ex = new TarantoolAttemptsLimitException(
-                                limit,
-                                ex);
+                            limit,
+                            ex);
                         break;
                     }
                 } while (this.canRetryRequest(ex));
@@ -368,7 +368,7 @@ public final class TarantoolRequestRetryPolicies {
      * @param <T> exception checking predicate type
      */
     public static final class AttemptsBoundRetryPolicyFactory<T extends Predicate<Throwable>>
-            implements RequestRetryPolicyFactory {
+        implements RequestRetryPolicyFactory {
 
         private final int numberOfAttempts;
         private final T exceptionCheck;
@@ -383,10 +383,11 @@ public final class TarantoolRequestRetryPolicies {
          * @param delay            delay between retry attempts, in milliseconds
          * @param exceptionCheck   predicate checking whether the given exception may be retried
          */
-        public AttemptsBoundRetryPolicyFactory(int numberOfAttempts,
-                                               long requestTimeout,
-                                               long delay,
-                                               T exceptionCheck) {
+        public AttemptsBoundRetryPolicyFactory(
+            int numberOfAttempts,
+            long requestTimeout,
+            long delay,
+            T exceptionCheck) {
             this.numberOfAttempts = numberOfAttempts;
             this.requestTimeout = requestTimeout;
             this.delay = delay;
@@ -555,7 +556,7 @@ public final class TarantoolRequestRetryPolicies {
             return exceptionCheck.test(throwable);
         } catch (Exception e) {
             throw new TarantoolClientException(
-                    "Specified in TarantoolClient predicate for exception check threw exception: ", e);
+                "Specified in TarantoolClient predicate for exception check threw exception: ", e);
         }
     }
 

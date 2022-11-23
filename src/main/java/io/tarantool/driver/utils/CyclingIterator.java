@@ -21,6 +21,7 @@ public class CyclingIterator<T> implements Iterator<T> {
 
     /**
      * Basic constructor.
+     *
      * @param items collection to iterate over
      */
     public CyclingIterator(Collection<T> items) {

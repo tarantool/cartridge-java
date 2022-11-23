@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Represents the Tarantool packet frame header.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#box-protocol-header</a>
  *
  * @author Alexey Kuzin
  */
@@ -96,6 +96,7 @@ public final class TarantoolHeader implements Packable {
 
     /**
      * Converts the current header contents into a MessagePack {@link Value}
+     *
      * @return MessagePack representation of the header
      */
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
@@ -110,19 +111,20 @@ public final class TarantoolHeader implements Packable {
 
     /**
      * Creates an instance of {@link TarantoolHeader} from MessagePack {@link Value}
+     *
      * @param value must be an instance of {@link MapValue}
      * @return a {@link TarantoolHeader} instance
      * @throws TarantoolProtocolException if the passed value is not a {@link MapValue}, mandatory fields are absent
-     * or have wrong type
+     *                                    or have wrong type
      */
     public static TarantoolHeader fromMessagePackValue(Value value) throws TarantoolProtocolException {
         if (!value.isMapValue()) {
             throw new TarantoolProtocolException("TarantoolHeader can be unpacked only from MP_MAP, received "
-                    + value.toString());
+                + value);
         }
         Map<Value, Value> values = value.asMapValue().map();
         TarantoolHeader header = new TarantoolHeader();
-        for (Value key: values.keySet()) {
+        for (Value key : values.keySet()) {
             if (!key.isIntegerValue()) {
                 throw new TarantoolProtocolException("TarantoolHeader keys must be of MP_INT type");
             }

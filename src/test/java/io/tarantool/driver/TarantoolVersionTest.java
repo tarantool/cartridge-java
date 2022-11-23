@@ -44,6 +44,6 @@ public class TarantoolVersionTest {
         final String versionString = "Tarantool 1.10";
 
         assertEquals(TarantoolVersion.fromString(versionString).hashCode(),
-                TarantoolVersion.fromString(versionString).hashCode());
+            TarantoolVersion.fromString(versionString).hashCode());
     }
 }

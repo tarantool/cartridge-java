@@ -11,7 +11,7 @@ import java.util.Optional;
  * @author Artyom Dubinin
  */
 abstract class ProxyBucketIdOptions<B extends ProxyBucketIdOptions<B>> extends ProxyBaseOptions<B>
-        implements OperationWithBucketIdOptions {
+    implements OperationWithBucketIdOptions {
 
     public static final String BUCKET_ID = "bucket_id";
 

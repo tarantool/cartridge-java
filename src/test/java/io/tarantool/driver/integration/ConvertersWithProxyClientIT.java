@@ -10,16 +10,15 @@ import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
-
-import java.util.UUID;
-import org.junit.jupiter.api.Disabled;
 import org.testcontainers.shaded.org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Artyom Dubinin
@@ -31,7 +30,7 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
     public static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
 
     @BeforeAll
@@ -42,10 +41,10 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
         return TarantoolClientFactory.createClient()
-                .withAddress(container.getHost(), container.getPort())
-                .withCredentials(container.getUsername(), container.getPassword())
-                .withProxyMethodMapping()
-                .build();
+            .withAddress(container.getHost(), container.getPort())
+            .withCredentials(container.getUsername(), container.getPassword())
+            .withProxyMethodMapping()
+            .build();
     }
 
     @Test
@@ -54,12 +53,12 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
         //given
         UUID uuid = UUID.randomUUID();
         client.space("space_with_uuid")
-                .insert(tupleFactory.create(1, uuid)).get();
+            .insert(tupleFactory.create(1, uuid)).get();
 
         //when
         TarantoolTuple fields = client
-                .space("space_with_uuid")
-                .select(Conditions.equals("id", 1)).get().get(0);
+            .space("space_with_uuid")
+            .select(Conditions.equals("id", 1)).get().get(0);
 
         //then
         Assertions.assertEquals(uuid, fields.getUUID("uuid_field"));
@@ -73,12 +72,12 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
         byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
         List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
         client.space("space_with_varbinary")
-                .insert(tupleFactory.create(1, bytes)).get();
+            .insert(tupleFactory.create(1, bytes)).get();
 
         //when
         TarantoolTuple fields = client
-                .space("space_with_varbinary")
-                .select(Conditions.equals("id", 1)).get().get(0);
+            .space("space_with_varbinary")
+            .select(Conditions.equals("id", 1)).get().get(0);
 
         //then
         byte[] bytesFromTarantool = fields.getByteArray("varbinary_field");
@@ -92,12 +91,12 @@ public class ConvertersWithProxyClientIT extends SharedCartridgeContainer {
         byte[] bytes = "hello".getBytes(StandardCharsets.UTF_8);
         List<Byte> byteList = Arrays.asList(ArrayUtils.toObject(bytes));
         client.space("space_with_string")
-                .insert(tupleFactory.create(1, bytes)).get();
+            .insert(tupleFactory.create(1, bytes)).get();
 
         //when
         TarantoolTuple fields = client
-                .space("space_with_string")
-                .select(Conditions.equals("id", 1)).get().get(0);
+            .space("space_with_string")
+            .select(Conditions.equals("id", 1)).get().get(0);
 
         //then
         byte[] bytesFromTarantool = fields.getByteArray("string_field");

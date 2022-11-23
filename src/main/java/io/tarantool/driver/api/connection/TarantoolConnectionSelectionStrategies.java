@@ -25,8 +25,9 @@ public final class TarantoolConnectionSelectionStrategies {
         INSTANCE;
 
         @Override
-        public ConnectionSelectionStrategy create(TarantoolClientConfig config,
-                                                  Collection<TarantoolConnection> connections) {
+        public ConnectionSelectionStrategy create(
+            TarantoolClientConfig config,
+            Collection<TarantoolConnection> connections) {
             Assert.notNull(connections, "The collection of Tarantool connections should not be null");
 
             return new RoundRobinStrategy(connections);
@@ -41,8 +42,8 @@ public final class TarantoolConnectionSelectionStrategies {
         RoundRobinStrategy(Collection<TarantoolConnection> connections) {
             this.available = new AtomicInteger(connections.size());
             this.connectionIterator = new TarantoolConnectionIterator(connections.stream()
-                    .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
-                    .collect(Collectors.toList()));
+                .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
+                .collect(Collectors.toList()));
         }
 
         @Override
@@ -69,8 +70,9 @@ public final class TarantoolConnectionSelectionStrategies {
         INSTANCE;
 
         @Override
-        public ConnectionSelectionStrategy create(TarantoolClientConfig config,
-                                                  Collection<TarantoolConnection> connections) {
+        public ConnectionSelectionStrategy create(
+            TarantoolClientConfig config,
+            Collection<TarantoolConnection> connections) {
             Assert.notNull(connections, "The collection of Tarantool connections should not be null");
 
             return new ParallelRoundRobinStrategy(config, connections);
@@ -90,16 +92,16 @@ public final class TarantoolConnectionSelectionStrategies {
         }
 
         private Collection<TarantoolConnectionIterator> populateIterators(
-                Collection<TarantoolConnection> connections) {
+            Collection<TarantoolConnection> connections) {
             int groupSize = config.getConnections();
             AtomicInteger currentSize = new AtomicInteger(0);
             return connections.stream()
-                    .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
-                    .collect(Collectors.groupingBy(
-                            conn -> currentSize.getAndIncrement() / groupSize)).values().stream()
-                    .map(TarantoolConnectionIterator::new)
-                    .filter(TarantoolConnectionIterator::hasNext)
-                    .collect(Collectors.toList());
+                .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
+                .collect(Collectors.groupingBy(
+                    conn -> currentSize.getAndIncrement() / groupSize)).values().stream()
+                .map(TarantoolConnectionIterator::new)
+                .filter(TarantoolConnectionIterator::hasNext)
+                .collect(Collectors.toList());
         }
 
         @Override

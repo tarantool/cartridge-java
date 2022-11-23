@@ -30,9 +30,10 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
 
     private static final Logger logger = LoggerFactory.getLogger(TarantoolConnection.class);
 
-    public TarantoolConnectionImpl(RequestFutureManager requestManager,
-                                   TarantoolVersionHolder versionHolder,
-                                   Channel channel) {
+    public TarantoolConnectionImpl(
+        RequestFutureManager requestManager,
+        TarantoolVersionHolder versionHolder,
+        Channel channel) {
         this.requestManager = requestManager;
         this.versionHolder = versionHolder;
         this.channel = channel;
@@ -73,7 +74,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
         channel.writeAndFlush(request).addListener(f -> {
             if (!f.isSuccess()) {
                 requestFuture.completeExceptionally(
-                        new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
+                    new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
             } else {
                 logger.debug("Request {} sent, status Success", request.getHeader().getSync());
             }

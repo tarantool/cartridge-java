@@ -1,8 +1,8 @@
 package io.tarantool.driver.core.proxy;
 
-import java.util.Optional;
-
 import io.tarantool.driver.protocol.Packable;
+
+import java.util.Optional;
 
 /**
  * This class is not part of the public API.
@@ -34,7 +34,7 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
      * @see CRUDAbstractOperationOptions.AbstractBuilder
      */
     protected abstract static class AbstractBuilder<B extends AbstractBuilder<B>>
-            extends CRUDBucketIdOptions.AbstractBuilder<CRUDSelectOptions, B> {
+        extends CRUDBucketIdOptions.AbstractBuilder<CRUDSelectOptions, B> {
         private Optional<Long> selectLimit = Optional.empty();
         private Optional<Packable> after = Optional.empty();
         private Optional<Integer> selectBatchSize = Optional.empty();

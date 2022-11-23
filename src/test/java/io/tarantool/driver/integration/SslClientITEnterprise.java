@@ -43,33 +43,33 @@ public class SslClientITEnterprise {
     @BeforeAll
     public static void setUp() throws URISyntaxException, SSLException {
         final File dockerfile = new File(
-                SslClientITEnterprise.class.getClassLoader()
-                        .getResource("org/testcontainers/containers/enterprise/Dockerfile").toURI()
+            SslClientITEnterprise.class.getClassLoader()
+                .getResource("org/testcontainers/containers/enterprise/Dockerfile").toURI()
         );
         final Map<String, String> buildArgs = new HashMap<>();
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", "tarantool-enterprise-bundle-2.10.0-beta2-91-g08c9b4963-r474");
 
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-                .withSslContext(getSslContext());
+            .withSslContext(getSslContext());
 
         containerWithSsl = new TarantoolContainer(
-                new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
-                .withScriptFileName("ssl_server.lua")
-                .withUsername("test_user")
-                .withPassword("test_password")
-                .withMemtxMemory(256 * 1024 * 1024)
-                .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl")
-                .withLogConsumer(new Slf4jLogConsumer(log));
+            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
+            .withScriptFileName("ssl_server.lua")
+            .withUsername("test_user")
+            .withPassword("test_password")
+            .withMemtxMemory(256 * 1024 * 1024)
+            .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl")
+            .withLogConsumer(new Slf4jLogConsumer(log));
 
         containerWithoutSsl = new TarantoolContainer(
-                new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
-                .withScriptFileName("server.lua")
-                .withUsername("test_user")
-                .withPassword("test_password")
-                .withMemtxMemory(256 * 1024 * 1024)
-                .withDirectoryBinding("org/testcontainers/containers/enterprise")
-                .withLogConsumer(new Slf4jLogConsumer(log));
+            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
+            .withScriptFileName("server.lua")
+            .withUsername("test_user")
+            .withPassword("test_password")
+            .withMemtxMemory(256 * 1024 * 1024)
+            .withDirectoryBinding("org/testcontainers/containers/enterprise")
+            .withLogConsumer(new Slf4jLogConsumer(log));
 
         if (!containerWithSsl.isRunning()) {
             containerWithSsl.start();
@@ -84,14 +84,14 @@ public class SslClientITEnterprise {
     public void test_should_throwException_ifClientWithSslButServerNot() throws SSLException {
         //when
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-                .withAddress(containerWithoutSsl.getHost(), containerWithoutSsl.getMappedPort(3301))
-                .withCredentials("test_user", "test_password")
-                .withSslContext(getSslContext());
+            .withAddress(containerWithoutSsl.getHost(), containerWithoutSsl.getMappedPort(3301))
+            .withCredentials("test_user", "test_password")
+            .withSslContext(getSslContext());
 
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientWithSsl =
-                tarantoolClientBuilder.build();
+            tarantoolClientBuilder.build();
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                tarantoolClientBuilder.withSecure(false).build();
+            tarantoolClientBuilder.withSecure(false).build();
 
         //then
         assertDoesNotThrow(client::getVersion);
@@ -102,14 +102,14 @@ public class SslClientITEnterprise {
     public void test_should_clientConnectWithSsl() throws SSLException {
         //when
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-                .withAddress(containerWithSsl.getHost(), containerWithSsl.getMappedPort(3301))
-                .withCredentials("test_user", "test_password")
-                .withSslContext(getSslContext());
+            .withAddress(containerWithSsl.getHost(), containerWithSsl.getMappedPort(3301))
+            .withCredentials("test_user", "test_password")
+            .withSslContext(getSslContext());
 
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientWithSsl =
-                tarantoolClientBuilder.build();
+            tarantoolClientBuilder.build();
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                tarantoolClientBuilder.withSecure(false).build();
+            tarantoolClientBuilder.withSecure(false).build();
 
         //then
         assertDoesNotThrow(clientWithSsl::getVersion);
@@ -122,7 +122,7 @@ public class SslClientITEnterprise {
     @NotNull
     private static SslContext getSslContext() throws SSLException {
         return SslContextBuilder.forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                .build();
+            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+            .build();
     }
 }

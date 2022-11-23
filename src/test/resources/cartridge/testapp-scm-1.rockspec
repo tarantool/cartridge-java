@@ -1,6 +1,6 @@
 package = 'testapp'
 version = 'scm-1'
-source  = {
+source = {
     url = '/dev/null',
 }
 -- Put any modules your app depends on here

@@ -23,10 +23,11 @@ public class TarantoolClusterConnectionManager extends AbstractTarantoolConnecti
      * @param listeners         are invoked after connection is established
      * @param addressProvider   provides Tarantool server nodes addresses
      */
-    public TarantoolClusterConnectionManager(TarantoolClientConfig config,
-                                             TarantoolConnectionFactory connectionFactory,
-                                             TarantoolConnectionListeners listeners,
-                                             TarantoolClusterAddressProvider addressProvider) {
+    public TarantoolClusterConnectionManager(
+        TarantoolClientConfig config,
+        TarantoolConnectionFactory connectionFactory,
+        TarantoolConnectionListeners listeners,
+        TarantoolClusterAddressProvider addressProvider) {
         super(config, connectionFactory, listeners);
         this.addressProvider = addressProvider;
         this.addressProvider.setRefreshCallback(super::refresh);

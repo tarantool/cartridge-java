@@ -20,7 +20,7 @@ public abstract class AbstractOptions<B extends AbstractOptions<B>> implements O
      * Add an option value.
      *
      * @param option option name
-     * @param value option value
+     * @param value  option value
      */
     public void addOption(String option, Object value) {
         resultMap.put(option, value);
@@ -29,7 +29,7 @@ public abstract class AbstractOptions<B extends AbstractOptions<B>> implements O
     /**
      * Get an option value.
      *
-     * @param option option name
+     * @param option      option name
      * @param optionClass option value type
      */
     @SuppressWarnings("unchecked")

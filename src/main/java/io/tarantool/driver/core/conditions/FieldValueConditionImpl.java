@@ -21,8 +21,8 @@ public class FieldValueConditionImpl extends BaseCondition implements FieldValue
      * Basic constructor
      *
      * @param operator filtering operator
-     * @param field filtering field
-     * @param value field value for comparison
+     * @param field    filtering field
+     * @param value    field value for comparison
      */
     public FieldValueConditionImpl(Operator operator, FieldIdentifier<?, ?> field, Object value) {
         super(operator, field);
@@ -44,8 +44,8 @@ public class FieldValueConditionImpl extends BaseCondition implements FieldValue
         }
         FieldValueConditionImpl that = (FieldValueConditionImpl) o;
         return Objects.equals(value, that.value) &&
-                operator() == that.operator() &&
-                Objects.equals(field(), that.field());
+            operator() == that.operator() &&
+            Objects.equals(field(), that.field());
     }
 
     @Override

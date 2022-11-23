@@ -30,7 +30,7 @@ public class DefaultBigDecimalToExtensionValueConverter implements ObjectConvert
         int scale = object.scale();
         if (scale > DECIMAL_MAX_DIGITS || scale < -DECIMAL_MAX_DIGITS) {
             throw new IOException(
-                    String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
+                String.format("Scales with absolute value greater than %d are not supported", DECIMAL_MAX_DIGITS));
         }
         String number = object.unscaledValue().toString();
         byte signum = DECIMAL_PLUS;
@@ -66,7 +66,7 @@ public class DefaultBigDecimalToExtensionValueConverter implements ObjectConvert
             return ValueFactory.newExtension(DECIMAL_TYPE, toBytes(object));
         } catch (IOException e) {
             throw new MessagePackValueMapperException(
-                    String.format("Failed to pack BigDecimal %s to MessagePack entity", object), e);
+                String.format("Failed to pack BigDecimal %s to MessagePack entity", object), e);
         }
     }
 }

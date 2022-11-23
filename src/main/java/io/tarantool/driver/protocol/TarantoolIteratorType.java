@@ -33,16 +33,22 @@ public enum TarantoolIteratorType {
 
     public TarantoolIteratorType reverse() {
         switch (this) {
-            case ITER_GE: return ITER_LE;
-            case ITER_GT: return ITER_LT;
-            case ITER_LE: return ITER_GE;
-            case ITER_LT: return ITER_GT;
-            default: return ITER_REQ;
+            case ITER_GE:
+                return ITER_LE;
+            case ITER_GT:
+                return ITER_LT;
+            case ITER_LE:
+                return ITER_GE;
+            case ITER_LT:
+                return ITER_GT;
+            default:
+                return ITER_REQ;
         }
     }
 
     /**
      * Returns the default iterator type (EQ iterator)
+     *
      * @return EQ iterator
      */
     public static TarantoolIteratorType defaultIterator() {

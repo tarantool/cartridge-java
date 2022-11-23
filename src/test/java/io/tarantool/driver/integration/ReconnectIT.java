@@ -56,7 +56,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
-            new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
 
     @BeforeAll
     public static void setUp() throws TimeoutException {
@@ -79,9 +79,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
         try {
             //save procedure to tmp variable set it to nil and call
             clusterClient.eval("rawset(_G, 'tmp_test_no_such_procedure', test_no_such_procedure)")
-                    .thenAccept(c -> clusterClient.eval("rawset(_G, 'test_no_such_procedure', nil)"))
-                    .thenApply(c -> clusterClient.call("test_no_such_procedure"))
-                    .join();
+                .thenAccept(c -> clusterClient.eval("rawset(_G, 'test_no_such_procedure', nil)"))
+                .thenApply(c -> clusterClient.call("test_no_such_procedure"))
+                .join();
         } catch (CompletionException exception) {
             assertTrue(exception.getCause() instanceof TarantoolNoSuchProcedureException);
         }
@@ -102,15 +102,15 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getClusterClient() {
         return TarantoolClientFactory
-                .createClient()
-                .withAddresses(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
-                )
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnections(10)
-                .build();
+            .createClient()
+            .withAddresses(
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
+            )
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnections(10)
+            .build();
     }
 
     @Test
@@ -143,25 +143,25 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getRetryingTarantoolClient() {
         return TarantoolClientFactory.createClient()
-                .withAddresses(
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-                        new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
-                )
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnections(10)
-                .withProxyMethodMapping()
-                .withRetryingByNumberOfAttempts(5,
-                        retryNetworkErrors().or(retryTarantoolNoSuchProcedureErrors()),
-                        factory -> factory.withDelay(300)
-                )
-                .build();
+            .withAddresses(
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
+            )
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnections(10)
+            .withProxyMethodMapping()
+            .withRetryingByNumberOfAttempts(5,
+                retryNetworkErrors().or(retryTarantoolNoSuchProcedureErrors()),
+                factory -> factory.withDelay(300)
+            )
+            .build();
     }
 
     @Test
     public void
     test_should_removeUnavailableHostsFromAddressProvider_ifDiscoveryProcedureReturnStatusNotHealthyAndNotAvailable()
-            throws Exception {
+        throws Exception {
         initRouterStatuses();
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = initClientWithDiscovery();
 
@@ -191,18 +191,18 @@ public class ReconnectIT extends SharedCartridgeContainer {
         startCartridge();
 
         final TarantoolServerAddress firstAddress =
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
         final TarantoolServerAddress secondAddress =
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302));
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302));
         final TarantoolServerAddress[] tarantoolServerAddresses = {firstAddress, secondAddress};
 
         // create client for check number of connections
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clientForCheck =
-                TarantoolClientFactory.createClient()
-                        .withCredentials(container.getUsername(), container.getPassword())
-                        .withAddresses(tarantoolServerAddresses)
-                        .withRetryingByNumberOfAttempts(10, b -> b.withDelay(100))
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withCredentials(container.getUsername(), container.getPassword())
+                .withAddresses(tarantoolServerAddresses)
+                .withRetryingByNumberOfAttempts(10, b -> b.withDelay(100))
+                .build();
 
         // make a function which returns everytime a one of two addresses in order
         AtomicBoolean isNextAddress = new AtomicBoolean(false);
@@ -218,33 +218,33 @@ public class ReconnectIT extends SharedCartridgeContainer {
         final AtomicBoolean isRefreshNeeded = new AtomicBoolean(false);
         final AtomicInteger numberOfSwitching = new AtomicInteger(0);
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withCredentials(container.getUsername(), container.getPassword())
-                        .withAddressProvider(new TarantoolClusterAddressProvider() {
+            TarantoolClientFactory.createClient()
+                .withCredentials(container.getUsername(), container.getPassword())
+                .withAddressProvider(new TarantoolClusterAddressProvider() {
 
-                            @Override
-                            public Collection<TarantoolServerAddress> getAddresses() {
-                                try {
-                                    return getTarantoolServerAddresses.call();
-                                } catch (Exception exception) {
-                                    exception.printStackTrace();
-                                    return Collections.emptyList();
-                                }
-                            }
+                    @Override
+                    public Collection<TarantoolServerAddress> getAddresses() {
+                        try {
+                            return getTarantoolServerAddresses.call();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            return Collections.emptyList();
+                        }
+                    }
 
-                            @Override
-                            public void setRefreshCallback(Runnable runnable) {
-                                // make a daemon that will refresh connections every 100ms
-                                Executors.newSingleThreadScheduledExecutor(
-                                        new TarantoolDaemonThreadFactory("refresh-connections")
-                                ).scheduleAtFixedRate(() -> {
-                                    if (isRefreshNeeded.get()) {
-                                        numberOfSwitching.incrementAndGet();
-                                        runnable.run();
-                                    }
-                                }, 500, 100, TimeUnit.MILLISECONDS);
+                    @Override
+                    public void setRefreshCallback(Runnable runnable) {
+                        // make a daemon that will refresh connections every 100ms
+                        Executors.newSingleThreadScheduledExecutor(
+                            new TarantoolDaemonThreadFactory("refresh-connections")
+                        ).scheduleAtFixedRate(() -> {
+                            if (isRefreshNeeded.get()) {
+                                numberOfSwitching.incrementAndGet();
+                                runnable.run();
                             }
-                        }).build();
+                        }, 500, 100, TimeUnit.MILLISECONDS);
+                    }
+                }).build();
 
         //initiate establish connection
         client.getVersion();
@@ -256,51 +256,52 @@ public class ReconnectIT extends SharedCartridgeContainer {
         }
 
         final List<Map<String, Map<String, Integer>>> result = (List<Map<String, Map<String, Integer>>>)
-                clientForCheck.eval("return box.stat.net()").join();
+            clientForCheck.eval("return box.stat.net()").join();
 
         assertTrue(result.get(0).get("CONNECTIONS").get("current") < 20);
     }
 
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClientWithDiscovery() {
         final BinaryClusterDiscoveryEndpoint discoveryEndpoint = BinaryClusterDiscoveryEndpoint.builder()
-                .withEntryFunction("get_routers_status")
-                .withEndpointProvider(() -> Arrays.asList(getTarantoolServerAddresses()))
-                .withClientConfig(TarantoolClientConfig.builder()
-                        .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-                        .build()
-                )
-                .build();
+            .withEntryFunction("get_routers_status")
+            .withEndpointProvider(() -> Arrays.asList(getTarantoolServerAddresses()))
+            .withClientConfig(TarantoolClientConfig.builder()
+                .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+                .build()
+            )
+            .build();
 
         final BinaryDiscoveryClusterAddressProvider binaryDiscoveryClusterAddressProvider =
-                new BinaryDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig.builder()
-                        .withEndpoint(discoveryEndpoint)
-                        .withDelay(50)
-                        .build());
+            new BinaryDiscoveryClusterAddressProvider(TarantoolClusterDiscoveryConfig.builder()
+                .withEndpoint(discoveryEndpoint)
+                .withDelay(50)
+                .build());
 
         return TarantoolClientFactory.createClient()
-                .withAddressProvider(
-                        new TestWrappedClusterAddressProvider(binaryDiscoveryClusterAddressProvider, container))
-                .withCredentials(USER_NAME, PASSWORD)
-                .withConnections(10)
-                .withProxyMethodMapping()
-                .build();
+            .withAddressProvider(
+                new TestWrappedClusterAddressProvider(binaryDiscoveryClusterAddressProvider, container))
+            .withCredentials(USER_NAME, PASSWORD)
+            .withConnections(10)
+            .withProxyMethodMapping()
+            .build();
     }
 
     private void initRouterStatuses() {
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClient =
-                TarantoolClientFactory.createClient()
-                        .withAddresses(getTarantoolServerAddresses())
-                        .withCredentials(USER_NAME, PASSWORD)
-                        .withConnections(1)
-                        .withProxyMethodMapping()
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withAddresses(getTarantoolServerAddresses())
+                .withCredentials(USER_NAME, PASSWORD)
+                .withConnections(1)
+                .withProxyMethodMapping()
+                .build();
         initClient.call("init_router_status").join();
     }
 
-    private void replaceInstancesInfo(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client,
-                                      int id, String status, Integer port) {
+    private void replaceInstancesInfo(
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client,
+        int id, String status, Integer port) {
         final TarantoolTuple tuple = tupleFactory
-                .create(id, 1, UUID.randomUUID().toString(), status, String.format("%s:%s", "localhost", port));
+            .create(id, 1, UUID.randomUUID().toString(), status, String.format("%s:%s", "localhost", port));
 
         client.space("instances_info").replace(tuple).join();
     }
@@ -308,9 +309,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
     @NotNull
     private TarantoolServerAddress[] getTarantoolServerAddresses() {
         return new TarantoolServerAddress[]{
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
         };
     }
 

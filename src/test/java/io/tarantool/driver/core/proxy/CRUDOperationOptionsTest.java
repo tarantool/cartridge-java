@@ -31,11 +31,11 @@ public class CRUDOperationOptionsTest {
         TarantoolTuple tuple = new TarantoolTupleImpl(values, defaultMapper);
 
         CRUDSelectOptions options = new CRUDSelectOptions.Builder()
-                .withTimeout(Optional.of(1000))
-                .withSelectLimit(Optional.of(50L))
-                .withSelectBatchSize(Optional.of(10))
-                .withSelectAfter(Optional.of(tuple))
-                .build();
+            .withTimeout(Optional.of(1000))
+            .withSelectLimit(Optional.of(50L))
+            .withSelectBatchSize(Optional.of(10))
+            .withSelectAfter(Optional.of(tuple))
+            .build();
 
         assertEquals(4, options.asMap().size());
 
@@ -48,8 +48,8 @@ public class CRUDOperationOptionsTest {
     @Test
     public void baseOperationOptions_createNotEmptyTest() {
         CRUDBaseOptions options = new CRUDBaseOptions.Builder()
-                .withTimeout(Optional.of(1000))
-                .build();
+            .withTimeout(Optional.of(1000))
+            .build();
 
         assertEquals(1, options.asMap().size());
         assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
@@ -58,9 +58,9 @@ public class CRUDOperationOptionsTest {
     @Test
     public void batchOperationOptions_createNotEmptyTest() {
         CRUDBatchOptions options = new CRUDBatchOptions.Builder()
-                .withStopOnError(Optional.of(false))
-                .withRollbackOnError(Optional.of(true))
-                .build();
+            .withStopOnError(Optional.of(false))
+            .withRollbackOnError(Optional.of(true))
+            .build();
 
         assertEquals(2, options.asMap().size());
         assertEquals(false, options.asMap().get(CRUDBatchOptions.BATCH_STOP_ON_ERROR));

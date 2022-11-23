@@ -26,9 +26,9 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
     protected final Map<String, TarantoolSpaceMetadata> spaceMetadataByName = new ConcurrentHashMap<>();
     protected final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new ConcurrentHashMap<>();
     protected final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName =
-            new ConcurrentHashMap<>();
+        new ConcurrentHashMap<>();
     protected final Map<Integer, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceId =
-            new ConcurrentHashMap<>();
+        new ConcurrentHashMap<>();
     private final Phaser initPhaser = new Phaser(0);
     private final AtomicBoolean needRefresh = new AtomicBoolean(true);
     private final TarantoolMetadataProvider metadataProvider;
@@ -107,7 +107,7 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
                     spaceMetadataByName.put(spaceName, spaceMetadata);
                     spaceMetadataById.put(spaceMetadata.getSpaceId(), spaceMetadata);
                     Map<String, TarantoolIndexMetadata> indexesForSpace =
-                            indexMetadataBySpaceName.get(spaceMetadata.getSpaceName());
+                        indexMetadataBySpaceName.get(spaceMetadata.getSpaceName());
                     if (indexesForSpace != null) {
                         indexMetadataBySpaceId.put(spaceMetadata.getSpaceId(), indexesForSpace);
                     }

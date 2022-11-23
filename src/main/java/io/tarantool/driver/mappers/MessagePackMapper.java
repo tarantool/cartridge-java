@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Alexey Kuzin
  */
 public interface MessagePackMapper
-        extends MessagePackObjectMapper, MessagePackValueMapper, Serializable {
+    extends MessagePackObjectMapper, MessagePackValueMapper, Serializable {
     /**
      * Makes a shallow copy of this mapper instance
      *

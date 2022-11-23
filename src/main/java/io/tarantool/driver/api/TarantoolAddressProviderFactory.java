@@ -27,7 +27,7 @@ public final class TarantoolAddressProviderFactory {
     }
 
     public TarantoolClusterAddressProvider createClusterAddressProviderWithDiscovery(
-            Collection<TarantoolServerAddress> nodes, TarantoolClusterDiscoveryConfig config) {
+        Collection<TarantoolServerAddress> nodes, TarantoolClusterDiscoveryConfig config) {
         TarantoolClusterAddressProvider addressProvider;
 
         if (config != null) {

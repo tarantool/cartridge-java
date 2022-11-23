@@ -11,8 +11,9 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
  */
 public interface PositionField extends FieldIdentifier<TarantoolFieldMetadata, Integer> {
     @Override
-    TarantoolFieldMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                    TarantoolSpaceMetadata spaceMetadata);
+    TarantoolFieldMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata);
 
     @Override
     Integer toIdentifier();

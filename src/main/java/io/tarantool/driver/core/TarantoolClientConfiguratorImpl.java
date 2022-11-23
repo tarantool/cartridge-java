@@ -20,7 +20,7 @@ import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryN
  * @author Oleg Kuznetsov
  */
 public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigurator<SELF>>
-        implements TarantoolClientConfigurator<SELF> {
+    implements TarantoolClientConfigurator<SELF> {
 
     private final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
 
@@ -42,7 +42,7 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
 
     @Override
     public SELF withProxyMethodMapping(
-            UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
+        UnaryOperator<ProxyOperationsMappingConfig.Builder> builder) {
         this.mappingConfig = builder.apply(ProxyOperationsMappingConfig.builder()).build();
         return getSelf();
     }
@@ -54,30 +54,31 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
 
     @Override
     public SELF withRetryingByNumberOfAttempts(
-            int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy) {
+        int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
+        .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy) {
         return withRetryingByNumberOfAttempts(numberOfAttempts, retryNetworkErrors(), policy);
     }
 
     @Override
     public <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
-            int numberOfAttempts, T exceptionsCheck,
-            UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
+        int numberOfAttempts, T exceptionsCheck,
+        UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
         return withRetrying(policy.apply(TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
-                .builder(numberOfAttempts, exceptionsCheck)).build());
+            .builder(numberOfAttempts, exceptionsCheck)).build());
     }
 
     @Override
-    public SELF withRetryingIndefinitely(UnaryOperator<TarantoolRequestRetryPolicies
+    public SELF withRetryingIndefinitely(
+        UnaryOperator<TarantoolRequestRetryPolicies
             .InfiniteRetryPolicyFactory.Builder<Predicate<Throwable>>> policy) {
         return withRetryingIndefinitely(retryNetworkErrors(), policy);
     }
 
     @Override
     public <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
-            T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy) {
+        T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy) {
         return withRetrying(policy.apply(TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.builder(callback))
-                .build());
+            .build());
     }
 
     @Override

@@ -23,7 +23,7 @@ import java.util.Collections;
  * @author Alexey Kuzin
  */
 public class ClusterTarantoolTupleClient
-        extends ClusterTarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+    extends ClusterTarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 
     /**
      * Create a client. Default guest credentials will be used. Connects to a Tarantool server on localhost using the
@@ -80,9 +80,9 @@ public class ClusterTarantoolTupleClient
      */
     public ClusterTarantoolTupleClient(TarantoolCredentials credentials, TarantoolServerAddress address) {
         this(TarantoolClientConfig.builder()
-                        .withCredentials(credentials)
-                        .build(),
-                address);
+                .withCredentials(credentials)
+                .build(),
+            address);
     }
 
     /**
@@ -109,10 +109,10 @@ public class ClusterTarantoolTupleClient
      */
     public ClusterTarantoolTupleClient(TarantoolCredentials credentials, Collection<TarantoolServerAddress> addresses) {
         this(TarantoolClientConfig.builder()
-                        .withCredentials(credentials)
-                        .withConnectionSelectionStrategyFactory(ParallelRoundRobinStrategyFactory.INSTANCE)
-                        .build(),
-                () -> addresses);
+                .withCredentials(credentials)
+                .withConnectionSelectionStrategyFactory(ParallelRoundRobinStrategyFactory.INSTANCE)
+                .build(),
+            () -> addresses);
     }
 
     /**
@@ -140,8 +140,9 @@ public class ClusterTarantoolTupleClient
 
     @Override
     protected TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>>
-    spaceOperations(TarantoolClientConfig config, TarantoolConnectionManager connectionManager,
-                    TarantoolMetadataOperations metadata, TarantoolSpaceMetadata spaceMetadata) {
+    spaceOperations(
+        TarantoolClientConfig config, TarantoolConnectionManager connectionManager,
+        TarantoolMetadataOperations metadata, TarantoolSpaceMetadata spaceMetadata) {
         return new TarantoolTupleSpace(this, config, connectionManager, metadata, spaceMetadata);
     }
 

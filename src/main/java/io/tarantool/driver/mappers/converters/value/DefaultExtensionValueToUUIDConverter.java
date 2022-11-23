@@ -32,11 +32,11 @@ public class DefaultExtensionValueToUUIDConverter implements ValueConverter<Exte
     private UUID fromBytes(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes); //84b56906-aeed-11ea-b3de-0242ac130004
         long mostSignificant =
-                (buffer.getInt() & 0xFFFFFFFFL) << 32 |
+            (buffer.getInt() & 0xFFFFFFFFL) << 32 |
                 (buffer.getShort() & 0xFFFFL) << 16 |
                 (buffer.getShort() & 0xFFFFL);
         long leastSignificant =
-                (buffer.get() & 0xFFL) << 56 |
+            (buffer.get() & 0xFFL) << 56 |
                 (buffer.get() & 0xFFL) << 48 |
                 (buffer.get() & 0xFFL) << 40 |
                 (buffer.get() & 0xFFL) << 32 |

@@ -11,8 +11,9 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
  */
 public interface NamedIndex extends FieldIdentifier<TarantoolIndexMetadata, String> {
     @Override
-    TarantoolIndexMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                    TarantoolSpaceMetadata spaceMetadata);
+    TarantoolIndexMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata);
 
     @Override
     String toIdentifier();

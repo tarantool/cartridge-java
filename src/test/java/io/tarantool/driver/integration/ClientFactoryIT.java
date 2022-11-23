@@ -49,22 +49,22 @@ public class ClientFactoryIT extends SharedCartridgeContainer {
 
         //when
         TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
-                TarantoolClientFactory.createClient()
-                        .withAddress(container.getRouterHost(), container.getRouterPort())
-                        .withCredentials(USER_NAME, PASSWORD)
-                        .withProxyMethodMapping(builder -> builder
-                                .withSelectFunctionName(expectedSelectFunctionName)
-                        )
-                        .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedCallback,
-                                policy -> policy.withDelay(expectedDelay)
-                                        .withRequestTimeout(expectedRequestTimeout))
-                        .build();
+            TarantoolClientFactory.createClient()
+                .withAddress(container.getRouterHost(), container.getRouterPort())
+                .withCredentials(USER_NAME, PASSWORD)
+                .withProxyMethodMapping(builder -> builder
+                    .withSelectFunctionName(expectedSelectFunctionName)
+                )
+                .withRetryingByNumberOfAttempts(expectedNumberOfAttempts, expectedCallback,
+                    policy -> policy.withDelay(expectedDelay)
+                        .withRequestTimeout(expectedRequestTimeout))
+                .build();
         //then
         CompletionException completionException =
-                assertThrows(CompletionException.class, () -> client.eval("return error").join());
+            assertThrows(CompletionException.class, () -> client.eval("return error").join());
         assertTrue(completionException.getCause() instanceof TarantoolClientException);
         assertTrue(completionException.getMessage()
-                .contains("Specified in TarantoolClient predicate for exception check threw exception: "));
+            .contains("Specified in TarantoolClient predicate for exception check threw exception: "));
 
         assertEquals(RetryingTarantoolTupleClient.class, client.getClass());
         assertDoesNotThrow(() -> client.space("test_space").select(Conditions.any()).join());

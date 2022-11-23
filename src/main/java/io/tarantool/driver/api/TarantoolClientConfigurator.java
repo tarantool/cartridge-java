@@ -54,8 +54,8 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
     SELF withRetryingByNumberOfAttempts(
-            int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
-            .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy);
+        int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
+        .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy);
 
     /**
      * Configure the attempts bound request retry policy.
@@ -68,8 +68,8 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
     <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
-            int numberOfAttempts, T exceptionsCheck,
-            UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
+        int numberOfAttempts, T exceptionsCheck,
+        UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
 
     /**
      * Configure the infinite request retry policy.
@@ -80,8 +80,8 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
     SELF withRetryingIndefinitely(
-            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
-                    <Predicate<Throwable>>> policy);
+        UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
+            <Predicate<Throwable>>> policy);
 
     /**
      * Configure the infinite request retry policy.
@@ -93,8 +93,8 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @return this instance of builder {@link TarantoolClientConfigurator}
      */
     <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
-            T callback,
-            UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
+        T callback,
+        UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
 
     /**
      * Specify a custom request retry policy factory. A request retry policy encapsulates an algorithm of checking

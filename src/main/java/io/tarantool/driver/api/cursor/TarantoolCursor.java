@@ -7,7 +7,7 @@ import io.tarantool.driver.protocol.Packable;
 /**
  * Basic cursor interface which allows forward-only iteration
  * through query results.
- *
+ * <p>
  * Warning: 'TarantoolCursor' cursors are not thread-safe.
  *
  * @author Vladimir Rogach

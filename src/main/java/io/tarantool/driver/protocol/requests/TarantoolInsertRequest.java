@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Insert request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
@@ -37,6 +37,7 @@ public final class TarantoolInsertRequest extends TarantoolRequest {
 
         /**
          * Specify tarantool space ID for operation
+         *
          * @param spaceId tarantool space ID
          * @return builder
          */
@@ -47,6 +48,7 @@ public final class TarantoolInsertRequest extends TarantoolRequest {
 
         /**
          * Specify tuple value
+         *
          * @param tuple data which will be insert into space
          * @return builder
          */
@@ -57,6 +59,7 @@ public final class TarantoolInsertRequest extends TarantoolRequest {
 
         /**
          * Build a {@link TarantoolInsertRequest} instance
+         *
          * @param mapper configured {@link MessagePackObjectMapper} instance
          * @return instance of insert request
          * @throws TarantoolProtocolException if some required params is missing

@@ -15,9 +15,10 @@ public class TarantoolErrorResult {
 
     /**
      * Basic constructor.
-     * @param syncId the request ID passed back from Tarantool server
+     *
+     * @param syncId    the request ID passed back from Tarantool server
      * @param errorCode error status code
-     * @param body response body containing the error message
+     * @param body      response body containing the error message
      * @throws TarantoolProtocolException if the specified body is invalid
      */
     public TarantoolErrorResult(Long syncId, Long errorCode, Value body) throws TarantoolProtocolException {
@@ -31,6 +32,7 @@ public class TarantoolErrorResult {
 
     /**
      * Get request ID a.k.a. sync ID
+     *
      * @return a number
      */
     public Long getSyncId() {
@@ -39,6 +41,7 @@ public class TarantoolErrorResult {
 
     /**
      * Get error status code
+     *
      * @return a number
      * @see "https://github.com/tarantool/tarantool/blob/master/src/box/errcode.h"
      */
@@ -48,6 +51,7 @@ public class TarantoolErrorResult {
 
     /**
      * Get error message
+     *
      * @return message
      */
     public String getErrorMessage() {

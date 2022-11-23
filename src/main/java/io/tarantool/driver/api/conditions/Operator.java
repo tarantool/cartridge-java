@@ -27,18 +27,23 @@ public enum Operator {
 
     public TarantoolIteratorType toIteratorType() {
         switch (this) {
-            case LT: return TarantoolIteratorType.ITER_LT;
-            case LE: return TarantoolIteratorType.ITER_LE;
-            case GT: return TarantoolIteratorType.ITER_GT;
-            case GE: return TarantoolIteratorType.ITER_GE;
-            default: return TarantoolIteratorType.ITER_EQ;
+            case LT:
+                return TarantoolIteratorType.ITER_LT;
+            case LE:
+                return TarantoolIteratorType.ITER_LE;
+            case GT:
+                return TarantoolIteratorType.ITER_GT;
+            case GE:
+                return TarantoolIteratorType.ITER_GE;
+            default:
+                return TarantoolIteratorType.ITER_EQ;
         }
     }
 
     @Override
     public String toString() {
         return "Operator{" +
-                "opCode=" + code.toString() +
-                '}';
+            "opCode=" + code +
+            '}';
     }
 }

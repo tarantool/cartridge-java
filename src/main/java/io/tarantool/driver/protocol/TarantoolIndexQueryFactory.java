@@ -18,6 +18,7 @@ public class TarantoolIndexQueryFactory {
 
     /**
      * Basic constructor.
+     *
      * @param metadataOperations a configured {@link TarantoolMetadataOperations} instance
      */
     public TarantoolIndexQueryFactory(TarantoolMetadataOperations metadataOperations) {
@@ -26,6 +27,7 @@ public class TarantoolIndexQueryFactory {
 
     /**
      * Create a query for primary index
+     *
      * @return new {@link TarantoolIndexQuery} instance
      */
     public TarantoolIndexQuery primary() {
@@ -34,7 +36,8 @@ public class TarantoolIndexQueryFactory {
 
     /**
      * Create a query for index by its name
-     * @param spaceId ID of Tarantool space
+     *
+     * @param spaceId   ID of Tarantool space
      * @param indexName the index name
      * @return new {@link TarantoolIndexQuery} instance
      * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool server
@@ -56,7 +59,7 @@ public class TarantoolIndexQueryFactory {
      * @throws TarantoolClientException if failed to retrieve metadata from the Tarantool cluster
      */
     public TarantoolIndexQuery byName(String spaceName, String indexName)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         Optional<TarantoolIndexMetadata> meta = metadataOperations.getIndexByName(spaceName, indexName);
         if (!meta.isPresent()) {
             throw new TarantoolIndexNotFoundException(spaceName, indexName);

@@ -41,7 +41,7 @@ class ConditionsTest {
         Conditions conditions = Conditions.offset(100);
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Offset is not supported", ex.getMessage());
     }
@@ -59,11 +59,11 @@ class ConditionsTest {
     @Test
     public void testProxyQuery_FilteringByMultipleIndexesNotSupported() {
         Conditions conditions = Conditions
-                .indexEquals(0, Collections.singletonList("abc"))
-                .andIndexEquals(1, Collections.singletonList(123));
+            .indexEquals(0, Collections.singletonList("abc"))
+            .andIndexEquals(1, Collections.singletonList(123));
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Filtering by more than one index is not supported", ex.getMessage());
     }
@@ -73,16 +73,16 @@ class ConditionsTest {
         ArrayList<Integer> startIndex = new ArrayList<>(Arrays.asList(1, 2, 3));
         ArrayList<Integer> endIndex = new ArrayList<>(Arrays.asList(4, 5, 6));
         Conditions conditions = Conditions
-                .equals("third", 456)
-                .andIndexGreaterOrEquals(0, startIndex)
-                .andEquals(1, 123)
-                .andIndexLessOrEquals("primary", endIndex);
+            .equals("third", 456)
+            .andIndexGreaterOrEquals(0, startIndex)
+            .andEquals(1, 123)
+            .andIndexLessOrEquals("primary", endIndex);
 
         List<?> query = Arrays.asList(
-                Arrays.asList(">=", "primary", Arrays.asList(1, 2, 3)),
-                Arrays.asList("<=", "primary", Arrays.asList(4, 5, 6)),
-                Arrays.asList("=", "third", 456),
-                Arrays.asList("=", 1, 123)
+            Arrays.asList(">=", "primary", Arrays.asList(1, 2, 3)),
+            Arrays.asList("<=", "primary", Arrays.asList(4, 5, 6)),
+            Arrays.asList("=", "third", 456),
+            Arrays.asList("=", 1, 123)
         );
 
         assertEquals(query, conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
@@ -91,14 +91,14 @@ class ConditionsTest {
     @Test
     public void testProxyQuery_FieldConditionsForSuitableIndexGoFirst() {
         Conditions conditions = Conditions
-                .equals("fourth", 789)
-                .andEquals("third", 456)
-                .andEquals("first", 123);
+            .equals("fourth", 789)
+            .andEquals("third", 456)
+            .andEquals("first", 123);
 
         List<?> query = Arrays.asList(
-                Arrays.asList("=", "first", 123),
-                Arrays.asList("=", "third", 456),
-                Arrays.asList("=", "fourth", 789)
+            Arrays.asList("=", "first", 123),
+            Arrays.asList("=", "third", 456),
+            Arrays.asList("=", "fourth", 789)
         );
 
         assertEquals(query, conditions.toProxyQuery(testOperations, testOperations.getSpaceByName("test").get()));
@@ -107,11 +107,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_AfterNotSupported() {
         TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(
-                DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
+            DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
         Conditions conditions = Conditions.after(factory.create());
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("'startAfter' is not supported", ex.getMessage());
     }
@@ -119,11 +119,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_MultipleConditionsPerOneIndexNotSupported() {
         Conditions conditions = Conditions
-                .indexEquals(0, Collections.singletonList("abc"))
-                .andIndexEquals(0, Collections.singletonList(123));
+            .indexEquals(0, Collections.singletonList("abc"))
+            .andIndexEquals(0, Collections.singletonList(123));
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Multiple conditions for one index are not supported", ex.getMessage());
     }
@@ -131,11 +131,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_FilteringByMultipleIndexesNotSupported() {
         Conditions conditions = Conditions
-                .indexEquals(0, Collections.singletonList("abc"))
-                .andIndexEquals(1, Collections.singletonList(123));
+            .indexEquals(0, Collections.singletonList("abc"))
+            .andIndexEquals(1, Collections.singletonList(123));
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Filtering by more than one index is not supported", ex.getMessage());
     }
@@ -143,11 +143,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_MultipleConditionsPerOneFieldNotSupported() {
         Conditions conditions = Conditions
-                .equals(0, "abc")
-                .andEquals(0, 123);
+            .equals(0, "abc")
+            .andEquals(0, 123);
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Multiple conditions for one field are not supported", ex.getMessage());
     }
@@ -155,11 +155,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_FilteringByIndexAndFieldsNotSupported() {
         Conditions conditions = Conditions
-                .indexEquals("primary", Collections.singletonList("abc"))
-                .andEquals(0, 123);
+            .indexEquals("primary", Collections.singletonList("abc"))
+            .andEquals(0, 123);
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Filtering simultaneously by index and fields is not supported", ex.getMessage());
     }
@@ -167,11 +167,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongIndexName() {
         Conditions conditions = Conditions
-                .indexEquals("kekeke", Collections.singletonList("abc"))
-                .andEquals(0, 123);
+            .indexEquals("kekeke", Collections.singletonList("abc"))
+            .andEquals(0, 123);
 
         TarantoolIndexNotFoundException ex = assertThrows(TarantoolIndexNotFoundException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Index 'kekeke' is not found in space test", ex.getMessage());
     }
@@ -179,11 +179,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongIndexId() {
         Conditions conditions = Conditions
-                .indexEquals(1000, Collections.singletonList("abc"))
-                .andEquals(0, 123);
+            .indexEquals(1000, Collections.singletonList("abc"))
+            .andEquals(0, 123);
 
         TarantoolIndexNotFoundException ex = assertThrows(TarantoolIndexNotFoundException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Index with id 1000 is not found in space test", ex.getMessage());
     }
@@ -191,11 +191,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongFieldName() {
         Conditions conditions = Conditions
-                .indexEquals("asecondary1", Collections.singletonList(123))
-                .andEquals("wrong", 123);
+            .indexEquals("asecondary1", Collections.singletonList(123))
+            .andEquals("wrong", 123);
 
         TarantoolFieldNotFoundException ex = assertThrows(TarantoolFieldNotFoundException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Field 'wrong' not found in space test", ex.getMessage());
     }
@@ -203,11 +203,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_WrongFieldId() {
         Conditions conditions = Conditions
-                .indexEquals("asecondary1", Collections.singletonList(123))
-                .andEquals(5, 123);
+            .indexEquals("asecondary1", Collections.singletonList(123))
+            .andEquals(5, 123);
 
         TarantoolFieldNotFoundException ex = assertThrows(TarantoolFieldNotFoundException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Field with id 5 not found in space test", ex.getMessage());
     }
@@ -215,11 +215,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_DifferentConditionsForIndexPartNotSupported() {
         Conditions conditions = Conditions.any()
-                .andGreaterThan("second", 123)
-                .andLessThan("third", 456);
+            .andGreaterThan("second", 123)
+            .andLessThan("third", 456);
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("Different conditions for index parts are not supported", ex.getMessage());
     }
@@ -236,11 +236,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_primaryDescending() {
         Conditions conditions = Conditions.descending()
-                .andIndexLessOrEquals("primary", Collections.singletonList("abc"));
+            .andIndexLessOrEquals("primary", Collections.singletonList("abc"));
 
         TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).primary()
-                .withIteratorType(TarantoolIteratorType.ITER_GE)
-                .withKeyValues(Collections.singletonList("abc"));
+            .withIteratorType(TarantoolIteratorType.ITER_GE)
+            .withKeyValues(Collections.singletonList("abc"));
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
     }
@@ -250,8 +250,8 @@ class ConditionsTest {
         Conditions conditions = Conditions.greaterOrEquals("first", "abc");
 
         TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).primary()
-                .withIteratorType(TarantoolIteratorType.ITER_GE)
-                .withKeyValues(Collections.singletonList("abc"));
+            .withIteratorType(TarantoolIteratorType.ITER_GE)
+            .withKeyValues(Collections.singletonList("abc"));
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
     }
@@ -261,8 +261,8 @@ class ConditionsTest {
         Conditions conditions = Conditions.lessOrEquals("second", 456);
 
         TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).byName(512, "asecondary")
-                .withIteratorType(TarantoolIteratorType.ITER_LE)
-                .withKeyValues(Collections.singletonList(456));
+            .withIteratorType(TarantoolIteratorType.ITER_LE)
+            .withKeyValues(Collections.singletonList(456));
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
     }
@@ -270,12 +270,12 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_autoselectSmallestIndex2() {
         Conditions conditions = Conditions
-                .lessThan("fourth", 456)
-                .andLessThan("second", 123);
+            .lessThan("fourth", 456)
+            .andLessThan("second", 123);
 
         TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).byName(512, "secondary2")
-                .withIteratorType(TarantoolIteratorType.ITER_LT)
-                .withKeyValues(Arrays.asList(123, 456));
+            .withIteratorType(TarantoolIteratorType.ITER_LT)
+            .withKeyValues(Arrays.asList(123, 456));
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
     }
@@ -285,8 +285,8 @@ class ConditionsTest {
         Conditions conditions = Conditions.greaterThan("fourth", 456);
 
         TarantoolIndexQuery query = new TarantoolIndexQueryFactory(testOperations).byName(512, "secondary2")
-                .withIteratorType(TarantoolIteratorType.ITER_GT)
-                .withKeyValues(Arrays.asList(null, 456));
+            .withIteratorType(TarantoolIteratorType.ITER_GT)
+            .withKeyValues(Arrays.asList(null, 456));
 
         assertEquals(query, conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
     }
@@ -294,11 +294,11 @@ class ConditionsTest {
     @Test
     public void testIndexQuery_noSuitableIndex() {
         Conditions conditions = Conditions
-                .greaterOrEquals("first", "abc")
-                .andGreaterOrEquals("second", 123);
+            .greaterOrEquals("first", "abc")
+            .andGreaterOrEquals("second", 123);
 
         TarantoolClientException ex = assertThrows(TarantoolClientException.class,
-                () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
+            () -> conditions.toIndexQuery(testOperations, testOperations.getSpaceByName("test").get()));
 
         assertEquals("No indexes that fit the passed fields are found", ex.getMessage());
     }
@@ -311,11 +311,11 @@ class ConditionsTest {
         TarantoolSpaceMetadata spaceMetadata = testOperations.getSpaceByName("test").get();
         TarantoolTuple startTuple = factory.create(1, 2, 3);
         Conditions conditions = Conditions
-                .greaterOrEquals("first", "abc")
-                .andGreaterOrEquals("second", 123)
-                .startAfter(startTuple)
-                .withLimit(100)
-                .withDescending();
+            .greaterOrEquals("first", "abc")
+            .andGreaterOrEquals("second", 123)
+            .startAfter(startTuple)
+            .withLimit(100)
+            .withDescending();
 
         byte[] buffer;
         int len = 4096;
@@ -342,6 +342,6 @@ class ConditionsTest {
         assertEquals(startTuple.getInteger(2), serializedTuple.getInteger(2));
 
         assertEquals(conditions.toProxyQuery(testOperations, spaceMetadata),
-                serializedConditions.toProxyQuery(testOperations, spaceMetadata));
+            serializedConditions.toProxyQuery(testOperations, spaceMetadata));
     }
 }

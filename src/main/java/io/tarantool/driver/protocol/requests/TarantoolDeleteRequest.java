@@ -15,9 +15,9 @@ import java.util.Map;
 /**
  * Delete request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
- *     <a href="https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-delete">
- *         https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-delete</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * <a href="https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-delete">
+ * https://www.tarantool.io/en/doc/2.3/reference/reference_lua/box_index/#box-index-delete</a>
  *
  * @author Sergey Volgin
  */
@@ -40,6 +40,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
 
         /**
          * Specify tarantool space ID for operation
+         *
          * @param spaceId tarantool space ID
          * @return builder
          */
@@ -50,6 +51,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
 
         /**
          * Specify tarantool index ID for operation
+         *
          * @param indexId tarantool index ID
          * @return builder
          */
@@ -60,6 +62,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
 
         /**
          * Specify values to be matched against the index key
+         *
          * @param keyValues key value
          * @return builder
          */
@@ -70,6 +73,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
 
         /**
          * Build a {@link TarantoolDeleteRequest} instance
+         *
          * @param mapper configured {@link MessagePackObjectMapper} instance
          * @return instance of delete request
          * @throws TarantoolProtocolException if some required params is missing
@@ -82,7 +86,7 @@ public final class TarantoolDeleteRequest extends TarantoolRequest {
                 throw new TarantoolProtocolException("Index ID must be specified in the delete request");
             }
             if ((Integer) bodyMap.get(TarantoolRequestFieldType.IPROTO_INDEX_ID.getCode())
-                    != TarantoolIndexQuery.PRIMARY) {
+                != TarantoolIndexQuery.PRIMARY) {
                 throw new TarantoolProtocolException("A delete request can only be executed for the primary key");
             }
             if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_KEY.getCode())) {

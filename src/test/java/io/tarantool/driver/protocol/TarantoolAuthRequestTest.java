@@ -13,25 +13,28 @@ import org.msgpack.value.ValueFactory;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TarantoolAuthRequestTest {
 
     @Test
     void createAndSerialize() throws Exception {
         assertThrows(TarantoolProtocolException.class,
-                () -> new TarantoolAuthRequest.Builder().withUsername("user").build(),
-                "Username and auth data must be specified for Tarantool auth request");
+            () -> new TarantoolAuthRequest.Builder().withUsername("user").build(),
+            "Username and auth data must be specified for Tarantool auth request");
         assertThrows(IllegalArgumentException.class,
-                () -> new TarantoolAuthRequest.Builder().withUsername(null).build(),
-                "Username must not be empty");
+            () -> new TarantoolAuthRequest.Builder().withUsername(null).build(),
+            "Username must not be empty");
         assertThrows(IllegalArgumentException.class,
-                () -> new TarantoolAuthRequest.Builder()
-                        .withAuthData(TarantoolAuthMechanism.CHAPSHA1, null).build(),
-                "Auth data must not be empty");
+            () -> new TarantoolAuthRequest.Builder()
+                .withAuthData(TarantoolAuthMechanism.CHAPSHA1, null).build(),
+            "Auth data must not be empty");
         TarantoolAuthRequest request = new TarantoolAuthRequest.Builder()
-                .withUsername("user")
-                .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1, 2, 3, 4}).build();
+            .withUsername("user")
+            .withAuthData(TarantoolAuthMechanism.CHAPSHA1, new byte[]{1, 2, 3, 4}).build();
         MessagePacker packer = MessagePack.newDefaultBufferPacker();
         request.toMessagePack(packer, DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper());
         packer.flush();

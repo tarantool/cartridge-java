@@ -13,8 +13,8 @@ public interface TarantoolField extends Packable {
      * Get the field value converted to the target type
      *
      * @param targetClass the target type class
-     * @param mapper mapper for converting MessagePack entity to Java object
-     * @param <O> the target type
+     * @param mapper      mapper for converting MessagePack entity to Java object
+     * @param <O>         the target type
      * @return value
      */
     <O> O getValue(Class<O> targetClass, MessagePackValueMapper mapper);
@@ -32,7 +32,7 @@ public interface TarantoolField extends Packable {
      * mapper
      *
      * @param targetClass the target type class
-     * @param mapper mapper for converting MessagePack entity to Java object
+     * @param mapper      mapper for converting MessagePack entity to Java object
      * @return value
      */
     boolean canConvertValue(Class<?> targetClass, MessagePackValueMapper mapper);

@@ -28,7 +28,7 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
     private static final ImmutableStringValue FORMAT_FIELD_TYPE = new ImmutableStringValueImpl("type");
     private static final ImmutableStringValue FORMAT_FIELD_IS_NULLABLE = new ImmutableStringValueImpl("is_nullable");
 
-    private MessagePackValueMapper mapper;
+    private final MessagePackValueMapper mapper;
 
     public TarantoolSpaceMetadataConverter(MessagePackValueMapper mapper) {
         this.mapper = mapper;
@@ -42,9 +42,9 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
         metadata.setOwnerId(mapper.fromValue(it.next().asIntegerValue()));
         metadata.setSpaceName(mapper.fromValue(it.next().asStringValue()));
 
-        Value spaceMetadataValue =  it.next();
+        Value spaceMetadataValue = it.next();
         while (!spaceMetadataValue.isArrayValue()) {
-            spaceMetadataValue =  it.next();
+            spaceMetadataValue = it.next();
         }
 
         LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata = new LinkedHashMap<>();
@@ -54,13 +54,13 @@ public class TarantoolSpaceMetadataConverter implements ValueConverter<ArrayValu
             Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
             Optional<Value> isNullable = Optional.ofNullable(fieldMap.get(FORMAT_FIELD_IS_NULLABLE));
             spaceFormatMetadata.put(
-                    fieldMap.get(FORMAT_FIELD_NAME).toString(),
-                    new TarantoolFieldMetadataImpl(
-                            fieldMap.get(FORMAT_FIELD_NAME).asStringValue().asString(),
-                            fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().asString(),
-                            fieldPosition,
-                            isNullable.isPresent() && isNullable.get().asBooleanValue().getBoolean()
-                    )
+                fieldMap.get(FORMAT_FIELD_NAME).toString(),
+                new TarantoolFieldMetadataImpl(
+                    fieldMap.get(FORMAT_FIELD_NAME).asStringValue().asString(),
+                    fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().asString(),
+                    fieldPosition,
+                    isNullable.isPresent() && isNullable.get().asBooleanValue().getBoolean()
+                )
             );
             fieldPosition++;
         }

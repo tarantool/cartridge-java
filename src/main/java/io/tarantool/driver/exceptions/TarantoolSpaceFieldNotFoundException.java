@@ -3,7 +3,7 @@ package io.tarantool.driver.exceptions;
 /**
  * Field not found in current space error
  *
- *  @author Sergey Volgin
+ * @author Sergey Volgin
  */
 public class TarantoolSpaceFieldNotFoundException extends TarantoolException {
     public TarantoolSpaceFieldNotFoundException(String fieldName) {

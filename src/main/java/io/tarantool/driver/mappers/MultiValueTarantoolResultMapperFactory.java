@@ -2,8 +2,8 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.mappers.converters.value.custom.TarantoolResultConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.value.custom.TarantoolResultConverter;
 import org.msgpack.value.ArrayValue;
 
 /**
@@ -34,7 +34,7 @@ public class MultiValueTarantoolResultMapperFactory<T> extends MultiValueResultM
     /**
      * Get {@link TarantoolResult} mapper for the Lua function call with single result
      *
-     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param valueMapper    MessagePack-to-entity mapper for result contents conversion
      * @param valueConverter the result content converter
      * @return call result mapper
      */
@@ -57,29 +57,31 @@ public class MultiValueTarantoolResultMapperFactory<T> extends MultiValueResultM
     /**
      * Get {@link TarantoolResult} mapper for the Lua function call with single result
      *
-     * @param valueMapper MessagePack-to-entity mapper for result contents conversion
+     * @param valueMapper    MessagePack-to-entity mapper for result contents conversion
      * @param valueConverter the result content converter
-     * @param resultClass full result type class
+     * @param resultClass    full result type class
      * @return call result mapper
      */
     public CallResultMapper<TarantoolResult<T>, MultiValueCallResult<T, TarantoolResult<T>>>
-    withTarantoolResultConverter(MessagePackValueMapper valueMapper,
-                                 ValueConverter<ArrayValue, T> valueConverter,
-                                 Class<? extends MultiValueCallResult<T, TarantoolResult<T>>> resultClass) {
+    withTarantoolResultConverter(
+        MessagePackValueMapper valueMapper,
+        ValueConverter<ArrayValue, T> valueConverter,
+        Class<? extends MultiValueCallResult<T, TarantoolResult<T>>> resultClass) {
         return withMultiValueResultConverter(
-                valueMapper, new TarantoolResultConverter<>(valueConverter), resultClass);
+            valueMapper, new TarantoolResultConverter<>(valueConverter), resultClass);
     }
 
     /**
      * Get {@link TarantoolResult} mapper for the Lua function call with single result
      *
      * @param valueConverter the result content converter
-     * @param resultClass full result type class
+     * @param resultClass    full result type class
      * @return call result mapper
      */
     public CallResultMapper<TarantoolResult<T>, MultiValueCallResult<T, TarantoolResult<T>>>
-    withTarantoolResultConverter(ValueConverter<ArrayValue, T> valueConverter,
-                                 Class<? extends MultiValueCallResult<T, TarantoolResult<T>>> resultClass) {
+    withTarantoolResultConverter(
+        ValueConverter<ArrayValue, T> valueConverter,
+        Class<? extends MultiValueCallResult<T, TarantoolResult<T>>> resultClass) {
         return withMultiValueResultConverter(new TarantoolResultConverter<>(valueConverter), resultClass);
     }
 }

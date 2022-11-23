@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Call request.
  * See <a href="https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * https://www.tarantool.io/en/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
@@ -37,6 +37,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
 
         /**
          * Specify function name
+         *
          * @param functionName function name
          * @return builder
          */
@@ -47,6 +48,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
 
         /**
          * Specify function arguments
+         *
          * @param arguments function arguments
          * @return builder
          */
@@ -57,6 +59,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
 
         /**
          * Build a {@link TarantoolCallRequest} instance
+         *
          * @param mapper configured {@link MessagePackObjectMapper} instance
          * @return instance of call request
          * @throws TarantoolProtocolException if some required params is missing

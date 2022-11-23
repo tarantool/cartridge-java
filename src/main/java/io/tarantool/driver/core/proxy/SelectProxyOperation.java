@@ -22,11 +22,12 @@ import java.util.Optional;
  */
 public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
-    private SelectProxyOperation(TarantoolCallOperations client,
-                                 String functionName,
-                                 List<?> arguments,
-                                 MessagePackObjectMapper argumentsMapper,
-                                 CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+    private SelectProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -56,20 +57,20 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public SelectProxyOperation<T> build() {
             CRUDSelectOptions.Builder requestOptions = new CRUDSelectOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withSelectBatchSize(options.getBatchSize())
-                    .withSelectLimit(Optional.of(conditions.getLimit()))
-                    .withSelectAfter(Optional.ofNullable(conditions.getStartTuple()))
-                    .withBucketId(options.getBucketId());
+                .withTimeout(options.getTimeout())
+                .withSelectBatchSize(options.getBatchSize())
+                .withSelectLimit(Optional.of(conditions.getLimit()))
+                .withSelectAfter(Optional.ofNullable(conditions.getStartTuple()))
+                .withBucketId(options.getBucketId());
 
             List<?> arguments = Arrays.asList(
-                    spaceName,
-                    conditions.toProxyQuery(operations, metadata),
-                    requestOptions.build().asMap()
+                spaceName,
+                conditions.toProxyQuery(operations, metadata),
+                requestOptions.build().asMap()
             );
 
             return new SelectProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

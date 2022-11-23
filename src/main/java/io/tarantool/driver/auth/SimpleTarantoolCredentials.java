@@ -17,7 +17,8 @@ public class SimpleTarantoolCredentials implements TarantoolCredentials {
 
     /**
      * Basic constructor.
-     * @param user non-empty username
+     *
+     * @param user     non-empty username
      * @param password non-null password
      */
     public SimpleTarantoolCredentials(String user, String password) {

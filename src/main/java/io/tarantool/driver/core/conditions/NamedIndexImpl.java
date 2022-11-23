@@ -33,10 +33,11 @@ public class NamedIndexImpl implements NamedIndex {
     }
 
     @Override
-    public TarantoolIndexMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolIndexMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
         Optional<TarantoolIndexMetadata> indexMetadata =
-                metadataOperations.getIndexByName(spaceMetadata.getSpaceName(), name);
+            metadataOperations.getIndexByName(spaceMetadata.getSpaceName(), name);
         if (!indexMetadata.isPresent()) {
             throw new TarantoolIndexNotFoundException(spaceMetadata.getSpaceName(), name);
         }

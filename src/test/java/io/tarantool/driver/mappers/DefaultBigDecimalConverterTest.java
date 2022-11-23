@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DefaultBigDecimalConverterTest {
 
@@ -35,27 +37,27 @@ class DefaultBigDecimalConverterTest {
         assertEquals("xwUBABERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(new BigDecimal(1111111111111111111L)))).toByteArray();
+            converter.toValue(new BigDecimal(1111111111111111111L)))).toByteArray();
         assertEquals("xwsBABERERERERERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(new BigDecimal("1111111111111111111111111")))).toByteArray();
+            converter.toValue(new BigDecimal("1111111111111111111111111")))).toByteArray();
         assertEquals("xw4BABERERERERERERERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(BigDecimal.valueOf(1.2)))).toByteArray();
+            converter.toValue(BigDecimal.valueOf(1.2)))).toByteArray();
         assertEquals("xwMBAQEs", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(new BigDecimal("1111111111111.111111111111")))).toByteArray();
+            converter.toValue(new BigDecimal("1111111111111.111111111111")))).toByteArray();
         assertEquals("xw4BDBERERERERERERERERw=", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(BigDecimal.valueOf(-1.2)))).toByteArray();
+            converter.toValue(BigDecimal.valueOf(-1.2)))).toByteArray();
         assertEquals("xwMBAQEt", encoder.encodeToString(result));
         packer = MessagePack.newDefaultBufferPacker();
         result = ((MessageBufferPacker) packer.packValue(
-                converter.toValue(new BigDecimal("-1111111111111.111111111111")))).toByteArray();
+            converter.toValue(new BigDecimal("-1111111111111.111111111111")))).toByteArray();
         assertEquals("xw4BDBERERERERERERERER0=", encoder.encodeToString(result));
     }
 

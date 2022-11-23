@@ -12,6 +12,7 @@ import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 public interface ConnectionSelectionStrategy {
     /**
      * Provide the next available connection from the underlying pool of connections
+     *
      * @return an established connection
      * @throws NoAvailableConnectionsException if no connections exist or all connections are not usable
      */

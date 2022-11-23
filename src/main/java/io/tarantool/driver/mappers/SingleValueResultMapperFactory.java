@@ -1,8 +1,8 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.SingleValueCallResult;
-import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
 import org.msgpack.value.Value;
 
 /**
@@ -35,13 +35,13 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
     /**
      * Get result mapper for the Lua function call with single result
      *
-     * @param valueMapper MessagePack-to-object mapper for result contents
+     * @param valueMapper    MessagePack-to-object mapper for result contents
      * @param valueConverter the result content converter
      * @return call result mapper
      */
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
-            MessagePackValueMapper valueMapper,
-            ValueConverter<Value, T> valueConverter) {
+        MessagePackValueMapper valueMapper,
+        ValueConverter<Value, T> valueConverter) {
         return withConverter(valueMapper, new SingleValueCallResultConverter<>(valueConverter));
     }
 
@@ -52,22 +52,22 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
      * @return call result mapper
      */
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
-            ValueConverter<Value, T> valueConverter) {
+        ValueConverter<Value, T> valueConverter) {
         return withConverter(messagePackMapper.copy(), new SingleValueCallResultConverter<>(valueConverter));
     }
 
     /**
      * Get result mapper for the Lua function call with single result
      *
-     * @param valueMapper MessagePack-to-object mapper for result contents
+     * @param valueMapper    MessagePack-to-object mapper for result contents
      * @param valueConverter the result content converter
-     * @param resultClass full result type class
+     * @param resultClass    full result type class
      * @return call result mapper
      */
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
-            MessagePackValueMapper valueMapper,
-            ValueConverter<Value, T> valueConverter,
-            Class<? extends SingleValueCallResult<T>> resultClass) {
+        MessagePackValueMapper valueMapper,
+        ValueConverter<Value, T> valueConverter,
+        Class<? extends SingleValueCallResult<T>> resultClass) {
         return withConverter(valueMapper, new SingleValueCallResultConverter<>(valueConverter), resultClass);
     }
 
@@ -75,13 +75,13 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
      * Get result mapper for the Lua function call with single result
      *
      * @param valueConverter the result content converter
-     * @param resultClass full result type class
+     * @param resultClass    full result type class
      * @return call result mapper
      */
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
-            ValueConverter<Value, T> valueConverter,
-            Class<? extends SingleValueCallResult<T>> resultClass) {
+        ValueConverter<Value, T> valueConverter,
+        Class<? extends SingleValueCallResult<T>> resultClass) {
         return withConverter(
-                messagePackMapper.copy(), new SingleValueCallResultConverter<>(valueConverter), resultClass);
+            messagePackMapper.copy(), new SingleValueCallResultConverter<>(valueConverter), resultClass);
     }
 }

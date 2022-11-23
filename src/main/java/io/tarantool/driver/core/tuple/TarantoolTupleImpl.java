@@ -58,7 +58,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     /**
      * Constructor for empty tuple with metadata
      *
-     * @param mapper provides conversion between MessagePack values and Java objects
+     * @param mapper   provides conversion between MessagePack values and Java objects
      * @param metadata provides information about the target space
      */
     public TarantoolTupleImpl(MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
@@ -79,8 +79,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
      * Construct an instance of {@link TarantoolTuple } from a list of objects. Provides space metadata which adds
      * extra functionality for working with fields and indexes.
      *
-     * @param values list of tuple fields data
-     * @param mapper provides conversion between MessagePack values and Java objects
+     * @param values   list of tuple fields data
+     * @param mapper   provides conversion between MessagePack values and Java objects
      * @param metadata provides information about the target space
      */
     public TarantoolTupleImpl(Collection<?> values, MessagePackMapper mapper, TarantoolSpaceMetadata metadata) {
@@ -104,7 +104,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     /**
      * Construct an instance of {@link TarantoolTuple }
      *
-     * @param value serialized Tarantool tuple
+     * @param value  serialized Tarantool tuple
      * @param mapper provides conversion between MessagePack values and Java objects
      */
     public TarantoolTupleImpl(ArrayValue value, MessagePackMapper mapper) {
@@ -113,8 +113,9 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     /**
      * Basic constructor. Used for converting Tarantool server responses into Java entities.
-     * @param value serialized Tarantool tuple
-     * @param mapper provides conversion between MessagePack values and Java objects
+     *
+     * @param value         serialized Tarantool tuple
+     * @param mapper        provides conversion between MessagePack values and Java objects
      * @param spaceMetadata provides field names and other metadata
      */
     public TarantoolTupleImpl(ArrayValue value, MessagePackMapper mapper, TarantoolSpaceMetadata spaceMetadata) {
@@ -224,7 +225,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void setField(int fieldPosition, TarantoolField field) {
         if (fieldPosition < 0 ||
-                (spaceMetadata != null && fieldPosition >= spaceMetadata.getSpaceFormatMetadata().size())) {
+            (spaceMetadata != null && fieldPosition >= spaceMetadata.getSpaceFormatMetadata().size())) {
             throw new IndexOutOfBoundsException("Index: " + fieldPosition);
         }
 
@@ -258,7 +259,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(int fieldPosition, Object value) {
         TarantoolField tarantoolField = value == null ?
-                TarantoolNullField.INSTANCE : new TarantoolFieldImpl(mapper.toValue(value));
+            TarantoolNullField.INSTANCE : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldPosition, tarantoolField);
     }
@@ -266,7 +267,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public void putObject(String fieldName, Object value) {
         TarantoolField tarantoolField = value == null ?
-               TarantoolNullField.INSTANCE : new TarantoolFieldImpl(mapper.toValue(value));
+            TarantoolNullField.INSTANCE : new TarantoolFieldImpl(mapper.toValue(value));
 
         setField(fieldName, tarantoolField);
     }

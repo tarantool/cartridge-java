@@ -20,13 +20,14 @@ import java.util.List;
  * @author Artyom Dubinin
  */
 public final class ReplaceProxyOperation<T extends Packable, R extends Collection<T>>
-        extends AbstractProxyOperation<R> {
+    extends AbstractProxyOperation<R> {
 
-    ReplaceProxyOperation(TarantoolCallOperations client,
-                          String functionName,
-                          List<?> arguments,
-                          MessagePackObjectMapper argumentsMapper,
-                          CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
+    ReplaceProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
     }
 
@@ -34,7 +35,7 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-            extends GenericOperationsBuilder<R, ReplaceOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, ReplaceOptions, Builder<T, R>> {
         private T tuple;
 
         public Builder() {
@@ -52,14 +53,14 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
 
         public ReplaceProxyOperation<T, R> build() {
             CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .withBucketId(options.getBucketId())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .withBucketId(options.getBucketId())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());
 
             return new ReplaceProxyOperation<>(
-                    this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
         }
     }
 }

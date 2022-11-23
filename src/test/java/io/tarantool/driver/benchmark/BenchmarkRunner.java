@@ -31,7 +31,7 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypes(TarantoolSetup plan, Blackhole bh) {
         List<?> result = plan.tarantoolClient.call(
-                "return_arrays_with_different_types"
+            "return_arrays_with_different_types"
         ).join();
 
         assertEquals(1, result.size());
@@ -68,10 +68,10 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypesAsTuplesAndUnpackIt(TarantoolSetup plan, Blackhole bh) {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
-                "return_arrays_with_different_types",
-                Collections.emptyList(),
-                plan.defaultMapper,
-                plan.resultMapper
+            "return_arrays_with_different_types",
+            Collections.emptyList(),
+            plan.defaultMapper,
+            plan.resultMapper
         ).join();
 
         assertEquals(1000, tuples.size());
@@ -106,10 +106,10 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void acceptingDiffTypesAsTuplesAndUnpackItWithTargetType(TarantoolSetup plan, Blackhole bh) {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
-                "return_arrays_with_different_types",
-                Collections.emptyList(),
-                plan.defaultMapper,
-                plan.resultMapper
+            "return_arrays_with_different_types",
+            Collections.emptyList(),
+            plan.defaultMapper,
+            plan.resultMapper
         ).join();
 
         assertEquals(1000, tuples.size());
@@ -144,7 +144,7 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithDiffTypes(TarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
-                "empty_function", plan.arraysWithDiffElements).join());
+            "empty_function", plan.arraysWithDiffElements).join());
     }
 
     @Benchmark
@@ -153,7 +153,7 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithNestedArrays(TarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
-                "empty_function", plan.arraysWithNestedArrays).join());
+            "empty_function", plan.arraysWithNestedArrays).join());
     }
 
     @Benchmark
@@ -162,6 +162,6 @@ public class BenchmarkRunner {
     @OperationsPerInvocation(1000)
     public void passingArrayOfArraysWithNestedMaps(TarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
-                "empty_function", plan.arraysWithNestedMaps).join());
+            "empty_function", plan.arraysWithNestedMaps).join());
     }
 }

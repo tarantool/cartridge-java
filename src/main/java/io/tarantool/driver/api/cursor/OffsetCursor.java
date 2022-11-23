@@ -32,9 +32,10 @@ public class OffsetCursor<T extends Packable, R extends Collection<T>> extends T
     private Iterator<T> resultIter = Collections.emptyIterator();
     private T currentValue;
 
-    public OffsetCursor(TarantoolSpaceOperations<T, R> space,
-                        Conditions conditions,
-                        int batchSize)  {
+    public OffsetCursor(
+        TarantoolSpaceOperations<T, R> space,
+        Conditions conditions,
+        int batchSize) {
         this.space = space;
         this.initConditions = conditions;
         this.spaceOffset = 0;
@@ -55,14 +56,14 @@ public class OffsetCursor<T extends Packable, R extends Collection<T>> extends T
         }
 
         Conditions conditions = new Conditions(initConditions)
-                .withLimit(limit)
-                .withOffset(spaceOffset);
+            .withLimit(limit)
+            .withOffset(spaceOffset);
 
         try {
             resultIter = space
-                    .select(conditions)
-                    .get()
-                    .iterator();
+                .select(conditions)
+                .get()
+                .iterator();
         } catch (InterruptedException | ExecutionException e) {
             throw new TarantoolClientException(e);
         }

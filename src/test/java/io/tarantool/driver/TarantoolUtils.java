@@ -24,7 +24,7 @@ public final class TarantoolUtils {
         TarantoolVersion ciVersion = new TarantoolVersion(tarantoolCiVersion);
         TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
         return ciVersion.getMajor() > version.getMajor() &&
-                ciVersion.getMinor() > version.getMinor();
+            ciVersion.getMinor() > version.getMinor();
     }
 
     public static boolean versionWithUUID() {
@@ -41,9 +41,9 @@ public final class TarantoolUtils {
 
         public TarantoolVersion(String stringVersion) {
             List<Integer> majorMinor = StringUtils.isEmpty(stringVersion) ? Collections.emptyList() :
-                    Arrays.stream(stringVersion.split("\\."))
-                            .map(Integer::parseInt)
-                            .collect(Collectors.toList());
+                Arrays.stream(stringVersion.split("\\."))
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
             major = majorMinor.size() >= 1 ? majorMinor.get(0) : 0;
             minor = majorMinor.size() >= 2 ? majorMinor.get(1) : 0;
         }

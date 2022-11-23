@@ -83,13 +83,13 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Inserts several tuples into the space at once. If writing of any tuple fails,
      * all tuples will not be saved.
      *
-     * @param tuples new data
+     * @param tuples  new data
      * @param options operation options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
     default CompletableFuture<R> insertMany(Collection<T> tuples, InsertManyOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return insertMany(tuples);
     }
 
@@ -128,13 +128,13 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * Insert or replace several tuples into the space at once. If writing of any tuple fails,
      * all tuples will not be saved, but this behavior can be changed with the options.
      *
-     * @param tuples new data
+     * @param tuples  new data
      * @param options operation options
      * @return a future that will contain all corresponding tuples once completed
      * @throws TarantoolClientException in case if request failed
      */
     default CompletableFuture<R> replaceMany(Collection<T> tuples, ReplaceManyOptions options)
-            throws TarantoolClientException {
+        throws TarantoolClientException {
         return replaceMany(tuples);
     }
 
@@ -203,7 +203,7 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      */
     default CompletableFuture<R> update(Conditions conditions, TupleOperations operations, UpdateOptions options) {
         return update(conditions, operations);
-    };
+    }
 
     /**
      * Update tuple if it would be found elsewhere try to insert tuple. Only a single primary index value condition
@@ -228,10 +228,11 @@ public interface TarantoolSpaceOperations<T extends Packable, R extends Collecti
      * @return a future that will empty list
      * @throws TarantoolClientException in case if the request failed
      */
-    default CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations,
-                                        UpsertOptions options) {
+    default CompletableFuture<R> upsert(
+        Conditions conditions, T tuple, TupleOperations operations,
+        UpsertOptions options) {
         return upsert(conditions, tuple, operations);
-    };
+    }
 
     /**
      * Truncate space if space would be found. Otherwise, throw space not found error.

@@ -19,7 +19,7 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
  * @author Alexey Kuzin
  */
 public class TarantoolTupleSpace extends
-        TarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
+    TarantoolSpace<TarantoolTuple, TarantoolResult<TarantoolTuple>> {
 
     private final TarantoolCallOperations client;
     private final TarantoolClientConfig config;
@@ -27,16 +27,18 @@ public class TarantoolTupleSpace extends
     /**
      * Basic constructor
      *
-     * @param client client that provides connection to tarantool server
-     * @param config client config
-     * @param connectionManager Tarantool server connection manager
-     * @param spaceMetadata metadata for this space
+     * @param client             client that provides connection to tarantool server
+     * @param config             client config
+     * @param connectionManager  Tarantool server connection manager
+     * @param spaceMetadata      metadata for this space
      * @param metadataOperations metadata operations implementation
-     */    public TarantoolTupleSpace(TarantoolCallOperations client,
-                                      TarantoolClientConfig config,
-                                      TarantoolConnectionManager connectionManager,
-                                      TarantoolMetadataOperations metadataOperations,
-                                      TarantoolSpaceMetadata spaceMetadata) {
+     */
+    public TarantoolTupleSpace(
+        TarantoolCallOperations client,
+        TarantoolClientConfig config,
+        TarantoolConnectionManager connectionManager,
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
         super(config, connectionManager, metadataOperations, spaceMetadata);
         this.client = client;
         this.config = config;
@@ -50,7 +52,7 @@ public class TarantoolTupleSpace extends
     @Override
     protected MessagePackValueMapper tupleResultMapper() {
         return client.getResultMapperFactoryFactory().defaultTupleResultMapperFactory()
-                .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
+            .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override

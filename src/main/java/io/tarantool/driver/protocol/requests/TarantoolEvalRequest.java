@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Eval request.
  * See <a href="https://www.tarantool.io/latest/doc/2.3/dev_guide/internals/box_protocol/#binary-protocol-requests">
- *     https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
+ * https://www.tarantool.io/en/doc/latest/dev_guide/internals/box_protocol/#binary-protocol-requests</a>
  *
  * @author Sergey Volgin
  */
@@ -37,6 +37,7 @@ public final class TarantoolEvalRequest extends TarantoolRequest {
 
         /**
          * Specify lua expression
+         *
          * @param expression lua expression
          * @return builder
          */
@@ -47,6 +48,7 @@ public final class TarantoolEvalRequest extends TarantoolRequest {
 
         /**
          * Specify eval arguments
+         *
          * @param arguments eval arguments
          * @return builder
          */
@@ -57,6 +59,7 @@ public final class TarantoolEvalRequest extends TarantoolRequest {
 
         /**
          * Build a {@link TarantoolEvalRequest} instance
+         *
          * @param mapper configured {@link MessagePackObjectMapper} instance
          * @return instance of eval request
          * @throws TarantoolProtocolException if some required params is missing

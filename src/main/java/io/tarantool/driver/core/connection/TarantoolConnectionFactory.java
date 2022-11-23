@@ -43,9 +43,10 @@ public class TarantoolConnectionFactory {
      * @param bootstrap        prepared Netty's bootstrap
      * @param timeoutScheduler scheduled executor for limiting the connection tasks by timeout
      */
-    public TarantoolConnectionFactory(TarantoolClientConfig config,
-                                      Bootstrap bootstrap,
-                                      ScheduledExecutorService timeoutScheduler) {
+    public TarantoolConnectionFactory(
+        TarantoolClientConfig config,
+        Bootstrap bootstrap,
+        ScheduledExecutorService timeoutScheduler) {
         this.config = config;
         this.bootstrap = bootstrap;
         this.timeoutScheduler = timeoutScheduler;
@@ -58,36 +59,37 @@ public class TarantoolConnectionFactory {
      * @param connectionListeners listeners for the event of establishing the connection
      * @return connection future
      */
-    public CompletableFuture<TarantoolConnection> singleConnection(InetSocketAddress serverAddress,
-                                                                   TarantoolConnectionListeners connectionListeners) {
+    public CompletableFuture<TarantoolConnection> singleConnection(
+        InetSocketAddress serverAddress,
+        TarantoolConnectionListeners connectionListeners) {
         CompletableFuture<Channel> connectionFuture = new CompletableFuture<>();
         RequestFutureManager requestManager = new RequestFutureManager(config, timeoutScheduler);
         TarantoolVersionHolder versionHolder = new TarantoolVersionHolder();
         TarantoolChannelInitializer handler = new TarantoolChannelInitializer(
-                config, requestManager, versionHolder, connectionFuture);
+            config, requestManager, versionHolder, connectionFuture);
 
         ChannelFuture future = bootstrap.clone()
-                .handler(handler)
-                .remoteAddress(serverAddress)
-                .connect();
+            .handler(handler)
+            .remoteAddress(serverAddress)
+            .connect();
 
         future.addListener((ChannelFutureListener) f -> {
             if (!f.isSuccess()) {
                 connectionFuture.completeExceptionally(new TarantoolClientException(
-                        String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
+                    String.format("Failed to connect to the Tarantool server at %s", serverAddress), f.cause()));
             }
         });
 
         timeoutScheduler.schedule(() -> {
             if (!connectionFuture.isDone()) {
                 connectionFuture.completeExceptionally(new TimeoutException(
-                        String.format("Failed to connect to the Tarantool server at %s within %d ms",
-                                serverAddress, config.getConnectTimeout())));
+                    String.format("Failed to connect to the Tarantool server at %s within %d ms",
+                        serverAddress, config.getConnectTimeout())));
             }
         }, config.getConnectTimeout(), TimeUnit.MILLISECONDS);
 
         CompletableFuture<TarantoolConnection> result = connectionFuture
-                .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
+            .thenApply(ch -> new TarantoolConnectionImpl(requestManager, versionHolder, ch));
 
         for (TarantoolConnectionListener listener : connectionListeners.all()) {
             result = result.thenCompose(listener::onConnection);
@@ -110,12 +112,12 @@ public class TarantoolConnectionFactory {
      * @return a collection with specified number of connection futures
      */
     public Collection<CompletableFuture<TarantoolConnection>> multiConnection(
-            InetSocketAddress serverAddress,
-            int connections,
-            TarantoolConnectionListeners connectionListeners) {
+        InetSocketAddress serverAddress,
+        int connections,
+        TarantoolConnectionListeners connectionListeners) {
         return Stream.generate(() -> serverAddress)
-                .map(address -> singleConnection(address, connectionListeners))
-                .limit(connections)
-                .collect(Collectors.toList());
+            .map(address -> singleConnection(address, connectionListeners))
+            .limit(connections)
+            .collect(Collectors.toList());
     }
 }

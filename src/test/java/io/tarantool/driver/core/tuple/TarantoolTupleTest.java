@@ -1,13 +1,13 @@
 package io.tarantool.driver.core.tuple;
 
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.core.metadata.TarantoolMetadata;
+import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapperException;
-import io.tarantool.driver.core.metadata.TarantoolMetadata;
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ImmutableArrayValue;
 import org.msgpack.value.Value;
@@ -43,7 +43,7 @@ public class TarantoolTupleTest {
         DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
         MessagePackMapper mapper = mapperFactory.defaultComplexTypesMapper();
         ImmutableArrayValue values = ValueFactory.newArray(
-                new ImmutableDoubleValueImpl(1.0), new ImmutableLongValueImpl(50L));
+            new ImmutableDoubleValueImpl(1.0), new ImmutableLongValueImpl(50L));
 
         TarantoolTuple tarantoolTuple = new TarantoolTupleImpl(values, mapper);
 
@@ -91,7 +91,7 @@ public class TarantoolTupleTest {
 
         //add value for negative index
         assertThrows(IndexOutOfBoundsException.class,
-                () -> tarantoolTuple.setField(-2, new TarantoolFieldImpl(ImmutableBooleanValueImpl.FALSE)));
+            () -> tarantoolTuple.setField(-2, new TarantoolFieldImpl(ImmutableBooleanValueImpl.FALSE)));
         assertThrows(IndexOutOfBoundsException.class, () -> tarantoolTuple.putObject(-1, 0));
 
         //trying to add complex object
@@ -110,13 +110,13 @@ public class TarantoolTupleTest {
         TarantoolTuple tupleWithSpaceMetadata = new TarantoolTupleImpl(values, mapper, spaceMetadata);
 
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
-                () -> tupleWithoutSpaceMetadata.setField("book_name",
-                        new TarantoolFieldImpl(ValueFactory.newString("Book 1"))));
+            () -> tupleWithoutSpaceMetadata.setField("book_name",
+                new TarantoolFieldImpl(ValueFactory.newString("Book 1"))));
         assertThrows(TarantoolSpaceFieldNotFoundException.class,
-                () -> tupleWithoutSpaceMetadata.putObject("book_name", "Book 1"));
+            () -> tupleWithoutSpaceMetadata.putObject("book_name", "Book 1"));
 
         assertDoesNotThrow(() -> tupleWithSpaceMetadata.setField("first",
-                new TarantoolFieldImpl(ValueFactory.newString("Book 2"))));
+            new TarantoolFieldImpl(ValueFactory.newString("Book 2"))));
         assertDoesNotThrow(() -> tupleWithSpaceMetadata.putObject("second", 222));
 
         // field exists and can be converted

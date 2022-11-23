@@ -20,9 +20,10 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
     private final String functionName;
     private final List<?> arguments;
 
-    private TruncateProxyOperation(TarantoolCallOperations client,
-                                   String functionName,
-                                   List<?> arguments) {
+    private TruncateProxyOperation(
+        TarantoolCallOperations client,
+        String functionName,
+        List<?> arguments) {
         this.client = client;
         this.arguments = arguments;
         this.functionName = functionName;
@@ -43,7 +44,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
     @Override
     public CompletableFuture<Void> execute() {
         return client.callForSingleResult(functionName, arguments, Boolean.class)
-                .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
+            .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
     }
 
     /**
@@ -68,12 +69,13 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
 
         /**
          * Prepare request of truncate operation to Tarantool server
+         *
          * @return TruncateProxyOperation instance
          */
         public TruncateProxyOperation build() {
             CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
-                    .withTimeout(options.getTimeout())
-                    .build();
+                .withTimeout(options.getTimeout())
+                .build();
 
             List<?> arguments = Arrays.asList(spaceName, requestOptions.asMap());
 

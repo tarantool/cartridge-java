@@ -6,8 +6,6 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolException;
-import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.protocol.Packable;
 
 import java.io.ByteArrayOutputStream;
@@ -48,10 +46,10 @@ public final class Utils {
      * @return number of buckets
      */
     public static <T extends Packable, R extends Collection<T>> Integer getBucketCount(
-            TarantoolClient<T, R> client) throws ExecutionException, InterruptedException {
+        TarantoolClient<T, R> client) throws ExecutionException, InterruptedException {
         if (!bucketCount.isPresent()) {
             bucketCount = Optional.ofNullable(
-                    client.callForSingleResult("vshard.router.bucket_count", Integer.class).get()
+                client.callForSingleResult("vshard.router.bucket_count", Integer.class).get()
             );
         }
         return bucketCount.orElseThrow(() -> new TarantoolClientException("Failed to get bucket count"));
@@ -68,7 +66,7 @@ public final class Utils {
      * @return bucketId number determining the location in the cluster
      */
     public static <T extends Packable, R extends Collection<T>> Integer getBucketIdStrCRC32(
-            TarantoolClient<T, R> client, List<Object> key) throws ExecutionException, InterruptedException {
+        TarantoolClient<T, R> client, List<Object> key) throws ExecutionException, InterruptedException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (Object part : key) {
             try {
@@ -80,7 +78,7 @@ public final class Utils {
             }
         }
         return Math.toIntExact(
-                (crc32(outputStream.toByteArray()) % getBucketCount(client)) + 1
+            (crc32(outputStream.toByteArray()) % getBucketCount(client)) + 1
         );
     }
 

@@ -33,8 +33,9 @@ public class NamedFieldImpl implements NamedField {
     }
 
     @Override
-    public TarantoolFieldMetadata metadata(TarantoolMetadataOperations metadataOperations,
-                                           TarantoolSpaceMetadata spaceMetadata) {
+    public TarantoolFieldMetadata metadata(
+        TarantoolMetadataOperations metadataOperations,
+        TarantoolSpaceMetadata spaceMetadata) {
 
         Optional<TarantoolFieldMetadata> fieldMetadata = spaceMetadata.getFieldByName(name);
         if (!fieldMetadata.isPresent()) {
