@@ -1,6 +1,6 @@
 package io.tarantool.driver.mappers;
 
-import io.tarantool.driver.mappers.converters.value.DefaultIntegerValueToShortConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultIntegerValueToShortConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ValueFactory;
 

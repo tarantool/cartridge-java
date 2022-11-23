@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.object.DefaultUUIDToExtensionValueConverter;
-import io.tarantool.driver.mappers.converters.value.DefaultExtensionValueToUUIDConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToUUIDConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;

@@ -53,8 +53,8 @@ public class ProxyTarantoolTupleSpace
     @Override
     protected CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     tupleResultMapper() {
-        return client.getResultMapperFactoryFactory().defaultTupleSingleResultMapperFactory()
-            .withDefaultTupleValueConverter(config.getMessagePackMapper(), getMetadata());
+        return client.getResultMapperFactoryFactory().singleValueTupleResultMapperFactory()
+            .withSingleValueTarantoolTupleResultMapper(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override

@@ -8,7 +8,7 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -47,13 +47,13 @@ public class TarantoolSetup {
             .withCredentials(tarantoolContainer.getUsername(), tarantoolContainer.getPassword())
             .build();
 
-        DefaultResultMapperFactoryFactory factory = new DefaultResultMapperFactoryFactory();
+        ResultMapperFactoryFactoryImpl factory = new ResultMapperFactoryFactoryImpl();
         TarantoolSpaceMetadata spaceMetadata = tarantoolClient.metadata().getSpaceByName("test_space").get();
 
         defaultMapper = tarantoolClient.getConfig().getMessagePackMapper();
         resultMapper = factory
-            .defaultTupleSingleResultMapperFactory()
-            .withDefaultTupleValueConverter(defaultMapper, spaceMetadata);
+            .singleValueTupleResultMapperFactory()
+            .withSingleValueTarantoolTupleResultMapper(defaultMapper, spaceMetadata);
 
         log.info("Successfully connected to Tarantool, version = {}", tarantoolClient.getVersion());
     }

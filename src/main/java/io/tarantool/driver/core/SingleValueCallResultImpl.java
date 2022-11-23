@@ -3,6 +3,7 @@ package io.tarantool.driver.core;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.errors.TarantoolErrorsParser;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
@@ -12,6 +13,7 @@ import org.msgpack.value.Value;
  * {@code null}, the second is treated as a formatted error or an error message.
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class SingleValueCallResultImpl<T> implements SingleValueCallResult<T> {
 
@@ -30,6 +32,22 @@ public class SingleValueCallResultImpl<T> implements SingleValueCallResult<T> {
         } else {
             // [result]
             value = valueConverter.fromValue(result.get(0));
+        }
+    }
+
+    public SingleValueCallResultImpl(ArrayValue result, MessagePackValueMapper valueMapper) {
+        if (result == null) {
+            throw new TarantoolFunctionCallException("Function call result is null");
+        }
+        if (result.size() == 0 || result.size() == 1 && result.get(0).isNilValue()) {
+            // [nil] or []
+            value = null;
+        } else if (result.size() == 2 && (result.get(0).isNilValue() && !result.get(1).isNilValue())) {
+            // [nil, "Error msg..."] or [nil, {str="Error msg...", stack="..."}]
+            throw TarantoolErrorsParser.parse(result.get(1));
+        } else {
+            // [result]
+            value = valueMapper.fromValue(result.get(0));
         }
     }
 

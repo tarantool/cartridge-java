@@ -2,7 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToSingleValueCallResultSimpleConverter;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.msgpack.value.ArrayValue;
 
@@ -32,6 +32,6 @@ public class DefaultSingleValueResultMapper<T> extends CallResultMapper<T, Singl
 
     private static <T> ValueConverter<ArrayValue, ? extends SingleValueCallResult<T>> defaultValueConverter(
         MessagePackValueMapper valueMapper) {
-        return new SingleValueCallResultConverter<>(valueMapper::fromValue);
+        return new ArrayValueToSingleValueCallResultSimpleConverter<>(valueMapper::fromValue);
     }
 }

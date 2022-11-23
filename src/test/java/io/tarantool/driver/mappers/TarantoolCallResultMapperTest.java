@@ -8,7 +8,7 @@ import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
@@ -26,12 +26,11 @@ public class TarantoolCallResultMapperTest {
 
     private static final MessagePackMapper defaultMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-    private final DefaultResultMapperFactoryFactory mapperFactoryFactory =
-        new DefaultResultMapperFactoryFactory();
+    private final ResultMapperFactoryFactoryImpl mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-        defaultResultMapper = mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
-        .withDefaultTupleValueConverter(defaultMapper, null);
+        defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
+        .withSingleValueTarantoolTupleResultMapper(defaultMapper, null);
 
     private static List<Object> nestedList1;
     private static TarantoolTuple tupleOne;
@@ -49,11 +48,12 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testSingleValueCallResultMapper() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
+        ResultMapperFactoryFactoryImpl
+            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             SingleValueCallResult<TarantoolResult<TarantoolTuple>>> mapper =
-            mapperFactoryFactory.defaultTupleSingleResultMapperFactory()
-                .withDefaultTupleValueConverter(defaultMapper, null);
+            mapperFactoryFactory.singleValueTupleResultMapperFactory()
+                .withSingleValueTarantoolTupleResultMapper(defaultMapper, null);
 
         //[nil, message]
         ArrayValue errorResult = ValueFactory.newArray(ValueFactory.newNil(), ValueFactory.newString("ERROR"));
@@ -100,11 +100,12 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testMultiValueCallResultMapper() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        DefaultResultMapperFactoryFactory mapperFactoryFactory = new DefaultResultMapperFactoryFactory();
+        ResultMapperFactoryFactoryImpl
+            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>> mapper =
-            mapperFactoryFactory.defaultTupleMultiResultMapperFactory()
-                .withDefaultTupleValueConverter(defaultMapper, null);
+            mapperFactoryFactory.multiValueTupleResultMapperFactory()
+                .withMultiValueTarantoolTupleResultMapper(defaultMapper, null);
 
         //[[], ...]
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);

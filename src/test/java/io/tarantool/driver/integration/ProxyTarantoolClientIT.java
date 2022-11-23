@@ -33,6 +33,7 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,9 +62,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
-    private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
+    private static final MessagePackMapper defaultMapper =
+        DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private static final TarantoolTupleFactory tupleFactory =
-        new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
+        new DefaultTarantoolTupleFactory(defaultMapper);
+    private static final ResultMapperFactoryFactoryImpl mapperFactoryFactory =
+        new ResultMapperFactoryFactoryImpl();
 
     public static String USER_NAME;
     public static String PASSWORD;

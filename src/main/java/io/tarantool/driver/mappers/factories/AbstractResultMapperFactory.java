@@ -6,7 +6,11 @@ import io.tarantool.driver.mappers.InterfaceParameterClassNotFoundException;
 import io.tarantool.driver.mappers.MapperReflectionUtils;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
+
+import java.util.List;
 
 /**
  * Base class for result mapper factories.
@@ -27,13 +31,20 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
      * Instantiate the mapper for result contents
      *
      * @param valueMapper    MessagePack value-to-object mapper for result contents
+     * @param valueType      MessagePack source type
      * @param valueConverter converter for result contents (an array)
      * @param resultClass    result type
      * @return new mapper instance
      */
     protected abstract T createMapper(
         MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends O> valueConverter,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends O> valueConverter,
+        Class<? extends O> resultClass);
+
+    protected abstract T createMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<O>> converters,
         Class<? extends O> resultClass);
 
     /**
@@ -43,10 +54,18 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
      * @param valueConverter entity-to-object converter
      * @return a mapper instance
      */
-    public T withConverter(MessagePackValueMapper valueMapper, ValueConverter<ArrayValue, ? extends O> valueConverter) {
+    public T withConverter(
+        MessagePackValueMapper valueMapper,
+        ValueConverter<? extends Value, ? extends O> valueConverter) {
+        return withConverter(valueMapper, ValueType.ARRAY, valueConverter);
+    }
+
+    public T withConverter(
+        MessagePackValueMapper valueMapper, ValueType valueType,
+        ValueConverter<? extends Value, ? extends O> valueConverter) {
         try {
             return withConverter(
-                valueMapper, valueConverter, MapperReflectionUtils.getConverterTargetType(valueConverter));
+                valueMapper, valueType, valueConverter, MapperReflectionUtils.getConverterTargetType(valueConverter));
         } catch (InterfaceParameterClassNotFoundException e) {
             throw new TarantoolClientException(e);
         }
@@ -63,9 +82,38 @@ public abstract class AbstractResultMapperFactory<O, T extends AbstractResultMap
      */
     public T withConverter(
         MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends O> valueConverter,
+        ValueConverter<? extends Value, ? extends O> valueConverter,
         Class<? extends O> resultClass) {
-        return createMapper(valueMapper, valueConverter, resultClass);
+        return withConverter(valueMapper, ValueType.ARRAY, valueConverter, resultClass);
+    }
+
+    public T withConverter(
+        MessagePackValueMapper valueMapper,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends O> valueConverter,
+        Class<? extends O> resultClass) {
+        return createMapper(valueMapper, valueType, valueConverter, resultClass);
+    }
+
+    public T withConverters(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<O>> converters) {
+        if (converters.size() < 1) {
+            throw new TarantoolClientException("Empty converters list");
+        }
+        try {
+            return withConverters(valueMapper, converters,
+                MapperReflectionUtils.getConverterTargetType(converters.get(0).getValueConverter()));
+        } catch (InterfaceParameterClassNotFoundException e) {
+            throw new TarantoolClientException(e);
+        }
+    }
+
+    public T withConverters(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<O>> converters,
+        Class<? extends O> resultClass) {
+        return createMapper(valueMapper, converters, resultClass);
     }
 
 }

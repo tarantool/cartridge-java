@@ -4,7 +4,11 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolResultMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import org.msgpack.value.ArrayValue;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
+
+import java.util.List;
 
 /**
  * Factory for {@link TarantoolResultMapper} instances used for handling box protocol operation results returning
@@ -26,8 +30,17 @@ public class TarantoolResultMapperFactory<T> extends
     @Override
     protected TarantoolResultMapper<T> createMapper(
         MessagePackValueMapper valueMapper,
-        ValueConverter<ArrayValue, ? extends TarantoolResult<T>> valueConverter,
+        ValueType valueType,
+        ValueConverter<? extends Value, ? extends TarantoolResult<T>> valueConverter,
         Class<? extends TarantoolResult<T>> resultClass) {
-        return new TarantoolResultMapper<>(valueMapper, valueConverter, resultClass);
+        return new TarantoolResultMapper<>(valueMapper, valueType, valueConverter, resultClass);
+    }
+
+    @Override
+    protected TarantoolResultMapper<T> createMapper(
+        MessagePackValueMapper valueMapper,
+        List<ValueConverterWithInputTypeWrapper<TarantoolResult<T>>> converters,
+        Class<? extends TarantoolResult<T>> resultClass) {
+        return new TarantoolResultMapper<>(valueMapper, converters, resultClass);
     }
 }

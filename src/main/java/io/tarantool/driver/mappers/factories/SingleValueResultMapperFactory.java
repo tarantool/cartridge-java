@@ -5,7 +5,8 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToSingleValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToSingleValueCallResultSimpleConverter;
 import org.msgpack.value.Value;
 
 /**
@@ -13,6 +14,7 @@ import org.msgpack.value.Value;
  * values -- result and error
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapperFactory<T, SingleValueCallResult<T>> {
 
@@ -45,7 +47,7 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
         MessagePackValueMapper valueMapper,
         ValueConverter<Value, T> valueConverter) {
-        return withConverter(valueMapper, new SingleValueCallResultConverter<>(valueConverter));
+        return withConverter(valueMapper, new ArrayValueToSingleValueCallResultSimpleConverter<>(valueConverter));
     }
 
     /**
@@ -56,7 +58,8 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
      */
     public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
         ValueConverter<Value, T> valueConverter) {
-        return withConverter(messagePackMapper.copy(), new SingleValueCallResultConverter<>(valueConverter));
+        return withConverter(messagePackMapper.copy(),
+            new ArrayValueToSingleValueCallResultSimpleConverter<>(valueConverter));
     }
 
     /**
@@ -71,7 +74,8 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
         MessagePackValueMapper valueMapper,
         ValueConverter<Value, T> valueConverter,
         Class<? extends SingleValueCallResult<T>> resultClass) {
-        return withConverter(valueMapper, new SingleValueCallResultConverter<>(valueConverter), resultClass);
+        return withConverter(valueMapper, new ArrayValueToSingleValueCallResultSimpleConverter<>(valueConverter),
+            resultClass);
     }
 
     /**
@@ -85,6 +89,21 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
         ValueConverter<Value, T> valueConverter,
         Class<? extends SingleValueCallResult<T>> resultClass) {
         return withConverter(
-            messagePackMapper.copy(), new SingleValueCallResultConverter<>(valueConverter), resultClass);
+            messagePackMapper.copy(), new ArrayValueToSingleValueCallResultSimpleConverter<>(valueConverter),
+            resultClass);
+    }
+
+    public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
+        MessagePackValueMapper structureValueMapper) {
+        return withConverter(
+            messagePackMapper.copy(), new ArrayValueToSingleValueCallResultConverter<>(structureValueMapper));
+    }
+
+    public CallResultMapper<T, SingleValueCallResult<T>> withSingleValueResultConverter(
+        MessagePackValueMapper structureValueMapper,
+        Class<? extends SingleValueCallResult<T>> resultClass) {
+        return withConverter(
+            messagePackMapper.copy(), new ArrayValueToSingleValueCallResultConverter<>(structureValueMapper),
+            resultClass);
     }
 }

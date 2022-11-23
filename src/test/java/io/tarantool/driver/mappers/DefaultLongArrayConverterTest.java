@@ -1,7 +1,7 @@
 package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
-import io.tarantool.driver.mappers.converters.value.DefaultArrayValueToLongArrayConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultArrayValueToLongArrayConverter;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageTypeCastException;
 import org.msgpack.value.ArrayValue;

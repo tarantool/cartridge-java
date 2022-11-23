@@ -5,7 +5,8 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
-import io.tarantool.driver.mappers.converters.value.custom.MultiValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToMultiValueCallResultConverter;
+import io.tarantool.driver.mappers.converters.value.ArrayValueToMultiValueCallResultSimpleConverter;
 import org.msgpack.value.ArrayValue;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * treated as a list of values
  *
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class MultiValueResultMapperFactory<T, R extends List<T>> extends
     TarantoolCallResultMapperFactory<R, MultiValueCallResult<T, R>> {
@@ -48,7 +50,7 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
     public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
         MessagePackValueMapper valueMapper,
         ValueConverter<ArrayValue, R> itemsConverter) {
-        return withConverter(valueMapper, new MultiValueCallResultConverter<>(itemsConverter));
+        return withConverter(valueMapper, new ArrayValueToMultiValueCallResultSimpleConverter<>(itemsConverter));
     }
 
     /**
@@ -59,7 +61,8 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
      */
     public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
         ValueConverter<ArrayValue, R> itemsConverter) {
-        return withConverter(messagePackMapper.copy(), new MultiValueCallResultConverter<>(itemsConverter));
+        return withConverter(messagePackMapper.copy(),
+            new ArrayValueToMultiValueCallResultSimpleConverter<>(itemsConverter));
     }
 
     /**
@@ -74,7 +77,8 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
         MessagePackValueMapper valueMapper,
         ValueConverter<ArrayValue, R> itemsConverter,
         Class<? extends MultiValueCallResult<T, R>> resultClass) {
-        return withConverter(valueMapper, new MultiValueCallResultConverter<>(itemsConverter), resultClass);
+        return withConverter(valueMapper, new ArrayValueToMultiValueCallResultSimpleConverter<>(itemsConverter),
+            resultClass);
     }
 
     /**
@@ -88,6 +92,35 @@ public class MultiValueResultMapperFactory<T, R extends List<T>> extends
         ValueConverter<ArrayValue, R> itemsConverter,
         Class<? extends MultiValueCallResult<T, R>> resultClass) {
         return withConverter(
-            messagePackMapper.copy(), new MultiValueCallResultConverter<>(itemsConverter), resultClass);
+            messagePackMapper.copy(), new ArrayValueToMultiValueCallResultSimpleConverter<>(itemsConverter),
+            resultClass);
+    }
+
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+        MessagePackValueMapper structureValueMapper) {
+        return withConverter(
+            messagePackMapper.copy(), new ArrayValueToMultiValueCallResultConverter<>(structureValueMapper));
+    }
+
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+        MessagePackValueMapper valueMapper,
+        MessagePackValueMapper structureValueMapper) {
+        return withConverter(
+            valueMapper, new ArrayValueToMultiValueCallResultConverter<>(structureValueMapper));
+    }
+
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+        MessagePackValueMapper structureValueMapper,
+        Class<? extends MultiValueCallResult<T, R>> resultClass) {
+        return withMultiValueResultConverter(
+            messagePackMapper.copy(), structureValueMapper, resultClass);
+    }
+
+    public CallResultMapper<R, MultiValueCallResult<T, R>> withMultiValueResultConverter(
+        MessagePackValueMapper valueMapper,
+        MessagePackValueMapper structureValueMapper,
+        Class<? extends MultiValueCallResult<T, R>> resultClass) {
+        return withConverter(
+            valueMapper, new ArrayValueToMultiValueCallResultConverter<>(structureValueMapper), resultClass);
     }
 }

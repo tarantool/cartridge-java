@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 - Use netty part dependencies instead of netty-all ([#295](https://github.com/tarantool/cartridge-java/issues/295))
+- Refactor mappers and split `TarantoolResultConverter` ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `TarantoolResultConverter` was removed, use `DefaultArrayValueToTarantoolResultConverter` or `DefaultMapValueToTarantoolTupleResultConverter` instead ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `ConverterWrapper` was moved to converters package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `*MapperFactory` classes were moved to separate package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `TarantoolTupleMultiResult` was renamed to `MultiValueTarantoolTupleResult` ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `TarantoolTupleSingleResult` was renamed to `SingleValueTarantoolTupleResult` ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `*MapperFactory` methods were renamed ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** `*DefaultConverter` converters moved into `mappers.converters.value.defaults` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- **[breaking change]** All converters from `mappers.converters.value.custom` moved into `mappers.converters.value` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 
 ## [0.9.2] - 2022-11-15
 
