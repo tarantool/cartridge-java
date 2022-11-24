@@ -1,0 +1,44 @@
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+[*.java]
+indent_style = space
+indent_size = 4
+ij_continuation_indent_size = 4
+max_line_length = 120
+ij_visual_guides = 120
+ij_java_align_multiline_parameters = false
+ij_java_align_multiline_parameters_in_calls = false
+ij_java_call_parameters_wrap = normal
+ij_java_method_parameters_new_line_after_left_paren = true
+ij_java_method_parameters_right_paren_on_new_line = false
+ij_java_method_parameters_wrap = normal
+ij_java_resource_list_wrap = normal
+ij_java_extends_list_wrap = normal
+ij_java_modifier_list_wrap = false
+ij_java_extends_keyword_wrap = normal
+ij_java_method_call_chain_wrap = normal
+ij_java_binary_operation_wrap = normal
+ij_java_for_statement_wrap = normal
+ij_java_array_initializer_wrap = normal
+ij_java_assignment_wrap = normal
+ij_java_assert_statement_wrap = normal
+ij_java_parameter_annotation_wrap = normal
+ij_java_annotation_parameter_wrap = normal
+ij_java_class_annotation_wrap = split_into_lines
+ij_java_enum_constants_wrap = normal
+ij_java_keep_builder_methods_indents = true
+ij_java_wrap_long_lines = true
+
+[{*.lua,*.lua.txt,*.rockspec}]
+indent_style = space
+indent_size = 4
+ij_continuation_indent_size = 4
+max_line_length = 120
+ij_visual_guides = 120
+ij_lua_call_parameters_wrap = normal
+ij_lua_method_parameters_wrap = normal
+
+[*.xml]
+indent_style = space
