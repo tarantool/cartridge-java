@@ -16,100 +16,35 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 
 ## Quickstart
 
-1. Set up your [Cartridge cluster](https://tarantool.io/cartridge). Use an existing Cartridge application or create
-a new one from the available [examples](https://github.com/tarantool/examples). 
-   
-2. Add the [tarantool/crud](https://github.com/tarantool/crud) and [tarantool/ddl](https://github.com/tarantool/ddl)
-modules to the dependencies in the [`rockspec`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#creating-a-project)
-file of your application.
+Example of single instance Tarantool application and java app connected using cartridge-java.
 
-3. Add the following lines into any [storage role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
-enabled on all storage instances in your cluster. The lines go into role API declaration section; in other words, into the returned table
+The easiest way to start experimenting with cartridge-java and single instance tarantool app is to use
+[single instance test](/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java).
+You can set breakpoints and run it in debug mode.
+Testcontainers will start [single instance tarantool application](src/test/resources/single-instance.lua) for you.
+So you will be able to manipulate data in Tarantool in real life through java expressions or Tarantool console.
 
-```lua
-return {
-    role_name = 'app.roles.api_storage',
-    init = init,
-    ...
-    get_schema = require('ddl').get_schema,
-    ...
-    dependencies = {
-        'cartridge.roles.crud-storage'
-    }
-}
+If you want to start tarantool application manually all you need is to run this file in tarantool
+``` bash
+tarantool src/test/resources/single-instance.lua
 ```
 
-4. Add the following lines into any [router role](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_dev/#cluster-roles)
-enabled on all router instances in your cluster to which the driver will be connected to:
+Example of TarantoolClient set up
+https://github.com/tarantool/cartridge-java/blob/master/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L49-L58
 
-```lua
-...
+Example of client API usage
+https://github.com/tarantool/cartridge-java/blob/master/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L62-L74
 
--- Add the following variables
-local cartridge_pool = require('cartridge.pool')
-local cartridge_rpc = require('cartridge.rpc')
+You can read more about Cartridge applications in its [documentation](https://www.tarantool.io/ru/doc/latest/how-to/getting_started_cartridge/).
+Also look at available Cartridge application [examples](https://github.com/tarantool/examples).
 
-...
-
--- Add the following function
-local function get_schema()
-    for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
-        return cartridge_rpc.call('app.roles.api_storage', 'get_schema', nil, { uri = instance_uri })
-    end
-end
-
-...
-
-local function init(opts)
-    ...
-    rawset(_G, 'ddl', { get_schema = get_schema }) -- Add this line
-    ...
-end
-```
-
-5. Check that at least one role enabled on the storage instances depends on the [`crud-storage`](https://github.com/tarantool/crud#api)
-role from the `tarantool/crud` module and at least one role enabled on the router instances the driver will be connected
-to depends on the [`crud-router`](https://github.com/tarantool/crud#api) role.
-
-6. Start your Cartridge cluster. You may use [`cartridge start`](https://www.tarantool.io/en/doc/latest/book/cartridge/cartridge_cli/)
-for starting it manually or the [Testcontainers for Tarantool](https://github.com/tarantool/cartridge-java-testcontainers)
-library for starting it automatically in tests.
-
-7. Add the following dependency into your project:
-
+If you use this code in another project don't forget to add `cartridge-driver` dependency:
 ```xml
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
   <version>0.9.2</version>
 </dependency>
-```
-
-8. Create a new `TarantoolClient` instance:
-
-```java
-TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> setupClient() {
-        return TarantoolClientFactory.createClient()
-            // If any addresses or an address provider are not specified, the default host 127.0.0.1 and port 3301 are used
-            .withAddress("123.123.123.1")
-            // For connecting to a Cartridge application, use the value of cluster_cookie parameter in the init.lua file
-            .withCredentials("admin", "secret-cluster-cookie")
-            // you may also specify more client settings, such as:
-            // timeouts, number of connections, custom MessagePack entities to Java objects mapping, etc.
-            .build();
-        }
-```
-
-9. Use the API provided by the Tarantool client, for example:
-
-```java
-    TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
-    TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace = client.space("profile");
-
-    List<Object> values = Arrays.asList(123, null, "Jane Doe", 18, 999);
-    TarantoolTuple tarantoolTuple = tupleFactory.create(values);
-
-    TarantoolResult<TarantoolTuple> insertTuples = profileSpace.insert(tarantoolTuple).get();
 ```
 
 ### Cluster Tarantool client
@@ -122,7 +57,7 @@ connections are open to a single host (using the `connections` option in the con
 closed, all connections to that host are gracefully closed and re-established.
 
 You may set up automatic retrieving of the list of cluster nodes available for connection (aka discovery). Discovery
-provider variants with a HTTP endpoint and a stored function in Tarantool are available out-of-the-box. You may use
+provider variants with an HTTP endpoint and a stored function in Tarantool are available out-of-the-box. You may use
 these variants or create your own discovery provider implementation. In real environments with high availability
 requirements it is recommended to use an external configuration provider (like etcd), DNS or a balancing proxy for
 connecting to the Tarantool server.
