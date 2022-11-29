@@ -28,12 +28,11 @@ If you want to start tarantool application manually all you need is to run this 
 ``` bash
 tarantool src/test/resources/single-instance.lua
 ```
-
 Example of TarantoolClient set up
-https://github.com/tarantool/cartridge-java/blob/master/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L49-L58
+https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a46e8fdd039/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L51-L59
 
 Example of client API usage
-https://github.com/tarantool/cartridge-java/blob/master/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L62-L74
+https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a46e8fdd039/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L64-L79
 
 You can read more about Cartridge applications in its [documentation](https://www.tarantool.io/ru/doc/latest/how-to/getting_started_cartridge/).
 Also look at available Cartridge application [examples](https://github.com/tarantool/examples).
@@ -343,9 +342,9 @@ Stack Overflow with tag [tarantool](https://stackoverflow.com/questions/tagged/t
 or join our community support chats in Telegram: [English](https://t.me/tarantool)
 and [Russian](https://t.me/tarantool).
 
-## [Changelog](https://github.com/tarantool/cartridge-java/blob/master/CHANGELOG.md)
+## [Changelog](CHANGELOG.md)
 
-## [License](https://github.com/tarantool/cartridge-java/blob/master/LICENSE)
+## [License](LICENSE)
 
 ## Requirements
 
