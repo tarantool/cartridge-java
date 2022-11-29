@@ -27,6 +27,8 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 
 /**
  * @author Ivan Dneprov
+ *
+ * WARNING: If you updated the code in this file, don't forget to update the readme permalinks!
  */
 @Testcontainers
 public class SingleInstanceExampleTest {
