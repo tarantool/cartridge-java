@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.retry;
 
+import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
@@ -12,8 +13,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -25,6 +30,9 @@ import java.util.function.Supplier;
  * @author Oleg Kuznetsov
  */
 public final class TarantoolRequestRetryPolicies {
+
+    private static final ScheduledExecutorService timeoutScheduler =
+        Executors.newSingleThreadScheduledExecutor(new TarantoolDaemonThreadFactory("tarantool-retry-timeout"));
 
     public static final Predicate<Throwable> retryAll = t -> true;
     public static final Predicate<Throwable> retryNone = t -> false;
@@ -94,9 +102,6 @@ public final class TarantoolRequestRetryPolicies {
         @Override
         public boolean canRetryRequest(Throwable throwable) {
             if (testException(exceptionCheck, throwable)) {
-                if (delay > 0) {
-                    trySleep(delay);
-                }
                 return true;
             }
             return false;
@@ -107,39 +112,51 @@ public final class TarantoolRequestRetryPolicies {
             return requestTimeout;
         }
 
+        @Override
+        public long getDelay() {
+            return delay;
+        }
+
         public long getOperationTimeout() {
             return operationTimeout;
         }
 
         @Override
         public <R> CompletableFuture<R> wrapOperation(Supplier<CompletableFuture<R>> operation, Executor executor) {
-
             Assert.notNull(operation, "Operation must not be null");
             Assert.notNull(executor, "Executor must not be null");
 
-            return CompletableFuture.supplyAsync(() -> {
-                long timeElapsed = 0;
-                long tStart;
-                Throwable ex;
-                do {
-                    tStart = System.nanoTime();
-                    try {
-                        return operation.get().get(getRequestTimeout(), TimeUnit.MILLISECONDS);
-                    } catch (TimeoutException | InterruptedException e) {
-                        ex = e;
-                    } catch (ExecutionException e) {
-                        ex = e.getCause();
-                    }
-                    timeElapsed = timeElapsed + (System.nanoTime() - tStart) / 1_000_000L;
-                    if (timeElapsed >= getOperationTimeout()) {
-                        ex = new TarantoolTimeoutException(
-                            timeElapsed,
-                            ex);
-                        break;
-                    }
-                } while (this.canRetryRequest(ex));
-                throw new CompletionException(ex);
-            }, executor);
+            // because we have asynchronous logic in completion stage chain
+            // we should have sharing answer state for final result
+            CompletableFuture<R> resultFuture = new CompletableFuture<>();
+            // to provide it if retrying has been stopped without correct result
+            AtomicReference<Throwable> lastExceptionWrapper = new AtomicReference<>();
+
+            CompletableFuture.runAsync(() -> {
+                    runAsyncOperation(operation, resultFuture, lastExceptionWrapper);
+                    // set global timeout
+                    ScheduledFuture<?> operationTimeoutScheduledFuture =
+                        TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
+                            if (!resultFuture.isDone()) {
+                                Throwable lastException = lastExceptionWrapper.get();
+                                if (lastException != null) {
+                                    resultFuture
+                                        .completeExceptionally(
+                                            new TarantoolTimeoutException(operationTimeout, lastException));
+                                } else {
+                                    resultFuture
+                                        .completeExceptionally(new TarantoolTimeoutException(operationTimeout));
+                                }
+                            }
+                        }, operationTimeout, TimeUnit.MILLISECONDS);
+                    // optimization: stop scheduled future if resultFuture has already done
+                    resultFuture.whenComplete((res, ex) -> operationTimeoutScheduledFuture.cancel(false));
+                }, executor)
+                .exceptionally(ex -> { // we should complete final exception if something went wrong
+                    resultFuture.completeExceptionally(ex);
+                    return null;
+                });
+            return resultFuture;
         }
     }
 
@@ -301,6 +318,11 @@ public final class TarantoolRequestRetryPolicies {
             return requestTimeout;
         }
 
+        @Override
+        public long getDelay() {
+            return delay;
+        }
+
         /**
          * Basic constructor with timeout
          *
@@ -326,39 +348,54 @@ public final class TarantoolRequestRetryPolicies {
         public boolean canRetryRequest(Throwable throwable) {
             if (testException(exceptionCheck, throwable) && attempts > 0) {
                 attempts--;
-                if (delay > 0) {
-                    trySleep(delay);
-                }
                 return true;
             }
             return false;
         }
 
         @Override
-        public <R> CompletableFuture<R> wrapOperation(Supplier<CompletableFuture<R>> operation, Executor executor) {
+        public <R> void runAsyncOperation(
+            Supplier<CompletableFuture<R>> operation, CompletableFuture<R> resultFuture,
+            AtomicReference<Throwable> lastExceptionWrapper) {
+            // start async operation running
+            CompletableFuture<R> operationFuture = operation.get();
+            // start scheduled request timeout task
+            // it never completes correctly only exceptionally
+            CompletableFuture<R> requestTimeoutFuture = failAfterRequestTimeout(resultFuture);
 
-            Assert.notNull(operation, "Operation must not be null");
-            Assert.notNull(executor, "Executor must not be null");
+            operationFuture.acceptEither(requestTimeoutFuture, resultFuture::complete)
+                .exceptionally(ex -> { // if requestTimeout has been raised or operation return exception
 
-            return CompletableFuture.supplyAsync(() -> {
-                Throwable ex;
-                do {
-                    try {
-                        return operation.get().get(getRequestTimeout(), TimeUnit.MILLISECONDS);
-                    } catch (TimeoutException | InterruptedException e) {
-                        ex = e;
-                    } catch (ExecutionException e) {
-                        ex = e.getCause();
+                    while (ex instanceof ExecutionException || ex instanceof CompletionException) {
+                        ex = ex.getCause();
                     }
+                    // to provide it if retrying has been stopped without correct result
+                    lastExceptionWrapper.set(ex);
+
                     if (attempts == 0) {
                         ex = new TarantoolAttemptsLimitException(
                             limit,
                             ex);
-                        break;
+                        resultFuture.completeExceptionally(ex);
+                        return null;
                     }
-                } while (this.canRetryRequest(ex));
-                throw new CompletionException(ex);
-            }, executor);
+
+                    if (this.canRetryRequest(ex)) {
+                        // retry it after delay
+                        ScheduledFuture<?> delayFuture =
+                            TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
+                                runAsyncOperation(operation, resultFuture, lastExceptionWrapper);
+                            }, getDelay(), TimeUnit.MILLISECONDS);
+                        // optimization: stop delayed future if resultFuture has already done from outside
+                        resultFuture.whenComplete((r, e) -> delayFuture.cancel(false));
+                    } else {
+                        resultFuture.completeExceptionally(ex);
+                    }
+                    return null;
+                }).exceptionally(ex -> { // if error has been happened in previous exceptionally section
+                    resultFuture.completeExceptionally(ex);
+                    return null;
+                });
         }
     }
 
@@ -560,11 +597,12 @@ public final class TarantoolRequestRetryPolicies {
         }
     }
 
-    private static void trySleep(long delay) {
-        try {
-            TimeUnit.MILLISECONDS.sleep(delay);
-        } catch (InterruptedException e) {
-            throw new TarantoolClientException("Request retry delay has been interrupted");
-        }
+    /**
+     * Get timeout scheduler instance.
+     *
+     * @return scheduler instance
+     */
+    public static ScheduledExecutorService getTimeoutScheduler() {
+        return timeoutScheduler;
     }
 }

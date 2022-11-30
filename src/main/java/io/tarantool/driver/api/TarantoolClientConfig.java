@@ -3,6 +3,7 @@ package io.tarantool.driver.api;
 import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies;
+import io.tarantool.driver.api.retry.RequestRetryPolicy;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.MessagePackMapper;
