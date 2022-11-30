@@ -4,12 +4,8 @@ import io.tarantool.driver.api.connection.ConnectionSelectionStrategy;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -21,6 +17,7 @@ import java.util.function.Supplier;
  * @author Vladimir Rogach
  * @author Artyom Dubinin
  */
+@FunctionalInterface
 public interface RequestRetryPolicy {
 
     int DEFAULT_DELAY = 500;
@@ -59,6 +56,15 @@ public interface RequestRetryPolicy {
     }
 
     /**
+     * Get an exception stating why the policy cannot repeat the request
+     *
+     * @return reason of stopping retrying
+     */
+    default Throwable getPolicyException(Throwable ex) {
+        return ex;
+    }
+
+    /**
      * Wrap a generic operation taking an arbitrary number of arguments and returning a {@link CompletableFuture}.
      * <p>
      *
@@ -76,77 +82,14 @@ public interface RequestRetryPolicy {
         CompletableFuture<T> resultFuture = new CompletableFuture<>();
         // to provide it if retrying has been stopped without correct result
         AtomicReference<Throwable> lastExceptionWrapper = new AtomicReference<>();
-        CompletableFuture.runAsync(() -> runAsyncOperation(operation, resultFuture, lastExceptionWrapper), executor)
-            .exceptionally(ex -> { // we should complete final exception if something went wrong in runAsyncOperation
+        CompletableFuture.runAsync(
+                new RetryingAsyncOperation<>(this, operation, resultFuture, lastExceptionWrapper),
+                executor
+            )
+            .exceptionally(ex -> {
                 resultFuture.completeExceptionally(ex);
                 return null;
             });
         return resultFuture;
-    }
-
-    /**
-     * Run operation in asynchronous way with retrying.
-     * Operation can be run many times but final result will store in result future.
-     * <p>
-     * Each operation attempt is limited with a timeout returned by {@link #getRequestTimeout()}.
-     * See {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy} for example of implementation.
-     *
-     * @param operation            supplier for the operation to perform. Must return a new operation instance
-     * @param resultFuture         future that store final result
-     * @param lastExceptionWrapper the last exception obtained in retrying chain
-     * @param <T>                  operation result type
-     */
-    default <T> void runAsyncOperation(
-        Supplier<CompletableFuture<T>> operation, CompletableFuture<T> resultFuture,
-        AtomicReference<Throwable> lastExceptionWrapper) {
-        // start async operation running
-        CompletableFuture<T> operationFuture = operation.get();
-        // start scheduled request timeout task
-        // it never completes correctly only exceptionally
-        CompletableFuture<T> requestTimeoutFuture = failAfterRequestTimeout(resultFuture);
-
-        operationFuture.acceptEither(requestTimeoutFuture, resultFuture::complete)
-            .exceptionally(ex -> { // if requestTimeout has been raised or operation return exception
-                // if future was completed exceptionally in wrapOperation
-                if (resultFuture.isDone()) {
-                    return null;
-                }
-
-                while (ex instanceof ExecutionException || ex instanceof CompletionException) {
-                    ex = ex.getCause();
-                }
-                // to provide it if retrying has been stopped without correct result
-                lastExceptionWrapper.set(ex);
-
-                if (this.canRetryRequest(ex)) {
-                    // retry it after delay
-                    ScheduledFuture<?> delayFuture =
-                        TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
-                            runAsyncOperation(operation, resultFuture, lastExceptionWrapper);
-                        }, getDelay(), TimeUnit.MILLISECONDS);
-                    // optimization: stop delayed future if resultFuture has already done from outside
-                    resultFuture.whenComplete((r, e) -> delayFuture.cancel(false));
-                } else {
-                    resultFuture.completeExceptionally(ex);
-                }
-                return null;
-            }).exceptionally(ex -> { // if error has been happened in previous exceptionally section
-                resultFuture.completeExceptionally(ex);
-                return null;
-            });
-    }
-
-    default <T> CompletableFuture<T> failAfterRequestTimeout(CompletableFuture<T> resultFuture) {
-        long requestTimeout = getRequestTimeout();
-        final CompletableFuture<T> future = new CompletableFuture<>();
-
-        ScheduledFuture<Boolean> scheduledFuture = TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
-            final TimeoutException ex = new TimeoutException("Request timeout after " + requestTimeout);
-            return future.completeExceptionally(ex);
-        }, requestTimeout, TimeUnit.MILLISECONDS);
-        // optimization: stop timeout future if resultFuture has already done from outside
-        resultFuture.whenComplete((res, ex) -> scheduledFuture.cancel(false));
-
-        return future;
     }
 }
