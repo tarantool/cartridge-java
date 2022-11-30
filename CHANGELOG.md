@@ -4,6 +4,7 @@
 
 ### Internal and API changes
 - Add ability to pass retrying executor in client builder ([#339](https://github.com/tarantool/cartridge-java/issues/339))
+- Do not use sync calls instead of async in retrying ([#299](https://github.com/tarantool/cartridge-java/pull/299))
 
 ## [0.10.0] - 2022-12-29
 

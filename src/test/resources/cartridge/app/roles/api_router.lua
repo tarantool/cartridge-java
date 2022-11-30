@@ -108,6 +108,11 @@ local function get_router_name()
     return string.sub(box.cfg.custom_proc_title, 9)
 end
 
+local function simple_long_running_function(seconds_to_sleep)
+    fiber.sleep(seconds_to_sleep)
+    return true
+end
+
 local function long_running_function(values)
     local seconds_to_sleep = 0
     local disabled_router_name = ""
@@ -203,6 +208,7 @@ local function init()
     rawset(_G, 'reset_request_counters', reset_request_counters)
     rawset(_G, 'get_router_name', get_router_name)
     rawset(_G, 'long_running_function', long_running_function)
+    rawset(_G, 'simple_long_running_function', simple_long_running_function)
     rawset(_G, 'get_request_count', get_request_count)
     rawset(_G, 'box_error_unpack_no_connection', box_error_unpack_no_connection)
     rawset(_G, 'box_error_unpack_timeout', box_error_unpack_timeout)
