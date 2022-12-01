@@ -1,6 +1,10 @@
-package io.tarantool.driver.mappers;
+package io.tarantool.driver.mappers.factories;
 
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.AbstractResultMapper;
+import io.tarantool.driver.mappers.InterfaceParameterClassNotFoundException;
+import io.tarantool.driver.mappers.MapperReflectionUtils;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 

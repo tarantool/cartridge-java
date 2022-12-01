@@ -1,4 +1,4 @@
-package io.tarantool.driver.mappers;
+package io.tarantool.driver.mappers.factories;
 
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;

@@ -20,9 +20,9 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;
 import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import org.junit.jupiter.api.Test;
 

@@ -16,7 +16,7 @@ import io.tarantool.driver.handlers.TarantoolAuthenticationHandler;
 import io.tarantool.driver.handlers.TarantoolAuthenticationResponseHandler;
 import io.tarantool.driver.handlers.TarantoolRequestHandler;
 import io.tarantool.driver.handlers.TarantoolResponseHandler;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 
 import java.util.concurrent.CompletableFuture;
 

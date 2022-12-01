@@ -2,8 +2,8 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

@@ -1,5 +1,6 @@
 package io.tarantool.driver.mappers;
 
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.StringValue;

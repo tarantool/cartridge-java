@@ -1,6 +1,9 @@
-package io.tarantool.driver.mappers;
+package io.tarantool.driver.mappers.factories;
 
 import io.tarantool.driver.api.SingleValueCallResult;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
 import org.msgpack.value.Value;

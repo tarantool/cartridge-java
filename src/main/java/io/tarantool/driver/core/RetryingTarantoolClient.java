@@ -18,8 +18,8 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
-import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import io.tarantool.driver.protocol.Packable;
 import org.msgpack.value.Value;
 

@@ -1,7 +1,7 @@
 package io.tarantool.driver.protocol;
 
 import io.tarantool.driver.auth.TarantoolAuthMechanism;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.protocol.requests.TarantoolAuthRequest;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;

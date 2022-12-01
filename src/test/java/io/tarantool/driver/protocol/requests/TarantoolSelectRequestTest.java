@@ -1,8 +1,8 @@
 package io.tarantool.driver.protocol.requests;
 
 import io.tarantool.driver.exceptions.TarantoolDecoderException;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.protocol.TarantoolIteratorType;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;

@@ -5,6 +5,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.converters.object.DefaultCharacterToStringValueConverter;
 import io.tarantool.driver.mappers.converters.value.DefaultStringValueToCharacterConverter;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.ValueFactory;

@@ -2,6 +2,7 @@ package io.tarantool.driver.mappers;
 
 import io.tarantool.driver.api.MessagePackMapperBuilder;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.mappers.converters.ConverterWrapper;
 import io.tarantool.driver.mappers.converters.ObjectConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultListToArrayValueConverter;
