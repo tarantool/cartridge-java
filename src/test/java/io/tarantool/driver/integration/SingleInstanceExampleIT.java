@@ -31,9 +31,9 @@ import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
  * WARNING: If you updated the code in this file, don't forget to update the readme permalinks!
  */
 @Testcontainers
-public class SingleInstanceExampleTest {
+public class SingleInstanceExampleIT {
 
-    private static final Logger log = LoggerFactory.getLogger(SingleInstanceExampleTest.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleInstanceExampleIT.class);
 
     @Container
     private static final TarantoolContainer container = new TarantoolContainer()
