@@ -9,12 +9,12 @@ box.cfg {
 -- You need this to have an ability to restart Tarantool app without deleting .xlog .snap files
 s = box.schema.space.create('region', { if_not_exists = true })
 s:format({
-    {name = 'id', type = 'unsigned'},
-    {name = 'name', type = 'string'}
+    { name = 'id', type = 'unsigned' },
+    { name = 'name', type = 'string' }
 })
 s:create_index('id', {
     type = 'tree',
-    parts = {'id'},
+    parts = { 'id' },
     if_not_exists = true
 })
 
