@@ -18,7 +18,7 @@ import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.integration.Utils;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -7,6 +7,8 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultResultMapperFactoryFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;

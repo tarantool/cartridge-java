@@ -4,8 +4,8 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.mappers.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import org.msgpack.value.Value;
 
 import java.util.List;

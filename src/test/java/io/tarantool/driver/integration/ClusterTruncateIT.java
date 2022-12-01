@@ -13,7 +13,7 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

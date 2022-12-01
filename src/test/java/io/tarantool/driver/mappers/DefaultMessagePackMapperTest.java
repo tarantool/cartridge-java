@@ -5,6 +5,7 @@ import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageTypeCastException;
 import org.msgpack.value.ArrayValue;

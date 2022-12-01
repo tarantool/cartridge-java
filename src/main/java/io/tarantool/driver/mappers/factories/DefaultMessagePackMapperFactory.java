@@ -1,5 +1,6 @@
-package io.tarantool.driver.mappers;
+package io.tarantool.driver.mappers.factories;
 
+import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBooleanToBooleanValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultByteArrayToBinaryValueConverter;

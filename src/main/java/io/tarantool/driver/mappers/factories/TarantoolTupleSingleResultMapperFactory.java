@@ -1,10 +1,12 @@
-package io.tarantool.driver.mappers;
+package io.tarantool.driver.mappers.factories;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleSingleResult;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.converters.value.custom.TarantoolTupleConverter;
 
 /**

@@ -7,6 +7,7 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -112,7 +113,7 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      * <p>
      * This method takes a lambda as an argument, where the mapperBuilder is {@link DefaultMessagePackMapper.Builder}.
      * </p>
-     * see {@link io.tarantool.driver.mappers.DefaultMessagePackMapperFactory}.
+     * see {@link DefaultMessagePackMapperFactory}.
      *
      * @param mapperBuilder builder provider instance, e.g. a lambda function taking the builder
      *                      for {@link MessagePackMapper} instance
@@ -127,7 +128,7 @@ public interface TarantoolClientBuilder extends TarantoolClientConfigurator<Tara
      * The mapper contains converters for simple and complex tuple field types and for the entire tuples into custom
      * Java objects. This mapper is used by default if a custom mapper is not passed to a specific operation.
      * You may build and pass here your custom mapper or add some converters to a default one,
-     * see {@link io.tarantool.driver.mappers.DefaultMessagePackMapperFactory}.
+     * see {@link DefaultMessagePackMapperFactory}.
      *
      * @param mapper configured {@link MessagePackMapper} instance
      * @return this instance of builder {@link TarantoolClientBuilder}

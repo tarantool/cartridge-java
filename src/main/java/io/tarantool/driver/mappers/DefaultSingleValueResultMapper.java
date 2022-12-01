@@ -3,6 +3,7 @@ package io.tarantool.driver.mappers;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.value.custom.SingleValueCallResultConverter;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.msgpack.value.ArrayValue;
 
 /**

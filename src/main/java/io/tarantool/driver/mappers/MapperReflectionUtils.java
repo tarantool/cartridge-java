@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 /**
  * Contains helper methods for converter classes lookup and determining its parameters at runtime
  */
-final class MapperReflectionUtils {
+public final class MapperReflectionUtils {
 
     private MapperReflectionUtils() {
     }
@@ -23,7 +23,8 @@ final class MapperReflectionUtils {
      *                                                  cannot be determined or is not found
      */
     @SuppressWarnings("unchecked")
-    static <T> Class<T> getConverterTargetType(Object converter) throws InterfaceParameterClassNotFoundException {
+    public static <T> Class<T> getConverterTargetType(Object converter)
+        throws InterfaceParameterClassNotFoundException {
         Type[] genericInterfaces = getGenericInterfaces(converter);
         if (genericInterfaces.length < 1) {
             throw new RuntimeException(

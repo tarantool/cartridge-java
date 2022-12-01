@@ -5,8 +5,8 @@ import io.tarantool.driver.api.connection.ConnectionSelectionStrategyFactory;
 import io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategies;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.mappers.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.atomic.AtomicBoolean;
