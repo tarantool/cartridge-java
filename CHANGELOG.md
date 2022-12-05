@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Use netty part dependencies instead of netty-all ([#295](https://github.com/tarantool/cartridge-java/issues/295))
+
 ## [0.9.2] - 2022-11-15
 
 - Adding default mapper for long arrays ([#290](https://github.com/tarantool/cartridge-java/pull/290))
