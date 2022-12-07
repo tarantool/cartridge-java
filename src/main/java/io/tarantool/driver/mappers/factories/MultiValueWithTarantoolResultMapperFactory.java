@@ -19,14 +19,14 @@ import org.msgpack.value.ArrayValue;
 public class MultiValueWithTarantoolResultMapperFactory<T>
     extends MultiValueResultMapperFactory<T, TarantoolResult<T>> {
 
-    private final RowsMetadataStructureToTarantoolResultMapperFactory<T> tarantoolResultMapperFactory;
+    private final ArrayValueToTarantoolResultMapperFactory<T> tarantoolResultMapperFactory;
 
     /**
      * Basic constructor
      */
     public MultiValueWithTarantoolResultMapperFactory() {
         super();
-        tarantoolResultMapperFactory = new RowsMetadataStructureToTarantoolResultMapperFactory<>();
+        tarantoolResultMapperFactory = new ArrayValueToTarantoolResultMapperFactory<>();
     }
 
     /**
@@ -36,7 +36,7 @@ public class MultiValueWithTarantoolResultMapperFactory<T>
      */
     public MultiValueWithTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
-        tarantoolResultMapperFactory = new RowsMetadataStructureToTarantoolResultMapperFactory<>();
+        tarantoolResultMapperFactory = new ArrayValueToTarantoolResultMapperFactory<>();
     }
 
     /**

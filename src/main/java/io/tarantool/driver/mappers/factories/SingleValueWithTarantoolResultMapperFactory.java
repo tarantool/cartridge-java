@@ -17,14 +17,14 @@ import org.msgpack.value.ArrayValue;
  */
 public class SingleValueWithTarantoolResultMapperFactory<T> extends SingleValueResultMapperFactory<TarantoolResult<T>> {
 
-    private final RowsMetadataStructureToTarantoolResultMapperFactory<T> tarantoolResultMapperFactory;
+    private final ArrayValueToTarantoolResultMapperFactory<T> tarantoolResultMapperFactory;
 
     /**
      * Basic constructor
      */
     public SingleValueWithTarantoolResultMapperFactory() {
         super();
-        tarantoolResultMapperFactory = new RowsMetadataStructureToTarantoolResultMapperFactory<>();
+        tarantoolResultMapperFactory = new ArrayValueToTarantoolResultMapperFactory<>();
     }
 
     /**
@@ -34,7 +34,7 @@ public class SingleValueWithTarantoolResultMapperFactory<T> extends SingleValueR
      */
     public SingleValueWithTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
-        tarantoolResultMapperFactory = new RowsMetadataStructureToTarantoolResultMapperFactory<>();
+        tarantoolResultMapperFactory = new ArrayValueToTarantoolResultMapperFactory<>();
     }
 
     /**

@@ -50,9 +50,9 @@ public class TarantoolTupleSpace extends
     }
 
     @Override
-    protected MessagePackValueMapper tupleResultMapper() {
-        return client.getResultMapperFactoryFactory().tupleResultMapperFactory()
-            .withFlattenTupleMapper(config.getMessagePackMapper(), getMetadata());
+    protected MessagePackValueMapper arrayTupleResultMapper() {
+        return client.getResultMapperFactoryFactory().arrayTupleResultMapperFactory()
+            .withArrayValueToTarantoolTupleResultConverter(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override

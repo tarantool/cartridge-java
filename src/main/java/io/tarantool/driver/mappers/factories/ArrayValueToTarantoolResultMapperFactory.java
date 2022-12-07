@@ -15,14 +15,14 @@ import org.msgpack.value.ValueType;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public class RowsMetadataStructureToTarantoolResultMapperFactory<T> extends TarantoolResultMapperFactory<T> {
+public class ArrayValueToTarantoolResultMapperFactory<T> extends TarantoolResultMapperFactory<T> {
 
     private final MessagePackMapper messagePackMapper;
 
     /**
      * Basic constructor
      */
-    public RowsMetadataStructureToTarantoolResultMapperFactory() {
+    public ArrayValueToTarantoolResultMapperFactory() {
         this(DefaultMessagePackMapperFactory.getInstance().emptyMapper());
     }
 
@@ -31,7 +31,7 @@ public class RowsMetadataStructureToTarantoolResultMapperFactory<T> extends Tara
      *
      * @param messagePackMapper MessagePack-to-object mapper for tuple contents
      */
-    public RowsMetadataStructureToTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
+    public ArrayValueToTarantoolResultMapperFactory(MessagePackMapper messagePackMapper) {
         super();
         this.messagePackMapper = messagePackMapper;
     }

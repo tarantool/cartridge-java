@@ -17,14 +17,16 @@ import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleCo
 public class SingleValueWithTarantoolTupleResultMapperFactory
     extends SingleValueWithTarantoolResultMapperFactory<TarantoolTuple> {
 
-    private static TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory;
+    private static ArrayValueToTarantoolTupleResultMapperFactory arrayValueToTarantoolTupleResultMapperFactory;
+    private static RowsMetadataToTarantoolTupleResultMapperFactory rowsMetadataToTarantoolTupleResultMapperFactory;
 
     /**
      * Basic constructor
      */
     public SingleValueWithTarantoolTupleResultMapperFactory() {
         super();
-        tarantoolTupleResultMapperFactory = new TarantoolTupleResultMapperFactory();
+        arrayValueToTarantoolTupleResultMapperFactory = new ArrayValueToTarantoolTupleResultMapperFactory();
+        rowsMetadataToTarantoolTupleResultMapperFactory = new RowsMetadataToTarantoolTupleResultMapperFactory();
     }
 
     /**
@@ -34,7 +36,9 @@ public class SingleValueWithTarantoolTupleResultMapperFactory
      */
     public SingleValueWithTarantoolTupleResultMapperFactory(MessagePackMapper messagePackMapper) {
         super(messagePackMapper);
-        tarantoolTupleResultMapperFactory = new TarantoolTupleResultMapperFactory(messagePackMapper);
+        arrayValueToTarantoolTupleResultMapperFactory =
+            new ArrayValueToTarantoolTupleResultMapperFactory(messagePackMapper);
+        rowsMetadataToTarantoolTupleResultMapperFactory = new RowsMetadataToTarantoolTupleResultMapperFactory();
     }
 
     /**
@@ -45,11 +49,21 @@ public class SingleValueWithTarantoolTupleResultMapperFactory
      * @return default mapper instance configured with {@link ArrayValueToTarantoolTupleConverter} instance
      */
     public CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-    withSingleValueTarantoolTupleResultMapper(
+    withSingleValueArrayToTarantoolTupleResultMapper(
         MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
         return withSingleValueResultConverter(
-            tarantoolTupleResultMapperFactory.
-                withTarantoolTupleMapper(messagePackMapper, spaceMetadata),
+            arrayValueToTarantoolTupleResultMapperFactory.
+                withArrayValueToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata),
+            SingleValueTarantoolTupleResult.class
+        );
+    }
+
+    public CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
+    withSingleValueRowsMetadataToTarantoolTupleResultMapper(
+        MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+        return withSingleValueResultConverter(
+            rowsMetadataToTarantoolTupleResultMapperFactory.
+                withRowsMetadataToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata),
             SingleValueTarantoolTupleResult.class
         );
     }

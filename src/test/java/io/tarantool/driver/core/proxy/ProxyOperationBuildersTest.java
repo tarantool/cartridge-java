@@ -45,7 +45,7 @@ public class ProxyOperationBuildersTest {
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
-        .withSingleValueTarantoolTupleResultMapper(defaultMapper, null);
+        .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
     private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
 
     @Test

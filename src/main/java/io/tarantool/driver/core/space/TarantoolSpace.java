@@ -61,7 +61,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
-        return delete(conditions, tupleResultMapper());
+        return delete(conditions, arrayTupleResultMapper());
     }
 
     private CompletableFuture<R> delete(Conditions conditions, MessagePackValueMapper resultMapper)
@@ -83,7 +83,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
-        return insert(tuple, tupleResultMapper());
+        return insert(tuple, arrayTupleResultMapper());
     }
 
     @Override
@@ -110,7 +110,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
-        return replace(tuple, tupleResultMapper());
+        return replace(tuple, arrayTupleResultMapper());
     }
 
     @Override
@@ -137,7 +137,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
-        return select(conditions, tupleResultMapper());
+        return select(conditions, arrayTupleResultMapper());
     }
 
     private CompletableFuture<R> select(Conditions conditions, MessagePackValueMapper resultMapper)
@@ -161,7 +161,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, T tuple) {
-        return update(conditions, makeOperationsFromTuple(tuple), tupleResultMapper());
+        return update(conditions, makeOperationsFromTuple(tuple), arrayTupleResultMapper());
     }
 
     /**
@@ -174,7 +174,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
-        return update(conditions, operations, tupleResultMapper());
+        return update(conditions, operations, arrayTupleResultMapper());
     }
 
     private CompletableFuture<R> update(
@@ -207,7 +207,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
-        return upsert(conditions, tuple, operations, tupleResultMapper());
+        return upsert(conditions, tuple, operations, arrayTupleResultMapper());
     }
 
     private CompletableFuture<R> upsert(
@@ -234,7 +234,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<Void> truncate() throws TarantoolClientException {
-        return truncate(tupleResultMapper());
+        return truncate(arrayTupleResultMapper());
     }
 
     private CompletableFuture<Void> truncate(MessagePackValueMapper resultMapper)
@@ -257,7 +257,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
      *
      * @return configured mapper with {@link ArrayValue} to {@code T} converter
      */
-    protected abstract MessagePackValueMapper tupleResultMapper();
+    protected abstract MessagePackValueMapper arrayTupleResultMapper();
 
     private CompletableFuture<R> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
         return connectionManager.getConnection().thenCompose(c -> c.sendRequest(request, resultMapper));

@@ -398,7 +398,7 @@ public class ClusterTarantoolTupleClientIT {
             Collections.singletonList(1000),
             defaultMapper,
             factory.singleValueTupleResultMapperFactory()
-                .withSingleValueTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
+                .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
         ).get();
 
         assertTrue(result.size() >= 3);

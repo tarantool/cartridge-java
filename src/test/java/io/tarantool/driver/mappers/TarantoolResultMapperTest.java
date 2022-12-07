@@ -6,7 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
-import io.tarantool.driver.mappers.factories.RowsMetadataStructureToTarantoolResultMapperFactory;
+import io.tarantool.driver.mappers.factories.ArrayValueToTarantoolResultMapperFactory;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
@@ -27,7 +27,7 @@ class TarantoolResultMapperTest {
         ResultMapperFactoryFactoryImpl
             mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
         TarantoolResultMapper<TarantoolTuple> mapper = mapperFactoryFactory
-            .tupleResultMapperFactory().withFlattenTupleMapper(defaultMapper, null);
+            .arrayTupleResultMapperFactory().withArrayValueToTarantoolTupleResultConverter(defaultMapper);
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
         TarantoolTuple tupleOne = new TarantoolTupleImpl(Arrays.asList("abc", 1234, nestedList1), defaultMapper);
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
@@ -50,7 +50,7 @@ class TarantoolResultMapperTest {
         defaultMapper.registerObjectConverter(CustomTuple.class, ArrayValue.class, t ->
             ValueFactory.newArray(ValueFactory.newInteger(t.getId()), ValueFactory.newString(t.getName())));
         ResultMapperFactoryFactory mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
-        RowsMetadataStructureToTarantoolResultMapperFactory<CustomTuple> mapperFactory
+        ArrayValueToTarantoolResultMapperFactory<CustomTuple> mapperFactory
             = mapperFactoryFactory.rowsMetadataStructureResultMapperFactory();
         TarantoolResultMapper<CustomTuple> mapper = mapperFactory.withArrayValueToTarantoolResultConverter(v -> {
             CustomTuple tuple = new CustomTuple();
