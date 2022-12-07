@@ -32,8 +32,13 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
     }
 
     @Override
-    public TarantoolTupleResultMapperFactory tupleResultMapperFactory() {
-        return new TarantoolTupleResultMapperFactory();
+    public ArrayValueToTarantoolTupleResultMapperFactory arrayTupleResultMapperFactory() {
+        return new ArrayValueToTarantoolTupleResultMapperFactory();
+    }
+
+    @Override
+    public RowsMetadataToTarantoolTupleResultMapperFactory rowsMetadataTupleResultMapperFactory() {
+        return new RowsMetadataToTarantoolTupleResultMapperFactory();
     }
 
     @Override
@@ -47,8 +52,8 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
     }
 
     @Override
-    public <T> RowsMetadataStructureToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory() {
-        return new RowsMetadataStructureToTarantoolResultMapperFactory<>();
+    public <T> ArrayValueToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory() {
+        return new ArrayValueToTarantoolResultMapperFactory<>();
     }
 
     @Override

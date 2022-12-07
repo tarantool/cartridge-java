@@ -53,7 +53,7 @@ public class TarantoolSetup {
         defaultMapper = tarantoolClient.getConfig().getMessagePackMapper();
         resultMapper = factory
             .singleValueTupleResultMapperFactory()
-            .withSingleValueTarantoolTupleResultMapper(defaultMapper, spaceMetadata);
+            .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata);
 
         log.info("Successfully connected to Tarantool, version = {}", tarantoolClient.getVersion());
     }

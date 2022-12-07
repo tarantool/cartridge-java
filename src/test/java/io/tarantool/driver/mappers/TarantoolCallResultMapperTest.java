@@ -30,7 +30,7 @@ public class TarantoolCallResultMapperTest {
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
-        .withSingleValueTarantoolTupleResultMapper(defaultMapper, null);
+        .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
     private static List<Object> nestedList1;
     private static TarantoolTuple tupleOne;
@@ -53,7 +53,7 @@ public class TarantoolCallResultMapperTest {
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             SingleValueCallResult<TarantoolResult<TarantoolTuple>>> mapper =
             mapperFactoryFactory.singleValueTupleResultMapperFactory()
-                .withSingleValueTarantoolTupleResultMapper(defaultMapper, null);
+                .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
         //[nil, message]
         ArrayValue errorResult = ValueFactory.newArray(ValueFactory.newNil(), ValueFactory.newString("ERROR"));
@@ -105,7 +105,7 @@ public class TarantoolCallResultMapperTest {
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>> mapper =
             mapperFactoryFactory.multiValueTupleResultMapperFactory()
-                .withMultiValueTarantoolTupleResultMapper(defaultMapper, null);
+                .withMultiValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
         //[[], ...]
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);

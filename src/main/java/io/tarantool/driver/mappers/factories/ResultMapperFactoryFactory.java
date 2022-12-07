@@ -17,10 +17,10 @@ public interface ResultMapperFactoryFactory {
     /**
      * Default factory for call result with a list of tuples.
      * Use this factory for handling containers with {@link TarantoolTuple} inside.
-     * For example, the IProto method results by default contain lists of tuples.
+     * The IProto method results by default contain lists of tuples.
      * This factory can be used at the inner level by other mapper factories that are handling higher-level containers.
      * <p>
-     * input: data structure with MessagePack values inside (e.g. array of tuples [t1, t2, ...])
+     * input: array of tuples with MessagePack values inside ([t1, t2, ...])
      * <br>
      * mapper result: {@code TarantoolResult<TarantoolTuple>}
      * <p>
@@ -28,7 +28,23 @@ public interface ResultMapperFactoryFactory {
      *
      * @return default factory for list of tuples results
      */
-    TarantoolTupleResultMapperFactory tupleResultMapperFactory();
+    ArrayValueToTarantoolTupleResultMapperFactory arrayTupleResultMapperFactory();
+
+    /**
+     * Default factory for call result with a list of tuples in structure with metadata.
+     * Use this factory for handling containers with {@link TarantoolTuple} inside.
+     * The IProto method results by default contain lists of tuples.
+     * This factory can be used at the inner level by other mapper factories that are handling higher-level containers.
+     * <p>
+     * input: map with metadata and array of tuples with MessagePack values inside ([t1, t2, ...])
+     * <br>
+     * mapper result: {@code TarantoolResult<TarantoolTuple>}
+     * <p>
+     * Mapper result and its inner depends on the parameters or converters you passed.
+     *
+     * @return default factory for list of tuples results
+     */
+    RowsMetadataToTarantoolTupleResultMapperFactory rowsMetadataTupleResultMapperFactory();
 
     /**
      * Default factory for single the stored Lua function call result in the form <code>return result, err</code>
@@ -115,7 +131,7 @@ public interface ResultMapperFactoryFactory {
      * <p>
      * Mapper result and its inner contents depend on the parameters or the passed converters.
      * Mapper checks errors and that result is not empty and uses
-     * {@link RowsMetadataStructureToTarantoolResultMapperFactory} for further parsing
+     * {@link ArrayValueToTarantoolResultMapperFactory} for further parsing
      *
      * @param <T> target inner content type
      * @return new or existing factory instance
@@ -157,5 +173,5 @@ public interface ResultMapperFactoryFactory {
      * @param <T> target inner result type
      * @return new or existing factory instance
      */
-    <T> RowsMetadataStructureToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory();
+    <T> ArrayValueToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory();
 }
