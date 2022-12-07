@@ -391,6 +391,42 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     }
 
     @Test
+    public void test_crudMetadataResponse_shouldReturnTuple_withoutDDLMetadata()
+        throws ExecutionException, InterruptedException {
+        Integer id = 123000;
+        String field1 = "Jane Doe";
+        Integer field2 = 999;
+        Boolean field3 = true;
+        Double field4 = 123.456;
+
+        List<Object> values = Arrays.asList(id, null, field1, field2);
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
+        client.space("test_space").insert(tarantoolTuple).get();
+
+        values = Arrays.asList(id, null, field3, field4);
+        tarantoolTuple = tupleFactory.create(values);
+        client.space("test_space_to_join").insert(tarantoolTuple).get();
+
+        CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
+            defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
+            .withSingleValueRowsMetadataToTarantoolTupleResultMapper(defaultMapper, null);
+
+        TarantoolResult<TarantoolTuple> result =
+            client.callForSingleResult(
+                "get_composite_data_with_crud",
+                Collections.singletonList(id),
+                defaultResultMapper
+            ).get();
+        assertEquals(1, result.size());
+        TarantoolTuple tuple = result.get(0);
+        assertEquals(id, tuple.getObject("id").orElse(null));
+        assertEquals(field1, tuple.getObject("field1").orElse(null));
+        assertEquals(field2, tuple.getObject("field2").orElse(null));
+        assertEquals(field3, tuple.getObject("field3").orElse(null));
+        assertEquals(field4, tuple.getObject("field4").orElse(null));
+    }
+
+    @Test
     public void clusterUpsertTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
             client.space(TEST_SPACE_NAME);

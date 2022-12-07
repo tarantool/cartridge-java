@@ -6,7 +6,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolResultMapper;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
-import io.tarantool.driver.mappers.converters.value.RowsMetadataToTarantoolTupleResultConverter;
+import io.tarantool.driver.core.metadata.RowsMetadataToTarantoolTupleResultConverter;
 import org.msgpack.value.ValueType;
 
 /**

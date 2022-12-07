@@ -31,6 +31,27 @@ local function get_other_storage_bucket_id(key)
     return res_bucket_id
 end
 
+local function get_composite_data_with_crud(id)
+    local test_space = crud.get("test_space", id)
+    local test_space_to_join = crud.get("test_space_to_join", id)
+
+    table.move(
+        test_space_to_join.metadata,
+        1,
+        #test_space_to_join.metadata,
+        #test_space.metadata + 1,
+        test_space.metadata)
+    table.move(
+        test_space_to_join.rows[1],
+        1,
+        #test_space_to_join.rows[1],
+        #test_space.rows[1] + 1,
+        test_space.rows[1]
+    )
+    return test_space
+end
+
 return {
     get_other_storage_bucket_id = get_other_storage_bucket_id,
+    get_composite_data_with_crud = get_composite_data_with_crud,
 }

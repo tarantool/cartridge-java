@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
 - Use netty part dependencies instead of netty-all ([#295](https://github.com/tarantool/cartridge-java/issues/295))
 - Refactor mappers and split `TarantoolResultConverter` ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** `TarantoolResultConverter` was removed, use `DefaultArrayValueToTarantoolResultConverter` or `DefaultMapValueToTarantoolTupleResultConverter` instead ([#301](https://github.com/tarantool/cartridge-java/pull/301))

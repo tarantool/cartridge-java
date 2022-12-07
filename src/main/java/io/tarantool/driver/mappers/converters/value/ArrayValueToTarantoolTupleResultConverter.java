@@ -3,6 +3,7 @@ package io.tarantool.driver.mappers.converters.value;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.TarantoolResultImpl;
+import io.tarantool.driver.core.TarantoolTupleResultImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 
@@ -14,16 +15,16 @@ public class ArrayValueToTarantoolTupleResultConverter
 
     private static final long serialVersionUID = -1348387430063097175L;
 
-    private final ValueConverter<ArrayValue, TarantoolTuple> tupleConverter;
+    private final ArrayValueToTarantoolTupleConverter tupleConverter;
 
     public ArrayValueToTarantoolTupleResultConverter(
-        ValueConverter<ArrayValue, TarantoolTuple> tupleConverter) {
+        ArrayValueToTarantoolTupleConverter tupleConverter) {
         super();
         this.tupleConverter = tupleConverter;
     }
 
     @Override
     public TarantoolResult<TarantoolTuple> fromValue(ArrayValue value) {
-        return new TarantoolResultImpl<>(value, tupleConverter);
+        return new TarantoolTupleResultImpl(value, tupleConverter);
     }
 }

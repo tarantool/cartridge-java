@@ -214,6 +214,7 @@ local function init()
     rawset(_G, 'init_router_status', init_router_status)
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
     rawset(_G, 'get_other_storage_bucket_id', crud_utils.get_other_storage_bucket_id)
+    rawset(_G, 'get_composite_data_with_crud', crud_utils.get_composite_data_with_crud)
     rawset(_G, 'vshard', vshard)
 
     create_restricted_user()

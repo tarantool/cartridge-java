@@ -11,6 +11,7 @@ import org.msgpack.value.ArrayValue;
  * Default {@link ArrayValue} to {@link TarantoolTuple} converter
  *
  * @author Sergey Volgin
+ * @author Artyom Dubinin
  */
 public class ArrayValueToTarantoolTupleConverter implements ValueConverter<ArrayValue, TarantoolTuple> {
 
@@ -27,5 +28,9 @@ public class ArrayValueToTarantoolTupleConverter implements ValueConverter<Array
     @Override
     public TarantoolTuple fromValue(ArrayValue value) {
         return new TarantoolTupleImpl(value, mapper, spaceMetadata);
+    }
+
+    public TarantoolTuple fromValue(ArrayValue value, TarantoolSpaceMetadata responseMetadata) {
+        return new TarantoolTupleImpl(value, mapper, responseMetadata);
     }
 }
