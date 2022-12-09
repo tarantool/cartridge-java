@@ -6,7 +6,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolResultMapper;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
-import io.tarantool.driver.mappers.converters.value.MapValueToTarantoolTupleResultConverter;
+import io.tarantool.driver.mappers.converters.value.RowsMetadataToTarantoolTupleResultConverter;
 import org.msgpack.value.ValueType;
 
 /**
@@ -54,7 +54,7 @@ public class RowsMetadataToTarantoolTupleResultMapperFactory
         return withConverterWithoutTargetClass(
             messagePackMapper.copy(),
             ValueType.MAP,
-            new MapValueToTarantoolTupleResultConverter(tupleConverter)
+            new RowsMetadataToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 
@@ -64,7 +64,7 @@ public class RowsMetadataToTarantoolTupleResultMapperFactory
         return withConverterWithoutTargetClass(
             valueMapper,
             ValueType.MAP,
-            new MapValueToTarantoolTupleResultConverter(tupleConverter)
+            new RowsMetadataToTarantoolTupleResultConverter(tupleConverter)
         );
     }
 }
