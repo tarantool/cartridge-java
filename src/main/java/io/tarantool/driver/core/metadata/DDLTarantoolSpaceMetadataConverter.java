@@ -7,12 +7,12 @@ import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataContainer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import org.msgpack.value.ArrayValue;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,9 +26,12 @@ import java.util.stream.Collectors;
  * @author Sergey Volgin
  * @author Artyom Dubinin
  */
-public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value, TarantoolMetadataContainer> {
+public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value, TarantoolMetadataContainer> {
 
-    private static final long serialVersionUID = 20200708L;
+    private static final DDLTarantoolSpaceMetadataConverter instance =
+        new DDLTarantoolSpaceMetadataConverter();
+
+    private static final long serialVersionUID = -2100651651306707627L;
 
     private static final int ID_UNKNOWN = -1;
 
@@ -38,10 +41,6 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
     private static final StringValue SPACE_FORMAT_KEY = ValueFactory.newString("format");
     private static final StringValue SPACE_INDEXES_KEY = ValueFactory.newString("indexes");
 
-    private static final StringValue FORMAT_NAME_KEY = ValueFactory.newString("name");
-    private static final StringValue FORMAT_TYPE_KEY = ValueFactory.newString("type");
-    private static final StringValue FORMAT_IS_NULLABLE = ValueFactory.newString("is_nullable");
-
     private static final StringValue INDEX_NAME_KEY = ValueFactory.newString("name");
     private static final StringValue INDEX_UNIQUE_KEY = ValueFactory.newString("unique");
     private static final StringValue INDEX_TYPE_KEY = ValueFactory.newString("type");
@@ -50,7 +49,10 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
     private static final StringValue INDEX_PARTS_TYPE_KEY = ValueFactory.newString("type");
     private static final StringValue INDEX_PARTS_PATH_KEY = ValueFactory.newString("path");
 
-    public DDLTarantoolSpaceMetadataConverter() {
+    private static final ArrayValueToSpaceFormatConverter arrayValueToSpaceFormatConverter
+        = ArrayValueToSpaceFormatConverter.getInstance();
+
+    private DDLTarantoolSpaceMetadataConverter() {
     }
 
     @Override
@@ -98,8 +100,8 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
                     "Unsupported space metadata format: key '" + SPACE_FORMAT_KEY + "' value is not a list");
             }
 
-            List<Value> spaceFormat = formatValue.asArrayValue().list();
-            Map<String, TarantoolFieldMetadata> fields = parseFormat(spaceFormat);
+            ArrayValue spaceFormat = formatValue.asArrayValue();
+            Map<String, TarantoolFieldMetadata> fields = arrayValueToSpaceFormatConverter.fromValue(spaceFormat);
             spaceMetadata.setSpaceFormatMetadata(fields);
 
             proxyMetadata.addSpace(spaceMetadata);
@@ -111,47 +113,6 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
             }
         }
         return proxyMetadata;
-    }
-
-    private Map<String, TarantoolFieldMetadata> parseFormat(List<Value> spaceFormat) {
-        LinkedHashMap<String, TarantoolFieldMetadata> spaceFormatMetadata = new LinkedHashMap<>();
-
-        int fieldPosition = 0;
-        for (Value fieldValueMetadata : spaceFormat) {
-
-            if (!fieldValueMetadata.isMapValue()) {
-                throw new TarantoolClientException("Unsupported space metadata format: field metadata is not a map");
-            }
-
-            Map<Value, Value> fieldMap = fieldValueMetadata.asMapValue().map();
-            Value fieldNameValue = fieldMap.get(FORMAT_NAME_KEY);
-            if (fieldNameValue == null || !fieldNameValue.isStringValue()) {
-                throw new TarantoolClientException(
-                    "Unsupported space metadata format: key '" + FORMAT_NAME_KEY + "' must have string value");
-            }
-            String fieldName = fieldNameValue.asStringValue().asString();
-
-            Value fieldTypeValue = fieldMap.get(FORMAT_TYPE_KEY);
-            if (fieldTypeValue == null || !fieldTypeValue.isStringValue()) {
-                throw new TarantoolClientException(
-                    "Unsupported space metadata format: key '" + FORMAT_TYPE_KEY + "' must have string value");
-            }
-            String fieldType = fieldTypeValue.asStringValue().asString();
-
-            Value fieldIsNullableValue = fieldMap.get(FORMAT_IS_NULLABLE);
-            boolean fieldIsNullable = false;
-            if (fieldIsNullableValue != null) {
-                if (!fieldIsNullableValue.isBooleanValue()) {
-                    throw new TarantoolClientException("Unsupported space metadata format: key '"
-                        + FORMAT_IS_NULLABLE + "' must have boolean value");
-                }
-                fieldIsNullable = fieldIsNullableValue.asBooleanValue().getBoolean();
-            }
-            spaceFormatMetadata.put(fieldName,
-                new TarantoolFieldMetadataImpl(fieldName, fieldType, fieldPosition++, fieldIsNullable));
-        }
-
-        return spaceFormatMetadata;
     }
 
     private Map<String, TarantoolIndexMetadata> parseIndexes(
@@ -263,5 +224,9 @@ public class DDLTarantoolSpaceMetadataConverter implements ValueConverter<Value,
                     "unable to determine the field number or name from path %s", fieldPath);
             }
         }
+    }
+
+    public static DDLTarantoolSpaceMetadataConverter getInstance() {
+        return instance;
     }
 }
