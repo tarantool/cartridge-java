@@ -28,7 +28,7 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
     static final String VINDEX_SELECT_CMD = "box.space._vindex:select"; // System space with all index descriptions
 
     private final TarantoolCallOperations client;
-    private final TarantoolSpaceMetadataConverter spaceMetadataMapper;
+    private final VSpaceToTarantoolSpaceMetadataConverter spaceMetadataMapper;
     private final TarantoolIndexMetadataConverter indexMetadataMapper;
 
     /**
@@ -41,7 +41,7 @@ public class SpacesMetadataProvider implements TarantoolMetadataProvider {
         TarantoolCallOperations client,
         MessagePackMapper messagePackMapper) {
         this.client = client;
-        this.spaceMetadataMapper = new TarantoolSpaceMetadataConverter(messagePackMapper);
+        this.spaceMetadataMapper = VSpaceToTarantoolSpaceMetadataConverter.getInstance();
         this.indexMetadataMapper = new TarantoolIndexMetadataConverter(messagePackMapper);
     }
 
