@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * @author Artyom Dubinin
  */
-public class MapValueToTarantoolTupleResultConverter
+public class RowsMetadataToTarantoolTupleResultConverter
     implements ValueConverter<MapValue, TarantoolResult<TarantoolTuple>> {
 
     private static final long serialVersionUID = -5228606294087295535L;
@@ -25,7 +25,7 @@ public class MapValueToTarantoolTupleResultConverter
 
     private final ArrayValueToTarantoolTupleConverter tupleConverter;
 
-    public MapValueToTarantoolTupleResultConverter(ArrayValueToTarantoolTupleConverter tupleConverter) {
+    public RowsMetadataToTarantoolTupleResultConverter(ArrayValueToTarantoolTupleConverter tupleConverter) {
         super();
         this.tupleConverter = tupleConverter;
     }

@@ -12,17 +12,21 @@ import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import org.junit.jupiter.api.Test;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.ImmutableMapValue;
+import org.msgpack.value.MapValue;
+import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TarantoolResultMapperTest {
     @Test
-    void testWithTarantoolTuple() {
+    void testWithArrayTarantoolTuple() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
         ResultMapperFactoryFactoryImpl
             mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
@@ -35,6 +39,34 @@ class TarantoolResultMapperTest {
         ArrayValue testTuples = ValueFactory.newArray(
             tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
         TarantoolResult<TarantoolTuple> result = mapper.fromValue(testTuples, TarantoolTupleResult.class);
+        assertEquals(2, result.size());
+        assertEquals("abc", result.get(0).getString(0));
+        assertEquals(1234, result.get(0).getInteger(1));
+        assertEquals(nestedList1, result.get(0).getList(2));
+        assertEquals("def", result.get(1).getString(0));
+        assertEquals(5678, result.get(1).getInteger(1));
+        assertEquals(nestedList2, result.get(1).getList(2));
+    }
+
+    @Test
+    void testWithRowsMetadataTarantoolTuple() {
+        MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        ResultMapperFactoryFactoryImpl
+            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+        TarantoolResultMapper<TarantoolTuple> mapper = mapperFactoryFactory
+            .rowsMetadataTupleResultMapperFactory().withRowsMetadataToTarantoolTupleResultConverter(defaultMapper);
+        List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
+        TarantoolTuple tupleOne = new TarantoolTupleImpl(Arrays.asList("abc", 1234, nestedList1), defaultMapper);
+        List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
+        TarantoolTuple tupleTwo = new TarantoolTupleImpl(Arrays.asList("def", 5678, nestedList2), defaultMapper);
+        ArrayValue testTuples = ValueFactory.newArray(
+            tupleOne.toMessagePackValue(defaultMapper), tupleTwo.toMessagePackValue(defaultMapper));
+        HashMap<StringValue, Value> rowsMetadata = new HashMap<StringValue, Value>() {{
+            put(ValueFactory.newString("metadata"), ValueFactory.newArray());
+            put(ValueFactory.newString("rows"), testTuples);
+        }};
+        MapValue mpRowsMetadata = ValueFactory.newMap(rowsMetadata);
+        TarantoolResult<TarantoolTuple> result = mapper.fromValue(mpRowsMetadata, TarantoolTupleResult.class);
         assertEquals(2, result.size());
         assertEquals("abc", result.get(0).getString(0));
         assertEquals(1234, result.get(0).getInteger(1));
