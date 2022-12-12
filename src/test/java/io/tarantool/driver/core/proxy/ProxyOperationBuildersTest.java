@@ -21,6 +21,8 @@ import io.tarantool.driver.core.metadata.TarantoolMetadata;
 import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
+import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
@@ -40,11 +42,11 @@ public class ProxyOperationBuildersTest {
     private static final ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient();
     private final MessagePackMapper defaultMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-    private final ResultMapperFactoryFactoryImpl mapperFactoryFactory =
-        new ResultMapperFactoryFactoryImpl();
+    TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+        TarantoolTupleResultMapperFactoryImpl.getInstance();
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-        defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
+        defaultResultMapper = tarantoolTupleResultMapperFactory
         .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
     private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
 

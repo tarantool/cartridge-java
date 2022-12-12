@@ -4,6 +4,7 @@ import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 
 import java.util.List;
 
@@ -29,6 +30,22 @@ public interface ResultMapperFactoryFactory {
      * @return default factory for list of tuples results
      */
     ArrayValueToTarantoolTupleResultMapperFactory arrayTupleResultMapperFactory();
+
+    /**
+     * Default factory for call result with different structures.
+     * Use this factory for handling containers with {@link TarantoolTuple} inside.
+     * The IProto method results by default contain lists of tuples.
+     * The crud results by default contain map with list of tuple inside.
+     * This factory can be used at the inner level by other mapper factories that are handling higher-level containers.
+     * <p>
+     * input: structure with array of tuples with MessagePack values inside ([t1, t2, ...])
+     * <br>
+     * mapper result: {@code TarantoolResult<TarantoolTuple>}
+     * <p>
+     *
+     * @return default factory for list of tuples results
+     */
+    TarantoolTupleResultMapperFactory getTarantoolTupleResultMapperFactory();
 
     /**
      * Default factory for call result with a list of tuples in structure with metadata.

@@ -8,6 +8,8 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMultiValueResultMapper;
 import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
+import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToMultiValueListConverter;
 import org.msgpack.value.Value;
@@ -34,6 +36,11 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
     @Override
     public ArrayValueToTarantoolTupleResultMapperFactory arrayTupleResultMapperFactory() {
         return new ArrayValueToTarantoolTupleResultMapperFactory();
+    }
+
+    @Override
+    public TarantoolTupleResultMapperFactory getTarantoolTupleResultMapperFactory() {
+        return TarantoolTupleResultMapperFactoryImpl.getInstance();
     }
 
     @Override
