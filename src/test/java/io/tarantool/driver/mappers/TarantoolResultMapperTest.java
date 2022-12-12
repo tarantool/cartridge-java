@@ -27,10 +27,10 @@ class TarantoolResultMapperTest {
     @Test
     void testWithArrayTarantoolTuple() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ResultMapperFactoryFactoryImpl
-            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
-        TarantoolResultMapper<TarantoolTuple> mapper = mapperFactoryFactory
-            .arrayTupleResultMapperFactory().withArrayValueToTarantoolTupleResultConverter(defaultMapper);
+        TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+            TarantoolTupleResultMapperFactoryImpl.getInstance();
+        TarantoolResultMapper<TarantoolTuple> mapper = tarantoolTupleResultMapperFactory.
+            withArrayValueToTarantoolTupleResultConverter(defaultMapper);
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
         TarantoolTuple tupleOne = new TarantoolTupleImpl(Arrays.asList("abc", 1234, nestedList1), defaultMapper);
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);
@@ -50,10 +50,10 @@ class TarantoolResultMapperTest {
     @Test
     void testWithRowsMetadataTarantoolTuple() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ResultMapperFactoryFactoryImpl
-            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
-        TarantoolResultMapper<TarantoolTuple> mapper = mapperFactoryFactory
-            .rowsMetadataTupleResultMapperFactory().withRowsMetadataToTarantoolTupleResultConverter(defaultMapper);
+        TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+            TarantoolTupleResultMapperFactoryImpl.getInstance();
+        TarantoolResultMapper<TarantoolTuple> mapper = tarantoolTupleResultMapperFactory
+            .withRowsMetadataToTarantoolTupleResultConverter(defaultMapper);
         List<Object> nestedList1 = Arrays.asList("nested", "array", 1);
         TarantoolTuple tupleOne = new TarantoolTupleImpl(Arrays.asList("abc", 1234, nestedList1), defaultMapper);
         List<Object> nestedList2 = Arrays.asList("nested", "array", 2);

@@ -4,6 +4,7 @@
 
 - Added `fields` option to ProxySpace ([#236](https://github.com/tarantool/cartridge-java/pull/236))
 - Move metadata parsing to separate converters ([#325](https://github.com/tarantool/cartridge-java/pull/325))
+- Add simple to use TarantoolTupleResultMapper factory ([#321](https://github.com/tarantool/cartridge-java/pull/321))
 - Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
 - Use netty part dependencies instead of netty-all ([#295](https://github.com/tarantool/cartridge-java/issues/295))
 - Refactor mappers and split `TarantoolResultConverter` ([#301](https://github.com/tarantool/cartridge-java/pull/301))

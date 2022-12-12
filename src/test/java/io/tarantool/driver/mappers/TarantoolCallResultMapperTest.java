@@ -26,10 +26,11 @@ public class TarantoolCallResultMapperTest {
 
     private static final MessagePackMapper defaultMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-    private final ResultMapperFactoryFactoryImpl mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+    TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+        TarantoolTupleResultMapperFactoryImpl.getInstance();
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
-        defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
+        defaultResultMapper = tarantoolTupleResultMapperFactory
         .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
     private static List<Object> nestedList1;
@@ -48,11 +49,11 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testSingleValueCallResultMapper() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ResultMapperFactoryFactoryImpl
-            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+        TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+            TarantoolTupleResultMapperFactoryImpl.getInstance();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             SingleValueCallResult<TarantoolResult<TarantoolTuple>>> mapper =
-            mapperFactoryFactory.singleValueTupleResultMapperFactory()
+            tarantoolTupleResultMapperFactory
                 .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
         //[nil, message]
@@ -100,11 +101,11 @@ public class TarantoolCallResultMapperTest {
     @Test
     void testMultiValueCallResultMapper() {
         MessagePackMapper defaultMapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-        ResultMapperFactoryFactoryImpl
-            mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+        TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
+            TarantoolTupleResultMapperFactoryImpl.getInstance();
         CallResultMapper<TarantoolResult<TarantoolTuple>,
             MultiValueCallResult<TarantoolTuple, TarantoolResult<TarantoolTuple>>> mapper =
-            mapperFactoryFactory.multiValueTupleResultMapperFactory()
+            tarantoolTupleResultMapperFactory
                 .withMultiValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
 
         //[[], ...]

@@ -67,6 +67,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final TarantoolConnectionListeners listeners;
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final ResultMapperFactoryFactoryImpl mapperFactoryFactory;
+
     private final SpacesMetadataProvider metadataProvider;
     private final ScheduledExecutorService timeoutScheduler;
     private TarantoolConnectionManager connectionManager;

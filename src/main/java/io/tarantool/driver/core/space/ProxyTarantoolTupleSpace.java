@@ -53,7 +53,7 @@ public class ProxyTarantoolTupleSpace
     @Override
     protected CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     rowsMetadataTupleResultMapper() {
-        return client.getResultMapperFactoryFactory().singleValueTupleResultMapperFactory()
+        return client.getResultMapperFactoryFactory().getTarantoolTupleResultMapperFactory()
             .withSingleValueRowsMetadataToTarantoolTupleResultMapper(config.getMessagePackMapper(), getMetadata());
     }
 
