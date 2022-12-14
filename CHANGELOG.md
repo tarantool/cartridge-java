@@ -13,6 +13,7 @@
 - **[breaking change]** `*MapperFactory` methods were renamed ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** `*DefaultConverter` converters moved into `mappers.converters.value.defaults` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** All converters from `mappers.converters.value.custom` moved into `mappers.converters.value` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
+- Return jmh-generator-annprocess dependency
 
 ## [0.9.2] - 2022-11-15
 
