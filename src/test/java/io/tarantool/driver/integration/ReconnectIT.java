@@ -169,14 +169,14 @@ public class ReconnectIT extends SharedCartridgeContainer {
         final Set<String> routerUuids = getInstancesUuids(client);
 
         // stop routers
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "router");
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "second-router");
+        stopInstance("router", true);
+        stopInstance("second-router", true);
 
         // check that there is only one instance left
         assertEquals(getInstanceUuid(client), getInstanceUuid(client));
 
         // start routers
-        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+        startCartridge();
 
         client.refresh();
         Thread.sleep(3000);
@@ -260,6 +260,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 .withAddresses(tarantoolServerAddresses)
                 .withRetryingByNumberOfAttempts(10, b -> b.withDelay(100))
                 .build();
+        // reset connection statistics
+        clientForCheck.eval("return box.stat.reset()").join();
 
         // make a function which returns everytime a one of two addresses in order
         AtomicBoolean isNextAddress = new AtomicBoolean(false);
