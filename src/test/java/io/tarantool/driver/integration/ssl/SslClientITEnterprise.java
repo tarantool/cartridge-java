@@ -1,4 +1,4 @@
-package io.tarantool.driver.integration;
+package io.tarantool.driver.integration.ssl;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -48,7 +48,7 @@ public class SslClientITEnterprise {
         );
         final Map<String, String> buildArgs = new HashMap<>();
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
-        buildArgs.put("SDK_VERSION", "tarantool-enterprise-bundle-2.10.0-beta2-91-g08c9b4963-r474");
+        buildArgs.put("SDK_VERSION", System.getenv("SDK_VERSION"));
 
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
             .withSslContext(getSslContext());
@@ -81,7 +81,7 @@ public class SslClientITEnterprise {
     }
 
     @Test
-    public void test_should_throwException_ifClientWithSslButServerNot() throws SSLException {
+    public void test_clientWithSsl_shouldWork_ifServerWithoutSSL() throws SSLException {
         //when
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
             .withAddress(containerWithoutSsl.getHost(), containerWithoutSsl.getMappedPort(3301))
@@ -99,7 +99,7 @@ public class SslClientITEnterprise {
     }
 
     @Test
-    public void test_should_clientConnectWithSsl() throws SSLException {
+    public void test_clientWithSsl_shouldWork() throws SSLException {
         //when
         final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
             .withAddress(containerWithSsl.getHost(), containerWithSsl.getMappedPort(3301))
