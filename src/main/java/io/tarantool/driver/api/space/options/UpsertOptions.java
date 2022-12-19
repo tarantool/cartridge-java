@@ -6,5 +6,6 @@ package io.tarantool.driver.api.space.options;
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface UpsertOptions extends OperationWithBucketIdOptions {
+public interface UpsertOptions<T extends UpsertOptions<T>>
+    extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T> {
 }

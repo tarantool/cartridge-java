@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.space.options.proxy;
 
+import io.tarantool.driver.api.space.options.BaseOptions;
 import io.tarantool.driver.api.space.options.ReplaceOptions;
 
 /**
@@ -8,7 +9,7 @@ import io.tarantool.driver.api.space.options.ReplaceOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyReplaceOptions extends ProxyBucketIdOptions<ProxyReplaceOptions> implements ReplaceOptions {
+public final class ProxyReplaceOptions extends BaseOptions implements ReplaceOptions<ProxyReplaceOptions> {
 
     private ProxyReplaceOptions() {
     }
@@ -23,7 +24,7 @@ public final class ProxyReplaceOptions extends ProxyBucketIdOptions<ProxyReplace
     }
 
     @Override
-    protected ProxyReplaceOptions self() {
+    public ProxyReplaceOptions self() {
         return this;
     }
 }

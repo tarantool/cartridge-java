@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
  */
 public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple> {
 
-    public TarantoolTupleResultImpl(ArrayValue rawTuples, TarantoolSpaceMetadata metadata,
+    public TarantoolTupleResultImpl(
+        ArrayValue rawTuples, TarantoolSpaceMetadata metadata,
         ArrayValueToTarantoolTupleConverter tupleConverter) {
         setItems(rawTuples, metadata, tupleConverter);
     }
@@ -26,7 +27,8 @@ public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple
         setItems(value.asArrayValue(), tupleConverter);
     }
 
-    private void setItems(ArrayValue tupleArray, TarantoolSpaceMetadata responseMetadata,
+    private void setItems(
+        ArrayValue tupleArray, TarantoolSpaceMetadata responseMetadata,
         ArrayValueToTarantoolTupleConverter tupleConverter) {
         this.tuples = tupleArray.list().stream()
             .map(v -> {

@@ -100,7 +100,7 @@ public class MetadataConvertersTest {
         );
 
         TarantoolMetadataContainer metadataContainer = DDLTarantoolSpaceMetadataConverter.getInstance()
-                .fromValue(ddlFormat);
+            .fromValue(ddlFormat);
         TarantoolSpaceMetadata spaceMetadata = metadataContainer.getSpaceMetadataByName().get(customSpaceName);
 
         assertEquals(0, spaceMetadata.getSpaceId());

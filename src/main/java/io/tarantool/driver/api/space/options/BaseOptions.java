@@ -5,16 +5,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * An abstract class-container for all operation options.
+ * Base functional for all operation options.
  *
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public abstract class AbstractOptions<B extends AbstractOptions<B>> implements Options {
+public abstract class BaseOptions implements Options {
 
     private final Map<String, Object> resultMap = new HashMap<>();
-
-    protected abstract B self();
 
     /**
      * Add an option value.

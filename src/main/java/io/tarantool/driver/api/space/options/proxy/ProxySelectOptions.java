@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.space.options.proxy;
 
+import io.tarantool.driver.api.space.options.BaseOptions;
 import io.tarantool.driver.api.space.options.SelectOptions;
 
 import java.util.Optional;
@@ -10,7 +11,7 @@ import java.util.Optional;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxySelectOptions extends ProxyBucketIdOptions<ProxySelectOptions> implements SelectOptions {
+public final class ProxySelectOptions extends BaseOptions implements SelectOptions<ProxySelectOptions> {
 
     public static final String BATCH_SIZE = "batch_size";
 
@@ -41,7 +42,7 @@ public final class ProxySelectOptions extends ProxyBucketIdOptions<ProxySelectOp
     }
 
     @Override
-    protected ProxySelectOptions self() {
+    public ProxySelectOptions self() {
         return this;
     }
 

@@ -169,7 +169,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         converters.add(0, new ConverterWrapper<>(converter, objectClass));
     }
 
-    public <V extends Value, O> void registerValueConverterWithoutTargetClass(ValueType valueType,
+    public <V extends Value, O> void registerValueConverterWithoutTargetClass(
+        ValueType valueType,
         ValueConverter<V, ? extends O> converter) {
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> converters =
             valueConverters.computeIfAbsent(valueType, k -> new LinkedList<>());

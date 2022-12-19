@@ -2,7 +2,6 @@ package io.tarantool.driver.mappers.converters.value;
 
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.core.TarantoolResultImpl;
 import io.tarantool.driver.core.TarantoolTupleResultImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
