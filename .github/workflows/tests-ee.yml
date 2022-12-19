@@ -40,5 +40,6 @@ jobs:
         TARANTOOL_VERSION: ${{ matrix.tarantool-version }}
         TARANTOOL_SERVER_USER: root
         TARANTOOL_SERVER_GROUP: root
-        DOWNLOAD_SDK_URI: ${{ secrets.DOWNLOAD_SDK_URI }}
+        DOWNLOAD_SDK_URI: https://tarantool:${{ secrets.DOWNLOAD_SDK_TOKEN }}@download.tarantool.io/enterprise/release/linux/x86_64/2.10
+        SDK_VERSION: tarantool-enterprise-sdk-nogc64-2.10.4-0-r523.linux.x86_64
       run: mvn -B test -P enterprise --file pom.xml
