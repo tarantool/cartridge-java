@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
 import io.tarantool.driver.api.space.options.InsertManyOptions;
+import io.tarantool.driver.api.space.options.BaseOptions;
 
 import java.util.Optional;
 
@@ -9,8 +10,8 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public final class ProxyInsertManyOptions extends ProxyBaseOptions<ProxyInsertManyOptions>
-    implements InsertManyOptions {
+public final class ProxyInsertManyOptions extends BaseOptions
+    implements InsertManyOptions<ProxyInsertManyOptions> {
 
     public static final String ROLLBACK_ON_ERROR = "rollback_on_error";
     public static final String STOP_ON_ERROR = "stop_on_error";
@@ -52,7 +53,7 @@ public final class ProxyInsertManyOptions extends ProxyBaseOptions<ProxyInsertMa
     }
 
     @Override
-    protected ProxyInsertManyOptions self() {
+    public ProxyInsertManyOptions self() {
         return this;
     }
 

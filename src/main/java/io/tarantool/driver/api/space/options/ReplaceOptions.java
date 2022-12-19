@@ -6,5 +6,6 @@ package io.tarantool.driver.api.space.options;
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface ReplaceOptions extends OperationWithBucketIdOptions {
+public interface ReplaceOptions<T extends ReplaceOptions<T>>
+    extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T> {
 }

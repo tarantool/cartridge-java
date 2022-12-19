@@ -6,5 +6,6 @@ package io.tarantool.driver.api.space.options;
  * @author Artyom Dubinin
  * @author Alexey Kuzin
  */
-public interface InsertOptions extends OperationWithBucketIdOptions {
+public interface InsertOptions<T extends InsertOptions<T>>
+    extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T> {
 }

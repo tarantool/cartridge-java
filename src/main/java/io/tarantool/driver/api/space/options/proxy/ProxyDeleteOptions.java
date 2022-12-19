@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
 import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.BaseOptions;
 
 /**
  * Represent options for delete cluster proxy operation
@@ -8,7 +9,8 @@ import io.tarantool.driver.api.space.options.DeleteOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyDeleteOptions extends ProxyBucketIdOptions<ProxyDeleteOptions> implements DeleteOptions {
+public final class ProxyDeleteOptions extends BaseOptions
+    implements DeleteOptions<ProxyDeleteOptions> {
 
     private ProxyDeleteOptions() {
     }
@@ -23,7 +25,7 @@ public final class ProxyDeleteOptions extends ProxyBucketIdOptions<ProxyDeleteOp
     }
 
     @Override
-    protected ProxyDeleteOptions self() {
+    public ProxyDeleteOptions self() {
         return this;
     }
 }

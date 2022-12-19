@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
 import io.tarantool.driver.api.space.options.InsertOptions;
+import io.tarantool.driver.api.space.options.BaseOptions;
 
 /**
  * Represent options for insert cluster proxy operation
@@ -8,7 +9,7 @@ import io.tarantool.driver.api.space.options.InsertOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyInsertOptions extends ProxyBucketIdOptions<ProxyInsertOptions> implements InsertOptions {
+public final class ProxyInsertOptions extends BaseOptions implements InsertOptions<ProxyInsertOptions> {
 
     private ProxyInsertOptions() {
     }
@@ -23,7 +24,7 @@ public final class ProxyInsertOptions extends ProxyBucketIdOptions<ProxyInsertOp
     }
 
     @Override
-    protected ProxyInsertOptions self() {
+    public ProxyInsertOptions self() {
         return this;
     }
 }

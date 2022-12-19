@@ -7,7 +7,7 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public interface InsertManyOptions extends OperationWithTimeoutOptions {
+public interface InsertManyOptions<T extends InsertManyOptions<T>> extends OperationWithTimeoutOptions<T> {
     /**
      * Return whether all changes should not be saved if any tuple insertion
      * was unsuccesful.

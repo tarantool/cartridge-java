@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.space.options.proxy;
 
+import io.tarantool.driver.api.space.options.BaseOptions;
 import io.tarantool.driver.api.space.options.UpsertOptions;
 
 /**
@@ -8,7 +9,7 @@ import io.tarantool.driver.api.space.options.UpsertOptions;
  * @author Alexey Kuzin
  * @author Artyom Dubinin
  */
-public final class ProxyUpsertOptions extends ProxyBucketIdOptions<ProxyUpsertOptions> implements UpsertOptions {
+public final class ProxyUpsertOptions extends BaseOptions implements UpsertOptions<ProxyUpsertOptions> {
 
     private ProxyUpsertOptions() {
     }
@@ -23,7 +24,7 @@ public final class ProxyUpsertOptions extends ProxyBucketIdOptions<ProxyUpsertOp
     }
 
     @Override
-    protected ProxyUpsertOptions self() {
+    public ProxyUpsertOptions self() {
         return this;
     }
 }
