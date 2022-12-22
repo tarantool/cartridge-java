@@ -8,6 +8,7 @@ import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
+import io.tarantool.driver.api.space.options.DeleteOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -21,11 +22,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Artyom Dubinin
@@ -118,5 +121,39 @@ public class ProxySpaceDeleteOptionsIT extends SharedCartridgeContainer {
         ProxyDeleteOptions deleteOptions = ProxyDeleteOptions.create().withBucketId(otherStorageBucketId);
         selectResult = profileSpace.delete(condition, deleteOptions).get();
         assertEquals(1, selectResult.size());
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        profileSpace.insert(tarantoolTuple).get();
+
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+
+        // without fields
+        TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(conditions).get();
+        assertEquals(1, deleteResult.size());
+
+        TarantoolTuple tuple = deleteResult.get(0);
+        assertEquals(5, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals("FIO", tuple.getString(2));
+        assertEquals(50, tuple.getInteger(3));
+        assertEquals(100, tuple.getInteger(4));
+
+        profileSpace.insert(tarantoolTuple).get();
+        // with fields
+        DeleteOptions options = ProxyDeleteOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        deleteResult = profileSpace.delete(conditions, options).get();
+        assertEquals(1, deleteResult.size());
+
+        tuple = deleteResult.get(0);
+        assertEquals(2, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertEquals("FIO", tuple.getString(1));
     }
 }

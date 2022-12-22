@@ -7,5 +7,5 @@ package io.tarantool.driver.api.space.options;
  * @author Alexey Kuzin
  */
 public interface DeleteOptions<T extends DeleteOptions<T>>
-    extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T> {
+    extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T> {
 }

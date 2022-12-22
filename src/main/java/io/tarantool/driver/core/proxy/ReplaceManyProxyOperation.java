@@ -59,6 +59,7 @@ public final class ReplaceManyProxyOperation<T extends Packable, R extends Colle
                 .withTimeout(options.getTimeout())
                 .withStopOnError(options.getStopOnError())
                 .withRollbackOnError(options.getRollbackOnError())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuples, requestOptions.asMap());

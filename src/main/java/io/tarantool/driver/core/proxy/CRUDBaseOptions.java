@@ -24,12 +24,11 @@ class CRUDBaseOptions extends CRUDAbstractOperationOptions {
      *
      * @see CRUDAbstractOperationOptions.AbstractBuilder
      */
-    protected abstract static
-    class AbstractBuilder<O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
-        extends CRUDAbstractOperationOptions.AbstractBuilder<O, T> {
+    protected abstract static class AbstractBuilder<O extends CRUDBaseOptions, B extends AbstractBuilder<O, B>>
+        extends CRUDAbstractOperationOptions.AbstractBuilder<O, B> {
         protected Optional<Integer> timeout = Optional.empty();
 
-        public T withTimeout(Optional<Integer> timeout) {
+        public B withTimeout(Optional<Integer> timeout) {
             this.timeout = timeout;
             return self();
         }

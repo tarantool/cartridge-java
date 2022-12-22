@@ -56,9 +56,10 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public UpdateProxyOperation<T> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
+            CRUDBucketIdOptions requestOptions = new CRUDUpdateOptions.Builder()
                 .withTimeout(options.getTimeout())
                 .withBucketId(options.getBucketId())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(spaceName,

@@ -58,9 +58,10 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public UpsertProxyOperation<T, R> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
+            CRUDBucketIdOptions requestOptions = new CRUDUpsertOptions.Builder()
                 .withTimeout(options.getTimeout())
                 .withBucketId(options.getBucketId())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(

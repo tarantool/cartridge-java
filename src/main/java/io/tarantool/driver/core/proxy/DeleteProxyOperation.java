@@ -49,9 +49,10 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public DeleteProxyOperation<T> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
+            CRUDBucketIdOptions requestOptions = new CRUDDeleteOptions.Builder()
                 .withTimeout(options.getTimeout())
                 .withBucketId(options.getBucketId())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), requestOptions.asMap());

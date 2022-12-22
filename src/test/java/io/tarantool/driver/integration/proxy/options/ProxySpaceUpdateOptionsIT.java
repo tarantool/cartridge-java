@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.UpdateOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyUpdateOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -18,11 +19,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -118,5 +121,37 @@ public class ProxySpaceUpdateOptionsIT extends SharedCartridgeContainer {
         ).get();
         crudUpdateOpts = client.eval("return crud_update_opts").get();
         assertEquals(bucketId, ((HashMap) crudUpdateOpts.get(0)).get("bucket_id"));
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+
+        // without fields
+        TarantoolTuple insertTuple = profileSpace.insert(tarantoolTuple).get().get(0);
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, insertTuple).get();
+        assertEquals(1, updateResult.size());
+
+        TarantoolTuple tuple = updateResult.get(0);
+        assertEquals(5, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals("FIO", tuple.getString(2));
+        assertEquals(50, tuple.getInteger(3));
+        assertEquals(100, tuple.getInteger(4));
+
+        // with fields
+        UpdateOptions options = ProxyUpdateOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        updateResult = profileSpace.update(conditions, insertTuple, options).get();
+        assertEquals(1, updateResult.size());
+
+        tuple = updateResult.get(0);
+        assertEquals(2, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertEquals("FIO", tuple.getString(1));
     }
 }
