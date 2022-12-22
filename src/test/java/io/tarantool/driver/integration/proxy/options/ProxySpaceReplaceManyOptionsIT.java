@@ -4,6 +4,7 @@ import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.ReplaceManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -18,11 +19,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexey Kuzin
@@ -121,5 +124,44 @@ public class ProxySpaceReplaceManyOptionsIT extends SharedCartridgeContainer {
         ).get();
         crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudReplaceManyOpts.get(0)).get("timeout"));
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(0, null, "0", 0, 0),
+            tupleFactory.create(1, null, "1", 1, 1)
+        );
+
+        // without fields
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replaceMany(tarantoolTuples).get();
+        replaceResult.sort(Comparator.comparing(tuple -> tuple.getInteger(0)));
+        assertEquals(2, replaceResult.size());
+
+        for (int i = 0; i < replaceResult.size(); i++) {
+            TarantoolTuple tuple = replaceResult.get(i);
+            assertEquals(5, tuple.size());
+            assertEquals(i, tuple.getInteger(0));
+            assertNotNull(tuple.getInteger(1)); //bucket_id
+            assertEquals(String.valueOf(i), tuple.getString(2));
+            assertEquals(i, tuple.getInteger(3));
+            assertEquals(i, tuple.getInteger(4));
+        }
+
+        // with fields
+        ReplaceManyOptions options = ProxyReplaceManyOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        replaceResult = profileSpace.replaceMany(tarantoolTuples, options).get();
+        replaceResult.sort(Comparator.comparing(tuple -> tuple.getInteger(0)));
+        assertEquals(2, replaceResult.size());
+
+        for (int i = 0; i < replaceResult.size(); i++) {
+            TarantoolTuple tuple = replaceResult.get(i);
+            assertEquals(2, tuple.size());
+            assertEquals(i, tuple.getInteger(0));
+            assertEquals(String.valueOf(i), tuple.getString(1));
+        }
     }
 }

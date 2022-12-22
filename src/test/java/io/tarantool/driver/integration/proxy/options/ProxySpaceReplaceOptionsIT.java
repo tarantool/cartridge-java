@@ -21,11 +21,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Artyom Dubinin
@@ -126,5 +128,35 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
         ProxyDeleteOptions deleteOptions = ProxyDeleteOptions.create().withBucketId(otherStorageBucketId);
         deleteResult = profileSpace.delete(condition, deleteOptions).get();
         assertEquals(1, deleteResult.size());
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+
+        // without fields
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replace(tarantoolTuple).get();
+        assertEquals(1, replaceResult.size());
+
+        TarantoolTuple tuple = replaceResult.get(0);
+        assertEquals(5, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals("FIO", tuple.getString(2));
+        assertEquals(50, tuple.getInteger(3));
+        assertEquals(100, tuple.getInteger(4));
+
+        // with fields
+        ReplaceOptions options = ProxyReplaceOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        replaceResult = profileSpace.replace(tarantoolTuple, options).get();
+        assertEquals(1, replaceResult.size());
+
+        tuple = replaceResult.get(0);
+        assertEquals(2, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertEquals("FIO", tuple.getString(1));
     }
 }

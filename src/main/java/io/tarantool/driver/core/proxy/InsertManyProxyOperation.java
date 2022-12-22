@@ -59,6 +59,7 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
                 .withTimeout(options.getTimeout())
                 .withStopOnError(options.getStopOnError())
                 .withRollbackOnError(options.getRollbackOnError())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuples, requestOptions.asMap());

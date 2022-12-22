@@ -52,9 +52,10 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
         }
 
         public ReplaceProxyOperation<T, R> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDBucketIdOptions.Builder()
+            CRUDBucketIdOptions requestOptions = new CRUDReplaceOptions.Builder()
                 .withTimeout(options.getTimeout())
                 .withBucketId(options.getBucketId())
+                .withFields(options.getFields())
                 .build();
 
             List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());

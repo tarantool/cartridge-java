@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Artyom Dubinin
@@ -228,5 +229,36 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
         });
         assertTrue(e.getCause() instanceof TarantoolInternalException);
         assertTrue(e.getCause().getMessage().contains("Bucket is unreachable: bucket id is out of range"));
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+                client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+
+        // without fields
+        TarantoolResult<TarantoolTuple> insertResult = profileSpace.insert(tarantoolTuple).get();
+        assertEquals(1, insertResult.size());
+
+        TarantoolTuple tuple = insertResult.get(0);
+        assertEquals(5, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertNotNull(tuple.getInteger(1)); //bucket_id
+        assertEquals("FIO", tuple.getString(2));
+        assertEquals(50, tuple.getInteger(3));
+        assertEquals(100, tuple.getInteger(4));
+
+        // with fields
+        profileSpace.delete(Conditions.equals(PK_FIELD_NAME, 1)).get();
+        InsertOptions options = ProxyInsertOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        insertResult = profileSpace.insert(tarantoolTuple, options).get();
+        assertEquals(1, insertResult.size());
+
+        tuple = insertResult.get(0);
+        assertEquals(2, tuple.size());
+        assertEquals(1, tuple.getInteger(0));
+        assertEquals("FIO", tuple.getString(1));
     }
 }

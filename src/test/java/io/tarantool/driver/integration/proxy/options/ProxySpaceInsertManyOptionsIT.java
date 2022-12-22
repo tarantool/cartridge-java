@@ -3,7 +3,9 @@ package io.tarantool.driver.integration.proxy.options;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -18,14 +20,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexey Kuzin
+ * @author Artyom Dubinin
  */
 public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
 
@@ -38,6 +43,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
     public static String PASSWORD;
 
     private static final String TEST_SPACE_NAME = "test__profile";
+    private static final String PK_FIELD_NAME = "profile_id";
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -131,5 +137,46 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
         ).get();
         crudInsertManyOpts = client.eval("return crud_insert_many_opts").get();
         assertEquals(customRequestTimeout, ((HashMap) crudInsertManyOpts.get(0)).get("timeout"));
+    }
+
+    @Test
+    public void withFieldsTest() throws ExecutionException, InterruptedException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(0, null, "0", 0, 0),
+            tupleFactory.create(1, null, "1", 1, 1)
+        );
+
+        // without fields
+        TarantoolResult<TarantoolTuple> insertResult = profileSpace.insertMany(tarantoolTuples).get();
+        assertEquals(2, insertResult.size());
+        insertResult.sort(Comparator.comparing(tuple -> tuple.getInteger(0)));
+
+        for (int i = 0; i < insertResult.size(); i++) {
+            TarantoolTuple tuple = insertResult.get(i);
+            assertEquals(5, tuple.size());
+            assertEquals(i, tuple.getInteger(0));
+            assertNotNull(tuple.getInteger(1)); //bucket_id
+            assertEquals(String.valueOf(i), tuple.getString(2));
+            assertEquals(i, tuple.getInteger(3));
+            assertEquals(i, tuple.getInteger(4));
+        }
+
+        // with fields
+        profileSpace.delete(Conditions.equals(PK_FIELD_NAME, 0)).get();
+        profileSpace.delete(Conditions.equals(PK_FIELD_NAME, 1)).get();
+        InsertManyOptions options = ProxyInsertManyOptions.create().withFields(Arrays.asList("profile_id", "fio"));
+        insertResult = profileSpace.insertMany(tarantoolTuples, options).get();
+        assertEquals(2, insertResult.size());
+        insertResult.sort(Comparator.comparing(tuple -> tuple.getInteger(0)));
+
+        for (int i = 0; i < insertResult.size(); i++) {
+            TarantoolTuple tuple = insertResult.get(i);
+            assertEquals(2, tuple.size());
+            assertEquals(i, tuple.getInteger(0));
+            assertEquals(String.valueOf(i), tuple.getString(1));
+        }
     }
 }

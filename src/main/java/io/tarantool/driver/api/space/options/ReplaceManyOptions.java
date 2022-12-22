@@ -7,7 +7,8 @@ import java.util.Optional;
  *
  * @author Alexey Kuzin
  */
-public interface ReplaceManyOptions<T extends ReplaceManyOptions<T>> extends OperationWithTimeoutOptions<T> {
+public interface ReplaceManyOptions<T extends ReplaceManyOptions<T>>
+    extends OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T> {
     /**
      * Return whether all changes should not be saved if any tuple replace
      * was unsuccesful.
