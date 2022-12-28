@@ -8,6 +8,7 @@ import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -33,15 +34,31 @@ public class SingleValueCallResultImpl<T> implements SingleValueCallResult<T> {
         if (result == null) {
             throw new TarantoolFunctionCallException("Function call result is null");
         }
-        if (result.size() == 0 || result.size() == 1 && result.get(0).isNilValue()) {
+        int callResultSize = result.size();
+        Value resultValue = result.getOrNilValue(0);
+        Value errorsValue = result.getOrNilValue(1);
+        if (callResultSize == 0 || callResultSize == 1 && resultValue.isNilValue()) {
             // [nil] or []
             return null;
-        } else if (result.size() == 2 && (result.get(0).isNilValue() && !result.get(1).isNilValue())) {
+        } else if (callResultSize == 2 && (resultValue.isNilValue() && !errorsValue.isNilValue())) {
             // [nil, "Error msg..."] or [nil, {str="Error msg...", stack="..."}]
-            throw TarantoolErrorsParser.parse(result.get(1));
+            throw TarantoolErrorsParser.parse(errorsValue);
+        } else if (callResultSize == 2 && errorsValue.isArrayValue()) {
+            // [result, errors]
+            List<Value> errorsList = errorsValue.asArrayValue().list();
+            // We are not really interested in all errors, since the operation is already failed
+            if (!errorsList.isEmpty()) {
+                throw TarantoolErrorsParser.parse(errorsList.get(0));
+            }
+            throw new TarantoolFunctionCallException("Unexpected error format in the function call result");
+        } else if (callResultSize > 1 && !errorsValue.isNilValue()) {
+            throw new TarantoolFunctionCallException(
+                "Too many values in the function call result, " +
+                    "expected \"[result]\", \"[result, errors]\" or \"[nil, error]\""
+            );
         } else {
             // [result]
-            return valueGetter.apply(result.get(0));
+            return valueGetter.apply(resultValue);
         }
     }
 
