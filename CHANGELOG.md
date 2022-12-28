@@ -2,10 +2,16 @@
 
 ## [Unreleased]
 
-- Added `fields` option to ProxySpace ([#236](https://github.com/tarantool/cartridge-java/pull/236))
+### Features
+- Add `fields` option to ProxySpace for controlling the result tuple fields ([#236](https://github.com/tarantool/cartridge-java/pull/236))
+- Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
+
+### Bugfixes
+- Add parsing of the batch operation errors ([#334](https://github.com/tarantool/cartridge-java/issues/334))
+
+### Internal and API changes
 - Move metadata parsing to separate converters ([#325](https://github.com/tarantool/cartridge-java/pull/325))
 - Add simple to use TarantoolTupleResultMapper factory ([#321](https://github.com/tarantool/cartridge-java/pull/321))
-- Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
 - Use netty part dependencies instead of netty-all ([#295](https://github.com/tarantool/cartridge-java/issues/295))
 - Refactor mappers and split `TarantoolResultConverter` ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** `TarantoolResultConverter` was removed, use `DefaultArrayValueToTarantoolResultConverter` or `DefaultMapValueToTarantoolTupleResultConverter` instead ([#301](https://github.com/tarantool/cartridge-java/pull/301))
@@ -16,11 +22,14 @@
 - **[breaking change]** `*MapperFactory` methods were renamed ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** `*DefaultConverter` converters moved into `mappers.converters.value.defaults` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
 - **[breaking change]** All converters from `mappers.converters.value.custom` moved into `mappers.converters.value` package ([#301](https://github.com/tarantool/cartridge-java/pull/301))
-- Return jmh-generator-annprocess dependency
+- Return back the `jmh-generator-annprocess` dependency
 
 ## [0.9.2] - 2022-11-15
 
+### Features
 - Adding default mapper for long arrays ([#290](https://github.com/tarantool/cartridge-java/pull/290))
+
+### Internal and API changes
 - Add dependency management ([#296](https://github.com/tarantool/cartridge-java/pull/296))
 - Bump testcontainers-java-tarantool to 0.5.3 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
 - Bump slf4j-api to 2.0.3 ([#296](https://github.com/tarantool/cartridge-java/pull/296))
@@ -34,9 +43,12 @@
 
 ## [0.9.1] - 2022-10-13
 
+### Features
+- Enable Short to Integer converters ([#282](https://github.com/tarantool/cartridge-java/issues/282))
+
+### Internal and API changes
 - Changed TarantoolNullField class to singleton ([#195](https://github.com/tarantool/cartridge-java/pull/275))
 - Bump netty to 4.1.78 ([#280](https://github.com/tarantool/cartridge-java/issues/280))
-- Enable Short to Integer converters ([#282](https://github.com/tarantool/cartridge-java/issues/282))
 
 ### Security
 - Bump jackson-databind to 2.14.1-rc1 ([#284](https://github.com/tarantool/cartridge-java/pull/284))
