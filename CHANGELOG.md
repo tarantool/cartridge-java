@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2022-12-29
+
 ### Features
 - Add `fields` option to ProxySpace for controlling the result tuple fields ([#236](https://github.com/tarantool/cartridge-java/pull/236))
 - Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
