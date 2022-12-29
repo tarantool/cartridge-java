@@ -27,7 +27,12 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
     protected TarantoolResultImpl() {
     }
 
-    public TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> valueConverter) {
+    protected TarantoolResultImpl buildTarantoolResultImpl(ArrayValue value,
+            ValueConverter<ArrayValue, T> valueConverter) {
+        return new TarantoolResultImpl(value, valueConverter);
+    }
+
+    protected TarantoolResultImpl(ArrayValue value, ValueConverter<ArrayValue, T> valueConverter) {
         // [[[],...]]
         setItems(value, valueConverter);
     }

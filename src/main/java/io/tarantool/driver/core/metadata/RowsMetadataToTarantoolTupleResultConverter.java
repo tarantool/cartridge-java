@@ -18,6 +18,7 @@ import java.util.Map;
  * @author Artyom Dubinin
  */
 public class RowsMetadataToTarantoolTupleResultConverter
+    extends TarantoolTupleResultImpl
     implements ValueConverter<MapValue, TarantoolResult<TarantoolTuple>> {
 
     private static final long serialVersionUID = -5228606294087295535L;
@@ -42,7 +43,7 @@ public class RowsMetadataToTarantoolTupleResultConverter
         ArrayValue rawMetadata = tupleMap.get(RESULT_META).asArrayValue();
         TarantoolSpaceMetadata parsedMetadata = spaceMetadataConverter.fromValue(rawMetadata);
 
-        return new TarantoolTupleResultImpl(rawTuples, parsedMetadata, tupleConverter);
+        return buildTarantoolTupleResultImpl(rawTuples, parsedMetadata, tupleConverter);
     }
 
     @Override

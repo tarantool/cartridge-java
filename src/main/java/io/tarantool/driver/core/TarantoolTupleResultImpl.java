@@ -17,14 +17,30 @@ import java.util.stream.Collectors;
  */
 public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple> {
 
-    public TarantoolTupleResultImpl(
+    protected TarantoolTupleResultImpl(
         ArrayValue rawTuples, TarantoolSpaceMetadata metadata,
-        ArrayValueToTarantoolTupleConverter tupleConverter) {
+            ArrayValueToTarantoolTupleConverter tupleConverter) {
         setItems(rawTuples, metadata, tupleConverter);
     }
 
-    public TarantoolTupleResultImpl(Value value, ArrayValueToTarantoolTupleConverter tupleConverter) {
+    protected TarantoolTupleResultImpl(Value value, ArrayValueToTarantoolTupleConverter tupleConverter) {
         setItems(value.asArrayValue(), tupleConverter);
+    }
+
+    protected TarantoolTupleResultImpl() {
+
+    }
+
+    protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(ArrayValue rawTuples,
+            TarantoolSpaceMetadata metadata,
+            ArrayValueToTarantoolTupleConverter tupleConverter) {
+        return new TarantoolTupleResultImpl(rawTuples, metadata, tupleConverter);
+
+    }
+
+    protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(Value value,
+            ArrayValueToTarantoolTupleConverter tupleConverter) {
+        return new TarantoolTupleResultImpl(value, tupleConverter);
     }
 
     private void setItems(
