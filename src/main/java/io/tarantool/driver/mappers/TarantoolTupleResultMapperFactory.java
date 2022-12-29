@@ -25,6 +25,7 @@ public interface TarantoolTupleResultMapperFactory {
      * <p>
      * Returned TarantoolResult doesn't store metadata, and you can't get field by field name
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
      * @return mapper that parses list of arrays to {@code TarantoolResult<TarantoolTuple>}
      */
     TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
@@ -42,6 +43,8 @@ public interface TarantoolTupleResultMapperFactory {
      * <p>
      * For example, it can be used to parse result from IPROTO_SELECT
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
+     * @param spaceMetadata space metadata to parse values by their names
      * @return mapper that parses list of arrays to {@code TarantoolResult<TarantoolTuple>}
      */
     TarantoolResultMapper<TarantoolTuple> withArrayValueToTarantoolTupleResultConverter(
@@ -59,6 +62,7 @@ public interface TarantoolTupleResultMapperFactory {
      * <p>
      * Returned TarantoolResult doesn't store metadata, and you can't get field by field name
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
      * @return mapper that parses map to {@code TarantoolResult<TarantoolTuple>}
      */
     TarantoolResultMapper<TarantoolTuple> withRowsMetadataToTarantoolTupleResultConverter(
@@ -75,6 +79,8 @@ public interface TarantoolTupleResultMapperFactory {
      * mapper result: {@code TarantoolResult<TarantoolTuple>}
      * <p>
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
+     * @param spaceMetadata space metadata to parse values by their names
      * @return mapper that parses map to {@code TarantoolResult<TarantoolTuple>}
      */
     TarantoolResultMapper<TarantoolTuple> withRowsMetadataToTarantoolTupleResultConverter(
@@ -95,6 +101,8 @@ public interface TarantoolTupleResultMapperFactory {
      * <p>
      * Mapper result and the inner contents depend on the parameters or the passed converters.
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
+     * @param spaceMetadata space metadata to parse values by their names
      * @return default mapper for single value call result with a list of tuples
      */
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
@@ -113,6 +121,8 @@ public interface TarantoolTupleResultMapperFactory {
      * mapper result: converted value of <code>x</code> to {@code TarantoolResult<TarantoolTuple>}
      * <p>
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
+     * @param spaceMetadata space metadata to parse values by their names
      * @return mapper for single value call result with a list of tuples
      */
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
@@ -131,6 +141,8 @@ public interface TarantoolTupleResultMapperFactory {
      * <p>
      * Mapper result and its inner contents depend on the parameters or the passed converters.
      *
+     * @param messagePackMapper MessagePack-to-entity converter for tuples
+     * @param spaceMetadata space metadata to parse values by their names
      * @return mapper for multi value call result as a list of tuples
      */
     CallResultMapper<
