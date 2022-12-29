@@ -9,7 +9,7 @@
     <groupId>io.tarantool</groupId>
     <artifactId>cartridge-driver</artifactId>
     <packaging>jar</packaging>
-    <version>0.10.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <licenses>
         <license>
@@ -49,7 +49,7 @@
         <connection>scm:git:git@github.com/tarantool/cartridge-java.git</connection>
         <developerConnection>scm:git:git@github.com:tarantool/cartridge-java.git</developerConnection>
         <url>http://github.com/tarantool/cartridge-java/tree/master</url>
-      <tag>v0.10.0</tag>
+      <tag>HEAD</tag>
     </scm>
 
     <properties>
