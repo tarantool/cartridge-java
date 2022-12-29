@@ -10,6 +10,7 @@ import org.msgpack.value.ArrayValue;
  * @author Artyom Dubinin
  */
 public class ArrayValueToTarantoolTupleResultConverter
+    extends TarantoolResultImpl
     implements ValueConverter<ArrayValue, TarantoolResult<TarantoolTuple>> {
 
     private static final long serialVersionUID = -1348387430063097175L;
@@ -24,6 +25,6 @@ public class ArrayValueToTarantoolTupleResultConverter
 
     @Override
     public TarantoolResult<TarantoolTuple> fromValue(ArrayValue value) {
-        return new TarantoolTupleResultImpl(value, tupleConverter);
+        return buildTarantoolResultImpl(value, tupleConverter);
     }
 }

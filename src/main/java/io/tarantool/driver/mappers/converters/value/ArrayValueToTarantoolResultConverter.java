@@ -9,6 +9,7 @@ import org.msgpack.value.ArrayValue;
  * @author Artyom Dubinin
  */
 public class ArrayValueToTarantoolResultConverter<T>
+    extends TarantoolResultImpl
     implements ValueConverter<ArrayValue, TarantoolResult<T>> {
 
     private static final long serialVersionUID = -1348387430063097175L;
@@ -16,6 +17,7 @@ public class ArrayValueToTarantoolResultConverter<T>
     private ValueConverter<ArrayValue, T> valueConverter;
 
     public ArrayValueToTarantoolResultConverter() {
+        super();
     }
 
     public ArrayValueToTarantoolResultConverter(ValueConverter<ArrayValue, T> valueConverter) {
@@ -24,6 +26,6 @@ public class ArrayValueToTarantoolResultConverter<T>
 
     @Override
     public TarantoolResult<T> fromValue(ArrayValue value) {
-        return new TarantoolResultImpl<>(value, valueConverter);
+        return buildTarantoolResultImpl(value, valueConverter);
     }
 }
