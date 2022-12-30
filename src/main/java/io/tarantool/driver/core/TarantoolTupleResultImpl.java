@@ -28,14 +28,12 @@ public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple
     }
 
     protected TarantoolTupleResultImpl() {
-
     }
 
     protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(ArrayValue rawTuples,
             TarantoolSpaceMetadata metadata,
             ArrayValueToTarantoolTupleConverter tupleConverter) {
         return new TarantoolTupleResultImpl(rawTuples, metadata, tupleConverter);
-
     }
 
     protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(Value value,
