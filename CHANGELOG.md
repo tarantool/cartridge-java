@@ -13,7 +13,7 @@
 ### Features
 - Add `fields` option to ProxySpace for controlling the result tuple fields ([#236](https://github.com/tarantool/cartridge-java/pull/236))
 - Parse metadata from crud response ([#272](https://github.com/tarantool/cartridge-java/pull/272))
-
+- Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
 ### Bugfixes
 - Add parsing of the batch operation errors ([#334](https://github.com/tarantool/cartridge-java/issues/334))
 
