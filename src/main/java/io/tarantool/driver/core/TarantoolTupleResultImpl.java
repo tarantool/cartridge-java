@@ -19,26 +19,12 @@ public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple
 
     protected TarantoolTupleResultImpl(
         ArrayValue rawTuples, TarantoolSpaceMetadata metadata,
-            ArrayValueToTarantoolTupleConverter tupleConverter) {
+        ArrayValueToTarantoolTupleConverter tupleConverter) {
         setItems(rawTuples, metadata, tupleConverter);
     }
 
     protected TarantoolTupleResultImpl(Value value, ArrayValueToTarantoolTupleConverter tupleConverter) {
         setItems(value.asArrayValue(), tupleConverter);
-    }
-
-    protected TarantoolTupleResultImpl() {
-    }
-
-    protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(ArrayValue rawTuples,
-            TarantoolSpaceMetadata metadata,
-            ArrayValueToTarantoolTupleConverter tupleConverter) {
-        return new TarantoolTupleResultImpl(rawTuples, metadata, tupleConverter);
-    }
-
-    protected TarantoolTupleResultImpl buildTarantoolTupleResultImpl(Value value,
-            ArrayValueToTarantoolTupleConverter tupleConverter) {
-        return new TarantoolTupleResultImpl(value, tupleConverter);
     }
 
     private void setItems(

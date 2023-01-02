@@ -3,6 +3,7 @@ package io.tarantool.driver.core.metadata;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.core.TarantoolResultFactory;
 import io.tarantool.driver.core.TarantoolTupleResultImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
@@ -18,7 +19,6 @@ import java.util.Map;
  * @author Artyom Dubinin
  */
 public class RowsMetadataToTarantoolTupleResultConverter
-    extends TarantoolTupleResultImpl
     implements ValueConverter<MapValue, TarantoolResult<TarantoolTuple>> {
 
     private static final long serialVersionUID = -5228606294087295535L;
@@ -30,10 +30,12 @@ public class RowsMetadataToTarantoolTupleResultConverter
         CRUDResponseToTarantoolSpaceMetadataConverter.getInstance();
 
     private final ArrayValueToTarantoolTupleConverter tupleConverter;
+    private final TarantoolResultFactory<TarantoolTuple> tarantoolResultFactory;
 
     public RowsMetadataToTarantoolTupleResultConverter(ArrayValueToTarantoolTupleConverter tupleConverter) {
         super();
         this.tupleConverter = tupleConverter;
+        this.tarantoolResultFactory = new TarantoolResultFactory<>();
     }
 
     @Override
@@ -43,7 +45,7 @@ public class RowsMetadataToTarantoolTupleResultConverter
         ArrayValue rawMetadata = tupleMap.get(RESULT_META).asArrayValue();
         TarantoolSpaceMetadata parsedMetadata = spaceMetadataConverter.fromValue(rawMetadata);
 
-        return buildTarantoolTupleResultImpl(rawTuples, parsedMetadata, tupleConverter);
+        return tarantoolResultFactory.createTarantoolTupleResultImpl(rawTuples, parsedMetadata, tupleConverter);
     }
 
     @Override
