@@ -9,6 +9,7 @@ import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.utils.Assert;
 
+import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -18,6 +19,7 @@ import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryN
  * Tarantool client configurator implementation.
  *
  * @author Oleg Kuznetsov
+ * @author Artyom Dubinin
  */
 public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigurator<SELF>>
     implements TarantoolClientConfigurator<SELF> {
@@ -26,6 +28,7 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
 
     protected RequestRetryPolicyFactory retryPolicyFactory;
     protected ProxyOperationsMappingConfig mappingConfig;
+    protected Executor executor;
 
     public TarantoolClientConfiguratorImpl(TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
         this.client = client;
@@ -60,11 +63,34 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
     }
 
     @Override
+    public SELF withRetryingByNumberOfAttempts(
+        int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
+        .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy, Executor executor) {
+        return withRetryingByNumberOfAttempts(numberOfAttempts, retryNetworkErrors(), policy, executor);
+    }
+
+    @Override
     public <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
         int numberOfAttempts, T exceptionsCheck,
         UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy) {
         return withRetrying(policy.apply(TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
             .builder(numberOfAttempts, exceptionsCheck)).build());
+    }
+
+    @Override
+    public <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
+        int numberOfAttempts, T exceptionsCheck,
+        UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy,
+        Executor executor) {
+        return withRetrying(policy.apply(TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory
+            .builder(numberOfAttempts, exceptionsCheck)).build(), executor);
+    }
+
+    @Override
+    public SELF withRetryingIndefinitely(
+        UnaryOperator<TarantoolRequestRetryPolicies
+            .InfiniteRetryPolicyFactory.Builder<Predicate<Throwable>>> policy, Executor executor) {
+        return withRetryingIndefinitely(retryNetworkErrors(), policy, executor);
     }
 
     @Override
@@ -82,8 +108,23 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
     }
 
     @Override
+    public <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
+        T callback, UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy,
+        Executor executor) {
+        return withRetrying(policy.apply(TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.builder(callback))
+            .build(), executor);
+    }
+
+    @Override
     public SELF withRetrying(RequestRetryPolicyFactory factory) {
         this.retryPolicyFactory = factory;
+        return getSelf();
+    }
+
+    @Override
+    public SELF withRetrying(RequestRetryPolicyFactory factory, Executor executor) {
+        this.retryPolicyFactory = factory;
+        this.executor = executor;
         return getSelf();
     }
 
@@ -107,7 +148,11 @@ public class TarantoolClientConfiguratorImpl<SELF extends TarantoolClientConfigu
             client = new ProxyTarantoolTupleClient(client, this.mappingConfig);
         }
         if (this.retryPolicyFactory != null) {
-            client = new RetryingTarantoolTupleClient(client, this.retryPolicyFactory);
+            if (this.executor != null) {
+                client = new RetryingTarantoolTupleClient(client, this.retryPolicyFactory, executor);
+            } else {
+                client = new RetryingTarantoolTupleClient(client, this.retryPolicyFactory);
+            }
         }
 
         return client;
