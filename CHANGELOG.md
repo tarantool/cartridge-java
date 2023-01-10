@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Internal and API changes
+- Add ability to pass retrying executor in client builder ([#339](https://github.com/tarantool/cartridge-java/issues/339))
+
 ## [0.10.0] - 2022-12-29
 
 ### Features

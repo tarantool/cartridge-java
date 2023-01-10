@@ -5,6 +5,7 @@ import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 
+import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -59,6 +60,20 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
 
     /**
      * Configure the attempts bound request retry policy.
+     * Only the requests that failed with known network exceptions will be retried by default.
+     *
+     * @param numberOfAttempts the number of retry attempts for each request
+     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *                         e.g. a lambda function taking the builder
+     * @param executor         executor service for retry callbacks
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     */
+    SELF withRetryingByNumberOfAttempts(
+        int numberOfAttempts, UnaryOperator<TarantoolRequestRetryPolicies
+        .AttemptsBoundRetryPolicyFactory.Builder<Predicate<Throwable>>> policy, Executor executor);
+
+    /**
+     * Configure the attempts bound request retry policy.
      *
      * @param numberOfAttempts the number of retry attempts for each request
      * @param exceptionsCheck  function checking whether the given exception may be retried
@@ -70,6 +85,22 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
     <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
         int numberOfAttempts, T exceptionsCheck,
         UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy);
+
+    /**
+     * Configure the attempts bound request retry policy.
+     *
+     * @param numberOfAttempts the number of retry attempts for each request
+     * @param exceptionsCheck  function checking whether the given exception may be retried
+     * @param policy           builder provider for {@link TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy},
+     *                         e.g. a lambda function taking the builder
+     * @param executor         executor service for retry callbacks
+     * @param <T>              callback type for exceptions check
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     */
+    <T extends Predicate<Throwable>> SELF withRetryingByNumberOfAttempts(
+        int numberOfAttempts, T exceptionsCheck,
+        UnaryOperator<TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicyFactory.Builder<T>> policy,
+        Executor executor);
 
     /**
      * Configure the infinite request retry policy.
@@ -85,6 +116,19 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
 
     /**
      * Configure the infinite request retry policy.
+     * Only the requests that failed with known network exceptions will be retried by default.
+     *
+     * @param policy   builder provider for {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy},
+     *                 e.g. a lambda function taking the builder
+     * @param executor executor service for retry callbacks
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     */
+    SELF withRetryingIndefinitely(
+        UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder
+            <Predicate<Throwable>>> policy, Executor executor);
+
+    /**
+     * Configure the infinite request retry policy.
      *
      * @param policy   builder provider for {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy},
      *                 e.g. a lambda function taking the builder
@@ -97,6 +141,20 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
         UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy);
 
     /**
+     * Configure the infinite request retry policy.
+     *
+     * @param policy   builder provider for {@link TarantoolRequestRetryPolicies.InfiniteRetryPolicy},
+     *                 e.g. a lambda function taking the builder
+     * @param callback function checking whether the given exception may be retried
+     * @param executor executor service for retry callbacks
+     * @param <T>      callback type for exceptions check
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     */
+    <T extends Predicate<Throwable>> SELF withRetryingIndefinitely(
+        T callback,
+        UnaryOperator<TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory.Builder<T>> policy, Executor executor);
+
+    /**
      * Specify a custom request retry policy factory. A request retry policy encapsulates an algorithm of checking
      * if a particular failed request needs to be repeated. The built-in request retry policies include customizable
      * policy variants with a bounded or unbounded number of retries.
@@ -106,6 +164,18 @@ public interface TarantoolClientConfigurator<SELF extends TarantoolClientConfigu
      * @see TarantoolRequestRetryPolicies
      */
     SELF withRetrying(RequestRetryPolicyFactory factory);
+
+    /**
+     * Specify a custom request retry policy factory. A request retry policy encapsulates an algorithm of checking
+     * if a particular failed request needs to be repeated. The built-in request retry policies include customizable
+     * policy variants with a bounded or unbounded number of retries.
+     *
+     * @param factory  {@link RequestRetryPolicyFactory}
+     * @param executor executor service for retry callbacks
+     * @return this instance of builder {@link TarantoolClientConfigurator}
+     * @see TarantoolRequestRetryPolicies
+     */
+    SELF withRetrying(RequestRetryPolicyFactory factory, Executor executor);
 
     /**
      * Build the configured Tarantool client instance. Call this when you have specified all necessary settings.

@@ -13,6 +13,9 @@ import io.tarantool.driver.auth.TarantoolCredentials;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
 import static io.tarantool.driver.api.connection.TarantoolConnectionSelectionStrategyType.PARALLEL_ROUND_ROBIN;
@@ -279,5 +282,59 @@ public class RetryTarantoolClientBuilderTest {
         assertEquals(expectedDelay, retryPolicyFactory.getDelay());
         assertEquals(expectedExceptionCheck, retryPolicyFactory.getExceptionCheck());
         assertEquals(expectedNumberOfAttempts, retryPolicyFactory.getNumberOfAttempts());
+    }
+
+    @Test
+    void test_executors_shouldPassCorrectly()
+        throws NoSuchFieldException, IllegalAccessException {
+        // use reflexion to take executor field from client
+        Field executorField
+            = RetryingTarantoolClient.class.getDeclaredField("executor");
+        executorField.setAccessible(true);
+
+        //given
+        Executor expectedExecutor = Executors.newSingleThreadExecutor();
+
+        //then
+        assertEquals(expectedExecutor, executorField.get(
+            TarantoolClientFactory.createClient()
+                .withRetryingByNumberOfAttempts(0,
+                    policy -> policy,
+                    expectedExecutor
+                )
+                .build()
+        ));
+        assertEquals(expectedExecutor, executorField.get(
+            TarantoolClientFactory.createClient()
+                .withRetryingByNumberOfAttempts(0, ex -> true,
+                    policy -> policy,
+                    expectedExecutor
+                )
+                .build()
+        ));
+        assertEquals(expectedExecutor, executorField.get(
+            TarantoolClientFactory.createClient()
+                .withRetryingIndefinitely(
+                    policy -> policy,
+                    expectedExecutor
+                )
+                .build()
+        ));
+        assertEquals(expectedExecutor, executorField.get(
+            TarantoolClientFactory.createClient()
+                .withRetryingIndefinitely(ex -> true,
+                    policy -> policy,
+                    expectedExecutor
+                )
+                .build()
+        ));
+        assertEquals(expectedExecutor, executorField.get(
+            TarantoolClientFactory.createClient()
+                .withRetrying(
+                    TarantoolRequestRetryPolicies.byNumberOfAttempts(0, ex -> true).build(),
+                    expectedExecutor
+                )
+                .build()
+        ));
     }
 }
