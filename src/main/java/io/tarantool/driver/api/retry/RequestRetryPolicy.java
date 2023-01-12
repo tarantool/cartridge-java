@@ -77,7 +77,7 @@ public interface RequestRetryPolicy {
         // to provide it if retrying has been stopped without correct result
         AtomicReference<Throwable> lastExceptionWrapper = new AtomicReference<>();
         CompletableFuture.runAsync(() -> runAsyncOperation(operation, resultFuture, lastExceptionWrapper), executor)
-            .exceptionally(ex -> { // we should complete final exception if something went wrong
+            .exceptionally(ex -> { // we should complete final exception if something went wrong in runAsyncOperation
                 resultFuture.completeExceptionally(ex);
                 return null;
             });

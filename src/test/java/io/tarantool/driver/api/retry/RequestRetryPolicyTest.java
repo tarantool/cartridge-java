@@ -4,6 +4,7 @@ import io.tarantool.driver.exceptions.TarantoolAttemptsLimitException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
+import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -11,8 +12,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,6 +68,25 @@ class RequestRetryPolicyTest {
     }
 
     @Test
+    void testInfiniteRetryPolicy_shouldHandleCorrectly_ifOperationThrowException() throws InterruptedException {
+        RequestRetryPolicy policy = throwable -> throwable instanceof TarantoolClientException;
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof RuntimeException);
+            assertEquals("Fail", e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    void testInfiniteRetryPolicyGetters_shouldWorkCorrectly() {
+        RequestRetryPolicy policy = throwable -> true;
+        assertEquals(500, policy.getDelay());
+        assertEquals(TimeUnit.HOURS.toMillis(1), policy.getRequestTimeout());
+    }
+
+    @Test
     void testUnboundRetryPolicy_returnSuccessAfterFailsWithDelay() throws ExecutionException, InterruptedException {
         AtomicReference<Integer> retries = new AtomicReference<>(3);
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound().withDelay(10).build().create();
@@ -73,6 +96,66 @@ class RequestRetryPolicyTest {
         assertTrue(wrappedFuture.get());
         long diff = Instant.now().toEpochMilli() - now.toEpochMilli();
         assertTrue(diff >= 30);
+    }
+
+    @Test
+    void testUnboundRetryPolicyFactoryGetCallback_shouldWorkCorrectly() {
+        Predicate<Throwable> expectedCallback = throwable -> true;
+        TarantoolRequestRetryPolicies.InfiniteRetryPolicyFactory<Predicate<Throwable>> policyFactory =
+            TarantoolRequestRetryPolicies.unbound(expectedCallback).build();
+        assertEquals(expectedCallback, policyFactory.getCallback());
+    }
+
+    @Test
+    void testUnboundRetryPolicy_shouldHandleCorrectly_ifOperationThrowException() throws InterruptedException {
+        RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound().withDelay(10).build().create();
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof RuntimeException);
+            assertEquals("Fail", e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    void testUnboundRetryPolicyGetOperationTimeout_shouldWorkCorrectly() throws InterruptedException {
+        long expectedOperationTimeout = 123;
+        TarantoolRequestRetryPolicies.InfiniteRetryPolicy<Predicate<Throwable>> policy =
+            new TarantoolRequestRetryPolicies.InfiniteRetryPolicy<>(
+                0, expectedOperationTimeout, 0, throwable -> true);
+        assertEquals(expectedOperationTimeout, policy.getOperationTimeout());
+    }
+
+    @Test
+    void testUnboundRetryPolicyCanRetryRequest_shouldWorkCorrectly() throws InterruptedException {
+        AtomicInteger counter = new AtomicInteger(2);
+        RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound(
+            ex -> counter.getAndDecrement() > 0
+        ).build().create();
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::simpleFailingFuture, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException e) {
+            assertEquals(-1, counter.get());
+            assertTrue(e.getCause() instanceof RuntimeException);
+            assertEquals("Fail", e.getCause().getMessage());
+        }
+    }
+
+    @Test
+    void testUnboundRetryPolicy_shouldWorkCorrectly_ifFutureNeverCompletes() throws InterruptedException {
+        RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound()
+            .withOperationTimeout(500)
+            .withRequestTimeout(500)
+            .build().create();
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::neverCompletedFuture, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof TarantoolTimeoutException);
+            assertEquals("Operation timeout value exceeded after 500 ms", e.getCause().getMessage());
+        }
     }
 
     @Test
@@ -161,6 +244,19 @@ class RequestRetryPolicyTest {
     }
 
     @Test
+    void testAttemptsBoundRetryPolicy_shouldHandleCorrectly_ifOperationThrowException() throws InterruptedException {
+        RequestRetryPolicy policy = new TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy<>(
+            4, 10, 0, throwable -> throwable instanceof TimeoutException);
+        CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
+        try {
+            wrappedFuture.get();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof RuntimeException);
+            assertEquals("Fail", e.getCause().getMessage());
+        }
+    }
+
+    @Test
     void testWithNetworkErrors_retryWhileTimeoutError() {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(4,
             TarantoolRequestRetryPolicies.retryNetworkErrors()
@@ -238,6 +334,14 @@ class RequestRetryPolicyTest {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         result.completeExceptionally(new RuntimeException("Fail"));
         return result;
+    }
+
+    private CompletableFuture<Boolean> neverCompletedFuture() {
+        return new CompletableFuture<>();
+    }
+
+    private CompletableFuture<Boolean> operationWithException() {
+        throw new RuntimeException("Fail");
     }
 
     private CompletableFuture<Boolean> simpleNetworkFailingFuture() {
