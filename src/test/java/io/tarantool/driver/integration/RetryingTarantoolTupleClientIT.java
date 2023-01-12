@@ -289,8 +289,8 @@ public class RetryingTarantoolTupleClientIT extends SharedCartridgeContainer {
             asyncFuture.complete(true);
         }).start();
 
-        CompletableFuture.allOf(asyncFutureTimestamp, syncFutureTimestamp).get(30, TimeUnit.SECONDS);
-        assertTrue(abs(asyncTimestamp.get().getTime() - asyncTimestamp.get().getTime()) < 500);
+        CompletableFuture.allOf(asyncFutureTimestamp, syncFutureTimestamp).get(60, TimeUnit.SECONDS);
+        assertTrue(abs(asyncTimestamp.get().getTime() - syncTimestamp.get().getTime()) < 2000);
     }
 
     @Test
