@@ -1,10 +1,11 @@
 package io.tarantool.driver.core.metadata;
 
+import java.util.Map;
+
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.TarantoolResultFactory;
-import io.tarantool.driver.core.TarantoolTupleResultImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
 import org.msgpack.value.ArrayValue;
@@ -13,7 +14,7 @@ import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.Map;
+import static io.tarantool.driver.core.TarantoolResultFactory.getInstance;
 
 /**
  * @author Artyom Dubinin
@@ -30,12 +31,12 @@ public class RowsMetadataToTarantoolTupleResultConverter
         CRUDResponseToTarantoolSpaceMetadataConverter.getInstance();
 
     private final ArrayValueToTarantoolTupleConverter tupleConverter;
-    private final TarantoolResultFactory<TarantoolTuple> tarantoolResultFactory;
+    private final TarantoolResultFactory tarantoolResultFactory;
 
     public RowsMetadataToTarantoolTupleResultConverter(ArrayValueToTarantoolTupleConverter tupleConverter) {
         super();
         this.tupleConverter = tupleConverter;
-        this.tarantoolResultFactory = new TarantoolResultFactory<>();
+        this.tarantoolResultFactory = getInstance();
     }
 
     @Override

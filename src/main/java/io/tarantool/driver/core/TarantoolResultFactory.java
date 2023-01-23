@@ -7,6 +7,11 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
 public class TarantoolResultFactory<T> {
+    private static final TarantoolResultFactory INSTANCE = new TarantoolResultFactory();
+
+    public static TarantoolResultFactory getInstance() {
+        return INSTANCE;
+    }
 
     public TarantoolResultImpl<T> createTarantoolResultImpl(ArrayValue value,
             ValueConverter<ArrayValue, T> valueConverter) {
