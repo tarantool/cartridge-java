@@ -138,8 +138,7 @@ public final class TarantoolRequestRetryPolicies {
                     ScheduledFuture<?> operationTimeoutScheduledFuture =
                         TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
                             if (!resultFuture.isDone()) {
-                                resultFuture
-                                    .completeExceptionally(
+                                resultFuture.completeExceptionally(
                                         new TarantoolTimeoutException(operationTimeout, lastExceptionWrapper.get()));
                             }
                         }, operationTimeout, TimeUnit.MILLISECONDS);
