@@ -20,6 +20,7 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -59,24 +60,18 @@ class RequestRetryPolicyTest {
     void testInfiniteRetryPolicy_unretryableError() throws InterruptedException {
         RequestRetryPolicy policy = throwable -> throwable instanceof TarantoolClientException;
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::simpleFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getMessage());
     }
 
     @Test
     void testInfiniteRetryPolicy_shouldHandleCorrectly_ifOperationThrowException() throws InterruptedException {
         RequestRetryPolicy policy = throwable -> throwable instanceof TarantoolClientException;
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getMessage());
     }
 
     @Test
@@ -110,12 +105,9 @@ class RequestRetryPolicyTest {
     void testUnboundRetryPolicy_shouldHandleCorrectly_ifOperationThrowException() throws InterruptedException {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.unbound().withDelay(10).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getMessage());
     }
 
     @Test
@@ -134,13 +126,10 @@ class RequestRetryPolicyTest {
             ex -> counter.getAndDecrement() > 0
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::simpleFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertEquals(-1, counter.get());
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertEquals(-1, counter.get());
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getMessage());
     }
 
     @Test
@@ -150,12 +139,9 @@ class RequestRetryPolicyTest {
             .withRequestTimeout(500)
             .build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::neverCompletedFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof TarantoolTimeoutException);
-            assertEquals("Operation timeout value exceeded after 500 ms", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof TarantoolTimeoutException);
+        assertEquals("Operation timeout value exceeded after 500 ms", ex.getCause().getMessage());
     }
 
     @Test
@@ -187,16 +173,11 @@ class RequestRetryPolicyTest {
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
             () -> failingWithNetworkIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         ExecutionException thrown = null;
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            thrown = e;
-            assertEquals(TarantoolAttemptsLimitException.class, e.getCause().getClass());
-            assertEquals("Attempts limit reached: 3", e.getCause().getMessage());
-            assertEquals(TarantoolInternalNetworkException.class, e.getCause().getCause().getClass());
-            assertEquals("Should fail 1 times", e.getCause().getCause().getMessage());
-        }
-        assertNotNull(thrown, "No exception has been thrown");
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertEquals(TarantoolAttemptsLimitException.class, ex.getCause().getClass());
+        assertEquals("Attempts limit reached: 3", ex.getCause().getMessage());
+        assertEquals(TarantoolInternalNetworkException.class, ex.getCause().getCause().getClass());
+        assertEquals("Should fail 1 times", ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -206,16 +187,11 @@ class RequestRetryPolicyTest {
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
             () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
         ExecutionException thrown = null;
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            thrown = e;
-            assertEquals(TarantoolAttemptsLimitException.class, e.getCause().getClass());
-            assertEquals("Attempts limit reached: 0", e.getCause().getMessage());
-            assertEquals(RuntimeException.class, e.getCause().getCause().getClass());
-            assertEquals("Should fail 1 times", e.getCause().getCause().getMessage());
-        }
-        assertNotNull(thrown, "No exception has been thrown");
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertEquals(TarantoolAttemptsLimitException.class, ex.getCause().getClass());
+        assertEquals("Attempts limit reached: 0", ex.getCause().getMessage());
+        assertEquals(RuntimeException.class, ex.getCause().getCause().getClass());
+        assertEquals("Should fail 1 times", ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -223,14 +199,11 @@ class RequestRetryPolicyTest {
         RequestRetryPolicy policy = TarantoolRequestRetryPolicies.byNumberOfAttempts(4).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy
             .wrapOperation(this::simpleNetworkFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
-            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
-            assertTrue(e.getCause().getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof TarantoolAttemptsLimitException);
+        assertEquals("Attempts limit reached: 4", ex.getCause().getMessage());
+        assertTrue(ex.getCause().getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -248,12 +221,9 @@ class RequestRetryPolicyTest {
         RequestRetryPolicy policy = new TarantoolRequestRetryPolicies.AttemptsBoundRetryPolicy<>(
             4, 10, 0, throwable -> throwable instanceof TimeoutException);
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(this::operationWithException, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Fail", e.getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Fail", ex.getCause().getMessage());
     }
 
     @Test
@@ -263,14 +233,11 @@ class RequestRetryPolicyTest {
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture =
             policy.wrapOperation(this::timeoutExceptionFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
-            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
-            assertTrue(e.getCause().getCause() instanceof TimeoutException);
-            assertEquals("Fail", e.getCause().getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof TarantoolAttemptsLimitException);
+        assertEquals("Attempts limit reached: 4", ex.getCause().getMessage());
+        assertTrue(ex.getCause().getCause() instanceof TimeoutException);
+        assertEquals("Fail", ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -280,15 +247,12 @@ class RequestRetryPolicyTest {
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
             this::tarantoolConnectionExceptionFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
-            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
-            assertTrue(e.getCause().getCause() instanceof TarantoolConnectionException);
-            assertEquals("The client is not connected to Tarantool server",
-                e.getCause().getCause().getMessage());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof TarantoolAttemptsLimitException);
+        assertEquals("Attempts limit reached: 4", ex.getCause().getMessage());
+        assertTrue(ex.getCause().getCause() instanceof TarantoolConnectionException);
+        assertEquals("The client is not connected to Tarantool server",
+            ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -298,15 +262,13 @@ class RequestRetryPolicyTest {
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
             this::tarantoolServerInternalNetworkExceptionFailingFuture, executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            assertTrue(e.getCause() instanceof TarantoolAttemptsLimitException);
-            assertEquals("Attempts limit reached: 4", e.getCause().getMessage());
-            assertTrue(e.getCause().getCause() instanceof TarantoolInternalNetworkException);
-            assertEquals("code: 77",
-                e.getCause().getCause().getMessage());
-        }
+
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof TarantoolAttemptsLimitException);
+        assertEquals("Attempts limit reached: 4", ex.getCause().getMessage());
+        assertTrue(ex.getCause().getCause() instanceof TarantoolInternalNetworkException);
+        assertEquals("code: 77",
+            ex.getCause().getCause().getMessage());
     }
 
     @Test
@@ -317,13 +279,10 @@ class RequestRetryPolicyTest {
         ).build().create();
         CompletableFuture<Boolean> wrappedFuture = policy.wrapOperation(
             () -> failingIfAvailableRetriesFuture(retries.getAndUpdate(r -> r - 1)), executor);
-        try {
-            wrappedFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
-            assertEquals("Should fail 3 times", e.getCause().getMessage());
-            assertEquals(2, retries.get());
-        }
+        ExecutionException ex = assertThrows(ExecutionException.class, wrappedFuture::get);
+        assertTrue(ex.getCause() instanceof RuntimeException);
+        assertEquals("Should fail 3 times", ex.getCause().getMessage());
+        assertEquals(2, retries.get());
     }
 
     private CompletableFuture<Boolean> simpleSuccessFuture() {
