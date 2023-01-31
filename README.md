@@ -46,10 +46,6 @@ If you use this code in another project don't forget to add `cartridge-driver` d
 </dependency>
 ```
 ## Advanced usage
-* [Cluster client](docs/ClusterTarantoolClient.md)  
-  Connecting to Tarantool nodes.  
-  The client can connect to storages and obtain data from spaces directly by space interface via native iproto binary protocol.  
-  It may call lua storing procedures or eval lua code on nodes.
 * [Proxy methods](docs/ProxyTarantoolClient.md)  
   Connecting to routers with crud library. It proxies space interface's methods to crud methods.
 * [Retrying](docs/RetryingTarantoolClient.md)  
