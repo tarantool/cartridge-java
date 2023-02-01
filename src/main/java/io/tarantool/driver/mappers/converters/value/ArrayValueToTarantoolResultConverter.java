@@ -15,15 +15,15 @@ public class ArrayValueToTarantoolResultConverter<T>
     private static final long serialVersionUID = -1348387430063097175L;
 
     private ValueConverter<ArrayValue, T> valueConverter;
-    private final TarantoolResultFactory<T> tarantoolResultFactory;
+    private final TarantoolResultFactory tarantoolResultFactory;
 
     public ArrayValueToTarantoolResultConverter() {
-        this.tarantoolResultFactory = new TarantoolResultFactory<>();
+        this.tarantoolResultFactory = TarantoolResultFactory.getInstance();
     }
 
     public ArrayValueToTarantoolResultConverter(ValueConverter<ArrayValue, T> valueConverter) {
         this.valueConverter = valueConverter;
-        this.tarantoolResultFactory = new TarantoolResultFactory<>();
+        this.tarantoolResultFactory = new TarantoolResultFactory();
     }
 
     @Override

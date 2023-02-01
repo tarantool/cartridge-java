@@ -6,14 +6,19 @@ import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleCo
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 
-public class TarantoolResultFactory<T> {
+/**
+ * Singleton Factory implementation to provide instance of TarantoolResultImpl objects.
+ *
+ * @author Rishal Dev Singh
+ */
+public class TarantoolResultFactory {
     private static final TarantoolResultFactory INSTANCE = new TarantoolResultFactory();
 
     public static TarantoolResultFactory getInstance() {
         return INSTANCE;
     }
 
-    public TarantoolResultImpl<T> createTarantoolResultImpl(ArrayValue value,
+    public <T> TarantoolResultImpl<T> createTarantoolResultImpl(ArrayValue value,
             ValueConverter<ArrayValue, T> valueConverter) {
         return new TarantoolResultImpl<>(value, valueConverter);
     }
