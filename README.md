@@ -19,7 +19,7 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 Example of single instance Tarantool application and java app connected using cartridge-java.
 
 The easiest way to start experimenting with cartridge-java and single instance tarantool app is to use
-[single instance test](/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java).
+[single instance test](/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleIT.java).
 You can set breakpoints and run it in debug mode.
 Testcontainers will start [single instance tarantool application](src/test/resources/single-instance.lua) for you.
 So you will be able to manipulate data in Tarantool in real life through java expressions or Tarantool console.
@@ -33,9 +33,6 @@ https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a4
 
 Example of client API usage
 https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a46e8fdd039/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L64-L79
-
-You can read more about Cartridge applications in its [documentation](https://www.tarantool.io/ru/doc/latest/how-to/getting_started_cartridge/).
-Also look at available Cartridge application [examples](https://github.com/tarantool/examples).
 
 If you use this code in another project don't forget to add `cartridge-driver` dependency:
 ```xml
