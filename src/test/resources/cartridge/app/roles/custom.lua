@@ -1,6 +1,6 @@
 local cartridge = require('cartridge')
 
-local function get_routers()
+function get_routers()
     local function table_contains(table, element)
         for _, value in pairs(table) do
             if value == element then
@@ -47,8 +47,6 @@ local function init(opts)
     end
 
     init_httpd()
-
-    rawset(_G, 'get_routers', get_routers)
 
     return true
 end
