@@ -289,9 +289,14 @@ public class ReconnectIT extends SharedCartridgeContainer {
     private void initRouterStatuses() {
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClient =
             TarantoolClientFactory.createClient()
+                // You can connect to multiple routers
                 .withAddresses(getTarantoolServerAddresses())
+                // For connecting to a Cartridge application,
+                // use the value of cluster_cookie parameter in the init.lua file
                 .withCredentials(USER_NAME, PASSWORD)
+                // Number of connections per Tarantool instance
                 .withConnections(1)
+                // Specify using the default CRUD proxy operations mapping configuration
                 .withProxyMethodMapping()
                 .build();
         initClient.call("init_router_status").join();
