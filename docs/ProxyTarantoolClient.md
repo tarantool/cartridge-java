@@ -1,6 +1,6 @@
 [Main page](../README.md)
 
-# Proxy Tarantool client
+# Using CRUD stored procedures
 
 This section shows the necessary settings for connecting to instances with a user-defined CRUD API exposed as Lua
 stored functions or Cartridge roles implementing the API similar to the one of [tarantool/crud](https://github.com/tarantool/crud).

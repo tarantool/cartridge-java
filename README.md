@@ -43,8 +43,11 @@ If you use this code in another project don't forget to add `cartridge-driver` d
 </dependency>
 ```
 ## Advanced usage
-* [Proxy methods](docs/ProxyTarantoolClient.md)  
-  Connecting to routers with crud library. It proxies space interface's methods to crud methods.
+* [Using CRUD stored procedures](docs/ProxyTarantoolClient.md)  
+  Connecting to routers with [tarantool/crud](https://github.com/tarantool/crud) library.
+  It proxies space interface's methods to CRUD methods.
+* [Connecting to multiple instances](docs/MultiInstanceConnecting.md)  
+  Connecting to multiple Tarantool instances.
 * [Retrying](docs/RetryingTarantoolClient.md)  
   Retrying transient cluster failures.
 * [TarantoolTuple usage](docs/TarantoolTupleUsage.md)  
