@@ -162,6 +162,19 @@ local function box_error_non_network_error()
     return nil, box.error.new(box.error.WAL_IO):unpack()
 end
 
+function delete_with_error_if_not_found(space_name, key, opts)
+    local result, err = crud.delete(space_name, key, opts)
+    if err then
+        return nil, err
+    end
+
+    if #result.rows == 0 then
+        return nil, "Records not found"
+    end
+
+    return result
+end
+
 local function test_no_such_procedure()
     return 'test_no_such_procedure'
 end
