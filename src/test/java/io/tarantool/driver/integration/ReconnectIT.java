@@ -6,6 +6,8 @@ import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -33,19 +35,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.tarantool.driver.TarantoolUtils.retry;
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryTarantoolNoSuchProcedureErrors;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * @author Oleg Kuznetsov
+ * @author Ivan Dneprov
+ * <p>
+ * WARNING: If you updated the code in this file, don't forget to update the MultiInstanceConnecting.md and
+ * docs/RetryingTarantoolClient.md permalinks!
+ */
 @Testcontainers
 public class ReconnectIT extends SharedCartridgeContainer {
 
@@ -53,6 +64,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
 
     private static String USER_NAME;
     private static String PASSWORD;
+    private static final String SPACE_NAME = "test__profile";
+    private static final String PK_FIELD_NAME = "profile_id";
+    private static AtomicInteger retryingCounter;
 
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
@@ -66,6 +80,31 @@ public class ReconnectIT extends SharedCartridgeContainer {
         PASSWORD = container.getPassword();
     }
 
+    @Test
+    public void test_should_retryDelete_ifRecordsNotFound() throws InterruptedException {
+        // Creating multiple clients
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> crudClient = getCrudClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingClient =
+            getRetryingTarantoolClient(crudClient);
+
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> space =
+            crudClient.space(SPACE_NAME);
+        space.truncate().join();
+
+        // Use TarantoolTupleFactory for instantiating new tuples
+        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(
+            crudClient.getConfig().getMessagePackMapper());
+
+        // Call delete_with_error_if_not_found before record was inserted
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+        CompletableFuture deleteFuture = retryingClient.space(SPACE_NAME).delete(conditions);
+        retry(() -> assertEquals(1, retryingCounter.get()));
+        space.insert(tupleFactory.create(1, null, "FIO", 50, 100)).join();
+        deleteFuture.join();
+        TarantoolResult<TarantoolTuple> selectResult = space.select(conditions).join();
+        assertEquals(0, selectResult.size());
+    }
+
     /**
      * Checking if this test is valid is here
      * {@link TarantoolErrorsIT#test_should_throwTarantoolNoSuchProcedureException_ifProcedureIsNil}
@@ -73,14 +112,15 @@ public class ReconnectIT extends SharedCartridgeContainer {
     @Test
     public void test_should_reconnect_ifCrudProcedureIsNotDefined() {
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clusterClient = getClusterClient();
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingClient = getRetryingTarantoolClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> crudClient = getCrudClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingClient =
+            getRetryingTarantoolClient(crudClient);
 
         try {
             //save procedure to tmp variable set it to nil and call
-            clusterClient.eval("rawset(_G, 'tmp_test_no_such_procedure', test_no_such_procedure)")
-                .thenAccept(c -> clusterClient.eval("rawset(_G, 'test_no_such_procedure', nil)"))
-                .thenApply(c -> clusterClient.call("test_no_such_procedure"))
+            crudClient.eval("rawset(_G, 'tmp_test_no_such_procedure', test_no_such_procedure)")
+                .thenAccept(c -> crudClient.eval("rawset(_G, 'test_no_such_procedure', nil)"))
+                .thenApply(c -> crudClient.call("test_no_such_procedure"))
                 .join();
         } catch (CompletionException exception) {
             assertTrue(exception.getCause() instanceof TarantoolNoSuchProcedureException);
@@ -93,30 +133,36 @@ public class ReconnectIT extends SharedCartridgeContainer {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            clusterClient.eval("rawset(_G, 'test_no_such_procedure', tmp_test_no_such_procedure)").join();
+            crudClient.eval("rawset(_G, 'test_no_such_procedure', tmp_test_no_such_procedure)").join();
         }).start();
 
         assertDoesNotThrow(() -> retryingClient.call("test_no_such_procedure").join());
         assertEquals("test_no_such_procedure", retryingClient.call("test_no_such_procedure").join().get(0));
     }
 
-    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getClusterClient() {
-        return TarantoolClientFactory
-            .createClient()
+    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getCrudClient() {
+        return TarantoolClientFactory.createClient()
+            // You can connect to multiple routers
             .withAddresses(
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
                 new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
             )
+            // For connecting to a Cartridge application,
+            // use the value of cluster_cookie parameter in the init.lua file
             .withCredentials(USER_NAME, PASSWORD)
+            // Number of connections per Tarantool instance
             .withConnections(10)
+            // Specify using the default CRUD proxy operations mapping configuration
+            .withProxyMethodMapping()
             .build();
     }
 
     @Test
     public void test_should_reconnect_ifReconnectIsInvoked() throws Exception {
         //when
-        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client = getRetryingTarantoolClient();
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client =
+            getRetryingTarantoolClient(getCrudClient());
 
         // getting all routers uuids
         final Set<String> routerUuids = getInstancesUuids(client);
@@ -141,18 +187,28 @@ public class ReconnectIT extends SharedCartridgeContainer {
         assertEquals(routerUuids.size(), uuidsAfterReconnect.size());
     }
 
-    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getRetryingTarantoolClient() {
-        return TarantoolClientFactory.createClient()
-            .withAddresses(
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
-            )
-            .withCredentials(USER_NAME, PASSWORD)
-            .withConnections(10)
-            .withProxyMethodMapping()
+    private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getRetryingTarantoolClient(
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client) {
+
+        retryingCounter = new AtomicInteger();
+
+        return TarantoolClientFactory.configureClient(client)
+            // Configure a custom delete function
+            .withProxyMethodMapping(builder -> builder.withDeleteFunctionName("delete_with_error_if_not_found"))
+            // Set retrying policy
+            // First parameter is number of attempts
             .withRetryingByNumberOfAttempts(5,
-                retryNetworkErrors().or(retryTarantoolNoSuchProcedureErrors()),
+                // You can use default predicates from TarantoolRequestRetryPolicies for checking errors
+                retryNetworkErrors()
+                    // Also you can use your own predicates and combine them with each other
+                    .or(e -> e.getMessage().contains("Unsuccessful attempt"))
+                    .or(e -> {
+                        retryingCounter.getAndIncrement();
+                        return e.getMessage().contains("Records not found");
+                    })
+                    // Or with defaults
+                    .or(retryTarantoolNoSuchProcedureErrors()),
+        // Also you can set delay in millisecond between attempts
                 factory -> factory.withDelay(300)
             )
             .build();

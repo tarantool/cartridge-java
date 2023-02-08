@@ -56,4 +56,25 @@ public final class TarantoolUtils {
             return minor;
         }
     }
+
+    public static Integer DEFAULT_RETRYING_ATTEMPTS = 5;
+    public static Integer DEFAULT_RETRYING_DELAY = 100;
+
+    public static void retry(Runnable fn) throws InterruptedException {
+        retry(DEFAULT_RETRYING_ATTEMPTS, DEFAULT_RETRYING_DELAY, fn);
+    }
+
+    public static void retry(Integer attempts, Integer delay, Runnable fn) throws InterruptedException {
+        while (attempts > 0) {
+            try {
+                fn.run();
+                return;
+            } catch (AssertionError ignored) {
+            }
+
+            --attempts;
+            Thread.sleep(delay);
+        }
+        fn.run();
+    }
 }
