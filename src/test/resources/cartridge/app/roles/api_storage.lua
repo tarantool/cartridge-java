@@ -202,6 +202,21 @@ local function init_space()
         type = 'TREE'
     })
 
+    local accounts = box.schema.space.create(
+        'accounts',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'bucket_id', 'unsigned' },
+                { 'name', 'string' },
+                { 'balance', 'number' },
+            },
+            if_not_exists = true,
+        }
+    )
+
+    accounts:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    accounts:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 end
 
 local function get_composite_data(id)

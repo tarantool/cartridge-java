@@ -10,11 +10,13 @@ import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Ivan Dneprov
  * <p>
- * WARNING: If you updated the code in this file, don't forget to update the docs/ProxyTarantoolClient.md permalinks!
+ * WARNING: If you updated the code in this file, don't forget to update the docs/ProxyTarantoolClient.md
+ * and docs/TarantoolTupleUsage.md permalinks!
  */
 public class ProxyTarantoolClientExampleIT extends SharedCartridgeContainer {
 
@@ -38,7 +41,6 @@ public class ProxyTarantoolClientExampleIT extends SharedCartridgeContainer {
     public static void setUp() throws Exception {
         startCluster();
         initClient();
-        truncateSpace(SPACE_NAME);
     }
 
     public static void initClient() {
@@ -55,8 +57,9 @@ public class ProxyTarantoolClientExampleIT extends SharedCartridgeContainer {
             .build();
     }
 
-    private static void truncateSpace(String spaceName) {
-        client.space(spaceName).truncate().join();
+    @BeforeEach
+    public void truncateSpace() {
+        client.space(SPACE_NAME).truncate().join();
     }
 
     @Test
@@ -105,5 +108,57 @@ public class ProxyTarantoolClientExampleIT extends SharedCartridgeContainer {
         conditions = Conditions.indexEquals(PK_FIELD_NAME, Collections.singletonList(1_000_000 + 10));
         TarantoolResult<TarantoolTuple> updateResult = space.update(conditions, TupleOperations.set(4, 10)).get();
         assertEquals(10, updateResult.get(0).getInteger(4));
+    }
+
+    @Test
+    public void tarantoolTupleUsageExample() throws ExecutionException, InterruptedException, NullPointerException {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> accounts =
+            client.space("accounts");
+
+        // Use TarantoolTupleFactory for instantiating new tuples
+        TarantoolTupleFactory tupleFactory = new DefaultTarantoolTupleFactory(
+            client.getConfig().getMessagePackMapper());
+
+        // Create a tuple from listed values: [1, null, "credit card", 99.99]
+        // This tuple contains java values
+        TarantoolTuple inputTuple = tupleFactory.create(1, null, "credit card", 99.99);
+
+        // Insert it in the database
+        accounts.insert(inputTuple).join();
+
+        // This tuple form the database
+        Conditions conditions = Conditions.equals("id", 1);
+        TarantoolResult<TarantoolTuple> selectResult = accounts.select(conditions).get();
+        assertEquals(selectResult.size(), 1);
+        // This tuple contains messagePack values
+        TarantoolTuple selectTuple = selectResult.get(0);
+        assertEquals(selectTuple.size(), 4);
+
+        // You can get value from TarantoolTuple by its filedPosition
+        // If you do not set objectClass default converter will be used for this value
+        Optional<?> object = selectTuple.getObject(0);
+        assertEquals(1, object.orElseThrow(NullPointerException::new));
+
+        // For example any non-integer number will be converted to Double by default
+        Optional<?> doubleValue = selectTuple.getObject(3);
+        assertEquals(99.99, doubleValue.orElseThrow(NullPointerException::new));
+        assertEquals(Double.class, doubleValue.orElseThrow(NullPointerException::new).getClass());
+
+        // But if you need to get Float, you can set objectClass
+        Optional<?> floatValue = selectTuple.getObject(3, Float.class);
+        assertEquals(99.99f, floatValue.orElseThrow(NullPointerException::new));
+        assertEquals(Float.class, floatValue.orElseThrow(NullPointerException::new).getClass());
+
+        // You do not have to work with Optional
+        // Getters for all basic types are available
+        float floatNumber = selectTuple.getFloat(3);
+        assertEquals(99.99f, floatNumber);
+
+        // Also you can get values by field name
+        Optional<?> balance = selectTuple.getObject("balance");
+        assertEquals(99.99, balance.orElseThrow(NullPointerException::new));
+
+        String stringValue = selectTuple.getString("name");
+        assertEquals("credit card", stringValue);
     }
 }
