@@ -3,18 +3,22 @@ package io.tarantool.driver.mappers.factories;
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMultiValueResultMapper;
 import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToMultiValueListConverter;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -120,5 +124,56 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
                 "No converter for value type %s and type %s is present", valueType, tupleClass);
         }
         return converter.get();
+    }
+
+    @Override
+    public Builder createMapper() {
+        return new Builder();
+    }
+
+    private class Builder implements ResultMapperFactoryFactory.Builder {
+
+        private final List<ValueConverterWithInputTypeWrapper<Object>> mappers;
+
+        Builder() {
+            this.mappers = new ArrayList<>();
+        }
+
+        public Builder withSingleValueConverter(
+            MessagePackValueMapper messagePackMapper) {
+            this.mappers.add(
+                singleValueResultMapperFactory()
+                    .getSingleValueResultConverter(
+                        messagePackMapper
+                    )
+            );
+            return this;
+        }
+
+        public Builder withArrayValueToTarantoolTupleResultConverter(
+            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+            this.mappers.add(
+                arrayTupleResultMapperFactory()
+                    .getArrayValueToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata)
+            );
+            return this;
+        }
+
+        public Builder withRowsMetadataToTarantoolTupleResultMapper(
+            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+            this.mappers.add(
+                rowsMetadataTupleResultMapperFactory()
+                    .getRowsMetadataToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata)
+            );
+            return this;
+        }
+
+        public MessagePackValueMapper buildMessagePackMapper(MessagePackValueMapper valueMapper) {
+            return new CallResultMapper(valueMapper, mappers);
+        }
+
+        public CallResultMapper buildCallResultMapper(MessagePackValueMapper valueMapper) {
+            return new CallResultMapper(valueMapper, mappers);
+        }
     }
 }

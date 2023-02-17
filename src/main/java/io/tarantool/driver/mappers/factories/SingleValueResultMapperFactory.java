@@ -5,9 +5,11 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToSingleValueCallResultConverter;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToSingleValueCallResultSimpleConverter;
 import org.msgpack.value.Value;
+import org.msgpack.value.ValueType;
 
 /**
  * Factory for {@link CallResultMapper} instances used for handling Lua call results resulting in two possible
@@ -105,5 +107,13 @@ public class SingleValueResultMapperFactory<T> extends TarantoolCallResultMapper
         return withConverter(
             messagePackMapper.copy(), new ArrayValueToSingleValueCallResultConverter<>(structureValueMapper),
             resultClass);
+    }
+
+    public ValueConverterWithInputTypeWrapper<Object> getSingleValueResultConverter(
+        MessagePackValueMapper structureValueMapper) {
+        return new ValueConverterWithInputTypeWrapper<>(
+            ValueType.ARRAY,
+            new ArrayValueToSingleValueCallResultConverter<>(structureValueMapper)
+        );
     }
 }

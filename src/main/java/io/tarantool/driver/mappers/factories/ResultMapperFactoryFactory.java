@@ -1,9 +1,14 @@
 package io.tarantool.driver.mappers.factories;
 
+import io.tarantool.driver.api.CallResult;
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 
 import java.util.List;
@@ -191,4 +196,21 @@ public interface ResultMapperFactoryFactory {
      * @return new or existing factory instance
      */
     <T> ArrayValueToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory();
+
+    Builder createMapper();
+
+    interface Builder {
+
+        Builder withSingleValueConverter(
+            MessagePackValueMapper messagePackMapper);
+
+        Builder withArrayValueToTarantoolTupleResultConverter(
+            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata);
+
+        MessagePackValueMapper buildMessagePackMapper(MessagePackValueMapper valueMapper);
+
+        CallResultMapper buildCallResultMapper(MessagePackValueMapper valueMapper);
+        Builder withRowsMetadataToTarantoolTupleResultMapper(
+            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata);
+    }
 }

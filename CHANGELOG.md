@@ -3,6 +3,7 @@
 ## [Unreleased]
 - Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
 - Add deep copy instead of shallow copy in default message pack mapper
+- Add factory builder to be able making mapper hierarchy
 
 ## [0.10.1] - 2023-01-13
 
