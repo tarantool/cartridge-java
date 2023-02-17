@@ -58,12 +58,12 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
         valueMapper.registerValueConverterWithoutTargetClass(valueType, resultConverter);
     }
 
-    public AbstractResultMapper(
+    public <O> AbstractResultMapper(
         MessagePackValueMapper valueMapper,
-        List<ValueConverterWithInputTypeWrapper<T>> converters,
+        List<ValueConverterWithInputTypeWrapper<O>> converters,
         Class<? extends T> resultClass) {
         this.valueMapper = valueMapper;
-        for (ValueConverterWithInputTypeWrapper<T> converter :
+        for (ValueConverterWithInputTypeWrapper<O> converter :
             converters) {
             valueMapper.registerValueConverter(
                 converter.getValueType(),
@@ -72,11 +72,11 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
         }
     }
 
-    public AbstractResultMapper(
+    public <O> AbstractResultMapper(
         MessagePackValueMapper valueMapper,
-        List<ValueConverterWithInputTypeWrapper<T>> converters) {
+        List<ValueConverterWithInputTypeWrapper<O>> converters) {
         this.valueMapper = valueMapper;
-        for (ValueConverterWithInputTypeWrapper<T> converter :
+        for (ValueConverterWithInputTypeWrapper<O> converter :
             converters) {
             valueMapper.registerValueConverterWithoutTargetClass(
                 converter.getValueType(),

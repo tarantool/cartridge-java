@@ -51,7 +51,7 @@ public class RowsMetadataToTarantoolTupleResultConverter
 
     @Override
     public boolean canConvertValue(MapValue value) {
-        // [{"metadata" : [...], "rows": [...]}]
+        // {"metadata" : [...], "rows": [...]}
         Map<Value, Value> tupleMap = value.asMapValue().map();
         if (!hasRowsAndMetadata(tupleMap)) {
             return false;

@@ -6,6 +6,7 @@ import io.tarantool.driver.core.metadata.RowsMetadataToTarantoolTupleResultConve
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolResultMapper;
+import io.tarantool.driver.mappers.converters.ValueConverterWithInputTypeWrapper;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
 import org.msgpack.value.ValueType;
 
@@ -49,10 +50,24 @@ public class RowsMetadataToTarantoolTupleResultMapperFactory
             new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata));
     }
 
+    public ValueConverterWithInputTypeWrapper<Object> getRowsMetadataToTarantoolTupleResultConverter(
+        MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+        return getRowsMetadataToTarantoolTupleResultConverter(
+            new ArrayValueToTarantoolTupleConverter(messagePackMapper, spaceMetadata));
+    }
+
     public TarantoolResultMapper<TarantoolTuple> withRowsMetadataToTarantoolTupleResultConverter(
         ArrayValueToTarantoolTupleConverter tupleConverter) {
         return withConverterWithoutTargetClass(
             messagePackMapper.copy(),
+            ValueType.MAP,
+            new RowsMetadataToTarantoolTupleResultConverter(tupleConverter)
+        );
+    }
+
+    public ValueConverterWithInputTypeWrapper<Object> getRowsMetadataToTarantoolTupleResultConverter(
+        ArrayValueToTarantoolTupleConverter tupleConverter) {
+        return new ValueConverterWithInputTypeWrapper<>(
             ValueType.MAP,
             new RowsMetadataToTarantoolTupleResultConverter(tupleConverter)
         );
