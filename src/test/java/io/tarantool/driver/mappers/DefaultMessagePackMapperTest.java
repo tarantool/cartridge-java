@@ -16,6 +16,7 @@ import org.msgpack.value.ValueType;
 import org.msgpack.value.impl.ImmutableLongValueImpl;
 import org.msgpack.value.impl.ImmutableStringValueImpl;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -184,6 +185,31 @@ class DefaultMessagePackMapperTest {
         testValue.put(ValueFactory.newString("id"), ValueFactory.newInteger(testTuple.getId()));
         testValue.put(ValueFactory.newString("name"), ValueFactory.newString(testTuple.getName()));
         assertEquals(testValue, mapper.toValue(testTuple).asMapValue().map());
+    }
+
+    @Test
+    void test_defaultMessagePackMapperCopy_shouldWorkFine() throws MessagePackValueMapperException,
+        NoSuchFieldException, IllegalAccessException {
+        DefaultMessagePackMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+        MessagePackMapper copiedMapper = mapper.copy();
+        MessagePackMapper copiedOfMapper = DefaultMessagePackMapperFactory.getInstance().copyOf(mapper);
+
+        Field privateField
+            = DefaultMessagePackMapper.class.getDeclaredField("valueConverters");
+        // Set the accessibility as true
+        privateField.setAccessible(true);
+
+        assertEquals(1, ((List) ((Map) privateField.get(mapper)).get(ValueType.MAP)).size());
+        assertEquals(1, ((List) ((Map) privateField.get(copiedMapper)).get(ValueType.MAP)).size());
+
+        mapper.registerValueConverter(ValueType.MAP, CustomTuple.class,
+            (ValueConverter<MapValue, CustomTuple>) v -> null);
+
+        assertEquals(2, ((List) ((Map) privateField.get(mapper)).get(ValueType.MAP)).size());
+        assertEquals(1, ((List) ((Map) privateField.get(copiedMapper)).get(ValueType.MAP)).size());
+        assertEquals(1, ((List) ((Map) privateField.get(copiedOfMapper)).get(ValueType.MAP)).size());
+
+        mapper.copy();
     }
 
     //TODO: add this test when will it be resolved https://github.com/tarantool/cartridge-java/issues/118
