@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static io.tarantool.driver.mappers.MapperReflectionUtils.getInterfaceParameterClass;
 
@@ -54,9 +55,10 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
      * @param mapper another mapper instance
      */
     public DefaultMessagePackMapper(DefaultMessagePackMapper mapper) {
-        this();
-        this.valueConverters.putAll(mapper.valueConverters);
-        this.objectConverters.putAll(mapper.objectConverters);
+        this.valueConverters = mapper.valueConverters.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> new ArrayList<>(e.getValue())));
+        this.objectConverters = mapper.objectConverters.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> new ArrayList<>(e.getValue())));
     }
 
     @SuppressWarnings("unchecked")
