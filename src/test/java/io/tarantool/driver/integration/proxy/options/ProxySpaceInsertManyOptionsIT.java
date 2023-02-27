@@ -7,6 +7,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
+import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -123,12 +125,20 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
         // with config timeout
         profileSpace.insertMany(tarantoolTuples).get();
         List<?> crudInsertManyOpts = client.eval("return crud_insert_many_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudInsertManyOpts.get(0)).get("timeout"));
+        assertNull(((HashMap) crudInsertManyOpts.get(0)).get("timeout"));
 
-        // with option timeout
         tarantoolTuples = Arrays.asList(
             tupleFactory.create(3, null, "FIO", 50, 100),
             tupleFactory.create(4, null, "KEK", 75, 125)
+        );
+        profileSpace.insertMany(tarantoolTuples, ProxyInsertManyOptions.create()).get();
+        crudInsertManyOpts = client.eval("return crud_insert_many_opts").get();
+        assertNull(((HashMap) crudInsertManyOpts.get(0)).get("timeout"));
+
+        // with option timeout
+        tarantoolTuples = Arrays.asList(
+            tupleFactory.create(5, null, "FIO", 50, 100),
+            tupleFactory.create(6, null, "KEK", 75, 125)
         );
 
         profileSpace.insertMany(

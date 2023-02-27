@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -87,7 +88,14 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
         // with config timeout
         profileSpace.replace(tarantoolTuple).get();
         List<?> crudReplaceOpts = client.eval("return crud_replace_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudReplaceOpts.get(0)).get("timeout"));
+        assertNull(((HashMap) crudReplaceOpts.get(0)).get("timeout"));
+
+        profileSpace.replace(
+            tarantoolTuple,
+            ProxyReplaceOptions.create()
+        ).get();
+        crudReplaceOpts = client.eval("return crud_replace_opts").get();
+        assertNull(((HashMap) crudReplaceOpts.get(0)).get("timeout"));
 
         // with option timeout
         profileSpace.replace(
