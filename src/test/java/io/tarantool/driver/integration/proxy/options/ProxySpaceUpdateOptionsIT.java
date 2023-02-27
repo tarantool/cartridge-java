@@ -87,7 +87,11 @@ public class ProxySpaceUpdateOptionsIT extends SharedCartridgeContainer {
         // with config timeout
         profileSpace.update(conditions, tarantoolTuple).get();
         List<?> crudUpdateOpts = client.eval("return crud_update_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudUpdateOpts.get(0)).get("timeout"));
+        assertNull(((HashMap) crudUpdateOpts.get(0)).get("timeout"));
+
+        profileSpace.update(conditions, tarantoolTuple, ProxyUpdateOptions.create()).get();
+        crudUpdateOpts = client.eval("return crud_update_opts").get();
+        assertNull(((HashMap) crudUpdateOpts.get(0)).get("timeout"));
 
         // with option timeout
         profileSpace.update(

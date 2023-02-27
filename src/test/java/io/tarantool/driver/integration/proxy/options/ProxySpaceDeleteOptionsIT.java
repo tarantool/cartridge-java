@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -87,7 +88,11 @@ public class ProxySpaceDeleteOptionsIT extends SharedCartridgeContainer {
         Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
         profileSpace.delete(conditions).get();
         List<?> crudDeleteOpts = client.eval("return crud_delete_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudDeleteOpts.get(0)).get("timeout"));
+        assertNull(((HashMap) crudDeleteOpts.get(0)).get("timeout"));
+
+        profileSpace.delete(conditions, ProxyDeleteOptions.create()).get();
+        crudDeleteOpts = client.eval("return crud_delete_opts").get();
+        assertNull(((HashMap) crudDeleteOpts.get(0)).get("timeout"));
 
         // with option timeout
         profileSpace.delete(

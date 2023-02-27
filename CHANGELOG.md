@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Remove config request timeout as default parameter in crud client
 - Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
 - Add deep copy instead of shallow copy in default message pack mapper
 
