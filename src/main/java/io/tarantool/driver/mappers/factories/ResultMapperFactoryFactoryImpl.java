@@ -127,16 +127,36 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
     }
 
     @Override
-    public Builder createMapper() {
-        return new Builder();
+    public Builder createMapper(MessagePackMapper messagePackMapper) {
+        return createMapper(messagePackMapper, null);
+    }
+
+    @Override
+    public Builder createMapper(MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+        return new Builder(messagePackMapper, spaceMetadata);
     }
 
     private class Builder implements ResultMapperFactoryFactory.Builder {
 
         private final List<ValueConverterWithInputTypeWrapper<Object>> mappers;
+        private final MessagePackMapper clientMapper;
+        private final TarantoolSpaceMetadata spaceMetadata;
 
-        Builder() {
+        Builder(MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
             this.mappers = new ArrayList<>();
+            this.clientMapper = messagePackMapper;
+            this.spaceMetadata = spaceMetadata;
+        }
+
+        @Override
+        public ResultMapperFactoryFactory.Builder withSingleValueConverter() {
+            this.mappers.add(
+                singleValueResultMapperFactory()
+                    .getSingleValueResultConverter(
+                        clientMapper
+                    )
+            );
+            return this;
         }
 
         public Builder withSingleValueConverter(
@@ -150,8 +170,9 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
             return this;
         }
 
+        @Override
         public Builder withArrayValueToTarantoolTupleResultConverter(
-            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+            MessagePackMapper messagePackMapper) {
             this.mappers.add(
                 arrayTupleResultMapperFactory()
                     .getArrayValueToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata)
@@ -159,8 +180,18 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
             return this;
         }
 
-        public Builder withRowsMetadataToTarantoolTupleResultMapper(
-            MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata) {
+        @Override
+        public ResultMapperFactoryFactory.Builder withArrayValueToTarantoolTupleResultConverter() {
+            this.mappers.add(
+                arrayTupleResultMapperFactory()
+                    .getArrayValueToTarantoolTupleResultConverter(clientMapper, spaceMetadata)
+            );
+            return this;
+        }
+
+        @Override
+        public Builder withRowsMetadataToTarantoolTupleResultConverter(
+            MessagePackMapper messagePackMapper) {
             this.mappers.add(
                 rowsMetadataTupleResultMapperFactory()
                     .getRowsMetadataToTarantoolTupleResultConverter(messagePackMapper, spaceMetadata)
@@ -168,12 +199,23 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
             return this;
         }
 
-        public MessagePackValueMapper buildMessagePackMapper(MessagePackValueMapper valueMapper) {
+        @Override
+        public ResultMapperFactoryFactory.Builder withRowsMetadataToTarantoolTupleResultConverter() {
+            this.mappers.add(
+                rowsMetadataTupleResultMapperFactory()
+                    .getRowsMetadataToTarantoolTupleResultConverter(clientMapper, spaceMetadata)
+            );
+            return this;
+        }
+
+        @Override
+        public CallResultMapper buildCallResultMapper(MessagePackMapper valueMapper) {
             return new CallResultMapper(valueMapper, mappers);
         }
 
-        public CallResultMapper buildCallResultMapper(MessagePackValueMapper valueMapper) {
-            return new CallResultMapper(valueMapper, mappers);
+        @Override
+        public CallResultMapper buildCallResultMapper() {
+            return new CallResultMapper(clientMapper.copy(), mappers);
         }
     }
 }
