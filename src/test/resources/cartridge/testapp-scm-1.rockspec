@@ -9,6 +9,7 @@ dependencies = {
     'lua >= 5.1',
     'cartridge == 2.7.3-1',
     'crud == 0.14.0-1',
+    'migrations == 0.4.2-1',
 }
 build = {
     type = 'none';

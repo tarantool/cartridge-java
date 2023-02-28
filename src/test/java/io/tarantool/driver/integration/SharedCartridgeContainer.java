@@ -27,6 +27,11 @@ public abstract class SharedCartridgeContainer {
         if (!container.isRunning()) {
             container.start();
         }
+        try {
+            container.executeCommand("return require('migrator').up()").get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected static void startCartridge() throws IOException, InterruptedException {

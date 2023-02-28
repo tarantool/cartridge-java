@@ -27,7 +27,7 @@ app-router-third:
   all_rw: false
 s1-storage:
   instances:
-    - s1-master
+    - s1-storage
   roles:
     - vshard-storage
     - crud-storage
@@ -37,7 +37,7 @@ s1-storage:
   vshard_group: default
 s2-storage:
   instances:
-    - s2-master
+    - s2-storage
   roles:
     - vshard-storage
     - crud-storage
