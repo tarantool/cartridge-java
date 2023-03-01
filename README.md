@@ -56,6 +56,8 @@ If you use this code in another project don't forget to add `cartridge-driver` d
   Determining bucket id on java side.
 * [Thread control](docs/ThreadControl.md)  
   Specifying custom numbers of netty work threads.
+* [Space not found](docs/SpaceNotFound.md)  
+    Specifying custom numbers of netty work threads.
 
 ## Documentation
 
