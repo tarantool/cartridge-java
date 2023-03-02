@@ -31,5 +31,10 @@ abstract class CartridgeMixedInstancesContainer {
         if (!container.isRunning()) {
             container.start();
         }
+        try {
+            container.executeCommand("return require('migrator').up()").get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
