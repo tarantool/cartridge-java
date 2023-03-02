@@ -57,7 +57,7 @@ If you use this code in another project don't forget to add `cartridge-driver` d
 * [Thread control](docs/ThreadControl.md)  
   Specifying custom numbers of netty work threads.
 * [Space not found](docs/SpaceNotFound.md)  
-    Specifying custom numbers of netty work threads.
+    The problem of getting metadata.
 
 ## Documentation
 
