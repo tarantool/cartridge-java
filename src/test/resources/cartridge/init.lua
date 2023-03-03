@@ -6,8 +6,6 @@ if package.setsearchroot ~= nil then
     package.setsearchroot()
 end
 
-require('migrator')
-
 local cartridge = require('cartridge')
 local ok, err = cartridge.cfg({
     workdir = 'tmp/db',
