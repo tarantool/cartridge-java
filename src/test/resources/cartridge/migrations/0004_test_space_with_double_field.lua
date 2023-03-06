@@ -1,18 +1,7 @@
 return {
     up = function()
-        local function get_field_type_by_version()
-            local tarantoolVersion = box.info.version
-            --todo: change this solution for more generic cases like for 10+ versions
-            local version = tonumber(string.sub(tarantoolVersion, 1, 3))
-
-            if version >= 2.3 then
-                return 'double'
-            end
-
-            return 'number'
-        end
-
         local utils = require("migrator.utils")
+        local get_field_type_by_version = require("utils.migration").get_field_type_by_version
 
         local s = box.schema.create_space("test_space_with_double_field", { if_not_exists = true })
 

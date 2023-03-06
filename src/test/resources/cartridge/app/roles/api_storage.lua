@@ -1,14 +1,3 @@
-local function tarantool_version()
-    local major_minor_patch = _G._TARANTOOL:split('-', 1)[1]
-    local major_minor_patch_parts = major_minor_patch:split('.', 2)
-
-    local major = tonumber(major_minor_patch_parts[1])
-    local minor = tonumber(major_minor_patch_parts[2])
-    local patch = tonumber(major_minor_patch_parts[3])
-
-    return major, minor, patch
-end
-
 local function get_composite_data(id)
     local composite = { id = id }
     local data1 = box.space.test_space:get(id)
