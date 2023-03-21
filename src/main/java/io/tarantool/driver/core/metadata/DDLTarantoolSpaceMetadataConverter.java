@@ -6,11 +6,13 @@ import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataContainer;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolEmptyMetadataException;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
 import org.msgpack.value.StringValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
+import org.msgpack.value.ValueType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +61,11 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
     public TarantoolMetadataContainer fromValue(Value value) {
 
         if (!value.isMapValue()) {
-            throw new TarantoolClientException("Unsupported space metadata format: expected map");
+            if (value.getValueType().equals(ValueType.ARRAY) && value.asArrayValue().size() == 0) {
+                throw new TarantoolEmptyMetadataException();
+            }
+            throw new TarantoolClientException("Unsupported space metadata format: expected map, got %s",
+                value.getValueType());
         }
 
         Map<Value, Value> spacesMap = value.asMapValue().map();

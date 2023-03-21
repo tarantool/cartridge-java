@@ -7,9 +7,14 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolAccessDeniedException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolEmptyMetadataException;
+import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolInternalNetworkException;
+import io.tarantool.driver.exceptions.TarantoolMetadataRequestException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
+import io.tarantool.driver.exceptions.TarantoolSpaceNotFoundException;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -212,5 +217,41 @@ public class TarantoolErrorsIT extends SharedCartridgeContainer {
         assertTrue(cause instanceof TarantoolAccessDeniedException);
         assertTrue(cause.getMessage()
             .contains("Execute access to function 'ddl.get_schema' is denied for user 'restricted_user'"));
+    }
+
+    @Test
+    void test_failedToRefreshMetadata_shouldHasReasonOfException_ifDdlReturnNull() {
+        ProxyTarantoolTupleClient adminClient = setupAdminClient();
+
+        adminClient.eval("true_ddl = ddl; " +
+                             "ddl = {get_schema = function() return nil end}").join();
+
+        TarantoolClientException exception = assertThrows(TarantoolClientException.class,
+            () -> adminClient.space("test_space").select(Conditions.any()));
+        assertEquals("Failed to refresh spaces and indexes metadata", exception.getMessage());
+        Throwable cause = exception.getCause();
+        assertEquals(TarantoolEmptyMetadataException.class, cause.getClass());
+        assertEquals("No space metadata returned", cause.getMessage());
+        adminClient.eval("ddl = true_ddl").join();
+    }
+
+    @Test
+    void test_failedToRefreshMetadata_shouldHasReasonOfException_ifDdlReturnEmptyTable() {
+        ProxyTarantoolTupleClient adminClient = setupAdminClient();
+
+        adminClient.eval("true_ddl = ddl; " +
+                             "ddl = {get_schema = function() return {} end}").join();
+
+        TarantoolClientException exception = assertThrows(TarantoolClientException.class,
+            () -> adminClient.space("test_space").select(Conditions.any()));
+        assertEquals("Failed to refresh spaces and indexes metadata", exception.getMessage());
+        Throwable cause = exception.getCause();
+        assertEquals(TarantoolMetadataRequestException.class, cause.getClass());
+        cause = cause.getCause();
+        assertEquals(CompletionException.class, cause.getClass());
+        cause = cause.getCause();
+        assertEquals(TarantoolEmptyMetadataException.class, cause.getClass());
+        assertEquals("No space metadata returned", cause.getMessage());
+        adminClient.eval("ddl = true_ddl").join();
     }
 }
