@@ -1,10 +1,14 @@
 package io.tarantool.driver.core.metadata;
 
+import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolEmptyMetadataException;
+import io.tarantool.driver.exceptions.TarantoolFunctionCallException;
+import io.tarantool.driver.exceptions.TarantoolMetadataRequestException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.utils.Assert;
 
@@ -97,6 +101,9 @@ public class TarantoolMetadata implements TarantoolMetadataOperations {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
             result = metadataProvider.getMetadata().thenAccept(container -> {
+                if (container == null) {
+                    throw new TarantoolEmptyMetadataException();
+                }
                 spaceMetadataByName.clear();
                 spaceMetadataById.clear();
                 indexMetadataBySpaceName.clear();
