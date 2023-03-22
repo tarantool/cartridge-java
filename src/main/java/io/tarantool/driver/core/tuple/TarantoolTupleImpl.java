@@ -137,6 +137,12 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
+    public boolean metadataFormatIsEmpty() {
+        return spaceMetadata == null || spaceMetadata.getSpaceFormatMetadata() == null ||
+                   spaceMetadata.getSpaceFormatMetadata().isEmpty();
+    }
+
+    @Override
     public Optional<TarantoolField> getField(int fieldPosition) {
         Assert.state(fieldPosition >= 0, "Field position starts with 0");
 

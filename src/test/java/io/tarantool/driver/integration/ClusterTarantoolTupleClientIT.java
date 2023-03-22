@@ -404,7 +404,19 @@ public class ClusterTarantoolTupleClientIT {
         ).get();
 
         assertTrue(result.size() >= 3);
-        assertEquals(1605, result.get(0).getInteger("year"));
+        TarantoolTuple tuple = result.get(0);
+        assertFalse(tuple.metadataFormatIsEmpty());
+        assertEquals(1605, tuple.getInteger("year"));
+
+        result = client.call(
+            "user_function_complex_query",
+            Collections.singletonList(1000),
+            defaultMapper,
+            factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null)
+        ).get();
+        assertTrue(result.size() >= 3);
+        tuple = result.get(0);
+        assertTrue(tuple.metadataFormatIsEmpty());
     }
 
     @Test
