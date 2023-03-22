@@ -30,4 +30,9 @@ public class ArrayValueToTarantoolTupleResultConverter
     public TarantoolResult<TarantoolTuple> fromValue(ArrayValue value) {
         return tarantoolResultFactory.createTarantoolTupleResultImpl(value, tupleConverter);
     }
+
+    @Override
+    public boolean canConvertValue(ArrayValue value) {
+        return value.size() == 0 || value.get(0).isArrayValue();
+    }
 }

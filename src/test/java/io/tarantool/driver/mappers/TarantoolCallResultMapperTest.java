@@ -108,7 +108,7 @@ public class TarantoolCallResultMapperTest {
         ArrayValue testTuples = ValueFactory.newArray(tupleOne.toMessagePackValue(defaultMapper));
 
         // Another corner case, tuple result mapper should not be used for this result format
-        assertThrows(TarantoolTupleConversionException.class, () -> defaultResultMapper.fromValue(testTuples));
+        assertThrows(MessagePackValueMapperException.class, () -> defaultResultMapper.fromValue(testTuples));
     }
 
     @Test
