@@ -3,6 +3,7 @@
 ## [Unreleased]
 - Remove config request timeout as default parameter in crud client
 - Add details for the case of space metadata fetching failure ([#200](https://github.com/tarantool/cartridge-java/issues/200))
+- Add metadataFormatIsEmpty in TarantoolTuple
 - Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
 - Split retrying into more detailed modules ([#341](https://github.com/tarantool/cartridge-java/issues/341))
 - Add deep copy instead of shallow copy in default message pack mapper ([#166](https://github.com/tarantool/cartridge-java/issues/166))
