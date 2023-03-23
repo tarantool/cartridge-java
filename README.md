@@ -56,6 +56,8 @@ If you use this code in another project don't forget to add `cartridge-driver` d
   Determining bucket id on java side to send requests directly on storage.
 * [Thread control](docs/ThreadControl.md)  
   Specifying custom numbers of netty work threads.
+* [SSL and mTLS usage examples (enterprise edition only)](docs/SslAndMtls.md)  
+  Connect to Tarantool instances over an SSL or mTLS channel.
 
 ## Documentation
 
