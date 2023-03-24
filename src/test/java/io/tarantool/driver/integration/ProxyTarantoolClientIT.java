@@ -26,6 +26,7 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
+import io.tarantool.driver.core.TarantoolTupleResultImpl;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
@@ -33,6 +34,7 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -424,6 +426,53 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(field2, tuple.getObject("field2").orElse(null));
         assertEquals(field3, tuple.getObject("field3").orElse(null));
         assertEquals(field4, tuple.getObject("field4").orElse(null));
+    }
+
+    @Test
+    public void test_universalConverter_shouldWorkWithBoxAndCrudCorrectly() {
+        Integer id = 123000;
+        String field1 = "Jane Doe";
+        Integer field2 = 999;
+
+        List<Object> values = Arrays.asList(id, null, field1, field2);
+        TarantoolTuple tarantoolTuple = tupleFactory.create(values);
+        client.space("test_space").insert(tarantoolTuple).join();
+
+        MessagePackMapper valueMapper = client.getConfig().getMessagePackMapper();
+
+        ResultMapperFactoryFactory factory =
+            client.getResultMapperFactoryFactory();
+        CallResultMapper callReturnMapper = factory.createMapper(valueMapper)
+            .withSingleValueConverter(
+                factory.createMapper(valueMapper)
+                    .withArrayValueToTarantoolTupleResultConverter()
+                    .withRowsMetadataToTarantoolTupleResultConverter()
+                    .buildCallResultMapper()
+            )
+            .buildCallResultMapper();
+
+        Object crudResult =
+            client.call("crud.select", Collections.singletonList("test_space"), callReturnMapper).join();
+
+        assertTrue(crudResult instanceof TarantoolTupleResultImpl);
+        TarantoolTupleResultImpl tarantoolResult = (TarantoolTupleResultImpl) crudResult;
+        assertEquals(1, tarantoolResult.size());
+        TarantoolTuple tuple = tarantoolResult.get(0);
+        assertEquals(id, tuple.getObject("id").orElse(null));
+        assertEquals(field1, tuple.getObject("field1").orElse(null));
+        assertEquals(field2, tuple.getObject("field2").orElse(null));
+
+        Object boxResult =
+            client.call("select_router_space", new ArrayList<>(), callReturnMapper).join();
+
+        assertTrue(boxResult instanceof TarantoolTupleResultImpl);
+        tarantoolResult = (TarantoolTupleResultImpl) boxResult;
+        assertEquals(1, tarantoolResult.size());
+        tuple = tarantoolResult.get(0);
+        assertEquals(1, tuple.getObject(0).orElse(null));
+
+        Object primitiveObject = client.call("returning_number", new ArrayList<>(), callReturnMapper).join();
+        assertEquals(2, primitiveObject);
     }
 
     @Test

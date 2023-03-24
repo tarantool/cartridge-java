@@ -53,11 +53,13 @@ If you use this code in another project don't forget to add `cartridge-driver` d
 * [TarantoolTuple usage](docs/TarantoolTupleUsage.md)  
   Creating and operating with TarantoolTuple entity.
 * [Custom sharding function](docs/CustomShardingFunction.md)  
-  Determining bucket id on java side.
+  Determining bucket id on java side to send requests directly on storage.
 * [Thread control](docs/ThreadControl.md)  
   Specifying custom numbers of netty work threads.
 * [Space not found](docs/SpaceNotFound.md)  
     The problem of getting metadata.
+* [SSL and mTLS usage examples (enterprise edition only)](docs/SslAndMtls.md)  
+  Connect to Tarantool instances over an SSL or mTLS channel.
 
 ## Documentation
 

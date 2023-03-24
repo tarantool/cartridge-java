@@ -78,9 +78,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
-        return delete(conditions, rowsMetadataTupleResultMapper(), ProxyDeleteOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return delete(conditions, rowsMetadataTupleResultMapper(), ProxyDeleteOptions.create());
     }
 
     @Override
@@ -113,9 +111,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
-        return insert(tuple, rowsMetadataTupleResultMapper(), ProxyInsertOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return insert(tuple, rowsMetadataTupleResultMapper(), ProxyInsertOptions.create());
     }
 
     @Override
@@ -147,7 +143,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     @Override
     public CompletableFuture<R> insertMany(Collection<T> tuples) {
         return insertMany(tuples, rowsMetadataTupleResultMapper(), ProxyInsertManyOptions.create()
-            .withTimeout(config.getRequestTimeout())
             .withStopOnError(true)
             .withRollbackOnError(true)
         );
@@ -182,9 +177,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
-        return replace(tuple, rowsMetadataTupleResultMapper(), ProxyReplaceOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return replace(tuple, rowsMetadataTupleResultMapper(), ProxyReplaceOptions.create());
     }
 
     @Override
@@ -216,7 +209,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     @Override
     public CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException {
         return replaceMany(tuples, rowsMetadataTupleResultMapper(), ProxyReplaceManyOptions.create()
-            .withTimeout(config.getRequestTimeout())
             .withStopOnError(true)
             .withRollbackOnError(true)
         );
@@ -250,9 +242,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
-        return select(conditions, rowsMetadataTupleResultMapper(), ProxySelectOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return select(conditions, rowsMetadataTupleResultMapper(), ProxySelectOptions.create());
     }
 
     @Override
@@ -275,7 +265,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getSelectFunctionName())
             .withConditions(conditions)
-            .withOptions(options)
             .withArgumentsMapper(config.getMessagePackMapper())
             .withResultMapper(resultMapper)
             .withOptions(options)
@@ -288,7 +277,6 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     public CompletableFuture<R> update(Conditions conditions, T tuple) {
         return update(conditions, makeOperationsFromTuple(tuple), rowsMetadataTupleResultMapper(),
             ProxyUpdateOptions.create()
-                .withTimeout(config.getRequestTimeout())
         );
     }
 
@@ -310,9 +298,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
-        return update(conditions, operations, rowsMetadataTupleResultMapper(), ProxyUpdateOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return update(conditions, operations, rowsMetadataTupleResultMapper(), ProxyUpdateOptions.create());
     }
 
     @Override
@@ -346,9 +332,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
-        return upsert(conditions, tuple, operations, rowsMetadataTupleResultMapper(), ProxyUpsertOptions.create()
-            .withTimeout(config.getRequestTimeout())
-        );
+        return upsert(conditions, tuple, operations, rowsMetadataTupleResultMapper(), ProxyUpsertOptions.create());
     }
 
     @Override
@@ -389,9 +373,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
                 .withClient(client)
                 .withSpaceName(spaceName)
                 .withFunctionName(operationsMapping.getTruncateFunctionName())
-                .withOptions(ProxyTruncateOptions.create()
-                    .withTimeout(config.getRequestTimeout())
-                )
+                .withOptions(ProxyTruncateOptions.create())
                 .build()
             );
         } catch (TarantoolClientException e) {

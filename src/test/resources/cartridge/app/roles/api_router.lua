@@ -197,14 +197,31 @@ local function create_restricted_user()
     box.schema.user.grant("restricted_user", "execute", "function", "returning_number", { if_not_exists = true })
 end
 
-local function init()
-    patch_crud_methods_for_tests()
+local function select_router_space()
+    return box.space.router_space:select()
+end
 
-    box.schema.space.create('request_counters', {
+local function init_router_spaces()
+    local request_counters = box.schema.space.create('request_counters', {
         format = { { 'id', 'unsigned' }, { 'count', 'unsigned' } },
         if_not_exists = true
     })
-    box.space.request_counters:create_index('id', { parts = { 'id' }, if_not_exists = true })
+    request_counters:create_index('id', { parts = { 'id' }, if_not_exists = true })
+
+    local router_space = box.schema.space.create('router_space', {
+        format = { { 'id', 'unsigned' } },
+        if_not_exists = true
+    })
+    router_space:create_index('id', { parts = { 'id' }, if_not_exists = true })
+    router_space:replace({1})
+end
+
+
+local function init(opts)
+    if opts.is_master then
+        init_router_spaces()
+    end
+    patch_crud_methods_for_tests()
 
     rawset(_G, 'truncate_space', truncate_space)
 
@@ -234,6 +251,7 @@ local function init()
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
     rawset(_G, 'get_other_storage_bucket_id', crud_utils.get_other_storage_bucket_id)
     rawset(_G, 'get_composite_data_with_crud', crud_utils.get_composite_data_with_crud)
+    rawset(_G, 'select_router_space', select_router_space)
     rawset(_G, 'vshard', vshard)
 
     create_restricted_user()

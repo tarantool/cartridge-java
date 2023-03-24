@@ -10,8 +10,6 @@ import io.tarantool.driver.exceptions.TarantoolTimeoutException;
 import io.tarantool.driver.utils.Assert;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -132,8 +130,10 @@ public final class TarantoolRequestRetryPolicies {
             // to provide it if retrying has been stopped without correct result
             AtomicReference<Throwable> lastExceptionWrapper = new AtomicReference<>();
 
+            RetryingAsyncOperation<R> retryingAsyncOperation =
+                new RetryingAsyncOperation<>(this, operation, resultFuture, lastExceptionWrapper);
             CompletableFuture.runAsync(() -> {
-                    runAsyncOperation(operation, resultFuture, lastExceptionWrapper);
+                    retryingAsyncOperation.run();
                     // set global timeout
                     ScheduledFuture<?> operationTimeoutScheduledFuture =
                         TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
@@ -316,6 +316,14 @@ public final class TarantoolRequestRetryPolicies {
             return delay;
         }
 
+        public int getAttempts() {
+            return attempts;
+        }
+
+        public int getLimit() {
+            return limit;
+        }
+
         /**
          * Basic constructor with timeout
          *
@@ -347,48 +355,11 @@ public final class TarantoolRequestRetryPolicies {
         }
 
         @Override
-        public <R> void runAsyncOperation(
-            Supplier<CompletableFuture<R>> operation, CompletableFuture<R> resultFuture,
-            AtomicReference<Throwable> lastExceptionWrapper) {
-            // start async operation running
-            CompletableFuture<R> operationFuture = operation.get();
-            // start scheduled request timeout task
-            // it never completes correctly only exceptionally
-            CompletableFuture<R> requestTimeoutFuture = failAfterRequestTimeout(resultFuture);
-
-            operationFuture.acceptEither(requestTimeoutFuture, resultFuture::complete)
-                .exceptionally(ex -> { // if requestTimeout has been raised or operation return exception
-
-                    while (ex instanceof ExecutionException || ex instanceof CompletionException) {
-                        ex = ex.getCause();
-                    }
-                    // to provide it if retrying has been stopped without correct result
-                    lastExceptionWrapper.set(ex);
-
-                    if (attempts == 0) {
-                        ex = new TarantoolAttemptsLimitException(
-                            limit,
-                            ex);
-                        resultFuture.completeExceptionally(ex);
-                        return null;
-                    }
-
-                    if (this.canRetryRequest(ex)) {
-                        // retry it after delay
-                        ScheduledFuture<?> delayFuture =
-                            TarantoolRequestRetryPolicies.getTimeoutScheduler().schedule(() -> {
-                                runAsyncOperation(operation, resultFuture, lastExceptionWrapper);
-                            }, getDelay(), TimeUnit.MILLISECONDS);
-                        // optimization: stop delayed future if resultFuture has already done from outside
-                        resultFuture.whenComplete((r, e) -> delayFuture.cancel(false));
-                    } else {
-                        resultFuture.completeExceptionally(ex);
-                    }
-                    return null;
-                }).exceptionally(ex -> { // if error has been happened in previous exceptionally section
-                    resultFuture.completeExceptionally(ex);
-                    return null;
-                });
+        public Throwable getPolicyException(Throwable ex) {
+            if (attempts == 0) {
+                return new TarantoolAttemptsLimitException(limit, ex);
+            }
+            return ex;
         }
     }
 

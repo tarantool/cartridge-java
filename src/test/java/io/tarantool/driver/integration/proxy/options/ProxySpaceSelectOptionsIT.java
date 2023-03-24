@@ -114,7 +114,14 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         // with config timeout
         profileSpace.select(Conditions.any()).get();
         List<?> crudSelectOpts = client.eval("return crud_select_opts").get();
-        assertEquals(requestConfigTimeout, ((HashMap) crudSelectOpts.get(0)).get("timeout"));
+        assertNull(((HashMap) crudSelectOpts.get(0)).get("timeout"));
+
+        profileSpace.select(
+            Conditions.any(),
+            ProxySelectOptions.create()
+        ).get();
+        crudSelectOpts = client.eval("return crud_select_opts").get();
+        assertNull(((HashMap) crudSelectOpts.get(0)).get("timeout"));
 
         // with option timeout
         profileSpace.select(

@@ -3,7 +3,12 @@ package io.tarantool.driver.mappers.factories;
 import io.tarantool.driver.api.MultiValueCallResult;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleResult;
+import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 
 import java.util.List;
@@ -191,4 +196,171 @@ public interface ResultMapperFactoryFactory {
      * @return new or existing factory instance
      */
     <T> ArrayValueToTarantoolResultMapperFactory<T> rowsMetadataStructureResultMapperFactory();
+
+    /**
+     * Return builder to create mapper which may depend on input clientMapper
+     * For example, you can create maper that can obtain crud and box results from lua
+     * and read it into {@link TarantoolTupleResult} structure.
+     * <pre>
+     * <code>
+     *     CallResultMapper callReturnMapper = factory.createMapper(valueMapper)
+     *             .withSingleValueConverter( // obtain first value from lua multi-value response
+     *                 factory.createMapper(valueMapper)
+     *                     .withArrayValueToTarantoolTupleResultConverter() // box type response
+     *                     .withRowsMetadataToTarantoolTupleResultMapper() // crud type response
+     *                     .buildCallResultMapper()
+     *             )
+     *             .buildCallResultMapper();
+     * </code>
+     * </pre>
+     * This mapper wouldn't have metadata to take fields by their names.
+     *
+     * @param messagePackMapper input client mapper
+     * @return Builder to create mapper with specific converters inside
+     */
+    Builder createMapper(MessagePackMapper messagePackMapper);
+
+    /**
+     * Return builder to create mapper which may depend on input clientMapper
+     * For example, you can create maper that can obtain crud and box results from lua
+     * and read it into {@link TarantoolTupleResult} structure.
+     * <pre>
+     * <code>
+     *     CallResultMapper callReturnMapper = factory.createMapper(valueMapper)
+     *             .withSingleValueConverter( // obtain first value from lua multi-value response
+     *                 factory.createMapper(valueMapper)
+     *                     .withArrayValueToTarantoolTupleResultConverter() // box type response
+     *                     .withRowsMetadataToTarantoolTupleResultMapper() // crud type response
+     *                     .buildCallResultMapper()
+     *             )
+     *             .buildCallResultMapper();
+     * </code>
+     * </pre>
+     *
+     * @param messagePackMapper input client mapper
+     * @param spaceMetadata metadata to get fields by names
+     * @return Builder to create mapper with specific converters inside
+     */
+    Builder createMapper(MessagePackMapper messagePackMapper, TarantoolSpaceMetadata spaceMetadata);
+
+    interface Builder {
+
+        /**
+         * Add a converter for mapping stored Lua function call results to {@link SingleValueCallResult}
+         * <p>
+         * input: [x, y, ...], MessagePack array from a Lua function multi-return response
+         * <br>
+         * where <code>x, y</code> are some MessagePack values. <code>x</code> is interpreted as a stored Lua function
+         * result and <code>y</code> may be interpreted as a stored Lua function error if it is not empty and there are
+         * no more arguments after <code>y</code>.
+         * <br>
+         * mapper result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to builder constructor for parsing the result contents.
+         * <p>
+         * Converter result and its inner contents depend on the parameters or the passed converters.
+         *
+         * @return builder with single value converter
+         */
+        Builder withSingleValueConverter();
+
+        /**
+         * Add a converter for mapping stored Lua function call results to {@link SingleValueCallResult}
+         * <p>
+         * input: [x, y, ...], MessagePack array from a Lua function multi-return response
+         * <br>
+         * where <code>x, y</code> are some MessagePack values. <code>x</code> is interpreted as a stored Lua function
+         * result and <code>y</code> may be interpreted as a stored Lua function error if it is not empty and there are
+         * no more arguments after <code>y</code>.
+         * <br>
+         * mapper result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to this one for parsing the result contents.
+         * <p>
+         * Converter result and its inner contents depend on the parameters or the passed converters.
+         *
+         * @param messagePackMapper to parse fields
+         * @return builder with single value converter
+         */
+        Builder withSingleValueConverter(
+            MessagePackValueMapper messagePackMapper);
+
+        /**
+         * Add converter parses result from a list of tuples.
+         * Use this converter for handling containers with {@link TarantoolTuple} inside.
+         * The IProto method results by default contain lists of tuples.
+         * This converter can be used at the inner level by other mapper factories that are handling higher-level
+         * containers.
+         * <p>
+         * input: array of tuples with MessagePack values inside ([t1, t2, ...])
+         * <br>
+         * converter result: {@code TarantoolResult<TarantoolTuple>}
+         * <p>
+         * For example, it can be used to parse result from IPROTO_SELECT.
+         * fields result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to builder constructor for parsing the result contents.
+         *
+         * @return builder with converter that parses list of arrays to {@code TarantoolResult<TarantoolTuple>}
+         */
+        Builder withArrayValueToTarantoolTupleResultConverter();
+
+        /**
+         * Add converter parses result from a list of tuples.
+         * Use this converter for handling containers with {@link TarantoolTuple} inside.
+         * The IProto method results by default contain lists of tuples.
+         * This converter can be used at the inner level by other mapper factories that are handling higher-level
+         * containers.
+         * <p>
+         * input: array of tuples with MessagePack values inside ([t1, t2, ...])
+         * <br>
+         * converter result: {@code TarantoolResult<TarantoolTuple>}
+         * <p>
+         * For example, it can be used to parse result from IPROTO_SELECT
+         * fields result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to this one for parsing the result contents.
+         *
+         * @param messagePackMapper to parse fields
+         * @return builder with converter that parses list of arrays to {@code TarantoolResult<TarantoolTuple>}
+         */
+        Builder withArrayValueToTarantoolTupleResultConverter(
+            MessagePackMapper messagePackMapper);
+
+        /**
+         * Add converter parses result from a map with list of tuples and metadata.
+         * Use this converter for handling containers with {@link TarantoolTuple} inside.
+         * The crud method results by default contain map with list of tuples and metadata.
+         * This converter can be used at the inner level by other mapper factories that are handling higher-level
+         * containers.
+         * <p>
+         * input: map with metadata and array of tuples with MessagePack values inside ([t1, t2, ...])
+         * <br>
+         * fields result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to builder constructor for parsing the result contents.
+         * <p>
+         *
+         * @return builder with converter that parses map to {@code TarantoolResult<TarantoolTuple>}
+         */
+        Builder withRowsMetadataToTarantoolTupleResultConverter();
+
+        /**
+         * Add converter parses result from a map with list of tuples and metadata.
+         * Use this converter for handling containers with {@link TarantoolTuple} inside.
+         * The crud method results by default contain map with list of tuples and metadata.
+         * This converter can be used at the inner level by other mapper factories that are handling higher-level
+         * containers.
+         * <p>
+         * input: map with metadata and array of tuples with MessagePack values inside ([t1, t2, ...])
+         * <br>
+         * fields result: some Java type converted from the value of <code>x</code> according to the mapper, passed as a
+         * parameter to this one for parsing the result contents.
+         * <p>
+         *
+         * @param messagePackMapper to parse fields
+         * @return builder with converter that parses map to {@code TarantoolResult<TarantoolTuple>}
+         */
+        Builder withRowsMetadataToTarantoolTupleResultConverter(
+            MessagePackMapper messagePackMapper);
+
+        CallResultMapper buildCallResultMapper();
+
+        CallResultMapper buildCallResultMapper(MessagePackMapper valueMapper);
+    }
 }
