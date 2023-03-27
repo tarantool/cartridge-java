@@ -48,10 +48,10 @@ local function get_routers_status()
     return result
 end
 
-local function init_router_status()
-    crud.insert('instances_info', { 1, 1, uuid.str(), 'available', 'localhost:3301' })
-    crud.insert('instances_info', { 2, 1, uuid.str(), 'available', 'localhost:3302' })
-    crud.insert('instances_info', { 3, 1, uuid.str(), 'available', 'localhost:3303' })
+local function init_router_status(router_uris)
+    for i, router_uri in ipairs(router_uris) do
+        crud.insert('instances_info', { i, 1, uuid.str(), 'available', router_uri })
+    end
 end
 
 local retries_holder = {

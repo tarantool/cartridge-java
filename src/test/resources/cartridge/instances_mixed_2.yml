@@ -1,0 +1,14 @@
+testapp.1:
+  workdir: ./tmp/db_dev/3351
+  advertise_uri: localhost:3351
+  http_port: 8581
+
+testapp.2:
+  workdir: ./tmp/db_dev/3352
+  advertise_uri: localhost:3352
+  http_port: 8582
+
+testapp.3:
+  workdir: ./tmp/db_dev/3353
+  advertise_uri: localhost:3353
+  http_port: 8583

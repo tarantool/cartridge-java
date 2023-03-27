@@ -99,9 +99,9 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
 
     private static void waitUntilRolesConfigured() {
         int INIT_TIMEOUT_SEC = 30;
-        Assertions.assertTrue(waitUntilNodeIsConfigured(3301, INIT_TIMEOUT_SEC));
-        Assertions.assertTrue(waitUntilNodeIsConfigured(3302, INIT_TIMEOUT_SEC));
-        Assertions.assertTrue(waitUntilNodeIsConfigured(3303, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(routerPort, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(router2Port, INIT_TIMEOUT_SEC));
+        Assertions.assertTrue(waitUntilNodeIsConfigured(router3Port, INIT_TIMEOUT_SEC));
     }
 
     @BeforeAll

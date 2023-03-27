@@ -5,6 +5,7 @@ import io.tarantool.driver.utils.Assert;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class TarantoolUtils {
@@ -12,6 +13,12 @@ public final class TarantoolUtils {
     private static final String TARANTOOL_VERSION = "TARANTOOL_VERSION";
 
     private TarantoolUtils() {
+    }
+
+    public static String getTarantoolVersionSuffix() {
+        return Optional.ofNullable(System.getenv(TarantoolUtils.TARANTOOL_VERSION))
+            .map(v -> "_" + v.trim().substring(0, 1))
+            .orElse("");
     }
 
     public static boolean versionGreaterOrEqualThen(String tarantoolVersion) {
@@ -24,7 +31,6 @@ public final class TarantoolUtils {
         TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
         return ciVersion.getMajor() >= version.getMajor() &&
             ciVersion.getMinor() >= version.getMinor();
-
     }
 
     public static boolean versionWithUUID() {

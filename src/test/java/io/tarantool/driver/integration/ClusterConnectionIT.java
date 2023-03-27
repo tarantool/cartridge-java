@@ -73,11 +73,19 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
             TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> true).withDelay(delay).build());
     }
 
+    private TarantoolServerAddress getRouter1Address() {
+        return new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.routerPort));
+    }
+
+    private TarantoolServerAddress getRouter2Address() {
+        return new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router2Port));
+    }
+
     @Test
     void testMultipleRoutersConnectWithUnreachable_retryableRequestShouldNotFail() throws Exception {
         // create retrying client with two routers, one does not exist
         TarantoolClusterAddressProvider addressProvider = () -> Arrays.asList(
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
+            getRouter1Address(),
             new TarantoolServerAddress(container.getRouterHost(), 33399));
 
         RetryingTarantoolTupleClient client = setupClusterClient(prepareConfig().build(), addressProvider, 1, 0);
@@ -90,15 +98,13 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
     @Test
     void testMultipleRoutersReconnect_retryableRequestShouldNotFail() throws Exception {
-        RetryingTarantoolTupleClient routerClient1 = setupRouterClient(3301, 3, 10);
+        RetryingTarantoolTupleClient routerClient1 = setupRouterClient(super.routerPort, 3, 10);
         routerClient1.call("reset_request_counters").get();
-        RetryingTarantoolTupleClient routerClient2 = setupRouterClient(3302, 3, 10);
+        RetryingTarantoolTupleClient routerClient2 = setupRouterClient(super.router2Port, 3, 10);
         routerClient2.call("reset_request_counters").get();
 
         // create retrying client with two routers
-        TarantoolClusterAddressProvider addressProvider = () -> Arrays.asList(
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)));
+        TarantoolClusterAddressProvider addressProvider = () -> Arrays.asList(getRouter1Address(), getRouter2Address());
 
         AtomicReference<Container.ExecResult> result = new AtomicReference<>();
         AtomicReference<String> nextRouterName = new AtomicReference<>();
@@ -177,12 +183,11 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
     @Test
     void testMultipleConnectionsReconnect_retryableRequestShouldNotFail() throws Exception {
-        try (RetryingTarantoolTupleClient routerClient1 = setupRouterClient(3301, 3, 10)) {
+        try (RetryingTarantoolTupleClient routerClient1 = setupRouterClient(super.routerPort, 3, 10)) {
             routerClient1.call("reset_request_counters").get();
 
             // create retrying client with one router and two connections
-            TarantoolClusterAddressProvider addressProvider = () -> Collections.singletonList(
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)));
+            TarantoolClusterAddressProvider addressProvider = () -> Collections.singletonList(getRouter1Address());
             RetryingTarantoolTupleClient client = setupClusterClient(
                 prepareConfig().withConnections(2).build(), addressProvider, 10, 10);
 

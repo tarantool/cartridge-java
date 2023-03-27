@@ -145,9 +145,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
         return TarantoolClientFactory.createClient()
             // You can connect to multiple routers
             .withAddresses(
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.routerPort)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router2Port)),
+                new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router3Port))
             )
             // For connecting to a Cartridge application,
             // use the value of cluster_cookie parameter in the init.lua file
@@ -179,12 +179,24 @@ public class ReconnectIT extends SharedCartridgeContainer {
         startCartridge();
 
         client.refresh();
-        Thread.sleep(3000);
 
-        // getting all routers uuids after restarting
-        final Set<String> uuidsAfterReconnect = getInstancesUuids(client);
+        Set<String> uuidsAfterReconnect = null;
+        int attempts = 10;
+        int sleepMs = 3000;
+        while (attempts > 0) {
 
-        // check that amount of routers is equal initial amount
+            // getting all routers uuids after restarting
+            uuidsAfterReconnect = getInstancesUuids(client);
+            // check that amount of routers is equal initial amount
+            if (routerUuids.size() == uuidsAfterReconnect.size()) {
+                break;
+            } else {
+                logger.info("Not all routers are online, sleeping {} ms", sleepMs);
+            }
+
+            Thread.sleep(sleepMs);
+            attempts--;
+        }
         assertEquals(routerUuids.size(), uuidsAfterReconnect.size());
     }
 
@@ -225,15 +237,15 @@ public class ReconnectIT extends SharedCartridgeContainer {
         final Set<String> instancesUuids = getInstancesUuids(client);
         assertEquals(3, instancesUuids.size());
 
-        replaceInstancesInfo(client, 1, "unavailable", 3301);
-        replaceInstancesInfo(client, 2, "unavailable", 3302);
+        replaceInstancesInfo(client, 1, "unavailable", super.routerPort);
+        replaceInstancesInfo(client, 2, "unavailable", super.router2Port);
         Thread.sleep(1000);
 
         final Set<String> afterRoutersDisablingInstancesUuids = getInstancesUuids(client);
         assertEquals(1, afterRoutersDisablingInstancesUuids.size());
 
-        replaceInstancesInfo(client, 1, "available", 3301);
-        replaceInstancesInfo(client, 2, "available", 3302);
+        replaceInstancesInfo(client, 1, "available", super.routerPort);
+        replaceInstancesInfo(client, 2, "available", super.router2Port);
         Thread.sleep(1000);
 
         final Set<String> afterRoutersEnablingInstancesUuids = getInstancesUuids(client);
@@ -248,9 +260,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
         startCartridge();
 
         final TarantoolServerAddress firstAddress =
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.routerPort));
         final TarantoolServerAddress secondAddress =
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302));
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router2Port));
         final TarantoolServerAddress[] tarantoolServerAddresses = {firstAddress, secondAddress};
 
         // create client for check number of connections
@@ -359,7 +371,12 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 // Specify using the default CRUD proxy operations mapping configuration
                 .withProxyMethodMapping()
                 .build();
-        initClient.call("init_router_status").join();
+        List<String> routerURIs = Arrays.asList(
+            String.format("%s:%s", "localhost", super.routerPort),
+            String.format("%s:%s", "localhost", super.router2Port),
+            String.format("%s:%s", "localhost", super.router3Port)
+        );
+        initClient.call("init_router_status", Arrays.asList(routerURIs)).join();
     }
 
     private void replaceInstancesInfo(
@@ -374,9 +391,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
     @NotNull
     private List<TarantoolServerAddress> getShuffledTarantoolServerAddresses() {
         List<TarantoolServerAddress> addresses = Arrays.asList(
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
-            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.routerPort)),
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router2Port)),
+            new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.router3Port))
         );
         Collections.shuffle(addresses);
 

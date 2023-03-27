@@ -31,12 +31,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
-    private static final String TEST_ROUTER1_URI = "localhost:3301";
-    private static final String TEST_ROUTER2_URI = "localhost:3302";
-
     @BeforeAll
     public static void setUp() {
         startCluster();
+    }
+
+    private String getRouter1URI() {
+        return String.format("localhost:%d", super.routerPort);
+    }
+
+    private String getRouter2URI() {
+        return String.format("localhost:%d", super.router2Port);
     }
 
     @Test
@@ -46,8 +51,8 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
         assertEquals(nodes.size(), 3);
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
-        assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
-        assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));
+        assertTrue(nodeSet.contains(new TarantoolServerAddress(getRouter1URI())));
+        assertTrue(nodeSet.contains(new TarantoolServerAddress(getRouter2URI())));
     }
 
     private HTTPDiscoveryClusterAddressProvider getHttpProvider() {
@@ -72,8 +77,8 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
         Collection<TarantoolServerAddress> nodes = addressProvider.getAddresses();
         assertEquals(nodes.size(), 3);
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
-        assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
-        assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));
+        assertTrue(nodeSet.contains(new TarantoolServerAddress(getRouter1URI())));
+        assertTrue(nodeSet.contains(new TarantoolServerAddress(getRouter2URI())));
     }
 
     private TarantoolClusterAddressProvider getBinaryProvider() {
