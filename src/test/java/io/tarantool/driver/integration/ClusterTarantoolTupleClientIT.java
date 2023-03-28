@@ -22,7 +22,7 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -405,7 +405,7 @@ public class ClusterTarantoolTupleClientIT {
 
         assertTrue(result.size() >= 3);
         TarantoolTuple tuple = result.get(0);
-        assertFalse(tuple.metadataFormatIsEmpty());
+        assertFalse(tuple.hasMetadata());
         assertEquals(1605, tuple.getInteger("year"));
 
         result = client.call(
@@ -416,7 +416,7 @@ public class ClusterTarantoolTupleClientIT {
         ).get();
         assertTrue(result.size() >= 3);
         tuple = result.get(0);
-        assertTrue(tuple.metadataFormatIsEmpty());
+        assertTrue(tuple.hasMetadata());
     }
 
     @Test
