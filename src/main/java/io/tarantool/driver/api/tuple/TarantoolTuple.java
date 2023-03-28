@@ -15,11 +15,11 @@ import java.util.UUID;
  */
 public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
     /**
-     * Check whether tuple have information about space format
+     * Check whether this tuple includes information about space format
      *
-     * @return true if we obtain fields by names
+     * @return true if we can obtain the tuple fields by names
      */
-    boolean metadataFormatIsEmpty();
+    boolean hasMetadata();
 
     /**
      * Get a tuple field by its position

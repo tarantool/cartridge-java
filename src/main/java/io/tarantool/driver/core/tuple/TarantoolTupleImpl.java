@@ -137,7 +137,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     }
 
     @Override
-    public boolean metadataFormatIsEmpty() {
+    public boolean hasMetadata() {
         return spaceMetadata == null || spaceMetadata.getSpaceFormatMetadata() == null ||
                    spaceMetadata.getSpaceFormatMetadata().isEmpty();
     }
