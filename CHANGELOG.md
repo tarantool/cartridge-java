@@ -6,7 +6,7 @@
 - Split retrying into more detailed modules ([#341](https://github.com/tarantool/cartridge-java/issues/341))
 - Add deep copy instead of shallow copy in default message pack mapper
 - Add a factory builder for constructing mapper hierarchies
-- Add can convert value to TupleResultConverter
+- Add "can convert value" check to TupleResultConverter
 
 ## [0.10.1] - 2023-01-13
 
