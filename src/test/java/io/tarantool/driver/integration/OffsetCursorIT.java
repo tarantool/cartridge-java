@@ -1,27 +1,16 @@
 package io.tarantool.driver.integration;
 
 
-import io.tarantool.driver.api.TarantoolClient;
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolResult;
-import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.auth.TarantoolCredentials;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.TarantoolContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
@@ -37,23 +26,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Testcontainers
-public class OffsetCursorIT {
+public class OffsetCursorIT extends SharedTarantoolContainer {
 
     private static final String TEST_SPACE_NAME = "cursor_test_space";
     private static final String TEST_MULTIPART_KEY_SPACE_NAME = "cursor_test_space_multi_part_key";
 
-    private static final Logger log = LoggerFactory.getLogger(OffsetCursorIT.class);
-
-    @Container
-    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-        .withScriptFileName("org/testcontainers/containers/server.lua");
-
-    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
-        assertTrue(tarantoolContainer.isRunning());
+        startContainer();
         initClient();
 
         try {
@@ -71,25 +53,6 @@ public class OffsetCursorIT {
     public static void tearDown() throws Exception {
         client.close();
         assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
-    }
-
-    private static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-            .withCredentials(credentials)
-            .withConnectTimeout(1000 * 5)
-            .withReadTimeout(1000 * 5)
-            .withRequestTimeout(1000 * 5)
-            .build();
-
-        log.info("Attempting connect to Tarantool");
-        client = new ClusterTarantoolTupleClient(config, serverAddress);
-        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     private interface ElementGenerator {
