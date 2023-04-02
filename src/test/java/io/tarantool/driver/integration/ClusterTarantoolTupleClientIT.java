@@ -49,47 +49,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class ClusterTarantoolTupleClientIT {
+public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
 
     private static final String TEST_SPACE_NAME = "test_space";
     private static final Logger log = LoggerFactory.getLogger(ClusterTarantoolTupleClientIT.class);
 
-    @Container
-    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-        .withScriptFileName("org/testcontainers/containers/server.lua")
-        .withLogConsumer(new Slf4jLogConsumer(log));
-
-    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
 
     @BeforeAll
     public static void setUp() {
-        assertTrue(tarantoolContainer.isRunning());
+        startContainer();
         initClient();
     }
 
     public static void tearDown() throws Exception {
         client.close();
         assertThrows(TarantoolClientException.class, () -> client.metadata().getSpaceByName("_space"));
-    }
-
-    private static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
-
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
-
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-            .withCredentials(credentials)
-            .withConnectTimeout(1000 * 5)
-            .withReadTimeout(1000 * 5)
-            .withRequestTimeout(1000 * 5)
-            .build();
-
-        log.info("Attempting connect to Tarantool");
-        client = new ClusterTarantoolTupleClient(config, serverAddress);
-        log.info("Successfully connected to Tarantool, version = {}", client.getVersion());
     }
 
     @Test

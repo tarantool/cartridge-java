@@ -19,9 +19,6 @@ import io.tarantool.driver.exceptions.TarantoolInternalException;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.TarantoolContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ClassUtil;
 
@@ -45,24 +42,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Artyom Dubinin
  */
 @Testcontainers
-public class ConnectionIT {
+public class ConnectionIT extends SharedTarantoolContainer {
     private static final String TEST_SPACE_NAME = "test_space";
     private static final String GUEST_USER = "guest";
     private static final String EXISTING_USER_WITHOUT_PASSWORD = "empty_password_user";
     private static final Logger log = LoggerFactory.getLogger(ConnectionIT.class);
 
-    @Container
-    private static final TarantoolContainer tarantoolContainer = new TarantoolContainer()
-        .withScriptFileName("org/testcontainers/containers/server.lua")
-        .withLogConsumer(new Slf4jLogConsumer(log));
-
     @Test
     public void connectAndCheckMetadata() throws Exception {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            container.getUsername(), container.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
 
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -86,10 +78,10 @@ public class ConnectionIT {
 
     private CompletableFuture<List<?>> connectAndEval(String command) throws Exception {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            container.getUsername(), container.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
         CompletableFuture<List<?>> future = client.eval(command);
@@ -119,7 +111,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             GUEST_USER, "");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             List<?> resultList = client.eval("return box.session.user()").get();
             String sessionUser = (String) resultList.get(0);
@@ -133,7 +125,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             GUEST_USER, "abcd");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             ExecutionException e = assertThrows(ExecutionException.class, () -> {
                 client.eval("return box.session.user()").get();
@@ -152,7 +144,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             "", "");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             List<?> resultList = client.eval("return box.session.user()").get();
             String sessionUser = (String) resultList.get(0);
@@ -166,7 +158,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             "", "abcd");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             ExecutionException e = assertThrows(ExecutionException.class, () -> {
                 List<?> resultList = client.eval("return box.session.user()").get();
@@ -185,7 +177,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             EXISTING_USER_WITHOUT_PASSWORD, "");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             List<?> resultList = client.eval("return box.session.user()").get();
             String sessionUser = (String) resultList.get(0);
@@ -198,7 +190,7 @@ public class ConnectionIT {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
             "RandomUserName", "");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
             ExecutionException e = assertThrows(ExecutionException.class, () -> {
                 client.eval("return box.session.user()").get();
@@ -213,9 +205,9 @@ public class ConnectionIT {
     public void testIncorrectHostname_shouldThrowException() {
         assertThrows(TarantoolClientException.class, () -> {
             TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+                container.getUsername(), container.getPassword());
             TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                "wronghost", tarantoolContainer.getPort());
+                "wronghost", container.getPort());
             ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
             // Connection is actually performed here
             client.getVersion();
@@ -226,9 +218,9 @@ public class ConnectionIT {
     public void testIncorrectPort_shouldThrowException() {
         assertThrows(TarantoolClientException.class, () -> {
             TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-                tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+                container.getUsername(), container.getPassword());
             TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-                tarantoolContainer.getHost(), 9999);
+                container.getHost(), 9999);
             ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
             // Connection is actually performed here
             client.getVersion();
@@ -238,9 +230,9 @@ public class ConnectionIT {
     @Test
     public void testCloseAfterIncorrectPort_shouldThrowException() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            container.getUsername(), container.getPassword());
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), 9999);
+            container.getHost(), 9999);
         assertThrows(TarantoolClientException.class, () -> {
             try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
                 // Connection is actually performed here
@@ -252,9 +244,9 @@ public class ConnectionIT {
     @Test
     public void testCloseAfterIncorrectPassword_shouldThrowException() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), "incorrect");
+            container.getUsername(), "incorrect");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         assertThrows(TarantoolClientException.class, () -> {
             try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
                 // Connection is actually performed here
@@ -266,9 +258,9 @@ public class ConnectionIT {
     @Test
     public void testIncorrectPassword_secondRequestShouldNotHang() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), "incorrect");
+            container.getUsername(), "incorrect");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
         assertThrows(TarantoolClientException.class, () -> {
             try (ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress)) {
                 // Connection is actually performed here
@@ -286,9 +278,9 @@ public class ConnectionIT {
     @Test
     public void testIncorrectPassword_multipleRequestsShouldNotHang() {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), "incorrect");
+            container.getUsername(), "incorrect");
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            "neverwhere", tarantoolContainer.getPort());
+            "neverwhere", container.getPort());
         TarantoolClientConfig config = TarantoolClientConfig.builder()
             .withConnectTimeout(100)
             .withRequestTimeout(100)
@@ -322,10 +314,10 @@ public class ConnectionIT {
     @Test
     public void testClientClosing_clientWithoutConnectionsShouldNotHang() throws Exception {
         TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            tarantoolContainer.getUsername(), tarantoolContainer.getPassword());
+            container.getUsername(), container.getPassword());
 
         TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            tarantoolContainer.getHost(), tarantoolContainer.getPort());
+            container.getHost(), container.getPort());
 
         ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
         client.close();
