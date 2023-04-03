@@ -1,15 +1,25 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.11.0] - 2023-04-12
+
+### Internal and API changes
 - Remove config request timeout as default parameter in crud client
-- Add details for the case of space metadata fetching failure ([#200](https://github.com/tarantool/cartridge-java/issues/200))
 - Add hasMetadata in TarantoolTuple
-- Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
-- Split retrying into more detailed modules ([#341](https://github.com/tarantool/cartridge-java/issues/341))
-- Add deep copy instead of shallow copy in default message pack mapper ([#166](https://github.com/tarantool/cartridge-java/issues/166))
-- Add a factory builder for constructing mapper hierarchies
 - Add "can convert value" check to TupleResultConverter
 - Support Datetime type ([#214](https://github.com/tarantool/cartridge-java/pull/214))
+
+### Bugfixes
+- Add details for the case of space metadata fetching failure ([#200](https://github.com/tarantool/cartridge-java/issues/200))
+- Close public access to TarantoolResult*Impl ([#326](https://github.com/tarantool/cartridge-java/issues/326))
+- Add deep copy instead of shallow copy in default message pack mapper ([#166](https://github.com/tarantool/cartridge-java/issues/166))
+
+### Refactor
+- Split retrying into more detailed modules ([#341](https://github.com/tarantool/cartridge-java/issues/341))
+
+### Features
+- Add a factory builder for constructing mapper hierarchies
 
 ## [0.10.1] - 2023-01-13
 
