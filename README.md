@@ -39,7 +39,7 @@ If you use this code in another project don't forget to add `cartridge-driver` d
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.10.1</version>
+  <version>0.11.0</version>
 </dependency>
 ```
 ## Advanced usage
