@@ -4,8 +4,10 @@
 
 ### Bugfixes
 - Fix lack of closing when greeting fails ([#379](https://github.com/tarantool/cartridge-java/pull/379))
+- Get rid of double executor in retrying ([#382](https://github.com/tarantool/cartridge-java/pull/382))
 
 ## [0.11.1] - 2023-04-24
+
 ### Bugfixes
 - Fix hasMetadata logic
 
