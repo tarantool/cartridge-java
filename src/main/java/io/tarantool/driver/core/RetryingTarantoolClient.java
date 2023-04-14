@@ -440,8 +440,12 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
 
     private TarantoolSpaceOperations<T, R> getTarantoolSpaceOperationsRetrying(
         Supplier<TarantoolSpaceOperations<T, R>> spaceSupplier) {
+        CompletableFuture<TarantoolSpaceOperations<T, R>> wrapperForSync = new CompletableFuture<>();
         try {
-            return wrapOperation(() -> CompletableFuture.supplyAsync(spaceSupplier, executor)).get();
+            return wrapOperation(() -> {
+                wrapperForSync.complete(spaceSupplier.get());
+                return wrapperForSync;
+            }).get();
         } catch (InterruptedException e) {
             throw new CompletionException(e);
         } catch (ExecutionException e) {

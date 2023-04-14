@@ -35,6 +35,7 @@ public class TarantoolSetup {
         .withLogConsumer(new Slf4jLogConsumer(log));
 
     TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
+    TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingTarantoolClient;
     MessagePackMapper defaultMapper;
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         resultMapper;
@@ -48,6 +49,9 @@ public class TarantoolSetup {
             .withAddress(tarantoolContainer.getHost(), tarantoolContainer.getPort())
             .withCredentials(tarantoolContainer.getUsername(), tarantoolContainer.getPassword())
             .build();
+
+        retryingTarantoolClient
+            = TarantoolClientFactory.configureClient(tarantoolClient).withRetryingByNumberOfAttempts(3).build();
 
         TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
             TarantoolTupleResultMapperFactoryImpl.getInstance();

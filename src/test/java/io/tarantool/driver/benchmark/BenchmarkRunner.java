@@ -164,4 +164,12 @@ public class BenchmarkRunner {
         bh.consume(plan.tarantoolClient.call(
             "empty_function", plan.arraysWithNestedMaps).join());
     }
+
+    @Benchmark
+    @Fork(1)
+    @BenchmarkMode(Mode.Throughput)
+    public void spaceCall(TarantoolSetup plan, Blackhole bh) {
+        bh.consume(plan.retryingTarantoolClient.space(
+            "test_space"));
+    }
 }
