@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.11.1] - 2023-04-24
+### Bugfixes
+- Fix hasMetadata logic
+
 ## [0.11.0] - 2023-04-12
 
 ### Internal and API changes
