@@ -380,7 +380,7 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
 
         assertTrue(result.size() >= 3);
         TarantoolTuple tuple = result.get(0);
-        assertFalse(tuple.hasMetadata());
+        assertTrue(tuple.hasMetadata());
         assertEquals(1605, tuple.getInteger("year"));
 
         result = client.call(
@@ -391,7 +391,7 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
         ).get();
         assertTrue(result.size() >= 3);
         tuple = result.get(0);
-        assertTrue(tuple.hasMetadata());
+        assertFalse(tuple.hasMetadata());
     }
 
     @Test
