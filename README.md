@@ -52,6 +52,8 @@ If you use this code in another project don't forget to add `cartridge-driver` d
   Retrying transient cluster failures.
 * [TarantoolTuple usage](docs/TarantoolTupleUsage.md)  
   Creating and operating with TarantoolTuple entity.
+* [Mappers and converters](docs/MappersAndConverters.md)  
+  Converting data from MessagePack types to basic Java types and back.
 * [Custom sharding function](docs/CustomShardingFunction.md)  
   Determining bucket id on java side to send requests directly on storage.
 * [Thread control](docs/ThreadControl.md)  
