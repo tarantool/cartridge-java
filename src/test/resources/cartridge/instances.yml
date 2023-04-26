@@ -13,6 +13,11 @@ testapp.third-router:
   advertise_uri: localhost:3303
   http_port: 8083
 
+testapp.fourth-router:
+  workdir: ./tmp/db_dev/3306
+  advertise_uri: localhost:3306
+  http_port: 8086
+
 testapp.s1-storage:
   workdir: ./tmp/db_dev/3304
   advertise_uri: localhost:3304

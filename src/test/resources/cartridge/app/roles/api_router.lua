@@ -1,11 +1,12 @@
 local vshard = require('vshard')
 local cartridge_rpc = require('cartridge.rpc')
-local fiber = require('fiber')
 local crud = require('crud')
 local uuid = require('uuid')
 local log = require('log')
 
+local metadata_utils = require('utils.metadata')
 local crud_utils = require('utils.crud')
+local counter = require('modules.counter')
 
 local function get_schema()
     for _, instance_uri in pairs(cartridge_rpc.get_candidates('app.roles.api_storage', { leader_only = true })) do
@@ -100,51 +101,6 @@ local function raising_error()
     error("Test error: raising_error() called")
 end
 
-local function reset_request_counters()
-    box.space.request_counters:replace({ 1, 0 })
-end
-
-local function get_router_name()
-    return string.sub(box.cfg.custom_proc_title, 9)
-end
-
-local function simple_long_running_function(seconds_to_sleep)
-    fiber.sleep(seconds_to_sleep)
-    return true
-end
-
-local function long_running_function(values)
-    local seconds_to_sleep = 0
-    local disabled_router_name = ""
-    if values ~= nil then
-        if type(values) == "table" then
-            values = values or {}
-            seconds_to_sleep = values[1]
-            disabled_router_name = values[2]
-        else
-            seconds_to_sleep = values
-        end
-    end
-
-    -- need using number instead field name as string in update function for compatibility with tarantool 1.10
-    box.space.request_counters:update(1, { { '+', 2, 1 } })
-    log.info('Executing long-running function ' ..
-        tostring(box.space.request_counters:get(1)[2]) ..
-        "(name: " .. disabled_router_name ..
-        "; sleep: " .. seconds_to_sleep .. ")")
-    if get_router_name() == disabled_router_name then
-        return nil, "Disabled by client; router_name = " .. disabled_router_name
-    end
-    if seconds_to_sleep then
-        fiber.sleep(seconds_to_sleep)
-    end
-    return true
-end
-
-local function get_request_count()
-    return box.space.request_counters:get(1)[2]
-end
-
 -- it's like vshard error throwing
 local function box_error_unpack_no_connection()
     return nil, box.error.new(box.error.NO_CONNECTION):unpack()
@@ -202,12 +158,6 @@ local function select_router_space()
 end
 
 local function init_router_spaces()
-    local request_counters = box.schema.space.create('request_counters', {
-        format = { { 'id', 'unsigned' }, { 'count', 'unsigned' } },
-        if_not_exists = true
-    })
-    request_counters:create_index('id', { parts = { 'id' }, if_not_exists = true })
-
     local router_space = box.schema.space.create('router_space', {
         format = { { 'id', 'unsigned' } },
         if_not_exists = true
@@ -220,6 +170,7 @@ end
 local function init(opts)
     if opts.is_master then
         init_router_spaces()
+        counter.init_counter_space()
     end
     patch_crud_methods_for_tests()
 
@@ -235,11 +186,13 @@ local function init(opts)
     rawset(_G, 'retrying_function', retrying_function)
     rawset(_G, 'raising_error', raising_error)
 
-    rawset(_G, 'reset_request_counters', reset_request_counters)
-    rawset(_G, 'get_router_name', get_router_name)
-    rawset(_G, 'long_running_function', long_running_function)
-    rawset(_G, 'simple_long_running_function', simple_long_running_function)
-    rawset(_G, 'get_request_count', get_request_count)
+    rawset(_G, 'get_router_name', metadata_utils.get_router_name)
+
+    rawset(_G, 'reset_request_counters', counter.reset_request_counters)
+    rawset(_G, 'simple_long_running_function', counter.simple_long_running_function)
+    rawset(_G, 'long_running_function', counter.long_running_function)
+    rawset(_G, 'get_request_count', counter.get_request_count)
+
     rawset(_G, 'box_error_unpack_no_connection', box_error_unpack_no_connection)
     rawset(_G, 'box_error_unpack_timeout', box_error_unpack_timeout)
     rawset(_G, 'box_error_timeout', box_error_timeout)

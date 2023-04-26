@@ -1,5 +1,7 @@
 local cartridge = require('cartridge')
 
+local counter = require('modules.counter')
+
 function get_routers()
     local function table_contains(table, element)
         for _, value in pairs(table) do
@@ -44,9 +46,15 @@ local function init(opts)
     -- luacheck: no unused args
     if opts.is_master then
         box.schema.user.grant('guest', 'read,write', 'universe', nil, { if_not_exists = true })
+        counter.init_counter_space()
     end
 
     init_httpd()
+
+    rawset(_G, 'reset_request_counters', counter.reset_request_counters)
+    rawset(_G, 'simple_long_running_function', counter.simple_long_running_function)
+    rawset(_G, 'long_running_function', counter.long_running_function)
+    rawset(_G, 'get_request_count', counter.get_request_count)
 
     return true
 end
