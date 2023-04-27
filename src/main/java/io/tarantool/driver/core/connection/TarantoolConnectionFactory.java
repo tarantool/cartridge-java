@@ -98,6 +98,7 @@ public class TarantoolConnectionFactory {
         return result.handle((connection, ex) -> {
             if (ex != null) {
                 logger.warn("Connection failed: {}", ex.getMessage());
+                future.channel().close();
             }
             return connection;
         });
