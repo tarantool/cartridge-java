@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -245,6 +246,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
         // restart routers for resetting connections
         stopInstances(Arrays.asList("router", "second-router"));
         startCartridge();
+        String status = container.execInContainer("cartridge", "status", "--run-dir=/tmp/run").getStderr();
+        assertEquals(6, StringUtils.countMatches(status, "RUNNING"));
 
         final TarantoolServerAddress firstAddress =
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
@@ -298,7 +301,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
                                 numberOfSwitching.incrementAndGet();
                                 runnable.run();
                             }
-                        }, 500, 100, TimeUnit.MILLISECONDS);
+                        }, 0, 100, TimeUnit.MILLISECONDS);
                     }
                 }).build();
 

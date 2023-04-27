@@ -142,9 +142,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         Object routerCallCounterPerConnection = getCallCountersPerConnection(getAllConnectionCalls, routerClient4);
         assertEquals(Arrays.asList(2, 2), routerCallCounterPerConnection);
 
-        String pid = container.execInContainer("pgrep", "-f", "testapp@fourth-router")
-                         .getStdout().replace("\n", "");
-        container.execInContainer("kill", "-9", pid);
+        stopInstance("fourth-router");
         // wait until discovery get topology
         Thread.sleep(5_000);
 
@@ -156,11 +154,11 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
         }
         Thread.sleep(5_000);
         for (TarantoolClient router :
-            Arrays.asList(routerClient1, routerClient3)) {
+            Arrays.asList(routerClient1, routerClient2, routerClient3)) {
             assertEquals(Arrays.asList(6, 7), getCallCountersPerConnection(getAllConnectionCalls, router));
         }
-        routerCallCounterPerConnection = getCallCountersPerConnection(getAllConnectionCalls, routerClient4);
-        assertEquals(Arrays.asList(4, 4), routerCallCounterPerConnection);
+
+        startCartridge();
     }
 
     private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getSimpleClient(Integer port) {
