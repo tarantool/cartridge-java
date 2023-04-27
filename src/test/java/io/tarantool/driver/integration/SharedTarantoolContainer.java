@@ -34,21 +34,23 @@ abstract class SharedTarantoolContainer {
     }
 
     protected static void initClient() {
-        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
-            container.getUsername(), container.getPassword());
+        if (client == null) {
+            TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+                container.getUsername(), container.getPassword());
 
-        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
-            container.getHost(), container.getPort());
+            TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+                container.getHost(), container.getPort());
 
-        TarantoolClientConfig config = new TarantoolClientConfig.Builder()
-                                           .withCredentials(credentials)
-                                           .withConnectTimeout(1000 * 5)
-                                           .withReadTimeout(1000 * 5)
-                                           .withRequestTimeout(1000 * 5)
-                                           .build();
+            TarantoolClientConfig config = new TarantoolClientConfig.Builder()
+                                               .withCredentials(credentials)
+                                               .withConnectTimeout(1000 * 5)
+                                               .withReadTimeout(1000 * 5)
+                                               .withRequestTimeout(1000 * 5)
+                                               .build();
 
-        logger.info("Attempting connect to Tarantool");
-        client = new ClusterTarantoolTupleClient(config, serverAddress);
-        logger.info("Successfully connected to Tarantool, version = {}", client.getVersion());
+            logger.info("Attempting connect to Tarantool");
+            client = new ClusterTarantoolTupleClient(config, serverAddress);
+            logger.info("Successfully connected to Tarantool, version = {}", client.getVersion());
+        }
     }
 }

@@ -333,7 +333,7 @@ public class ConnectionIT extends SharedTarantoolContainer {
         }
         Map netStat = (Map) container.executeCommand("return box.stat.net()").join().get(0);
         Map connections = (Map) netStat.get("CONNECTIONS");
-        assertEquals(1, connections.get("current")); // only container connection
+        assertTrue((Integer) connections.get("current") <= 2); // one for container one for static test client
     }
 
     @Test
