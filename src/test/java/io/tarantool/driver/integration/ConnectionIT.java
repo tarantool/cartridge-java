@@ -16,6 +16,8 @@ import io.tarantool.driver.exceptions.NoAvailableConnectionsException;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolConnectionException;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.util.ClassUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -47,6 +50,11 @@ public class ConnectionIT extends SharedTarantoolContainer {
     private static final String GUEST_USER = "guest";
     private static final String EXISTING_USER_WITHOUT_PASSWORD = "empty_password_user";
     private static final Logger log = LoggerFactory.getLogger(ConnectionIT.class);
+
+    @BeforeAll
+    public static void setUp() {
+        startContainer();
+    }
 
     @Test
     public void connectAndCheckMetadata() throws Exception {
@@ -309,6 +317,23 @@ public class ConnectionIT extends SharedTarantoolContainer {
                     .get(5000, TimeUnit.MILLISECONDS);
             }
         });
+    }
+
+    @Test
+    public void testIncorrectPassword_shouldCloseConnection() throws Exception {
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+            container.getUsername(), "incorrect");
+        TarantoolServerAddress serverAddress = new TarantoolServerAddress(
+            container.getHost(), container.getPort());
+        ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient(credentials, serverAddress);
+        for (int i = 0; i < 100; i++) {
+            assertThrows(TarantoolClientException.class, () -> {
+                client.getVersion();
+            });
+        }
+        Map netStat = (Map) container.executeCommand("return box.stat.net()").join().get(0);
+        Map connections = (Map) netStat.get("CONNECTIONS");
+        assertTrue((Integer) connections.get("current") <= 2); // one for container one for static test client
     }
 
     @Test

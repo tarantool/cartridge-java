@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Bugfixes
+- Fix lack of closing when greeting fails ([#379](https://github.com/tarantool/cartridge-java/pull/379))
+
 ## [0.11.1] - 2023-04-24
 ### Bugfixes
 - Fix hasMetadata logic
