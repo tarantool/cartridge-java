@@ -7,6 +7,7 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.DefaultMultiValueResultMapper;
+import io.tarantool.driver.mappers.DefaultSingleAnyValueResultMapper;
 import io.tarantool.driver.mappers.DefaultSingleValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
@@ -112,8 +113,13 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
     }
 
     public <T> CallResultMapper<T, SingleValueCallResult<T>>
-    getDefaultSingleValueMapper(MessagePackMapper mapper, Class<T> tupleClass) {
+    getDefaultSingleValueMapper(MessagePackValueMapper mapper, Class<T> tupleClass) {
         return new DefaultSingleValueResultMapper<>(mapper, tupleClass);
+    }
+
+    public DefaultSingleAnyValueResultMapper
+    getDefaultSingleAnyValueMapper(MessagePackValueMapper mapper) {
+        return new DefaultSingleAnyValueResultMapper(mapper);
     }
 
     private <V extends Value, T> ValueConverter<V, T> getConverter(
@@ -209,13 +215,25 @@ public final class ResultMapperFactoryFactoryImpl implements ResultMapperFactory
         }
 
         @Override
-        public CallResultMapper buildCallResultMapper(MessagePackMapper valueMapper) {
+        public MessagePackValueMapper buildCallResultMapper() {
+            return new CallResultMapper(clientMapper.copy(), mappers);
+        }
+
+        @Override
+        public MessagePackValueMapper buildCallResultMapper(MessagePackMapper valueMapper) {
             return new CallResultMapper(valueMapper, mappers);
         }
 
         @Override
-        public CallResultMapper buildCallResultMapper() {
-            return new CallResultMapper(clientMapper.copy(), mappers);
+        public <T> CallResultMapper<T, SingleValueCallResult<T>>
+            buildSingleValueResultMapper(MessagePackValueMapper valueMapper, Class<T> classResult) {
+            return getDefaultSingleValueMapper(valueMapper, classResult);
+        }
+
+        @Override
+        public DefaultSingleAnyValueResultMapper
+        buildSingleAnyValueResultMapper(MessagePackValueMapper valueMapper) {
+            return getDefaultSingleAnyValueMapper(valueMapper);
         }
     }
 }

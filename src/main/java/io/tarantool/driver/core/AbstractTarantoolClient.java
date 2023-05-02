@@ -265,10 +265,10 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
     }
@@ -285,11 +285,11 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
     }
