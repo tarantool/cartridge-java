@@ -20,7 +20,7 @@ public class DefaultSingleValueResultMapper<T> extends CallResultMapper<T, Singl
      * @param valueMapper  value mapper for result content conversion
      * @param contentClass target result content class
      */
-    public DefaultSingleValueResultMapper(MessagePackMapper valueMapper, Class<T> contentClass) {
+    public DefaultSingleValueResultMapper(MessagePackValueMapper valueMapper, Class<T> contentClass) {
         super(DefaultMessagePackMapperFactory.getInstance().emptyMapper(),
             defaultValueConverter(valueMapper), getResultClass(contentClass));
     }

@@ -209,10 +209,10 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return client.call(functionName, arguments, resultMapper);
     }
@@ -227,11 +227,11 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return client.call(functionName, arguments, argumentsMapper, resultMapper);
     }

@@ -31,6 +31,7 @@ import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.CallResultMapper;
+import io.tarantool.driver.mappers.DefaultSingleAnyValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
@@ -442,14 +443,13 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         ResultMapperFactoryFactory factory =
             client.getResultMapperFactoryFactory();
-        CallResultMapper callReturnMapper = factory.createMapper(valueMapper)
-            .withSingleValueConverter(
+        DefaultSingleAnyValueResultMapper callReturnMapper = factory.createMapper(valueMapper)
+            .buildSingleAnyValueResultMapper(
                 factory.createMapper(valueMapper)
                     .withArrayValueToTarantoolTupleResultConverter()
                     .withRowsMetadataToTarantoolTupleResultConverter()
                     .buildCallResultMapper()
-            )
-            .buildCallResultMapper();
+            );
 
         Object crudResult =
             client.call("crud.select", Collections.singletonList("test_space"), callReturnMapper).join();

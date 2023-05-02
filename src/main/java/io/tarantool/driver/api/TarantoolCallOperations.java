@@ -123,10 +123,10 @@ public interface TarantoolCallOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
-    <T> CompletableFuture<TarantoolResult<T>> call(
+    <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException;
 
     /**
@@ -160,11 +160,11 @@ public interface TarantoolCallOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
      */
-    <T> CompletableFuture<TarantoolResult<T>> call(
+    <T> CompletableFuture<T> call(
         String functionName,
         List<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException;
 
     /**
