@@ -54,6 +54,8 @@ If you use this code in another project don't forget to add `cartridge-driver` d
   Creating and operating with TarantoolTuple entity.
 * [Mappers and converters](docs/MappersAndConverters.md)  
   Converting data from MessagePack types to basic Java types and back.
+* [Token authorization](docs/TokenAuthorization.md)  
+  An example of TDG authorization by token
 * [Custom sharding function](docs/CustomShardingFunction.md)  
   Determining bucket id on java side to send requests directly on storage.
 * [Thread control](docs/ThreadControl.md)  
