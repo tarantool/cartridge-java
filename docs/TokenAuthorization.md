@@ -7,7 +7,7 @@ Token authorization is now supported only in [Tarantool Data Grid](https://www.t
 After the [token is generated](https://www.tarantool.io/en/tdg/latest/administration/security/tokens/) it can be used
 for authorization.
 
-Token can be placed in `credentials` Map. After that you can add `credentials` as last argument of calling TDG function
+Token can be placed in "credentials" `Map`. After that you can add `credentials` as the last argument of the TDG function to be called.
 
 The following is an example of authorization by token:
 ```java
