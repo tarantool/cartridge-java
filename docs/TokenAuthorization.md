@@ -2,7 +2,7 @@
 
 # Token authorization
 
-Token authorization supported only in [Tarantool Data Grid](https://www.tarantool.io/en/datagrid/).  
+Token authorization is now supported only in [Tarantool Data Grid](https://www.tarantool.io/en/datagrid/).  
 
 After the [token is generated](https://www.tarantool.io/en/tdg/latest/administration/security/tokens/) it can be used
 for authorization.
