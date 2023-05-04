@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.2] - 2023-05-04
+
 ### Bugfixes
 - Fix lack of closing when greeting fails ([#379](https://github.com/tarantool/cartridge-java/pull/379))
 - Get rid of double executor in retrying ([#382](https://github.com/tarantool/cartridge-java/pull/382))
