@@ -245,23 +245,23 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, Class<T> tupleClass)
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, Class<T> tupleClass)
         throws TarantoolClientException {
-        return call(functionName, Collections.emptyList(), tupleClass);
+        return callForTupleResult(functionName, Collections.emptyList(), tupleClass);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<T> call(
         String functionName,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return call(functionName, Collections.emptyList(), resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<?> arguments, Class<T> tupleClass)
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, List<?> arguments, Class<T> tupleClass)
         throws TarantoolClientException {
-        return call(functionName, arguments, config.getMessagePackMapper(), tupleClass);
+        return callForTupleResult(functionName, arguments, config.getMessagePackMapper(), tupleClass);
     }
 
     @Override
@@ -274,7 +274,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
         String functionName,
         List<?> arguments,
         MessagePackObjectMapper argumentsMapper,

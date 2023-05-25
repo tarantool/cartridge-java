@@ -189,49 +189,38 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, Class<T> entityClass)
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, Class<T> entityClass)
         throws TarantoolClientException {
-        return client.call(functionName, entityClass);
+        return client.callForTupleResult(functionName, entityClass);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
-        String functionName,
-        CallResultMapper<TarantoolResult<T>, SingleValueCallResult<TarantoolResult<T>>> resultMapper)
-        throws TarantoolClientException {
+    public <T> CompletableFuture<T> call(String functionName,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
         return client.call(functionName, resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(String functionName, List<?> arguments, Class<T> entityClass)
-        throws TarantoolClientException {
-        return client.call(functionName, arguments, entityClass);
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, List<?> arguments,
+        Class<T> entityClass) throws TarantoolClientException {
+        return client.callForTupleResult(functionName, arguments, entityClass);
     }
 
     @Override
-    public <T> CompletableFuture<T> call(
-        String functionName,
-        List<?> arguments,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
-        throws TarantoolClientException {
+    public <T> CompletableFuture<T> call(String functionName, List<?> arguments,
+        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
         return client.call(functionName, arguments, resultMapper);
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> call(
-        String functionName,
-        List<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
-        Class<T> entityClass) throws TarantoolClientException {
-        return client.call(functionName, arguments, argumentsMapper, entityClass);
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, List<?> arguments,
+        MessagePackObjectMapper argumentsMapper, Class<T> entityClass) throws TarantoolClientException {
+        return client.callForTupleResult(functionName, arguments, argumentsMapper, entityClass);
     }
 
     @Override
-    public <T> CompletableFuture<T> call(
-        String functionName,
-        List<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+    public <T> CompletableFuture<T> call(String functionName, List<?> arguments,
+        MessagePackObjectMapper argumentsMapper, CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return client.call(functionName, arguments, argumentsMapper, resultMapper);
     }
