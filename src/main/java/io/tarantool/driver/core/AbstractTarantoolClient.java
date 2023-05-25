@@ -1,9 +1,23 @@
 package io.tarantool.driver.core;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.msgpack.value.Value;
+
 import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.CallResult;
 import io.tarantool.driver.api.MultiValueCallResult;
@@ -36,19 +50,6 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
 import io.tarantool.driver.utils.Assert;
-import org.msgpack.value.Value;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 /**
  * Basic Tarantool client implementation. Subclasses must provide the connection manager.
@@ -259,7 +260,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, List<?> arguments, Class<T> tupleClass)
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
+            String functionName, List<?> arguments, Class<T> tupleClass)
         throws TarantoolClientException {
         return callForTupleResult(functionName, arguments, config.getMessagePackMapper(), tupleClass);
     }
