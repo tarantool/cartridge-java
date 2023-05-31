@@ -31,7 +31,6 @@ import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.DefaultSingleAnyValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
@@ -443,32 +442,30 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         ResultMapperFactoryFactory factory =
             client.getResultMapperFactoryFactory();
-        DefaultSingleAnyValueResultMapper callReturnMapper = factory.createMapper(valueMapper)
-            .buildSingleAnyValueResultMapper(
-                factory.createMapper(valueMapper)
-                    .withArrayValueToTarantoolTupleResultConverter()
-                    .withRowsMetadataToTarantoolTupleResultConverter()
-                    .buildCallResultMapper()
-            );
+        CallResultMapper<TarantoolTupleResultImpl, SingleValueCallResult<TarantoolTupleResultImpl>> callReturnMapper =
+            factory.createMapper(valueMapper)
+                .buildSingleValueResultMapper(
+                    factory.createMapper(valueMapper)
+                        .withArrayValueToTarantoolTupleResultConverter()
+                        .withRowsMetadataToTarantoolTupleResultConverter()
+                        .buildCallResultMapper(),
+                    TarantoolTupleResultImpl.class
+                );
 
-        Object crudResult =
+        TarantoolTupleResultImpl crudResult =
             client.call("crud.select", Collections.singletonList("test_space"), callReturnMapper).join();
 
-        assertTrue(crudResult instanceof TarantoolTupleResultImpl);
-        TarantoolTupleResultImpl tarantoolResult = (TarantoolTupleResultImpl) crudResult;
-        assertEquals(1, tarantoolResult.size());
-        TarantoolTuple tuple = tarantoolResult.get(0);
+        assertEquals(1, crudResult.size());
+        TarantoolTuple tuple = crudResult.get(0);
         assertEquals(id, tuple.getObject("id").orElse(null));
         assertEquals(field1, tuple.getObject("field1").orElse(null));
         assertEquals(field2, tuple.getObject("field2").orElse(null));
 
-        Object boxResult =
+        TarantoolTupleResultImpl boxResult =
             client.call("select_router_space", new ArrayList<>(), callReturnMapper).join();
 
-        assertTrue(boxResult instanceof TarantoolTupleResultImpl);
-        tarantoolResult = (TarantoolTupleResultImpl) boxResult;
-        assertEquals(1, tarantoolResult.size());
-        tuple = tarantoolResult.get(0);
+        assertEquals(1, boxResult.size());
+        tuple = boxResult.get(0);
         assertEquals(1, tuple.getObject(0).orElse(null));
 
         Object primitiveObject = client.call("returning_number", new ArrayList<>(), callReturnMapper).join();
