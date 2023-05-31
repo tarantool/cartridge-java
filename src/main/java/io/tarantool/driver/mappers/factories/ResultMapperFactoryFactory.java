@@ -7,7 +7,6 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.DefaultSingleAnyValueResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
@@ -366,8 +365,5 @@ public interface ResultMapperFactoryFactory {
 
         <T> CallResultMapper<T, SingleValueCallResult<T>>
         buildSingleValueResultMapper(MessagePackValueMapper valueMapper, Class<T> classResult);
-
-        DefaultSingleAnyValueResultMapper
-        buildSingleAnyValueResultMapper(MessagePackValueMapper valueMapper);
     }
 }
