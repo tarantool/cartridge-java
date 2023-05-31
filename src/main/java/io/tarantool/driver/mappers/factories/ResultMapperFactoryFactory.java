@@ -359,9 +359,9 @@ public interface ResultMapperFactoryFactory {
         Builder withRowsMetadataToTarantoolTupleResultConverter(
             MessagePackMapper messagePackMapper);
 
-        MessagePackValueMapper buildCallResultMapper();
+        CallResultMapper buildCallResultMapper();
 
-        MessagePackValueMapper buildCallResultMapper(MessagePackMapper valueMapper);
+        CallResultMapper buildCallResultMapper(MessagePackMapper valueMapper);
 
         <T> CallResultMapper<T, SingleValueCallResult<T>>
         buildSingleValueResultMapper(MessagePackValueMapper valueMapper, Class<T> classResult);
