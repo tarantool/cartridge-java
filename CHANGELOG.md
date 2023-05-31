@@ -3,7 +3,8 @@
 ## [Unreleased]
 
 ### Internal and API changes
-- - **[breaking change]** Split call API for calls with tarantool result as return and call with generic return ([#123](https://github.com/tarantool/cartridge-springdata/issues/123))
+- **[breaking change]** Split call API for calls with tarantool result as return and call with generic return ([#123](https://github.com/tarantool/cartridge-springdata/issues/123))
+- Add buildSingleValueResultMapper in mapper builder
 
 ## [0.11.2] - 2023-05-04
 
