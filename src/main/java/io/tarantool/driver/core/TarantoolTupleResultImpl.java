@@ -2,6 +2,7 @@ package io.tarantool.driver.core;
 
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.exceptions.TarantoolTupleConversionException;
 import io.tarantool.driver.mappers.converters.value.ArrayValueToTarantoolTupleConverter;
 import org.msgpack.core.MessageTypeCastException;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author Artyom Dubinin
  */
-public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple> {
+public class TarantoolTupleResultImpl extends TarantoolResultImpl<TarantoolTuple> implements TarantoolTupleResult {
 
     protected TarantoolTupleResultImpl(
         ArrayValue rawTuples, TarantoolSpaceMetadata metadata,
