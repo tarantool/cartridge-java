@@ -16,6 +16,7 @@ import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
+import io.tarantool.driver.api.tuple.TarantoolTupleResult;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.auth.SimpleTarantoolCredentials;
 import io.tarantool.driver.auth.TarantoolCredentials;
@@ -442,17 +443,17 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         ResultMapperFactoryFactory factory =
             client.getResultMapperFactoryFactory();
-        CallResultMapper<TarantoolTupleResultImpl, SingleValueCallResult<TarantoolTupleResultImpl>> callReturnMapper =
+        CallResultMapper<TarantoolTupleResult, SingleValueCallResult<TarantoolTupleResult>> callReturnMapper =
             factory.createMapper(valueMapper)
                 .buildSingleValueResultMapper(
                     factory.createMapper(valueMapper)
                         .withArrayValueToTarantoolTupleResultConverter()
                         .withRowsMetadataToTarantoolTupleResultConverter()
                         .buildCallResultMapper(),
-                    TarantoolTupleResultImpl.class
+                    TarantoolTupleResult.class
                 );
 
-        TarantoolTupleResultImpl crudResult =
+        TarantoolResult<TarantoolTuple> crudResult =
             client.call("crud.select", Collections.singletonList("test_space"), callReturnMapper).join();
 
         assertEquals(1, crudResult.size());
@@ -461,7 +462,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(field1, tuple.getObject("field1").orElse(null));
         assertEquals(field2, tuple.getObject("field2").orElse(null));
 
-        TarantoolTupleResultImpl boxResult =
+        TarantoolResult<TarantoolTuple> boxResult =
             client.call("select_router_space", new ArrayList<>(), callReturnMapper).join();
 
         assertEquals(1, boxResult.size());
