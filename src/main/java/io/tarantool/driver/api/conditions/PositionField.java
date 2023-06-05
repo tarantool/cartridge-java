@@ -16,5 +16,5 @@ public interface PositionField extends FieldIdentifier<TarantoolFieldMetadata, I
         TarantoolSpaceMetadata spaceMetadata);
 
     @Override
-    Integer toIdentifier();
+    Object toIdentifier();
 }

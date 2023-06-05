@@ -16,5 +16,5 @@ public interface NamedField extends FieldIdentifier<TarantoolFieldMetadata, Stri
         TarantoolSpaceMetadata spaceMetadata);
 
     @Override
-    String toIdentifier();
+    Object toIdentifier();
 }

@@ -7,11 +7,11 @@ package io.tarantool.driver.exceptions;
  */
 public class TarantoolIndexNotFoundException extends TarantoolException {
 
-    public TarantoolIndexNotFoundException(int spaceId, String indexName) {
+    public TarantoolIndexNotFoundException(int spaceId, Object indexName) {
         super(String.format("Index '%s' is not found in space %d", indexName, spaceId));
     }
 
-    public TarantoolIndexNotFoundException(String spaceName, String indexName) {
+    public TarantoolIndexNotFoundException(String spaceName, Object indexName) {
         super(String.format("Index '%s' is not found in space %s", indexName, spaceName));
     }
 

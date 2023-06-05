@@ -17,7 +17,7 @@ public class SpacesTarantoolMetadataContainer implements TarantoolMetadataContai
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadataByName = new HashMap<>();
     private final Map<Integer, TarantoolSpaceMetadata> spaceMetadataById = new HashMap<>();
-    private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
+    private final Map<String, Map<Object, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
 
     public SpacesTarantoolMetadataContainer(
         TarantoolResult<TarantoolSpaceMetadata> spacesCollection,
@@ -40,7 +40,7 @@ public class SpacesTarantoolMetadataContainer implements TarantoolMetadataContai
     }
 
     @Override
-    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
+    public Map<String, Map<Object, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
         return indexMetadataBySpaceName;
     }
 }

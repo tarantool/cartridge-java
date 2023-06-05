@@ -737,7 +737,7 @@ public final class Conditions implements Serializable {
             throw new TarantoolClientException("Offset is not supported");
         }
 
-        final Map<String, List<IndexValueCondition>> indexConditions = new HashMap<>();
+        final Map<Object, List<IndexValueCondition>> indexConditions = new HashMap<>();
         final Map<Integer, List<FieldValueCondition>> fieldConditions = new HashMap<>();
         final Map<Integer, TarantoolFieldMetadata> selectedFields = new HashMap<>();
 
@@ -796,7 +796,7 @@ public final class Conditions implements Serializable {
 
     private IndexValueCondition convertIndexIfNecessary(
         IndexValueCondition condition,
-        String indexName) {
+        Object indexName) {
         if (!(condition.field() instanceof IdIndexImpl)) {
             return condition;
         }
@@ -817,8 +817,8 @@ public final class Conditions implements Serializable {
             throw new TarantoolClientException("'startAfter' is not supported");
         }
 
-        final Map<String, List<IndexValueCondition>> indexConditions = new HashMap<>();
-        final Map<String, TarantoolIndexMetadata> selectedIndexes = new HashMap<>();
+        final Map<Object, List<IndexValueCondition>> indexConditions = new HashMap<>();
+        final Map<Object, TarantoolIndexMetadata> selectedIndexes = new HashMap<>();
         final Map<String, List<FieldValueCondition>> fieldConditions = new HashMap<>();
         final Map<String, TarantoolFieldMetadata> selectedFields = new HashMap<>();
 
@@ -879,8 +879,8 @@ public final class Conditions implements Serializable {
     }
 
     private TarantoolIndexQuery indexQueryFromIndexValues(
-        Map<String, List<IndexValueCondition>> indexConditions,
-        Map<String, TarantoolIndexMetadata> selectedIndexes) {
+        Map<Object, List<IndexValueCondition>> indexConditions,
+        Map<Object, TarantoolIndexMetadata> selectedIndexes) {
         IndexValueCondition condition = indexConditions.values().iterator().next().get(0);
         TarantoolIndexMetadata indexMetadata = selectedIndexes.values().iterator().next();
         TarantoolIteratorType iteratorType = condition.operator().toIteratorType();
@@ -924,7 +924,7 @@ public final class Conditions implements Serializable {
         TarantoolMetadataOperations operations,
         TarantoolSpaceMetadata spaceMetadata,
         Collection<TarantoolFieldMetadata> selectedFields) {
-        Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
+        Map<Object, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
             .orElseThrow(() -> new TarantoolClientException(
                 "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 
@@ -959,7 +959,7 @@ public final class Conditions implements Serializable {
         TarantoolMetadataOperations operations,
         TarantoolSpaceMetadata spaceMetadata,
         Collection<TarantoolFieldMetadata> selectedFields) {
-        Map<String, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
+        Map<Object, TarantoolIndexMetadata> allIndexes = operations.getSpaceIndexes(spaceMetadata.getSpaceName())
             .orElseThrow(() -> new TarantoolClientException(
                 "Metadata for space %s not found", spaceMetadata.getSpaceName()));
 

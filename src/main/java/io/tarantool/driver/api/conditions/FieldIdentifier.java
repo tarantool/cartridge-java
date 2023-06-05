@@ -26,5 +26,5 @@ public interface FieldIdentifier<T, O> extends Serializable {
      *
      * @return an object serializable into MessagePack
      */
-    O toIdentifier();
+    Object toIdentifier();
 }

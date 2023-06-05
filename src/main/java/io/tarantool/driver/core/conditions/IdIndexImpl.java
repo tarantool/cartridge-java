@@ -46,7 +46,7 @@ public class IdIndexImpl implements IdIndex {
     }
 
     @Override
-    public Integer toIdentifier() {
+    public Object toIdentifier() {
         return position;
     }
 

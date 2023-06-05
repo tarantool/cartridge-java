@@ -16,5 +16,5 @@ public interface IdIndex extends FieldIdentifier<TarantoolIndexMetadata, Integer
         TarantoolSpaceMetadata spaceMetadata);
 
     @Override
-    Integer toIdentifier();
+    Object toIdentifier();
 }

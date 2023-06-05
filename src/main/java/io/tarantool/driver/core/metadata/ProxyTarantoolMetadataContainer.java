@@ -15,7 +15,7 @@ import java.util.Map;
 public class ProxyTarantoolMetadataContainer implements TarantoolMetadataContainer {
 
     private final Map<String, TarantoolSpaceMetadata> spaceMetadata = new HashMap<>();
-    private final Map<String, Map<String, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
+    private final Map<String, Map<Object, TarantoolIndexMetadata>> indexMetadata = new HashMap<>();
 
     public ProxyTarantoolMetadataContainer() {
     }
@@ -26,7 +26,7 @@ public class ProxyTarantoolMetadataContainer implements TarantoolMetadataContain
     }
 
     @Override
-    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
+    public Map<String, Map<Object, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
         return indexMetadata;
     }
 
@@ -34,7 +34,7 @@ public class ProxyTarantoolMetadataContainer implements TarantoolMetadataContain
         spaceMetadata.put(metadata.getSpaceName(), metadata);
     }
 
-    public void addIndexes(String spaceName, Map<String, TarantoolIndexMetadata> indexMetadataMap) {
+    public void addIndexes(String spaceName, Map<Object, TarantoolIndexMetadata> indexMetadataMap) {
         indexMetadata.put(spaceName, indexMetadataMap);
     }
 }

@@ -90,15 +90,15 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
     }
 
     @Override
-    public Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
-        Map<String, TarantoolIndexMetadata> indexes = new HashMap<>();
+    public Map<String, Map<Object, TarantoolIndexMetadata>> getIndexMetadataBySpaceName() {
+        Map<Object, TarantoolIndexMetadata> indexes = new HashMap<>();
         indexes.put("primary", testPrimaryIndexMetadata);
         indexes.put("asecondary", testIndexMetadata1);
         indexes.put("asecondary1", testIndexMetadata2);
         indexes.put("secondary2", testIndexMetadata3);
         indexes.put("asecondary3", testIndexMetadata4);
 
-        Map<String, Map<String, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
+        Map<String, Map<Object, TarantoolIndexMetadata>> indexMetadataBySpaceName = new HashMap<>();
         indexMetadataBySpaceName.put("test", indexes);
         return indexMetadataBySpaceName;
     }

@@ -22,7 +22,7 @@ class TarantoolIndexMetadataImpl implements TarantoolIndexMetadata {
 
     private int spaceId;
     private int indexId;
-    private String indexName;
+    private Object indexName;
     private TarantoolIndexType indexType;
     private TarantoolIndexOptions indexOptions;
     private List<TarantoolIndexPartMetadata> indexParts;
@@ -58,7 +58,7 @@ class TarantoolIndexMetadataImpl implements TarantoolIndexMetadata {
     }
 
     @Override
-    public String getIndexName() {
+    public Object getIndexName() {
         return indexName;
     }
 
@@ -67,7 +67,7 @@ class TarantoolIndexMetadataImpl implements TarantoolIndexMetadata {
      *
      * @param indexName a non-empty {@code String}
      */
-    void setIndexName(String indexName) {
+    void setIndexName(Object indexName) {
         this.indexName = indexName;
     }
 

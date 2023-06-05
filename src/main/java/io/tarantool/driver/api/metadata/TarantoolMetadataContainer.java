@@ -20,5 +20,5 @@ public interface TarantoolMetadataContainer {
      *
      * @return map of index metadata, must not be null
      */
-    Map<String, Map<String, TarantoolIndexMetadata>> getIndexMetadataBySpaceName();
+    Map<String, Map<Object, TarantoolIndexMetadata>> getIndexMetadataBySpaceName();
 }

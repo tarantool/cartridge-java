@@ -16,5 +16,5 @@ public interface NamedIndex extends FieldIdentifier<TarantoolIndexMetadata, Stri
         TarantoolSpaceMetadata spaceMetadata);
 
     @Override
-    String toIdentifier();
+    Object toIdentifier();
 }

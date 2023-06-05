@@ -121,10 +121,10 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
         return proxyMetadata;
     }
 
-    private Map<String, TarantoolIndexMetadata> parseIndexes(
+    private Map<Object, TarantoolIndexMetadata> parseIndexes(
         Map<String, TarantoolFieldMetadata> fields,
         List<Value> indexes) {
-        Map<String, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
+        Map<Object, TarantoolIndexMetadata> indexMetadataMap = new HashMap<>();
 
         int indexId = 0;
         for (Value indexValueMetadata : indexes) {
@@ -136,11 +136,16 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
             Map<Value, Value> indexMap = indexValueMetadata.asMapValue().map();
 
             Value indexNameValue = indexMap.get(INDEX_NAME_KEY);
-            if (indexNameValue == null || !indexNameValue.isStringValue()) {
+
+            Object indexName;
+            if (indexNameValue != null && indexNameValue.isIntegerValue()) {
+                indexName = indexNameValue.asIntegerValue().toInt();
+            } else if (indexNameValue != null && indexNameValue.isStringValue()) {
+                indexName = indexNameValue.asStringValue().asString();
+            } else {
                 throw new TarantoolClientException(
-                    "Unsupported index metadata format: key '" + INDEX_NAME_KEY + "' must have string value");
+                    "Unsupported index metadata format: key '" + INDEX_NAME_KEY + "' must have string or int value");
             }
-            String indexName = indexNameValue.asStringValue().asString();
 
             Value indexTypeValue = indexMap.get(INDEX_TYPE_KEY);
             if (indexTypeValue == null || !indexTypeValue.isStringValue()) {

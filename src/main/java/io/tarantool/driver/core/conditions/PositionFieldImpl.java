@@ -46,7 +46,7 @@ public class PositionFieldImpl implements PositionField {
     }
 
     @Override
-    public Integer toIdentifier() {
+    public Object toIdentifier() {
         return position;
     }
 

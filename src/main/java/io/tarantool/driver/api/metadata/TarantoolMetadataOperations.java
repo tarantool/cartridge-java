@@ -40,7 +40,7 @@ public interface TarantoolMetadataOperations {
      * @param indexName index name, must not be null or empty
      * @return nullable index metadata wrapped in {@link Optional}
      */
-    Optional<TarantoolIndexMetadata> getIndexByName(int spaceId, String indexName);
+    Optional<TarantoolIndexMetadata> getIndexByName(int spaceId, Object indexName);
 
     /**
      * Get metadata for index from the specified space by name
@@ -49,7 +49,7 @@ public interface TarantoolMetadataOperations {
      * @param indexName index name, must not be null or empty
      * @return nullable index metadata wrapped in {@link Optional}
      */
-    Optional<TarantoolIndexMetadata> getIndexByName(String spaceName, String indexName);
+    Optional<TarantoolIndexMetadata> getIndexByName(String spaceName, Object indexName);
 
     /**
      * Get metadata for index from the specified space by index ID
@@ -83,7 +83,7 @@ public interface TarantoolMetadataOperations {
      * @param spaceId the space ID, must be greater than 0
      * @return nullable map of index names to index metadata wrapped in {@link Optional}
      */
-    Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(int spaceId);
+    Optional<Map<Object, TarantoolIndexMetadata>> getSpaceIndexes(int spaceId);
 
     /**
      * Get metadata for all indexes for space specified by name
@@ -91,5 +91,5 @@ public interface TarantoolMetadataOperations {
      * @param spaceName the space name, must not be null or empty
      * @return nullable map of index names to index metadata wrapped in {@link Optional}
      */
-    Optional<Map<String, TarantoolIndexMetadata>> getSpaceIndexes(String spaceName);
+    Optional<Map<Object, TarantoolIndexMetadata>> getSpaceIndexes(String spaceName);
 }

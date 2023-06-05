@@ -19,15 +19,19 @@ public class NamedIndexImpl implements NamedIndex {
 
     private static final long serialVersionUID = 20200708L;
 
-    private final String name;
+    private final Object name;
 
     /**
      * Construct index by its name
      *
      * @param name index name, should not be empty
      */
-    public NamedIndexImpl(String name) {
-        Assert.hasText(name, "Index name should not be empty");
+    public NamedIndexImpl(Object name) {
+        if (name instanceof String) {
+            Assert.hasText((String) name, "Index name should be not empty String or Integer");
+        } else if (!(name instanceof Integer)) {
+            throw new IllegalArgumentException("Index name should be not empty String or Integer");
+        }
 
         this.name = name;
     }
@@ -46,7 +50,7 @@ public class NamedIndexImpl implements NamedIndex {
     }
 
     @Override
-    public String toIdentifier() {
+    public Object toIdentifier() {
         return name;
     }
 

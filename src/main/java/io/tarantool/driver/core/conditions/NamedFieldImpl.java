@@ -46,7 +46,7 @@ public class NamedFieldImpl implements NamedField {
     }
 
     @Override
-    public String toIdentifier() {
+    public Object toIdentifier() {
         return name;
     }
 

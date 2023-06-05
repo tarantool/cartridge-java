@@ -30,7 +30,7 @@ public interface TarantoolIndexMetadata {
      *
      * @return a non-empty {@code String}
      */
-    String getIndexName();
+    Object getIndexName();
 
     /**
      * Get index type
