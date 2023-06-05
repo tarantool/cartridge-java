@@ -7,6 +7,8 @@ import io.tarantool.driver.utils.Assert;
 import io.tarantool.driver.utils.CyclingIterator;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,16 @@ public final class TarantoolConnectionSelectionStrategies {
 
             return new RoundRobinStrategy(connections);
         }
+
+        @Override
+        public ConnectionSelectionStrategy create(
+            TarantoolClientConfig config,
+            Collection<TarantoolConnection> connections,
+            boolean needShuffle) {
+            Assert.notNull(connections, "The collection of Tarantool connections should not be null");
+
+            return new RoundRobinStrategy(connections, needShuffle);
+        }
     }
 
     static final class RoundRobinStrategy implements ConnectionSelectionStrategy {
@@ -40,6 +52,20 @@ public final class TarantoolConnectionSelectionStrategies {
         private final AtomicInteger available;
 
         RoundRobinStrategy(Collection<TarantoolConnection> connections) {
+            this.available = new AtomicInteger(connections.size());
+            this.connectionIterator = new TarantoolConnectionIterator(connections.stream()
+                .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
+                .collect(Collectors.toList()));
+        }
+
+        RoundRobinStrategy(Collection<TarantoolConnection> connections, boolean needShuffle) {
+            if (needShuffle) {
+
+                List<?> connectionsList = (List<?>) connections;
+                Collections.shuffle(connectionsList);
+                connections = (Collection<TarantoolConnection>) connectionsList;
+            }
+
             this.available = new AtomicInteger(connections.size());
             this.connectionIterator = new TarantoolConnectionIterator(connections.stream()
                 .peek(conn -> conn.addConnectionCloseListener(c -> available.getAndDecrement()))
@@ -77,6 +103,16 @@ public final class TarantoolConnectionSelectionStrategies {
 
             return new ParallelRoundRobinStrategy(config, connections);
         }
+
+        @Override
+        public ConnectionSelectionStrategy create(
+            TarantoolClientConfig config,
+            Collection<TarantoolConnection> connections,
+            boolean needShuffle) {
+            Assert.notNull(connections, "The collection of Tarantool connections should not be null");
+
+            return new ParallelRoundRobinStrategy(config, connections, needShuffle);
+        }
     }
 
     static final class ParallelRoundRobinStrategy implements ConnectionSelectionStrategy {
@@ -86,6 +122,19 @@ public final class TarantoolConnectionSelectionStrategies {
         private final AtomicInteger available;
 
         ParallelRoundRobinStrategy(TarantoolClientConfig config, Collection<TarantoolConnection> connections) {
+            this.config = config;
+            this.available = new AtomicInteger(connections.size());
+            this.iteratorsIterator = new CyclingIterator<>(populateIterators(connections));
+        }
+
+        ParallelRoundRobinStrategy(TarantoolClientConfig config, Collection<TarantoolConnection> connections,
+           boolean needShuffle) {
+            if (needShuffle) {
+                List<?> connectionsList = (List<?>) connections;
+                Collections.shuffle(connectionsList);
+                connections = (Collection<TarantoolConnection>) connectionsList;
+            }
+
             this.config = config;
             this.available = new AtomicInteger(connections.size());
             this.iteratorsIterator = new CyclingIterator<>(populateIterators(connections));

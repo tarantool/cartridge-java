@@ -20,4 +20,14 @@ public interface ConnectionSelectionStrategyFactory {
      * @return a connection selection strategy instance
      */
     ConnectionSelectionStrategy create(TarantoolClientConfig config, Collection<TarantoolConnection> connections);
+    /**
+     * Take the specified collection of Tarantool server connections and instantiate a strategy with shuffled connections
+     *
+     * @param config      client configuration
+     * @param connections established connections
+     * @param needShuffle shuffles connections if true
+     * @return a connection selection strategy instance
+     */
+    ConnectionSelectionStrategy create(TarantoolClientConfig config, Collection<TarantoolConnection> connections,
+        boolean needShuffle);
 }

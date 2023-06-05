@@ -126,6 +126,7 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
                             .collect(Collectors.toList()));
                     connectionSelectStrategy.set(strategy);
                 })
+                // тут каждый раз будет shuffle
                 .thenApply(v -> connectionSelectStrategy.get().next())
                 .whenComplete((v, ex) -> {
                     if (ex != null) {
