@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +41,7 @@ public class ProxyTarantoolClientWithAddressProviderExampleIT extends SharedCart
         truncateSpace(SPACE_NAME);
     }
 
-    private static TarantoolClusterAddressProvider getClusterAddressProvider() {
+    private static TarantoolClusterAddressProvider getClusterShuffledAddressProvider() {
         TarantoolClientConfig config = TarantoolClientConfig.builder()
             .withCredentials(credentials)
             .build();
@@ -51,8 +52,13 @@ public class ProxyTarantoolClientWithAddressProviderExampleIT extends SharedCart
             // Name of a function that returns a pool of addresses to connect to
             .withEntryFunction("get_routers")
             // Setting first router URI as entry point
-            .withEndpointProvider(() -> Collections.singletonList(
-                new TarantoolServerAddress(container.getRouterHost(), container.getRouterPort())))
+            .withEndpointProvider(() -> {
+                List<TarantoolServerAddress> addresses = Collections.singletonList(new TarantoolServerAddress(container.getRouterHost(),
+                    container.getRouterPort()));
+                // Shuffling addresses in address provider
+                Collections.shuffle(addresses);
+                return addresses;
+            })
             .build();
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
@@ -74,7 +80,8 @@ public class ProxyTarantoolClientWithAddressProviderExampleIT extends SharedCart
 
         client = TarantoolClientFactory.createClient()
             // You don't have to set the routers addresses yourself address provider will do it for you
-            .withAddressProvider(getClusterAddressProvider())
+            // Do not forget to shuffle your addresses if you are using multiple clients
+            .withAddressProvider(getClusterShuffledAddressProvider())
             // For connecting to a Cartridge application, use the value of cluster_cookie parameter in the init.lua file
             .withCredentials(credentials)
             // Specify using the default CRUD proxy operations mapping configuration
