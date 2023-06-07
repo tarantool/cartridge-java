@@ -25,5 +25,5 @@ public interface TarantoolIndexPartMetadata {
      *
      * @return path inside field (may be null)
      */
-    String getPath();
+    Object getPath();
 }
