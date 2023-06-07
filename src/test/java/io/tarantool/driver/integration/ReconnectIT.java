@@ -42,6 +42,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static io.tarantool.driver.TarantoolUtils.retry;
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;
@@ -208,7 +209,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
                     })
                     // Or with defaults
                     .or(retryTarantoolNoSuchProcedureErrors()),
-        // Also you can set delay in millisecond between attempts
+                // Also you can set delay in millisecond between attempts
                 factory -> factory.withDelay(300)
             )
             .build();
@@ -320,7 +321,7 @@ public class ReconnectIT extends SharedCartridgeContainer {
     private TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClientWithDiscovery() {
         final BinaryClusterDiscoveryEndpoint discoveryEndpoint = BinaryClusterDiscoveryEndpoint.builder()
             .withEntryFunction("get_routers_status")
-            .withEndpointProvider(() -> Arrays.asList(getTarantoolServerAddresses()))
+            .withEndpointProvider(this::getShuffledTarantoolServerAddresses)
             .withClientConfig(TarantoolClientConfig.builder()
                 .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
                 .build()
@@ -346,7 +347,8 @@ public class ReconnectIT extends SharedCartridgeContainer {
         final TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> initClient =
             TarantoolClientFactory.createClient()
                 // You can connect to multiple routers
-                .withAddresses(getTarantoolServerAddresses())
+                // Do not forget to shuffle your addresses if you are using multiple clients
+                .withAddresses(getShuffledTarantoolServerAddresses())
                 // For connecting to a Cartridge application,
                 // use the value of cluster_cookie parameter in the init.lua file
                 .withCredentials(USER_NAME, PASSWORD)
@@ -368,12 +370,15 @@ public class ReconnectIT extends SharedCartridgeContainer {
     }
 
     @NotNull
-    private TarantoolServerAddress[] getTarantoolServerAddresses() {
-        return new TarantoolServerAddress[]{
+    private List<TarantoolServerAddress> getShuffledTarantoolServerAddresses() {
+        List<TarantoolServerAddress> addresses = Arrays.asList(
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301)),
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3302)),
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3303))
-        };
+        );
+        Collections.shuffle(addresses);
+
+        return addresses;
     }
 
     /**
