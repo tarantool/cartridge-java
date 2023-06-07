@@ -210,7 +210,7 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
                     }
                     String fieldType = fieldTypeValue.asStringValue().asString();
 
-                    return new TarantoolIndexPartMetadataImpl(fieldNumber, fieldType, fieldPath);
+                    return new TarantoolIndexPartMetadataImpl<>(fieldNumber, fieldType, fieldPath);
                 })
                 .collect(Collectors.toList());
 

@@ -5,7 +5,7 @@ package io.tarantool.driver.api.metadata;
  *
  * @author Sergey Volgin
  */
-public interface TarantoolIndexPartMetadata {
+public interface TarantoolIndexPartMetadata<T> {
     /**
      * Get field index in space format
      *
@@ -25,5 +25,5 @@ public interface TarantoolIndexPartMetadata {
      *
      * @return path inside field (may be null)
      */
-    Object getPath();
+    T getPath();
 }
