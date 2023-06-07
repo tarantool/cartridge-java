@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.conditions;
 
+import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
+import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -25,7 +27,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -343,5 +347,31 @@ class ConditionsTest {
 
         assertEquals(conditions.toProxyQuery(testOperations, spaceMetadata),
             serializedConditions.toProxyQuery(testOperations, spaceMetadata));
+    }
+
+    @Test
+    public void testIndexMetadata_CanHandleBothStringAndIntFiledPath() {
+        Optional<TarantoolIndexMetadata> primaryIndex = testOperations.getIndexByName("test", "primary");
+        assertTrue(primaryIndex.isPresent());
+        Object path = primaryIndex.get().getIndexParts().get(0).getPath();
+        assertEquals(path.getClass(), Integer.class);
+        assertEquals(1, path);
+
+        Optional<TarantoolIndexMetadata> asecondaryIndex = testOperations.getIndexByName("test", "asecondary");
+        assertTrue(asecondaryIndex.isPresent());
+        path = asecondaryIndex.get().getIndexParts().get(0).getPath();
+        assertEquals(path.getClass(), String.class);
+        assertEquals(path, "second");
+
+        Optional<TarantoolIndexMetadata> asecondary1Index = testOperations.getIndexByName("test", "asecondary1");
+        assertTrue(asecondary1Index.isPresent());
+        List<TarantoolIndexPartMetadata> indexParts = asecondary1Index.get().getIndexParts();
+        assertEquals(indexParts.size(), 2);
+        path = indexParts.get(0).getPath();
+        assertEquals(path.getClass(), Integer.class);
+        assertEquals(path, 2);
+        path = indexParts.get(1).getPath();
+        assertEquals(path.getClass(), String.class);
+        assertEquals(path, "third");
     }
 }

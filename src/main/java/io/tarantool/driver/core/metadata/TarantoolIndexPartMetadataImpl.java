@@ -11,13 +11,13 @@ class TarantoolIndexPartMetadataImpl implements TarantoolIndexPartMetadata {
 
     private final int fieldIndex;
     private final String fieldType;
-    private final String path;
+    private final Object path;
 
     TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType) {
         this(fieldIndex, fieldType, null);
     }
 
-    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType, String path) {
+    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType, Object path) {
         this.fieldIndex = fieldIndex;
         this.fieldType = fieldType;
         this.path = path;
@@ -34,7 +34,7 @@ class TarantoolIndexPartMetadataImpl implements TarantoolIndexPartMetadata {
     }
 
     @Override
-    public String getPath() {
+    public Object getPath() {
         return path;
     }
 }

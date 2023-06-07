@@ -187,12 +187,21 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
                     Map<Value, Value> partsMap = parts.asMapValue().map();
 
                     Value fieldPathValue = partsMap.get(INDEX_PARTS_PATH_KEY);
-                    if (fieldPathValue == null || !fieldPathValue.isStringValue()) {
+                    if (fieldPathValue == null ||
+                        (!fieldPathValue.isStringValue() && !fieldPathValue.isIntegerValue())) {
                         throw new TarantoolClientException("Unsupported index metadata format: key '" +
-                            INDEX_PARTS_PATH_KEY + "' must have string value");
+                            INDEX_PARTS_PATH_KEY + "' must have string or int value");
                     }
-                    String fieldPath = fieldPathValue.asStringValue().asString();
-                    int fieldNumber = getFieldNumberFromFieldPath(fields, fieldPath);
+
+                    int fieldNumber;
+                    Object fieldPath;
+                    if (fieldPathValue.isStringValue()) {
+                        fieldPath = fieldPathValue.asStringValue().asString();
+                        fieldNumber = getFieldNumberFromFieldPath(fields, (String) fieldPath);
+                    } else {
+                        fieldNumber = fieldPathValue.asIntegerValue().asInt();
+                        fieldPath = fieldNumber;
+                    }
 
                     Value fieldTypeValue = partsMap.get(INDEX_PARTS_TYPE_KEY);
                     if (fieldTypeValue == null || !fieldTypeValue.isStringValue()) {
