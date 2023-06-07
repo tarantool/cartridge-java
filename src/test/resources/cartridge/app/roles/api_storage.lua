@@ -40,7 +40,7 @@ local function init_space()
         }
     )
 
-    test_space:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+    test_space:create_index('id', { parts = { 1 }, if_not_exists = true, })
     test_space:create_index('bucket_id', { parts = { 'bucket_id' }, unique = false, if_not_exists = true, })
 
     local second_test_space = box.schema.space.create(

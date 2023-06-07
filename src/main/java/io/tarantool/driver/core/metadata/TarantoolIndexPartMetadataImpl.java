@@ -7,17 +7,17 @@ import io.tarantool.driver.api.metadata.TarantoolIndexPartMetadata;
  *
  * @author Sergey Volgin
  */
-class TarantoolIndexPartMetadataImpl implements TarantoolIndexPartMetadata {
+class TarantoolIndexPartMetadataImpl<T> implements TarantoolIndexPartMetadata {
 
     private final int fieldIndex;
     private final String fieldType;
-    private final Object path;
+    private final T path;
 
     TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType) {
         this(fieldIndex, fieldType, null);
     }
 
-    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType, Object path) {
+    TarantoolIndexPartMetadataImpl(int fieldIndex, String fieldType, T path) {
         this.fieldIndex = fieldIndex;
         this.fieldType = fieldType;
         this.path = path;
@@ -34,7 +34,7 @@ class TarantoolIndexPartMetadataImpl implements TarantoolIndexPartMetadata {
     }
 
     @Override
-    public Object getPath() {
+    public T getPath() {
         return path;
     }
 }
