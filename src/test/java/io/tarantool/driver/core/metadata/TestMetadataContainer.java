@@ -44,7 +44,7 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
         testPrimaryIndexMetadata.setIndexName("primary");
         testPrimaryIndexMetadata.setSpaceId(512);
         testPrimaryIndexMetadata.setIndexParts(Collections.singletonList(
-            new TarantoolIndexPartMetadataImpl(0, "string"))
+            new TarantoolIndexPartMetadataImpl(0, "string", 1))
         );
 
         testIndexMetadata2 = new TarantoolIndexMetadataImpl();
@@ -52,8 +52,8 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
         testIndexMetadata2.setIndexName("asecondary1");
         testIndexMetadata2.setSpaceId(512);
         List<TarantoolIndexPartMetadata> parts = new ArrayList<>();
-        parts.add(new TarantoolIndexPartMetadataImpl(1, "number"));
-        parts.add(new TarantoolIndexPartMetadataImpl(2, "number"));
+        parts.add(new TarantoolIndexPartMetadataImpl(1, "number", 2));
+        parts.add(new TarantoolIndexPartMetadataImpl(2, "number", "third"));
         testIndexMetadata2.setIndexParts(parts);
 
         testIndexMetadata3 = new TarantoolIndexMetadataImpl();
@@ -79,7 +79,8 @@ public class TestMetadataContainer implements TarantoolMetadataContainer {
         testIndexMetadata1.setIndexId(4);
         testIndexMetadata1.setIndexName("asecondary");
         testIndexMetadata1.setSpaceId(512);
-        testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadataImpl(1, "number")));
+        testIndexMetadata1.setIndexParts(Collections.singletonList(new TarantoolIndexPartMetadataImpl(1, "number",
+            "second")));
     }
 
     @Override
