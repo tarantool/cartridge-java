@@ -2,9 +2,13 @@
 
 ## [Unreleased]
 
+## [0.12.0] - 2023-06-09
+
 ### Internal and API changes
-- **[breaking change]** Split call API into calls with tuple result as return type and calls with generic Object return type ([#123](https://github.com/tarantool/cartridge-springdata/issues/123))
-- Add buildSingleValueResultMapper() in mapper builder for generic call result mappers. That will simplify the support for auto object converter in SpringData.
+- **[breaking change]** Split `call*` client API methods into calls with Tuple result as a return type
+and calls with generic Object as a return type ([#123](https://github.com/tarantool/cartridge-springdata/issues/123))
+- Add buildSingleValueResultMapper() in mapper builder for generic call result mappers.
+That will simplify the support for auto object converter in SpringData module.
 
 ### Bugfixes
 - Support both string and integer values in index fields metadata
