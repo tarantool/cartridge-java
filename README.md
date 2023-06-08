@@ -16,30 +16,32 @@ with sharding via [vshard](https://github.com/tarantool/vshard).
 
 ## Quickstart
 
-Example of single instance Tarantool application and java app connected using cartridge-java.
+Here is an easy way to try using Tarantool together with this Java driver.
 
-The easiest way to start experimenting with cartridge-java and single instance tarantool app is to use
-[single instance test](/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleIT.java).
-You can set breakpoints and run it in debug mode.
-Testcontainers will start [single instance tarantool application](src/test/resources/single-instance.lua) for you.
-So you will be able to manipulate data in Tarantool in real life through java expressions or Tarantool console.
+Look at the [single instance test](/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleIT.java) to start
+experimenting with a single Tarantool server instance and a simple Java app.
+You can set breakpoints and run it in "debug" mode using your IDE.
+Testcontainers library will start a [single instance Tarantool server](src/test/resources/single-instance.lua) for you.
+Try to manipulate data in Tarantool in real time through evaluating Java expressions in debug mode or using the Tarantool
+console.
 
-If you want to start tarantool application manually all you need is to run this file in tarantool
+If you want to start a simple Tarantool application manually, all you need is to install Tarantool and run it with this file:
 ``` bash
 tarantool src/test/resources/single-instance.lua
 ```
-Example of TarantoolClient set up
+
+Example of creating a `TarantoolClient` instance:
 https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a46e8fdd039/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L51-L59
 
-Example of client API usage
+Example of the `TarantoolClient` API usage:
 https://github.com/tarantool/cartridge-java/blob/2f8e826deb9833a5deb6d21177527a46e8fdd039/src/test/java/io/tarantool/driver/integration/SingleInstanceExampleTest.java#L64-L79
 
-If you use this code in another project don't forget to add `cartridge-driver` dependency:
+If you use this code in another project don't forget to add a `cartridge-driver` dependency:
 ```xml
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.11.2</version>
+  <version>0.12.0</version>
 </dependency>
 ```
 ## Advanced usage
