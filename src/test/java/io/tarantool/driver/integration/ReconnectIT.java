@@ -19,7 +19,6 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.TarantoolDaemonThreadFactory;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -388,7 +387,6 @@ public class ReconnectIT extends SharedCartridgeContainer {
         client.space("instances_info").replace(tuple).join();
     }
 
-    @NotNull
     private List<TarantoolServerAddress> getShuffledTarantoolServerAddresses() {
         List<TarantoolServerAddress> addresses = Arrays.asList(
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(super.routerPort)),
