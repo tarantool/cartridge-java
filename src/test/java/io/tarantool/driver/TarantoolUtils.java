@@ -24,7 +24,6 @@ public final class TarantoolUtils {
         TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
         return ciVersion.getMajor() >= version.getMajor() &&
             ciVersion.getMinor() >= version.getMinor();
-
     }
 
     public static boolean versionWithUUID() {

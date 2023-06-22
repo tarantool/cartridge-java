@@ -9,7 +9,6 @@ import io.tarantool.driver.api.TarantoolClientFactory;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -104,7 +103,6 @@ public class SslClientMTlsITEnterprise {
         assertThrows(CompletionException.class, () -> clientWithSsl.eval("return 'test'").join());
     }
 
-    @NotNull
     private static SslContext getSslContextWithCA() throws Exception {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         final File keyCertChainFile = new File(classloader
