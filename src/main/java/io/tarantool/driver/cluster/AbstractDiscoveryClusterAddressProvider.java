@@ -36,20 +36,13 @@ public abstract class AbstractDiscoveryClusterAddressProvider implements Taranto
     protected void startDiscoveryTask() throws TarantoolClientException {
         Runnable discoveryTask = () -> {
             try {
-                Collection<TarantoolServerAddress> currentAddresses = this.addressesHolder.get();
-                Collection<TarantoolServerAddress> addresses = discoverAddresses();
-                setAddresses(addresses);
-
-                if (currentAddresses != null
-                    && addresses.size() != currentAddresses.size()
-                    || !addresses.equals(currentAddresses)) {
-                    this.refreshCallback.get().run();
-                }
+                setAddresses(discoverAddresses());
             } finally {
                 if (initLatch.getCount() > 0) {
                     initLatch.countDown();
                 }
             }
+            this.refreshCallback.get().run();
         };
 
         this.scheduledExecutorService.scheduleWithFixedDelay(

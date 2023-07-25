@@ -30,7 +30,13 @@ public class TarantoolClusterConnectionManager extends AbstractTarantoolConnecti
         TarantoolClusterAddressProvider addressProvider) {
         super(config, connectionFactory, listeners);
         this.addressProvider = addressProvider;
-        this.addressProvider.setRefreshCallback(super::refresh);
+        this.addressProvider.setRefreshCallback(this::refreshIfConditionsChanged);
+    }
+
+    private void refreshIfConditionsChanged() {
+        if (areAddressesChanged() || !areConnectionsAlive()) {
+            super.refresh();
+        }
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,6 +94,25 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
     @Override
     public boolean refresh() {
         return connectionMode.compareAndSet(ConnectionMode.OFF, ConnectionMode.PARTIAL);
+    }
+
+    protected boolean areAddressesChanged() {
+        Collection<TarantoolServerAddress> addresses = getAddresses();
+        if (addresses == null) {
+            logger.debug("The list of server addresses is not defined");
+            return true;
+        }
+        return !connectionRegistry.keySet().equals(new HashSet<>(addresses));
+    }
+
+    protected boolean areConnectionsAlive() {
+        for (List<TarantoolConnection> connections : connectionRegistry.values()) {
+            int isAliveConnections = (int) connections.stream().filter(TarantoolConnection::isConnected).count();
+            if (isAliveConnections != config.getConnections()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private CompletableFuture<TarantoolConnection> getConnectionInternal() {
