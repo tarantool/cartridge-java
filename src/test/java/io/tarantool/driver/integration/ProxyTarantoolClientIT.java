@@ -1,7 +1,5 @@
 package io.tarantool.driver.integration;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,12 +10,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.org.apache.commons.lang3.reflect.FieldUtils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,6 +28,7 @@ import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.connection.TarantoolConnection;
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
@@ -52,7 +49,6 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.core.connection.TarantoolClusterConnectionManager;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
@@ -84,9 +80,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     private static final String PK_FIELD_NAME = "profile_id";
     private static final String BUCKET_ID_FIELD_NAME = "bucket_id";
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
-    private static TestWrappedClusterAddressProvider addressProvider;
-    private static Method getAliveConnections;
-    private static TarantoolClusterConnectionManager connectionManager;
+    private static List<TarantoolConnection> connections = new ArrayList<>();
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -152,6 +146,10 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                 .builder(10, thr -> thr instanceof TarantoolNoSuchProcedureException)
                 .withDelay(100)
                 .build());
+        client.getConnectionListeners().add(conn -> {
+            connections.add(conn);
+            return CompletableFuture.completedFuture(conn);
+        });
     }
 
     @Test
@@ -706,37 +704,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         });
     }
 
-    private static int getAliveConnections() throws IllegalAccessException, NoSuchMethodException {
-        if (addressProvider == null) {
-            ClusterTarantoolTupleClient
-                innerClient = (ClusterTarantoolTupleClient) FieldUtils.readField(
-                FieldUtils.readField(client, "client", true),
-                "client", true);
-            connectionManager =
-                (TarantoolClusterConnectionManager) FieldUtils.readField(innerClient, "connectionManager", true);
-
-            getAliveConnections =
-                connectionManager.getClass().getSuperclass()
-                    .getDeclaredMethod("getAliveConnections", TarantoolServerAddress.class);
-            getAliveConnections.setAccessible(true);
-
-            addressProvider =
-                (TestWrappedClusterAddressProvider) FieldUtils.readField(innerClient, "addressProvider", true);
-        }
-
-        return getAliveConnectionsAux();
-    }
-
-    private static int getAliveConnectionsAux() {
-        AtomicInteger res = new AtomicInteger();
-        addressProvider.getAddresses().forEach(r -> {
-            try {
-                res.addAndGet(((List<?>) getAliveConnections.invoke(connectionManager, r)).size());
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        return res.get();
+    private static long getAliveConnections() throws IllegalAccessException, NoSuchMethodException {
+        return connections.stream().filter(TarantoolConnection::isConnected).count();
     }
 }

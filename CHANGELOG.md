@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Bugfixes
+- Fix losing address connections in discovery if restart happens faster than discovery task ([#404](https://github.com/tarantool/cartridge-springdata/issues/404))
+
 ## [0.12.0] - 2023-06-09
 
 ### Internal and API changes
