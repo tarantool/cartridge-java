@@ -1,5 +1,30 @@
 package io.tarantool.driver.integration;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.apache.commons.lang3.reflect.FieldUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.tarantool.driver.TarantoolUtils;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
@@ -27,7 +52,7 @@ import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import io.tarantool.driver.core.TarantoolTupleResultImpl;
+import io.tarantool.driver.core.connection.TarantoolClusterConnectionManager;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.exceptions.TarantoolNoSuchProcedureException;
@@ -37,26 +62,6 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Sergey Volgin
@@ -79,6 +84,9 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     private static final String PK_FIELD_NAME = "profile_id";
     private static final String BUCKET_ID_FIELD_NAME = "bucket_id";
     private static final int DEFAULT_TIMEOUT = 5 * 1000;
+    private static TestWrappedClusterAddressProvider addressProvider;
+    private static Method getAliveConnections;
+    private static TarantoolClusterConnectionManager connectionManager;
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -118,7 +126,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
         TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
             .withEndpoint(endpoint)
-            .withDelay(1)
+            .withDelay(300)
             .build();
 
         return new TestWrappedClusterAddressProvider(
@@ -395,7 +403,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
 
     @Test
     public void test_crudMetadataResponse_shouldReturnTuple_withoutDDLMetadata()
-        throws ExecutionException, InterruptedException {
+    throws ExecutionException, InterruptedException {
         Integer id = 123000;
         String field1 = "Jane Doe";
         Integer field2 = 999;
@@ -671,5 +679,64 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
             thrown = e;
         }
         assertNotNull(thrown, "Exception was not thrown");
+    }
+
+    @Test
+    public void test_should_reconnect_ifReconnectIsInvoked() throws Exception {
+        assertEquals(3, getAliveConnections());
+
+        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "second-router");
+        TarantoolUtils.retry(() -> {
+            try {
+                client.getVersion();
+                assertEquals(2, getAliveConnections());
+            } catch (IllegalAccessException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+
+        TarantoolUtils.retry(20, 200, () -> {
+            try {
+                client.getVersion();
+                assertEquals(3, getAliveConnections());
+            } catch (IllegalAccessException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static int getAliveConnections() throws IllegalAccessException, NoSuchMethodException {
+        if (addressProvider == null) {
+            ClusterTarantoolTupleClient
+                innerClient = (ClusterTarantoolTupleClient) FieldUtils.readField(
+                FieldUtils.readField(client, "client", true),
+                "client", true);
+            connectionManager =
+                (TarantoolClusterConnectionManager) FieldUtils.readField(innerClient, "connectionManager", true);
+
+            getAliveConnections =
+                connectionManager.getClass().getSuperclass()
+                    .getDeclaredMethod("getAliveConnections", TarantoolServerAddress.class);
+            getAliveConnections.setAccessible(true);
+
+            addressProvider =
+                (TestWrappedClusterAddressProvider) FieldUtils.readField(innerClient, "addressProvider", true);
+        }
+
+        return getAliveConnectionsAux();
+    }
+
+    private static int getAliveConnectionsAux() {
+        AtomicInteger res = new AtomicInteger();
+        addressProvider.getAddresses().forEach(r -> {
+            try {
+                res.addAndGet(((List<?>) getAliveConnections.invoke(connectionManager, r)).size());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return res.get();
     }
 }
