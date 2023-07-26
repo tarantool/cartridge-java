@@ -471,10 +471,9 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public String toString() {
-        return String.format(
-            "TarantoolTupleImpl{\n" +
-                "\tspaceMetadata=%s,\n" +
-                "\tfields=%s\n" +
-            "}", spaceMetadata, fields);
+        return "TarantoolTupleImpl{\n" +
+            "\tspaceMetadata=" + spaceMetadata + ",\n" +
+            "\tfields=" + fields + "\n" +
+            "}";
     }
 }
