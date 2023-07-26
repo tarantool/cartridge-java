@@ -161,8 +161,6 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
 
     @Override
     public String toString() {
-        return "TarantoolResultImpl{" +
-            "tuples=" + tuples +
-            '}';
+        return new StringBuilder("TarantoolResultImpl{tuples=").append(tuples).append("}").toString();
     }
 }

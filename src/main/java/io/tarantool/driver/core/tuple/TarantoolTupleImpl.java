@@ -471,9 +471,8 @@ public class TarantoolTupleImpl implements TarantoolTuple {
 
     @Override
     public String toString() {
-        return "TarantoolTupleImpl{\n" +
-            "\tspaceMetadata=" + spaceMetadata + ",\n" +
-            "\tfields=" + fields + "\n" +
-            "}";
+        return new StringBuilder("TarantoolTupleImpl{\n")
+            .append("\tspaceMetadata=").append(spaceMetadata).append(",\n")
+            .append("\tfields=").append(fields).append("}").toString();
     }
 }

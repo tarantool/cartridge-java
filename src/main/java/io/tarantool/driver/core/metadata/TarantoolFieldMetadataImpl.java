@@ -68,11 +68,10 @@ class TarantoolFieldMetadataImpl implements TarantoolFieldMetadata {
 
     @Override
     public String toString() {
-        return "TarantoolFieldMetadataImpl{" +
-            "fieldName='" + fieldName + '\'' +
-            ", fieldType='" + fieldType + '\'' +
-            ", fieldPosition=" + fieldPosition +
-            ", isNullable=" + isNullable +
-            '}';
+        return new StringBuilder("TarantoolFieldMetadataImpl{")
+            .append("fieldName='").append(fieldName).append('\'')
+            .append(", fieldType='").append(fieldType).append('\'')
+            .append(", fieldPosition=").append(fieldPosition)
+            .append(", isNullable=").append(isNullable).append('}').toString();
     }
 }
