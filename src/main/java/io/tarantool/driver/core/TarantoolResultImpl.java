@@ -158,4 +158,9 @@ public class TarantoolResultImpl<T> implements TarantoolResult<T> {
     public List<T> subList(int fromIndex, int toIndex) {
         return this.tuples.subList(fromIndex, toIndex);
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("TarantoolResultImpl{tuples=").append(tuples).append("}").toString();
+    }
 }

@@ -1,21 +1,5 @@
 package io.tarantool.driver.core.tuple;
 
-import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.tuple.TarantoolField;
-import io.tarantool.driver.api.tuple.TarantoolNullField;
-import io.tarantool.driver.api.tuple.TarantoolTuple;
-import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
-import io.tarantool.driver.mappers.MessagePackMapper;
-import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.utils.Assert;
-import org.msgpack.core.MessagePack;
-import org.msgpack.core.MessagePackException;
-import org.msgpack.core.MessagePacker;
-import org.msgpack.core.MessageUnpacker;
-import org.msgpack.value.ArrayValue;
-import org.msgpack.value.Value;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,6 +14,23 @@ import java.util.Optional;
 import java.util.Spliterator;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePackException;
+import org.msgpack.core.MessagePacker;
+import org.msgpack.core.MessageUnpacker;
+import org.msgpack.value.ArrayValue;
+import org.msgpack.value.Value;
+
+import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.tuple.TarantoolField;
+import io.tarantool.driver.api.tuple.TarantoolNullField;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.exceptions.TarantoolClientException;
+import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
+import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.utils.Assert;
 
 /**
  * Basic Tarantool tuple implementation
@@ -140,7 +141,7 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public boolean hasMetadata() {
         return spaceMetadata != null && spaceMetadata.getSpaceFormatMetadata() != null &&
-                   !spaceMetadata.getSpaceFormatMetadata().isEmpty();
+            !spaceMetadata.getSpaceFormatMetadata().isEmpty();
     }
 
     @Override
@@ -466,5 +467,12 @@ public class TarantoolTupleImpl implements TarantoolTuple {
                 fields.add(new TarantoolFieldImpl(fieldValue));
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("TarantoolTupleImpl{\n")
+            .append("\tspaceMetadata=").append(spaceMetadata).append(",\n")
+            .append("\tfields=").append(fields).append("}").toString();
     }
 }

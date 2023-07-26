@@ -65,4 +65,13 @@ class TarantoolFieldMetadataImpl implements TarantoolFieldMetadata {
     public boolean getIsNullable() {
         return isNullable;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("TarantoolFieldMetadataImpl{")
+            .append("fieldName='").append(fieldName).append('\'')
+            .append(", fieldType='").append(fieldType).append('\'')
+            .append(", fieldPosition=").append(fieldPosition)
+            .append(", isNullable=").append(isNullable).append('}').toString();
+    }
 }
