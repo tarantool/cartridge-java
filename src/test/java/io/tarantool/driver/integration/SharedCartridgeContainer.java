@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.TarantoolCartridgeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -32,7 +33,8 @@ public abstract class SharedCartridgeContainer {
     }
 
     protected static void startCartridge() throws IOException, InterruptedException {
-        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+        container.execInContainer(
+            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "--log-dir=/tmp/log", "-d");
     }
 
     protected static void stopCartridge() throws IOException, InterruptedException {
@@ -47,16 +49,25 @@ public abstract class SharedCartridgeContainer {
 
     protected static void stopInstances(List<String> instancesName) throws IOException, InterruptedException {
         for (String instanceName : instancesName) {
-            stopInstance(instanceName);
+            stopInstance(instanceName, false);
         }
     }
 
-    protected static void startInstance(String instanceName) throws IOException, InterruptedException {
-        container.execInContainer(
-            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", instanceName);
+    protected static ExecResult startInstance(String instanceName) throws IOException, InterruptedException {
+        return container.execInContainer(
+            "cartridge", "start",
+            "--run-dir=/tmp/run", "--data-dir=/tmp/data", "--log-dir=/tmp/log", "-d",
+            instanceName);
     }
 
-    protected static void stopInstance(String instanceName) throws IOException, InterruptedException {
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "--data-dir=/tmp/data", instanceName);
+    protected static ExecResult stopInstance(String instanceName, boolean force)
+        throws IOException, InterruptedException {
+        if (force) {
+            return container.execInContainer(
+                "cartridge", "stop", "--run-dir=/tmp/run", "--force", instanceName);
+        } else {
+            return container.execInContainer(
+                "cartridge", "stop", "--run-dir=/tmp/run", instanceName);
+        }
     }
 }

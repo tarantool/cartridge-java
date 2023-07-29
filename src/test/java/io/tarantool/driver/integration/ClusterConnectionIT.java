@@ -112,8 +112,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
                 // which we retry, so that the request goes to another connection
                 if (e.getMessage().contains("Disabled by client")) {
                     try {
-                        result.set(container.execInContainer(
-                            "cartridge", "stop", "--run-dir=/tmp/run", "--force", nextRouterName.get()));
+                        result.set(stopInstance(nextRouterName.get(), true));
                         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
                     } catch (IOException | InterruptedException er) {
                         throw new RuntimeException(er);
@@ -123,7 +122,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
             }).withDelay(0).build());
 
         // one of router accept request
-        // get first router name in round robbin loop
+        // get first router name in round-robin loop
         String firstRouterName = client.callForSingleResult("get_router_name", String.class).get();
         nextRouterName.set(firstRouterName.equals("router") ? "second-router" : "router");
 
@@ -134,8 +133,7 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
             Collections.singletonList(Arrays.asList(0.5, nextRouterName.get())), Boolean.class).get());
 
         // start the turned off router to get requests
-        result.set(container.execInContainer(
-            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", nextRouterName.get()));
+        result.set(startInstance(nextRouterName.get()));
         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
 
         assertEquals(1, routerClient1.callForSingleResult("get_request_count", Integer.class).get());
@@ -143,17 +141,13 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
         // full reconnection
         // this is necessary so that a client with two connections can see both routers
-        result.set(container.execInContainer(
-            "cartridge", "stop", "--run-dir=/tmp/run", "--force", "router"));
+        result.set(stopInstance("router", true));
         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
-        result.set(container.execInContainer(
-            "cartridge", "stop", "--run-dir=/tmp/run", "--force", "second-router"));
+        result.set(stopInstance("second-router", true));
         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
-        result.set(container.execInContainer(
-            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "router"));
+        result.set(startInstance("router"));
         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
-        result.set(container.execInContainer(
-            "cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d", "second-router"));
+        result.set(startInstance("second-router"));
         assertEquals(0, result.get().getExitCode(), result.get().getStderr());
 
         // wait until full reconnection completed

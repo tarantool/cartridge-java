@@ -683,7 +683,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
     public void test_should_reconnect_ifReconnectIsInvoked() throws Exception {
         assertEquals(3, getAliveConnections());
 
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "second-router");
+        stopInstance("second-router", false);
         TarantoolUtils.retry(() -> {
             try {
                 client.getVersion();
@@ -692,7 +692,7 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                 throw new RuntimeException(e);
             }
         });
-        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+        startCartridge();
 
         TarantoolUtils.retry(20, 200, () -> {
             try {
