@@ -167,14 +167,14 @@ public class ReconnectIT extends SharedCartridgeContainer {
         final Set<String> routerUuids = getInstancesUuids(client);
 
         // stop routers
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "router");
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "second-router");
+        stopInstance("router", false);
+        stopInstance("second-router", false);
 
         // check that there is only one instance left
         assertEquals(getInstanceUuid(client), getInstanceUuid(client));
 
         // start routers
-        container.execInContainer("cartridge", "start", "--run-dir=/tmp/run", "--data-dir=/tmp/data", "-d");
+        startCartridge();
 
         client.refresh();
         Thread.sleep(3000);
@@ -241,10 +241,6 @@ public class ReconnectIT extends SharedCartridgeContainer {
     @Test
     @SuppressWarnings("unchecked")
     void test_should_closeConnections_ifAddressProviderReturnsNewAddresses() throws Exception {
-        // restart routers for resetting connections
-        stopInstances(Arrays.asList("router", "second-router"));
-        startCartridge();
-
         final TarantoolServerAddress firstAddress =
             new TarantoolServerAddress(container.getRouterHost(), container.getMappedPort(3301));
         final TarantoolServerAddress secondAddress =
@@ -258,6 +254,9 @@ public class ReconnectIT extends SharedCartridgeContainer {
                 .withAddresses(tarantoolServerAddresses)
                 .withRetryingByNumberOfAttempts(10, b -> b.withDelay(100))
                 .build();
+
+        // reset stats
+        clientForCheck.eval("return box.stat.reset()").join();
 
         // make a function which returns everytime a one of two addresses in order
         AtomicBoolean isNextAddress = new AtomicBoolean(false);
