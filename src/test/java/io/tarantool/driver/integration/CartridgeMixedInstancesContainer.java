@@ -18,8 +18,11 @@ abstract class CartridgeMixedInstancesContainer {
     static {
         final HashMap<String, String> env = new HashMap<>();
         env.put("TARANTOOL_INSTANCES_FILE", "./instances_mixed.yml");
-        container = new TarantoolCartridgeContainer("cartridge/instances_mixed.yml",
-                                                    "cartridge/topology_mixed.lua")
+        container = new TarantoolCartridgeContainer(
+                        "Dockerfile",
+                        "cartridge-java-test-mixed",
+                        "cartridge/instances_mixed.yml",
+                        "cartridge/topology_mixed.lua")
                         .withDirectoryBinding("cartridge")
                         .withLogConsumer(new Slf4jLogConsumer(logger))
                         .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 3))
