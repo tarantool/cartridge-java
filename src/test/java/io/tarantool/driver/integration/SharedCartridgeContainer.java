@@ -16,6 +16,8 @@ public abstract class SharedCartridgeContainer {
 
     protected static final TarantoolCartridgeContainer container =
         new TarantoolCartridgeContainer(
+            "Dockerfile",
+            "cartridge-java-test",
             "cartridge/instances.yml",
             "cartridge/topology.lua")
             .withDirectoryBinding("cartridge")
