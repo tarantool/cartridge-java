@@ -2,8 +2,11 @@
 
 ## [Unreleased]
 
+## [0.12.1] - 2023-08-04
+
 ### Bugfixes
-- Fix losing address connections in discovery if restart happens faster than discovery task ([#404](https://github.com/tarantool/cartridge-springdata/issues/404))
+- Fix losing address connections in discovery if restart happens faster than discovery task ([#404](https://github.com/tarantool/cartridge-java/issues/404))
+- Add toString in tarantool proxy entities ([#406](https://github.com/tarantool/cartridge-java/issues/406))
 
 ## [0.12.0] - 2023-06-09
 

@@ -41,7 +41,7 @@ If you use this code in another project don't forget to add a `cartridge-driver`
 <dependency>
   <groupId>io.tarantool</groupId>
   <artifactId>cartridge-driver</artifactId>
-  <version>0.12.0</version>
+  <version>0.12.1</version>
 </dependency>
 ```
 ## Advanced usage
