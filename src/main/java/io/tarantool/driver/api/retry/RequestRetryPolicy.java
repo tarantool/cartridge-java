@@ -58,6 +58,7 @@ public interface RequestRetryPolicy {
     /**
      * Get an exception stating why the policy cannot repeat the request
      *
+     * @param ex exception that will be wrapped
      * @return reason of stopping retrying
      */
     default Throwable getPolicyException(Throwable ex) {
