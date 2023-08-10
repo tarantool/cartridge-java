@@ -1,8 +1,8 @@
 package io.tarantool.driver.core;
 
-import io.tarantool.driver.mappers.MessagePackValueMapper;
-
 import java.util.concurrent.CompletableFuture;
+
+import org.msgpack.value.Value;
 
 /**
  * Intermediate request metadata holder
@@ -10,19 +10,13 @@ import java.util.concurrent.CompletableFuture;
  * @author Alexey Kuzin
  */
 public class TarantoolRequestMetadata {
-    private final CompletableFuture<?> feature;
-    private final MessagePackValueMapper mapper;
+    private final CompletableFuture<Value> future;
 
-    protected TarantoolRequestMetadata(CompletableFuture<?> feature, MessagePackValueMapper mapper) {
-        this.feature = feature;
-        this.mapper = mapper;
+    protected TarantoolRequestMetadata(CompletableFuture<Value> future) {
+        this.future = future;
     }
 
-    public CompletableFuture<?> getFuture() {
-        return feature;
-    }
-
-    public MessagePackValueMapper getMapper() {
-        return mapper;
+    public CompletableFuture<Value> getFuture() {
+        return future;
     }
 }

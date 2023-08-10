@@ -6,11 +6,12 @@ import io.tarantool.driver.api.connection.TarantoolConnection;
 import io.tarantool.driver.api.connection.TarantoolConnectionCloseListener;
 import io.tarantool.driver.api.connection.TarantoolConnectionFailureListener;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+
+import org.msgpack.value.Value;
 
 /**
  * @author Alexey Kuzin
@@ -44,8 +45,8 @@ public class CustomConnection implements TarantoolConnection {
     }
 
     @Override
-    public <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
-        return connection.sendRequest(request, resultMapper);
+    public CompletableFuture<Value> sendRequest(TarantoolRequest request) {
+        return connection.sendRequest(request);
     }
 
     @Override

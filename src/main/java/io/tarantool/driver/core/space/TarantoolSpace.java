@@ -260,7 +260,9 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     protected abstract MessagePackValueMapper arrayTupleResultMapper();
 
     private CompletableFuture<R> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
-        return connectionManager.getConnection().thenCompose(c -> c.sendRequest(request, resultMapper));
+        return connectionManager.getConnection()
+            .thenCompose(c -> c.sendRequest(request))
+            .thenApply(resultMapper::fromValue);
     }
 
     @Override

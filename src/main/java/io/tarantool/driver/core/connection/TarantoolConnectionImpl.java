@@ -8,8 +8,9 @@ import io.tarantool.driver.api.connection.TarantoolConnectionCloseListener;
 import io.tarantool.driver.api.connection.TarantoolConnectionFailureListener;
 import io.tarantool.driver.core.RequestFutureManager;
 import io.tarantool.driver.exceptions.TarantoolClientException;
-import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.protocol.TarantoolRequest;
+
+import org.msgpack.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,12 +66,12 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     }
 
     @Override
-    public <T> CompletableFuture<T> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
+    public CompletableFuture<Value> sendRequest(TarantoolRequest request) {
         if (!isConnected()) {
             throw new TarantoolClientException("Not connected to Tarantool server");
         }
 
-        CompletableFuture<T> requestFuture = requestManager.submitRequest(request, resultMapper);
+        CompletableFuture<Value> requestFuture = requestManager.submitRequest(request);
         channel.writeAndFlush(request).addListener(f -> {
             if (!f.isSuccess()) {
                 requestFuture.completeExceptionally(
