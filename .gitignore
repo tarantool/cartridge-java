@@ -11,3 +11,4 @@ tmp/
 *.swo
 .bloop/
 .metals/
+.vscode/

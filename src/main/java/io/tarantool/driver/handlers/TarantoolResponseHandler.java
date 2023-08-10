@@ -10,6 +10,8 @@ import io.tarantool.driver.exceptions.errors.TarantoolErrors;
 import io.tarantool.driver.protocol.TarantoolErrorResult;
 import io.tarantool.driver.protocol.TarantoolOkResult;
 import io.tarantool.driver.protocol.TarantoolResponse;
+
+import org.msgpack.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
     protected void channelRead0(ChannelHandlerContext ctx, TarantoolResponse tarantoolResponse) throws Exception {
         TarantoolRequestMetadata requestMeta = futureManager.getRequest(tarantoolResponse.getSyncId());
         if (requestMeta != null) {
-            CompletableFuture<?> requestFuture = requestMeta.getFuture();
+            CompletableFuture<Value> requestFuture = requestMeta.getFuture();
             if (!requestFuture.isDone()) {
                 switch (tarantoolResponse.getResponseType()) {
                     case IPROTO_NOT_OK:
@@ -48,7 +50,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
                         try {
                             TarantoolOkResult okResult = new TarantoolOkResult(tarantoolResponse.getSyncId(),
                                 tarantoolResponse.getBody().getData());
-                            requestFuture.complete(requestMeta.getMapper().fromValue(okResult.getData()));
+                            requestFuture.complete(okResult.getData());
                         } catch (Throwable e) {
                             requestFuture.completeExceptionally(e);
                         }
@@ -65,7 +67,7 @@ public class TarantoolResponseHandler extends SimpleChannelInboundHandler<Tarant
             TarantoolDecoderException ex = (TarantoolDecoderException) cause.getCause();
             TarantoolRequestMetadata requestMeta = futureManager.getRequest(ex.getHeader().getSync());
             if (requestMeta != null) {
-                CompletableFuture<?> requestFuture = requestMeta.getFuture();
+                CompletableFuture<Value> requestFuture = requestMeta.getFuture();
                 if (!requestFuture.isDone()) {
                     requestFuture.completeExceptionally(cause);
                     return;
