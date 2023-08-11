@@ -7,6 +7,7 @@ import io.tarantool.driver.api.connection.TarantoolConnection;
 import io.tarantool.driver.api.connection.TarantoolConnectionCloseListener;
 import io.tarantool.driver.api.connection.TarantoolConnectionFailureListener;
 import io.tarantool.driver.core.RequestFutureManager;
+import io.tarantool.driver.core.TarantoolRequestMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
@@ -66,12 +67,13 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
     }
 
     @Override
-    public CompletableFuture<Value> sendRequest(TarantoolRequest request) {
+    public TarantoolRequestMetadata sendRequest(TarantoolRequest request) {
         if (!isConnected()) {
             throw new TarantoolClientException("Not connected to Tarantool server");
         }
 
-        CompletableFuture<Value> requestFuture = requestManager.submitRequest(request);
+        TarantoolRequestMetadata requestMetadata = requestManager.submitRequest(request);
+        CompletableFuture<Value> requestFuture = requestMetadata.getFuture();
         channel.writeAndFlush(request).addListener(f -> {
             if (!f.isSuccess()) {
                 requestFuture.completeExceptionally(
@@ -81,7 +83,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
             }
         });
 
-        return requestFuture;
+        return requestMetadata;
     }
 
     @Override

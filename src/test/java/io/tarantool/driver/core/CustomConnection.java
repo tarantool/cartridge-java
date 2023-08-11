@@ -9,11 +9,8 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.msgpack.value.Value;
 
 /**
  * @author Alexey Kuzin
@@ -66,7 +63,7 @@ final class CustomConnection implements TarantoolConnection {
     }
 
     @Override
-    public CompletableFuture<Value> sendRequest(TarantoolRequest request) {
+    public TarantoolRequestMetadata sendRequest(TarantoolRequest request) {
         return null;
     }
 

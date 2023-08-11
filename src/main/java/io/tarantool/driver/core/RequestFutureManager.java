@@ -38,9 +38,10 @@ public class RequestFutureManager implements AutoCloseable {
      * The request timeout is taken from the client configuration
      *
      * @param request      request to Tarantool server
-     * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
+     * @return {@link TarantoolRequestMetadata} metadata holder with request future that completes when a response
+     * is received from Tarantool server or request timeout is expired
      */
-    public CompletableFuture<Value> submitRequest(TarantoolRequest request) {
+    public TarantoolRequestMetadata submitRequest(TarantoolRequest request) {
         return submitRequest(request, config.getRequestTimeout());
     }
 
@@ -50,22 +51,22 @@ public class RequestFutureManager implements AutoCloseable {
      *
      * @param request        request to Tarantool server
      * @param requestTimeout timeout after which the request will be automatically failed, milliseconds
-     * @return {@link CompletableFuture} that completes when a response is received from Tarantool server
+     * @return {@link TarantoolRequestMetadata} metadata holder with request future that completes when a response
+     * is received from Tarantool server or request timeout is expired
      */
-    public CompletableFuture<Value> submitRequest(
-        TarantoolRequest request,
-        int requestTimeout) {
+    public TarantoolRequestMetadata submitRequest(TarantoolRequest request, int requestTimeout) {
         CompletableFuture<Value> requestFuture = new CompletableFuture<>();
+        TarantoolRequestMetadata requestMetadata = new TarantoolRequestMetadata(requestFuture);
         long requestId = request.getHeader().getSync();
         requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
-        requestFutures.put(requestId, new TarantoolRequestMetadata(requestFuture));
+        requestFutures.put(requestId, requestMetadata);
         timeoutScheduler.schedule(() -> {
             if (!requestFuture.isDone()) {
                 requestFuture.completeExceptionally(new TimeoutException(String.format(
                     "Failed to get response for request id: %d within %d ms", requestId, requestTimeout)));
             }
         }, requestTimeout, TimeUnit.MILLISECONDS);
-        return requestFuture;
+        return requestMetadata;
     }
 
     /**

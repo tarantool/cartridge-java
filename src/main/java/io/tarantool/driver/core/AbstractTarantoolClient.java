@@ -496,7 +496,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
             TarantoolCallRequest request = builder.build(argumentsMapper);
             return connectionManager().getConnection()
-                .thenCompose(c -> c.sendRequest(request))
+                .thenCompose(c -> c.sendRequest(request).getFuture())
                 .thenApply(resultMapper::fromValue);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
@@ -539,7 +539,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                 .withArguments(arguments)
                 .build(argumentsMapper);
             return connectionManager().getConnection()
-                .thenCompose(c -> c.sendRequest(request))
+                .thenCompose(c -> c.sendRequest(request).getFuture())
                 .thenApply(resultMapper::fromValue);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);

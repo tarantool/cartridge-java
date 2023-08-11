@@ -2,13 +2,11 @@ package io.tarantool.driver.api.connection;
 
 import io.netty.channel.Channel;
 import io.tarantool.driver.TarantoolVersion;
+import io.tarantool.driver.core.TarantoolRequestMetadata;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
-
-import org.msgpack.value.Value;
 
 public interface TarantoolConnection extends AutoCloseable {
     /**
@@ -38,9 +36,9 @@ public interface TarantoolConnection extends AutoCloseable {
      * Send a prepared request to the Tarantool server and flush the buffer
      *
      * @param request      the request
-     * @return result future
+     * @return request metadata containing the request result future
      */
-    CompletableFuture<Value> sendRequest(TarantoolRequest request);
+    TarantoolRequestMetadata sendRequest(TarantoolRequest request);
 
     /**
      * Get the Netty channel baking this connection
