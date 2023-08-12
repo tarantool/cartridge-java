@@ -6,6 +6,7 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 
 import java.util.HashMap;
@@ -21,19 +22,24 @@ import java.util.Map;
  */
 public final class TarantoolSelectRequest extends TarantoolRequest {
 
-    private TarantoolSelectRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_SELECT, body);
+    private TarantoolSelectRequest(TarantoolRequestBody body, TarantoolRequestSignature signature) {
+        super(TarantoolRequestType.IPROTO_SELECT, body, signature);
     }
 
     /**
      * Tarantool select request builder
      */
-    public static class Builder {
+    public static class Builder extends TarantoolRequest.Builder<Builder> {
 
         Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(6, 1);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         /**
@@ -128,7 +134,7 @@ public final class TarantoolSelectRequest extends TarantoolRequest {
             if (!bodyMap.containsKey(TarantoolRequestFieldType.IPROTO_KEY.getCode())) {
                 throw new TarantoolProtocolException("Key values must be specified in the select request");
             }
-            return new TarantoolSelectRequest(new TarantoolRequestBody(bodyMap, mapper));
+            return new TarantoolSelectRequest(new TarantoolRequestBody(bodyMap, mapper), signature);
         }
     }
 }

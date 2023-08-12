@@ -5,6 +5,7 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 
 import java.util.Collection;
@@ -20,19 +21,24 @@ import java.util.Map;
  */
 public final class TarantoolCallRequest extends TarantoolRequest {
 
-    private TarantoolCallRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_CALL, body);
+    private TarantoolCallRequest(TarantoolRequestBody body, TarantoolRequestSignature signature) {
+        super(TarantoolRequestType.IPROTO_CALL, body, signature);
     }
 
     /**
      * Tarantool call request builder
      */
-    public static class Builder {
+    public static class Builder extends TarantoolRequest.Builder<Builder> {
 
         Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(2, 1);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         /**
@@ -69,7 +75,7 @@ public final class TarantoolCallRequest extends TarantoolRequest {
                 throw new TarantoolProtocolException("Function name must be specified in the call request");
             }
 
-            return new TarantoolCallRequest(new TarantoolRequestBody(bodyMap, mapper));
+            return new TarantoolCallRequest(new TarantoolRequestBody(bodyMap, mapper), signature);
         }
     }
 }

@@ -5,6 +5,7 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 
 import java.util.Collection;
@@ -20,19 +21,24 @@ import java.util.Map;
  */
 public final class TarantoolEvalRequest extends TarantoolRequest {
 
-    private TarantoolEvalRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_EVAL, body);
+    private TarantoolEvalRequest(TarantoolRequestBody body, TarantoolRequestSignature signature) {
+        super(TarantoolRequestType.IPROTO_EVAL, body, signature);
     }
 
     /**
      * Tarantool eval request builder
      */
-    public static class Builder {
+    public static class Builder extends TarantoolRequest.Builder<Builder> {
 
         Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(2, 1);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         /**
@@ -69,7 +75,7 @@ public final class TarantoolEvalRequest extends TarantoolRequest {
                 throw new TarantoolProtocolException("Lua expression must be specified in the eval request");
             }
 
-            return new TarantoolEvalRequest(new TarantoolRequestBody(bodyMap, mapper));
+            return new TarantoolEvalRequest(new TarantoolRequestBody(bodyMap, mapper), signature);
         }
     }
 }
