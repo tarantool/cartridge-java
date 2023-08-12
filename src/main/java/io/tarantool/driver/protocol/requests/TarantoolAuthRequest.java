@@ -6,6 +6,7 @@ import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 import io.tarantool.driver.utils.Assert;
 
@@ -25,14 +26,14 @@ public final class TarantoolAuthRequest extends TarantoolRequest {
     private static final int IPROTO_USER_NAME = 0x23;
     private static final int IPROTO_AUTH_DATA = 0x21;
 
-    private TarantoolAuthRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_AUTH, body);
+    private TarantoolAuthRequest(TarantoolRequestBody body, TarantoolRequestSignature signature) {
+        super(TarantoolRequestType.IPROTO_AUTH, body, signature);
     }
 
     /**
      * Tarantool authentication request builder
      */
-    public static class Builder {
+    public static class Builder extends TarantoolRequest.Builder<Builder> {
 
         private final Map<Integer, Object> authMap;
 
@@ -41,6 +42,11 @@ public final class TarantoolAuthRequest extends TarantoolRequest {
          */
         public Builder() {
             authMap = new HashMap<>(2, 1);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         public Builder withUsername(String username) {
@@ -63,7 +69,7 @@ public final class TarantoolAuthRequest extends TarantoolRequest {
                     "Username and auth data must be specified for Tarantool auth request");
             }
             MessagePackObjectMapper mapper = DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
-            return new TarantoolAuthRequest(new TarantoolRequestBody(authMap, mapper));
+            return new TarantoolAuthRequest(new TarantoolRequestBody(authMap, mapper), signature);
         }
     }
 }

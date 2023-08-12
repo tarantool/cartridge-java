@@ -6,6 +6,7 @@ import org.msgpack.core.MessagePackException;
 import org.msgpack.core.MessagePacker;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -16,7 +17,7 @@ import java.util.function.Supplier;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolRequest {
+public abstract class TarantoolRequest {
 
     private static final AtomicLong syncId = new AtomicLong(0);
     private static final Supplier<Long> syncIdSupplier =
@@ -24,17 +25,20 @@ public class TarantoolRequest {
 
     private final TarantoolHeader header;
     private final TarantoolRequestBody body;
+    private final Optional<TarantoolRequestSignature> signature;
 
     /**
      * Basic constructor. Sets an auto-incremented request ID into the Tarantool packet header.
      *
-     * @param type request type code supported by Tarantool
-     * @param body request body, may be empty
+     * @param type      request type code supported by Tarantool
+     * @param body      request body, may be empty
+     * @param signature request signature, may be null
      * @see TarantoolRequestType
      */
-    public TarantoolRequest(TarantoolRequestType type, TarantoolRequestBody body) {
+    public TarantoolRequest(TarantoolRequestType type, TarantoolRequestBody body, TarantoolRequestSignature signature) {
         this.header = new TarantoolHeader(syncIdSupplier.get(), type.getCode());
         this.body = body;
+        this.signature = Optional.ofNullable(signature);
     }
 
     /**
@@ -51,8 +55,17 @@ public class TarantoolRequest {
      *
      * @return instance of a {@link Packable}
      */
-    public Packable getBody() {
+    public TarantoolRequestBody getBody() {
         return body;
+    }
+
+    /**
+     * Get signature
+     *
+     * @return request signature that uniquely represents the operation and argument types
+     */
+    public Optional<TarantoolRequestSignature> getSignature() {
+        return signature;
     }
 
     /**
@@ -69,6 +82,25 @@ public class TarantoolRequest {
             packer.packValue(body.toMessagePackValue(mapper));
         } catch (IOException | MessagePackException e) {
             throw new TarantoolDecoderException(header, e);
+        }
+    }
+
+    /**
+     * Base class for request builder implementations
+     */
+    protected abstract static class Builder<B extends Builder<B>> {
+        protected TarantoolRequestSignature signature;
+
+        protected abstract B self();
+
+        /**
+         * Set request signature
+         *
+         * @param signature request signature
+         */
+        public B withSignature(TarantoolRequestSignature signature) {
+            this.signature = signature;
+            return self();
         }
     }
 }

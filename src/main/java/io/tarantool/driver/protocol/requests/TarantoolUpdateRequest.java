@@ -7,6 +7,7 @@ import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
 import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 
 import java.util.HashMap;
@@ -25,19 +26,24 @@ public final class TarantoolUpdateRequest extends TarantoolRequest {
     /**
      * (non-Javadoc)
      */
-    private TarantoolUpdateRequest(TarantoolRequestBody body) {
-        super(TarantoolRequestType.IPROTO_UPDATE, body);
+    private TarantoolUpdateRequest(TarantoolRequestBody body, TarantoolRequestSignature signature) {
+        super(TarantoolRequestType.IPROTO_UPDATE, body, signature);
     }
 
     /**
      * Tarantool update request builder
      */
-    public static class Builder {
+    public static class Builder extends TarantoolRequest.Builder<Builder> {
 
         Map<Integer, Object> bodyMap;
 
         public Builder() {
             this.bodyMap = new HashMap<>(4, 1);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         public Builder withSpaceId(int spaceId) {
@@ -74,7 +80,7 @@ public final class TarantoolUpdateRequest extends TarantoolRequest {
                 throw new TarantoolProtocolException("Update operations must be specified for the update request");
             }
 
-            return new TarantoolUpdateRequest(new TarantoolRequestBody(bodyMap, mapper));
+            return new TarantoolUpdateRequest(new TarantoolRequestBody(bodyMap, mapper), signature);
         }
     }
 }

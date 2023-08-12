@@ -47,6 +47,7 @@ import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactory;
 import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolEvalRequest;
 import io.tarantool.driver.utils.Assert;
@@ -370,7 +371,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<S, SingleValueCallResult<S>> resultMapper)
         throws TarantoolClientException {
-        return makeRequestForSingleResult(functionName, arguments, argumentsMapper, resultMapper)
+        return makeRequestForSingleResult(functionName, arguments, null, argumentsMapper, resultMapper)
             .thenApply(CallResult::value);
     }
 
@@ -460,29 +461,32 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
         throws TarantoolClientException {
-        return makeRequestForMultiResult(functionName, arguments, argumentsMapper, resultMapper)
+        return makeRequestForMultiResult(functionName, arguments, null, argumentsMapper, resultMapper)
             .thenApply(CallResult::value);
     }
 
     private <T> CompletableFuture<CallResult<T>> makeRequestForSingleResult(
         String functionName,
         Collection<?> arguments,
+        TarantoolRequestSignature requestSignature,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
-        return makeRequest(functionName, arguments, argumentsMapper, resultMapper);
+        return makeRequest(functionName, arguments, requestSignature, argumentsMapper, resultMapper);
     }
 
     private <T, R extends List<T>> CompletableFuture<CallResult<R>> makeRequestForMultiResult(
         String functionName,
         Collection<?> arguments,
+        TarantoolRequestSignature requestSignature,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) {
-        return makeRequest(functionName, arguments, argumentsMapper, resultMapper);
+        return makeRequest(functionName, arguments, requestSignature, argumentsMapper, resultMapper);
     }
 
     private <S> CompletableFuture<S> makeRequest(
         String functionName,
         Collection<?> arguments,
+        TarantoolRequestSignature requestSignature,
         MessagePackObjectMapper argumentsMapper,
         MessagePackValueMapper resultMapper)
         throws TarantoolClientException {
@@ -493,6 +497,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
             if (arguments.size() > 0) {
                 builder.withArguments(arguments);
             }
+            builder.withSignature(requestSignature);
 
             TarantoolCallRequest request = builder.build(argumentsMapper);
             return connectionManager().getConnection()
