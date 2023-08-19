@@ -11,6 +11,7 @@ import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.Value;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Provides spaces and index metadata via stored function call
@@ -22,7 +23,8 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
     private final String metadataFunctionName;
     private final TarantoolCallOperations client;
     private final
-    CallResultMapper<TarantoolMetadataContainer, SingleValueCallResult<TarantoolMetadataContainer>> mapper;
+    Supplier<CallResultMapper<TarantoolMetadataContainer, SingleValueCallResult<TarantoolMetadataContainer>>>
+        mapperSupplier;
 
     /**
      * Basic constructor
@@ -40,14 +42,14 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
         Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {
         this.metadataFunctionName = metadataFunctionName;
         this.client = client;
-        this.mapper = client.getResultMapperFactoryFactory()
+        this.mapperSupplier = () -> client.getResultMapperFactoryFactory()
             .<TarantoolMetadataContainer>singleValueResultMapperFactory()
             .withSingleValueResultConverter(metadataConverter, resultClass);
     }
 
     @Override
     public CompletableFuture<TarantoolMetadataContainer> getMetadata() {
-        return client.callForSingleResult(metadataFunctionName, mapper)
+        return client.callForSingleResult(metadataFunctionName, mapperSupplier)
             .exceptionally(ex -> {
                 if (ex.getCause() != null && ex.getCause() instanceof TarantoolClientException) {
                     throw new TarantoolMetadataRequestException(metadataFunctionName, ex);

@@ -10,7 +10,6 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
-import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 @State(Scope.Benchmark)
 public class TarantoolSetup {
@@ -39,6 +39,8 @@ public class TarantoolSetup {
     MessagePackMapper defaultMapper;
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         resultMapper;
+    Supplier<CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>>
+        resultMapperSupplier;
     List<List<Object>> arraysWithDiffElements;
     List<List<Object>> arraysWithNestedArrays;
     List<List<Object>> arraysWithNestedMaps;
@@ -61,6 +63,7 @@ public class TarantoolSetup {
         defaultMapper = tarantoolClient.getConfig().getMessagePackMapper();
         resultMapper = tarantoolTupleResultMapperFactory
             .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata);
+        resultMapperSupplier = () -> resultMapper;
 
         log.info("Successfully connected to Tarantool, version = {}", tarantoolClient.getVersion());
     }

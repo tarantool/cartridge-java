@@ -15,7 +15,6 @@ import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.core.space.RetryingTarantoolSpace;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
-import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
@@ -147,14 +146,6 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public CompletableFuture<List<?>> call(
-        String functionName,
-        Collection<?> arguments,
-        MessagePackMapper mapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.call(functionName, arguments, mapper));
-    }
-
-    @Override
     public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, Class<T> entityClass)
         throws TarantoolClientException {
         return wrapOperation(() -> client.callForTupleResult(functionName, entityClass));
@@ -162,8 +153,8 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
 
     @Override
     public <T> CompletableFuture<T> call(String functionName,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.call(functionName, resultMapper));
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) throws TarantoolClientException {
+        return wrapOperation(() -> client.call(functionName, resultMapperSupplier));
     }
 
     @Override
@@ -174,8 +165,8 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
 
     @Override
     public <T> CompletableFuture<T> call(String functionName, Collection<?> arguments,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.call(functionName, arguments, resultMapper));
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) throws TarantoolClientException {
+        return wrapOperation(() -> client.call(functionName, arguments, resultMapperSupplier));
     }
 
     @Override
@@ -185,10 +176,12 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName, Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper, CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+    public <T> CompletableFuture<T> call(String functionName,
+        Collection<?> arguments,
+        MessagePackObjectMapper argumentsMapper,
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.call(functionName, arguments, argumentsMapper, resultMapper));
+        return wrapOperation(() -> client.call(functionName, arguments, argumentsMapper, resultMapperSupplier));
     }
 
     @Override
@@ -216,9 +209,10 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper));
+        return wrapOperation(
+            () -> client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapperSupplier));
     }
 
     @Override
@@ -241,9 +235,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.callForSingleResult(functionName, arguments, resultMapper));
+        return wrapOperation(() -> client.callForSingleResult(functionName, arguments, resultMapperSupplier));
     }
 
     @Override
@@ -261,9 +255,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.callForSingleResult(functionName, resultMapper));
+        return wrapOperation(() -> client.callForSingleResult(functionName, resultMapperSupplier));
     }
 
     @Override
@@ -295,9 +289,10 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
+        Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.callForMultiResult(functionName, arguments, argumentsMapper, resultMapper));
+        return wrapOperation(
+            () -> client.callForMultiResult(functionName, arguments, argumentsMapper, resultMapperSupplier));
     }
 
     @Override
@@ -326,8 +321,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.callForMultiResult(functionName, arguments, resultMapper));
+        Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
+        throws TarantoolClientException {
+        return wrapOperation(() -> client.callForMultiResult(functionName, arguments, resultMapperSupplier));
     }
 
     @Override
@@ -351,8 +347,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.callForMultiResult(functionName, resultMapper));
+        Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
+        throws TarantoolClientException {
+        return wrapOperation(() -> client.callForMultiResult(functionName, resultMapperSupplier));
     }
 
     @Override

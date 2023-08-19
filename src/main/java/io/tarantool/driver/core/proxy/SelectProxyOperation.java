@@ -14,6 +14,7 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Proxy operation for select
@@ -29,8 +30,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
-        super(client, functionName, arguments, argumentsMapper, resultMapper);
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
+        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
     }
 
     /**
@@ -70,7 +71,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                 .ifPresent(after -> options.put(ProxyOption.AFTER.toString(), after));
 
             return new SelectProxyOperation<>(
-                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, this.arguments.values(),
+                this.argumentsMapper, this.resultMapperSupplier);
         }
     }
 }

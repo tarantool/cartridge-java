@@ -71,7 +71,7 @@ public class BenchmarkRunner {
             "return_arrays_with_different_types",
             Collections.emptyList(),
             plan.defaultMapper,
-            plan.resultMapper
+            plan.resultMapperSupplier
         ).join();
 
         assertEquals(1000, tuples.size());
@@ -109,7 +109,7 @@ public class BenchmarkRunner {
             "return_arrays_with_different_types",
             Collections.emptyList(),
             plan.defaultMapper,
-            plan.resultMapper
+            plan.resultMapperSupplier
         ).join();
 
         assertEquals(1000, tuples.size());

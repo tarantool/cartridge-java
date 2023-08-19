@@ -366,7 +366,7 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
             "user_function_complex_query",
             Collections.singletonList(1000),
             defaultMapper,
-            factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
+            () -> factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
         ).get();
 
         assertTrue(result.size() >= 3);
@@ -378,7 +378,7 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
             "user_function_complex_query",
             Collections.singletonList(1000),
             defaultMapper,
-            factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null)
+            () -> factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null)
         ).get();
         assertTrue(result.size() >= 3);
         tuple = result.get(0);

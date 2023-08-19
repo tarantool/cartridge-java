@@ -8,6 +8,7 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 /**
  * Proxy operation for replace
@@ -25,8 +26,8 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
-        super(client, functionName, arguments, argumentsMapper, resultMapper);
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier) {
+        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
     }
 
     /**
@@ -47,7 +48,8 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
         public ReplaceProxyOperation<T, R> build() {
 
             return new ReplaceProxyOperation<>(
-                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, this.arguments.values(),
+                this.argumentsMapper, this.resultMapperSupplier);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -419,12 +420,15 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
             defaultResultMapper = mapperFactoryFactory.singleValueTupleResultMapperFactory()
             .withSingleValueRowsMetadataToTarantoolTupleResultMapper(defaultMapper, null);
+        Supplier<CallResultMapper<TarantoolResult<TarantoolTuple>,
+            SingleValueCallResult<TarantoolResult<TarantoolTuple>>>>
+            defaultResultMapperSupplier = () -> defaultResultMapper;
 
         TarantoolResult<TarantoolTuple> result =
             client.callForSingleResult(
                 "get_composite_data_with_crud",
                 Collections.singletonList(id),
-                defaultResultMapper
+                defaultResultMapperSupplier
             ).get();
         assertEquals(1, result.size());
         TarantoolTuple tuple = result.get(0);
@@ -458,9 +462,11 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                         .buildCallResultMapper(),
                     TarantoolTupleResult.class
                 );
+        Supplier<CallResultMapper<TarantoolTupleResult, SingleValueCallResult<TarantoolTupleResult>>>
+            callReturnMapperSupplier = () -> callReturnMapper;
 
         TarantoolResult<TarantoolTuple> crudResult =
-            client.call("crud.select", Collections.singletonList("test_space"), callReturnMapper).join();
+            client.call("crud.select", Collections.singletonList("test_space"), callReturnMapperSupplier).join();
 
         assertEquals(1, crudResult.size());
         TarantoolTuple tuple = crudResult.get(0);
@@ -469,13 +475,13 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
         assertEquals(field2, tuple.getObject("field2").orElse(null));
 
         TarantoolResult<TarantoolTuple> boxResult =
-            client.call("select_router_space", new ArrayList<>(), callReturnMapper).join();
+            client.call("select_router_space", new ArrayList<>(), callReturnMapperSupplier).join();
 
         assertEquals(1, boxResult.size());
         tuple = boxResult.get(0);
         assertEquals(1, tuple.getObject(0).orElse(null));
 
-        Object primitiveObject = client.call("returning_number", new ArrayList<>(), callReturnMapper).join();
+        Object primitiveObject = client.call("returning_number", new ArrayList<>(), callReturnMapperSupplier).join();
         assertEquals(2, primitiveObject);
     }
 
@@ -538,8 +544,9 @@ public class ProxyTarantoolClientIT extends SharedCartridgeContainer {
                     composite.field4 = (Double) valueMap.get("field4");
                     return composite;
                 }, TestCompositeCallResult.class);
+        Supplier<CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>>> mapperSupplier = () -> mapper;
         TestComposite actual =
-            client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapper).get();
+            client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapperSupplier).get();
 
         assertEquals("Jane Doe", actual.field1);
         assertEquals(999, actual.field2);
