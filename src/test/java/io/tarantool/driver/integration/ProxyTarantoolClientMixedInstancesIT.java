@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -376,8 +377,9 @@ public class ProxyTarantoolClientMixedInstancesIT extends CartridgeMixedInstance
                     composite.field4 = (Double) valueMap.get("field4");
                     return composite;
                 }, TestCompositeCallResult.class);
+        Supplier<CallResultMapper<TestComposite, SingleValueCallResult<TestComposite>>> mapperSupplier = () -> mapper;
         TestComposite actual =
-            client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapper).get();
+            client.callForSingleResult("get_composite_data", Collections.singletonList(123000), mapperSupplier).get();
 
         assertEquals("Jane Doe", actual.field1);
         assertEquals(999, actual.field2);

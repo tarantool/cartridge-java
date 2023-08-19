@@ -11,6 +11,7 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Basic implementation of a proxy operation
@@ -24,20 +25,20 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     protected final TarantoolCallOperations client;
     protected final String functionName;
     protected final Collection<?> arguments;
-    protected final CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
     private final MessagePackObjectMapper argumentsMapper;
+    protected final Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier;
 
     AbstractProxyOperation(
         TarantoolCallOperations client,
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
+        Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
         this.client = client;
         this.argumentsMapper = argumentsMapper;
         this.arguments = arguments;
         this.functionName = functionName;
-        this.resultMapper = resultMapper;
+        this.resultMapperSupplier = resultMapperSupplier;
     }
 
     public TarantoolCallOperations getClient() {
@@ -52,13 +53,13 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return arguments;
     }
 
-    public CallResultMapper<T, SingleValueCallResult<T>> getResultMapper() {
-        return resultMapper;
+    public Supplier<CallResultMapper<T, SingleValueCallResult<T>>> getResultMapperSupplier() {
+        return resultMapperSupplier;
     }
 
     @Override
     public CompletableFuture<T> execute() {
-        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapper);
+        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapperSupplier);
     }
 
     abstract static
@@ -66,9 +67,9 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         implements BuilderOptions, Self<B> {
         protected TarantoolCallOperations client;
         protected String functionName;
-        protected MessagePackObjectMapper argumentsMapper;
-        protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
         protected EnumMap<ProxyOperationArgument, Object> arguments;
+        protected MessagePackObjectMapper argumentsMapper;
+        protected Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier;
 
         GenericOperationsBuilder() {
             this.arguments = new EnumMap<>(ProxyOperationArgument.class);
@@ -125,11 +126,12 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         /**
          * Specify MessagePack-to-entity mapper for result contents conversion
          *
-         * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+         * @param resultMapperSupplier mapper supplier for result value MessagePack entity-to-object conversion
          * @return builder
          */
-        public B withResultMapper(CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
-            this.resultMapper = resultMapper;
+        public B withResultMapperSupplier(
+            Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
+            this.resultMapperSupplier = resultMapperSupplier;
             return self();
         }
 

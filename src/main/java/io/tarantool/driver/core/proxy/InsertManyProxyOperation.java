@@ -8,6 +8,7 @@ import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 /**
  * Proxy operation for inserting many records at once
@@ -24,8 +25,8 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
         String functionName,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
-        super(client, functionName, arguments, argumentsMapper, resultMapper);
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier) {
+        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
     }
 
     /**
@@ -45,7 +46,8 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
 
         public InsertManyProxyOperation<T, R> build() {
             return new InsertManyProxyOperation<>(
-                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, this.arguments.values(),
+                this.argumentsMapper, this.resultMapperSupplier);
         }
     }
 }
