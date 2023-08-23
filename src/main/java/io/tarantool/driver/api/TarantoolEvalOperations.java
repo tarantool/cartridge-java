@@ -7,6 +7,7 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Aggregates all value operation variants
@@ -43,11 +44,11 @@ public interface TarantoolEvalOperations {
      * keyword <code>return</code>.
      *
      * @param expression   lua expression, must not be null or empty
-     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param resultMapperSupplier mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
+    CompletableFuture<List<?>> eval(String expression, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException;
 
     /**
@@ -57,11 +58,12 @@ public interface TarantoolEvalOperations {
      * @param expression   lua expression, must not be null or empty
      * @param arguments    the list of function arguments. The object mapper specified in the client configuration
      *                     will be used for arguments conversion to MessagePack entities
-     * @param resultMapper mapper for result value MessagePack entity-to-object conversion
+     * @param resultMapperSupplier mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<?>> eval(String expression, Collection<?> arguments, MessagePackValueMapper resultMapper)
+    CompletableFuture<List<?>> eval(
+        String expression, Collection<?> arguments, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException;
 
     /**
@@ -71,7 +73,7 @@ public interface TarantoolEvalOperations {
      * @param expression      lua expression, must not be null or empty
      * @param arguments       the list of function arguments
      * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
-     * @param resultMapper    mapper for result value MessagePack entity-to-object conversion
+     * @param resultMapperSupplier    mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
@@ -79,5 +81,5 @@ public interface TarantoolEvalOperations {
         String expression,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException;
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException;
 }

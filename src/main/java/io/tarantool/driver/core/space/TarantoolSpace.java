@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -61,10 +62,10 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
-        return delete(conditions, arrayTupleResultMapper());
+        return delete(conditions, this::arrayTupleResultMapper);
     }
 
-    private CompletableFuture<R> delete(Conditions conditions, MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> delete(Conditions conditions, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -75,7 +76,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withKeyValues(indexQuery.getKeyValues())
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -83,7 +84,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
-        return insert(tuple, arrayTupleResultMapper());
+        return insert(tuple, this::arrayTupleResultMapper);
     }
 
     @Override
@@ -94,7 +95,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
             "Standalone node API does not support inserting several tuples at once yet");
     }
 
-    private CompletableFuture<R> insert(T tuple, MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> insert(T tuple, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
@@ -102,7 +103,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withTuple(tuple)
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -110,7 +111,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
-        return replace(tuple, arrayTupleResultMapper());
+        return replace(tuple, this::arrayTupleResultMapper);
     }
 
     @Override
@@ -121,7 +122,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
             "Standalone node API does not support replacing several tuples at once yet");
     }
 
-    private CompletableFuture<R> replace(T tuple, MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> replace(T tuple, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
@@ -129,7 +130,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withTuple(tuple)
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -137,10 +138,10 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
-        return select(conditions, arrayTupleResultMapper());
+        return select(conditions, this::arrayTupleResultMapper);
     }
 
-    private CompletableFuture<R> select(Conditions conditions, MessagePackValueMapper resultMapper)
+    private CompletableFuture<R> select(Conditions conditions, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -153,7 +154,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withOffset(conditions.getOffset())
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -161,7 +162,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, T tuple) {
-        return update(conditions, makeOperationsFromTuple(tuple), arrayTupleResultMapper());
+        return update(conditions, makeOperationsFromTuple(tuple), this::arrayTupleResultMapper);
     }
 
     /**
@@ -174,13 +175,13 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
-        return update(conditions, operations, arrayTupleResultMapper());
+        return update(conditions, operations, this::arrayTupleResultMapper);
     }
 
     private CompletableFuture<R> update(
         Conditions conditions,
         TupleOperations operations,
-        MessagePackValueMapper resultMapper)
+        Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -199,7 +200,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withTupleOperations(fillFieldIndexFromMetadata(operations))
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -207,14 +208,14 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
-        return upsert(conditions, tuple, operations, arrayTupleResultMapper());
+        return upsert(conditions, tuple, operations, this::arrayTupleResultMapper);
     }
 
     private CompletableFuture<R> upsert(
         Conditions conditions,
         T tuple,
         TupleOperations operations,
-        MessagePackValueMapper resultMapper)
+        Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -226,7 +227,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withTupleOperations(fillFieldIndexFromMetadata(operations))
                 .build(config.getMessagePackMapper());
 
-            return sendRequest(request, resultMapper);
+            return sendRequest(request, resultMapperSupplier);
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
         }
@@ -234,17 +235,17 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
 
     @Override
     public CompletableFuture<Void> truncate() throws TarantoolClientException {
-        return truncate(arrayTupleResultMapper());
+        return truncate(this::arrayTupleResultMapper);
     }
 
-    private CompletableFuture<Void> truncate(MessagePackValueMapper resultMapper)
+    private CompletableFuture<Void> truncate(Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         try {
             String spaceName = spaceMetadata.getSpaceName();
             TarantoolCallRequest request = new TarantoolCallRequest.Builder()
                 .withFunctionName("box.space." + spaceName + ":truncate")
                 .build(config.getMessagePackMapper());
-            return sendRequest(request, resultMapper)
+            return sendRequest(request, resultMapperSupplier)
                 .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
         } catch (TarantoolProtocolException e) {
             throw new TarantoolClientException(e);
@@ -259,7 +260,9 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
      */
     protected abstract MessagePackValueMapper arrayTupleResultMapper();
 
-    private CompletableFuture<R> sendRequest(TarantoolRequest request, MessagePackValueMapper resultMapper) {
+    private CompletableFuture<R> sendRequest(
+        TarantoolRequest request, Supplier<MessagePackValueMapper> resultMapperSupplier) {
+        MessagePackValueMapper resultMapper = resultMapperSupplier.get();
         return connectionManager.getConnection()
             .thenCompose(c -> c.sendRequest(request).getFuture())
             .thenApply(resultMapper::fromValue);

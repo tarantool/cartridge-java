@@ -46,6 +46,7 @@ import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Basic proxy {@link TarantoolSpaceOperations} implementation, which uses calls to API functions defined in
@@ -80,7 +81,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> delete(Conditions conditions) throws TarantoolClientException {
-        return delete(conditions, rowsMetadataTupleResultMapper(), ProxyDeleteOptions.create());
+        return delete(conditions, this::rowsMetadataTupleResultMapper, ProxyDeleteOptions.create());
     }
 
     @Override
@@ -88,12 +89,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return delete(conditions, rowsMetadataTupleResultMapper(), options);
+        return delete(conditions, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> delete(
         Conditions conditions,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         DeleteOptions options)
         throws TarantoolClientException {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
@@ -104,7 +105,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getDeleteFunctionName())
             .withIndexQuery(indexQuery)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -113,7 +114,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> insert(T tuple) throws TarantoolClientException {
-        return insert(tuple, rowsMetadataTupleResultMapper(), ProxyInsertOptions.create());
+        return insert(tuple, this::rowsMetadataTupleResultMapper, ProxyInsertOptions.create());
     }
 
     @Override
@@ -121,12 +122,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return insert(tuple, rowsMetadataTupleResultMapper(), options);
+        return insert(tuple, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> insert(
         T tuple,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         InsertOptions options)
         throws TarantoolClientException {
         InsertProxyOperation<T, R> operation = new InsertProxyOperation.Builder<T, R>()
@@ -135,7 +136,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getInsertFunctionName())
             .withTuple(tuple)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -144,7 +145,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> insertMany(Collection<T> tuples) {
-        return insertMany(tuples, rowsMetadataTupleResultMapper(), ProxyInsertManyOptions.create()
+        return insertMany(tuples, this::rowsMetadataTupleResultMapper, ProxyInsertManyOptions.create()
             .withStopOnError(StopOnError.TRUE)
             .withRollbackOnError(RollbackOnError.TRUE)
         );
@@ -156,12 +157,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return insertMany(tuples, rowsMetadataTupleResultMapper(), options);
+        return insertMany(tuples, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> insertMany(
         Collection<T> tuples,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         InsertManyOptions options)
         throws TarantoolClientException {
         InsertManyProxyOperation<T, R> operation = new InsertManyProxyOperation.Builder<T, R>()
@@ -170,7 +171,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getInsertManyFunctionName())
             .withTuples(tuples)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -179,7 +180,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> replace(T tuple) throws TarantoolClientException {
-        return replace(tuple, rowsMetadataTupleResultMapper(), ProxyReplaceOptions.create());
+        return replace(tuple, this::rowsMetadataTupleResultMapper, ProxyReplaceOptions.create());
     }
 
     @Override
@@ -187,12 +188,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return replace(tuple, rowsMetadataTupleResultMapper(), options);
+        return replace(tuple, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> replace(
         T tuple,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         ReplaceOptions options)
         throws TarantoolClientException {
         ReplaceProxyOperation<T, R> operation = new ReplaceProxyOperation.Builder<T, R>()
@@ -201,7 +202,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getReplaceFunctionName())
             .withTuple(tuple)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -210,7 +211,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException {
-        return replaceMany(tuples, rowsMetadataTupleResultMapper(), ProxyReplaceManyOptions.create()
+        return replaceMany(tuples, this::rowsMetadataTupleResultMapper, ProxyReplaceManyOptions.create()
             .withStopOnError(StopOnError.TRUE)
             .withRollbackOnError(RollbackOnError.TRUE)
         );
@@ -221,12 +222,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return replaceMany(tuples, rowsMetadataTupleResultMapper(), options);
+        return replaceMany(tuples, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> replaceMany(
         Collection<T> tuples,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         ReplaceManyOptions options)
         throws TarantoolClientException {
         ReplaceManyProxyOperation<T, R> operation = new ReplaceManyProxyOperation.Builder<T, R>()
@@ -235,7 +236,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getReplaceManyFunctionName())
             .withTuples(tuples)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -244,7 +245,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> select(Conditions conditions) throws TarantoolClientException {
-        return select(conditions, rowsMetadataTupleResultMapper(), ProxySelectOptions.create());
+        return select(conditions, this::rowsMetadataTupleResultMapper, ProxySelectOptions.create());
     }
 
     @Override
@@ -254,12 +255,12 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return select(conditions, rowsMetadataTupleResultMapper(), options);
+        return select(conditions, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> select(
         Conditions conditions,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         SelectOptions options)
         throws TarantoolClientException {
         SelectProxyOperation<R> operation = new SelectProxyOperation.Builder<R>(metadataOperations, spaceMetadata)
@@ -268,7 +269,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getSelectFunctionName())
             .withConditions(conditions)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -277,7 +278,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, T tuple) {
-        return update(conditions, makeOperationsFromTuple(tuple), rowsMetadataTupleResultMapper(),
+        return update(conditions, makeOperationsFromTuple(tuple), this::rowsMetadataTupleResultMapper,
             ProxyUpdateOptions.create()
         );
     }
@@ -287,7 +288,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return update(conditions, makeOperationsFromTuple(tuple), rowsMetadataTupleResultMapper(), options);
+        return update(conditions, makeOperationsFromTuple(tuple), this::rowsMetadataTupleResultMapper, options);
     }
 
     /**
@@ -300,7 +301,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> update(Conditions conditions, TupleOperations operations) {
-        return update(conditions, operations, rowsMetadataTupleResultMapper(), ProxyUpdateOptions.create());
+        return update(conditions, operations, this::rowsMetadataTupleResultMapper, ProxyUpdateOptions.create());
     }
 
     @Override
@@ -308,13 +309,13 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return update(conditions, operations, rowsMetadataTupleResultMapper(), options);
+        return update(conditions, operations, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> update(
         Conditions conditions,
         TupleOperations operations,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         UpdateOptions options) {
         TarantoolIndexQuery indexQuery = conditions.toIndexQuery(metadataOperations, spaceMetadata);
 
@@ -325,7 +326,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withIndexQuery(indexQuery)
             .withTupleOperation(operations)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 
@@ -334,7 +335,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
 
     @Override
     public CompletableFuture<R> upsert(Conditions conditions, T tuple, TupleOperations operations) {
-        return upsert(conditions, tuple, operations, rowsMetadataTupleResultMapper(), ProxyUpsertOptions.create());
+        return upsert(conditions, tuple, operations, this::rowsMetadataTupleResultMapper, ProxyUpsertOptions.create());
     }
 
     @Override
@@ -344,14 +345,14 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
         if (options == null) {
             throw new IllegalArgumentException("Options should not be null");
         }
-        return upsert(conditions, tuple, operations, rowsMetadataTupleResultMapper(), options);
+        return upsert(conditions, tuple, operations, this::rowsMetadataTupleResultMapper, options);
     }
 
     private CompletableFuture<R> upsert(
         Conditions conditions,
         T tuple,
         TupleOperations operations,
-        CallResultMapper<R, SingleValueCallResult<R>> resultMapper,
+        Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier,
         UpsertOptions options) {
 
         UpsertProxyOperation<T, R> operation = new UpsertProxyOperation.Builder<T, R>()
@@ -361,7 +362,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withTuple(tuple)
             .withTupleOperation(operations)
             .withArgumentsMapper(config.getMessagePackMapper())
-            .withResultMapperSupplier(() -> resultMapper)
+            .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
 

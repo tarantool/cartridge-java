@@ -516,20 +516,20 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public CompletableFuture<List<?>> eval(String expression, Collection<?> arguments)
         throws TarantoolClientException {
-        return eval(expression, arguments, config.getMessagePackMapper());
+        return eval(expression, arguments, config::getMessagePackMapper);
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<?>> eval(String expression, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
-        return eval(expression, Collections.emptyList(), resultMapper);
+        return eval(expression, Collections.emptyList(), resultMapperSupplier);
     }
 
     @Override
     public CompletableFuture<List<?>> eval(
-        String expression, Collection<?> arguments, MessagePackValueMapper resultMapper)
+        String expression, Collection<?> arguments, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
-        return eval(expression, arguments, config.getMessagePackMapper(), resultMapper);
+        return eval(expression, arguments, config.getMessagePackMapper(), resultMapperSupplier);
     }
 
     @Override
@@ -537,12 +537,13 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         String expression,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException {
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
         try {
             TarantoolEvalRequest request = new TarantoolEvalRequest.Builder()
                 .withExpression(expression)
                 .withArguments(arguments)
                 .build(argumentsMapper);
+            MessagePackValueMapper resultMapper = resultMapperSupplier.get();
             return connectionManager().getConnection()
                 .thenCompose(c -> c.sendRequest(request).getFuture())
                 .thenApply(resultMapper::fromValue);
