@@ -391,16 +391,16 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<?>> eval(String expression, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
-        return client.eval(expression, resultMapper);
+        return client.eval(expression, resultMapperSupplier);
     }
 
     @Override
     public CompletableFuture<List<?>> eval(
-        String expression, Collection<?> arguments, MessagePackValueMapper resultMapper)
+        String expression, Collection<?> arguments, Supplier<MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
-        return client.eval(expression, arguments, resultMapper);
+        return client.eval(expression, arguments, resultMapperSupplier);
     }
 
     @Override
@@ -408,8 +408,8 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
         String expression,
         Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        return client.eval(expression, arguments, argumentsMapper, resultMapper);
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
+        return client.eval(expression, arguments, argumentsMapper, resultMapperSupplier);
     }
 
     @Override

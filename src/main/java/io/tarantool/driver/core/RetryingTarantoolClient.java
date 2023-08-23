@@ -370,24 +370,24 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     @Override
     public CompletableFuture<List<?>> eval(
         String expression,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.eval(expression, resultMapper));
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
+        return wrapOperation(() -> client.eval(expression, resultMapperSupplier));
     }
 
     @Override
     public CompletableFuture<List<?>> eval(
         String expression,
         Collection<?> arguments,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.eval(expression, arguments, resultMapper));
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
+        return wrapOperation(() -> client.eval(expression, arguments, resultMapperSupplier));
     }
 
     @Override
     public CompletableFuture<List<?>> eval(
         String expression, Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
-        MessagePackValueMapper resultMapper) throws TarantoolClientException {
-        return wrapOperation(() -> client.eval(expression, arguments, argumentsMapper, resultMapper));
+        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
+        return wrapOperation(() -> client.eval(expression, arguments, argumentsMapper, resultMapperSupplier));
     }
 
     @Override
