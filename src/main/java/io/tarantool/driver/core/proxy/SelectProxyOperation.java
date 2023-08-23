@@ -29,9 +29,9 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         TarantoolCallOperations client,
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
-        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
+        super(client, functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
     }
 
     /**
@@ -72,7 +72,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
             return new SelectProxyOperation<>(
                 this.client, this.functionName, this.arguments.values(),
-                this.argumentsMapper, this.resultMapperSupplier);
+                this.argumentsMapperSupplier, this.resultMapperSupplier);
         }
     }
 }

@@ -13,6 +13,7 @@ import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.exceptions.TarantoolSpaceOperationException;
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -359,13 +361,14 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
     @Test
     public void callForTarantoolResultTest() throws Exception {
         MessagePackMapper defaultMapper = client.getConfig().getMessagePackMapper();
+        Supplier<MessagePackObjectMapper> defaultMapperSupplier = () -> defaultMapper;
         TarantoolTupleResultMapperFactory factory =
             TarantoolTupleResultMapperFactoryImpl.getInstance();
         TarantoolSpaceMetadata spaceMetadata = client.metadata().getSpaceByName("test_space").get();
         TarantoolResult<TarantoolTuple> result = client.call(
             "user_function_complex_query",
             Collections.singletonList(1000),
-            defaultMapper,
+            defaultMapperSupplier,
             () -> factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, spaceMetadata)
         ).get();
 
@@ -377,7 +380,7 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
         result = client.call(
             "user_function_complex_query",
             Collections.singletonList(1000),
-            defaultMapper,
+            defaultMapperSupplier,
             () -> factory.withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null)
         ).get();
         assertTrue(result.size() >= 3);

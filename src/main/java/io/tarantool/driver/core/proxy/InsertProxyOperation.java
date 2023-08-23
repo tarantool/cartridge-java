@@ -24,9 +24,9 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
         TarantoolCallOperations client,
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<R, SingleValueCallResult<R>>> resultMapperSupplier) {
-        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
+        super(client, functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
     }
 
     /**
@@ -48,7 +48,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
 
             return new InsertProxyOperation<>(
                 this.client, this.functionName, this.arguments.values(),
-                this.argumentsMapper, this.resultMapperSupplier);
+                this.argumentsMapperSupplier, this.resultMapperSupplier);
         }
     }
 }

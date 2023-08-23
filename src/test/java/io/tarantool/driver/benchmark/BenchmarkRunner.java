@@ -70,7 +70,7 @@ public class BenchmarkRunner {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
             "return_arrays_with_different_types",
             Collections.emptyList(),
-            plan.defaultMapper,
+            plan.defaultMapperSupplier,
             plan.resultMapperSupplier
         ).join();
 
@@ -108,7 +108,7 @@ public class BenchmarkRunner {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
             "return_arrays_with_different_types",
             Collections.emptyList(),
-            plan.defaultMapper,
+            plan.defaultMapperSupplier,
             plan.resultMapperSupplier
         ).join();
 

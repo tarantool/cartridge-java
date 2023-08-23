@@ -8,6 +8,7 @@ import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import org.openjdk.jmh.annotations.Level;
@@ -37,6 +38,7 @@ public class TarantoolSetup {
     TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> tarantoolClient;
     TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> retryingTarantoolClient;
     MessagePackMapper defaultMapper;
+    Supplier<MessagePackObjectMapper> defaultMapperSupplier = () -> defaultMapper;
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         resultMapper;
     Supplier<CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>>
