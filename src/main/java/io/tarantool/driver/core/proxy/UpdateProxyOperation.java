@@ -22,9 +22,9 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         TarantoolCallOperations client,
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
-        super(client, functionName, arguments, argumentsMapper, resultMapperSupplier);
+        super(client, functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
     }
 
     /**
@@ -46,7 +46,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
 
             return new UpdateProxyOperation<>(
                 this.client, this.functionName, this.arguments.values(),
-                this.argumentsMapper, this.resultMapperSupplier);
+                this.argumentsMapperSupplier, this.resultMapperSupplier);
         }
     }
 }

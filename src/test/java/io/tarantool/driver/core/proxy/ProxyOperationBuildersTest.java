@@ -25,6 +25,7 @@ import io.tarantool.driver.core.metadata.TarantoolMetadata;
 import io.tarantool.driver.core.metadata.TestMetadataProvider;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackMapper;
+import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
@@ -49,6 +50,7 @@ public class ProxyOperationBuildersTest {
     private final MessagePackMapper defaultMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
+    private final Supplier<MessagePackObjectMapper> defaultMapperSupplier = () -> defaultMapper;
     TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
         TarantoolTupleResultMapperFactoryImpl.getInstance();
     private final
@@ -71,7 +73,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withIndexQuery(indexQuery)
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyDeleteOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                 )
@@ -98,7 +100,7 @@ public class ProxyOperationBuildersTest {
                 .withSpaceName("space1")
                 .withFunctionName("function1")
                 .withTuple(tarantoolTuple)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withResultMapperSupplier(defaultResultMapperSupplier)
                 .withOptions(ProxyInsertOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
@@ -128,7 +130,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withTuples(tarantoolTuples)
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyInsertManyOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withRollbackOnError(RollbackOnError.TRUE)
@@ -143,6 +145,7 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertIterableEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertEquals(defaultMapperSupplier, operation.getArgumentsMapperSupplier());
         assertEquals(defaultResultMapperSupplier, operation.getResultMapperSupplier());
     }
 
@@ -158,7 +161,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withTuple(tarantoolTuple)
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyReplaceOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                 )
@@ -170,6 +173,7 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertIterableEquals(Arrays.asList("space1", tarantoolTuple, options), operation.getArguments());
+        assertEquals(defaultMapperSupplier, operation.getArgumentsMapperSupplier());
         assertEquals(defaultResultMapperSupplier, operation.getResultMapperSupplier());
     }
 
@@ -187,7 +191,7 @@ public class ProxyOperationBuildersTest {
                 .withFunctionName("function1")
                 .withTuples(tarantoolTuples)
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyReplaceManyOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withRollbackOnError(RollbackOnError.TRUE)
@@ -203,6 +207,7 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
         assertIterableEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertEquals(defaultMapperSupplier, operation.getArgumentsMapperSupplier());
         assertEquals(defaultResultMapperSupplier, operation.getResultMapperSupplier());
     }
 
@@ -225,7 +230,7 @@ public class ProxyOperationBuildersTest {
                 .withConditions(conditions)
                 .withFunctionName("function1")
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxySelectOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withBatchSize(123456)
@@ -263,7 +268,7 @@ public class ProxyOperationBuildersTest {
                 .withIndexQuery(indexQuery)
                 .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyUpdateOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                 )
@@ -280,6 +285,7 @@ public class ProxyOperationBuildersTest {
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
             operation.getArguments());
 
+        assertEquals(defaultMapperSupplier, operation.getArgumentsMapperSupplier());
         assertEquals(defaultResultMapperSupplier, operation.getResultMapperSupplier());
     }
 
@@ -299,7 +305,7 @@ public class ProxyOperationBuildersTest {
                 .withTuple(tarantoolTuple)
                 .withTupleOperation(TupleOperations.add(3, 90).andAdd(4, 5))
                 .withResultMapperSupplier(defaultResultMapperSupplier)
-                .withArgumentsMapper(defaultMapper)
+                .withArgumentsMapperSupplier(defaultMapperSupplier)
                 .withOptions(ProxyUpsertOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                 )
@@ -313,6 +319,7 @@ public class ProxyOperationBuildersTest {
         assertIterableEquals(Arrays.asList("space1", tarantoolTuple,
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
             operation.getArguments());
+        assertEquals(defaultMapperSupplier, operation.getArgumentsMapperSupplier());
         assertEquals(defaultResultMapperSupplier, operation.getResultMapperSupplier());
     }
 

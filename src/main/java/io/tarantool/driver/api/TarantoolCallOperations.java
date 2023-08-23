@@ -125,7 +125,7 @@ public interface TarantoolCallOperations {
      * @param <T>             desired function call result type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param entityClass     target result entity class
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -133,7 +133,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> entityClass)
         throws TarantoolClientException;
 
@@ -143,7 +143,7 @@ public interface TarantoolCallOperations {
      * @param <T>             desired function call result type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultMapperSupplier    mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -151,7 +151,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> call(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException;
 
@@ -162,7 +162,7 @@ public interface TarantoolCallOperations {
      * @param <T>             target result content type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultClass     target result entity class
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -170,7 +170,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> resultClass)
         throws TarantoolClientException;
 
@@ -181,7 +181,7 @@ public interface TarantoolCallOperations {
      * @param <T>             target result content type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param valueConverter  MessagePack value to entity converter for each result item
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -189,7 +189,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException;
 
@@ -200,7 +200,7 @@ public interface TarantoolCallOperations {
      * @param <T>             target result content type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultMapperSupplier    mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -208,7 +208,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException;
 
@@ -315,7 +315,7 @@ public interface TarantoolCallOperations {
      * @param <R>                     target result type
      * @param functionName            function name, must not be null or empty
      * @param arguments               list of function arguments
-     * @param argumentsMapper         mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultContainerSupplier supplier function for new empty result collection
      * @param resultClass             target result entity class
      * @return some result
@@ -324,7 +324,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
         throws TarantoolClientException;
@@ -336,7 +336,7 @@ public interface TarantoolCallOperations {
      * @param <R>                     target result type
      * @param functionName            function name, must not be null or empty
      * @param arguments               list of function arguments
-     * @param argumentsMapper         mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultContainerSupplier supplier function for new empty result collection
      * @param valueConverter          MessagePack value to entity converter for each result item
      * @return some result
@@ -345,7 +345,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException;
@@ -357,7 +357,7 @@ public interface TarantoolCallOperations {
      * @param <R>             target result type
      * @param functionName    function name, must not be null or empty
      * @param arguments       list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultMapperSupplier    mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected or some other error occurred
@@ -365,7 +365,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
         throws TarantoolClientException;
 

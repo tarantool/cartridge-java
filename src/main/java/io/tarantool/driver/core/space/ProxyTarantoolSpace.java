@@ -104,7 +104,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getDeleteFunctionName())
             .withIndexQuery(indexQuery)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -135,7 +135,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getInsertFunctionName())
             .withTuple(tuple)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -170,7 +170,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getInsertManyFunctionName())
             .withTuples(tuples)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -201,7 +201,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getReplaceFunctionName())
             .withTuple(tuple)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -235,7 +235,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getReplaceManyFunctionName())
             .withTuples(tuples)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -268,7 +268,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withSpaceName(spaceName)
             .withFunctionName(operationsMapping.getSelectFunctionName())
             .withConditions(conditions)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -325,7 +325,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getUpdateFunctionName())
             .withIndexQuery(indexQuery)
             .withTupleOperation(operations)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();
@@ -361,7 +361,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
             .withFunctionName(operationsMapping.getUpsertFunctionName())
             .withTuple(tuple)
             .withTupleOperation(operations)
-            .withArgumentsMapper(config.getMessagePackMapper())
+            .withArgumentsMapperSupplier(config::getMessagePackMapper)
             .withResultMapperSupplier(resultMapperSupplier)
             .withOptions(options)
             .build();

@@ -170,49 +170,55 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(String functionName, Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper, Class<T> entityClass) throws TarantoolClientException {
-        return wrapOperation(() -> client.callForTupleResult(functionName, arguments, argumentsMapper, entityClass));
+    public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
+        String functionName,
+        Collection<?> arguments,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Class<T> entityClass) throws TarantoolClientException {
+        return wrapOperation(
+            () -> client.callForTupleResult(functionName, arguments, argumentsMapperSupplier, entityClass));
     }
 
     @Override
-    public <T> CompletableFuture<T> call(String functionName,
+    public <T> CompletableFuture<T> call(
+        String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return wrapOperation(() -> client.call(functionName, arguments, argumentsMapper, resultMapperSupplier));
+        return wrapOperation(() -> client.call(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier));
     }
 
     @Override
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> resultClass) throws TarantoolClientException {
-        return wrapOperation(() -> client.callForSingleResult(functionName, arguments, argumentsMapper, resultClass));
+        return wrapOperation(
+            () -> client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultClass));
     }
 
     @Override
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException {
         return wrapOperation(() ->
-            client.callForSingleResult(functionName, arguments, argumentsMapper, valueConverter));
+            client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, valueConverter));
     }
 
     @Override
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
         return wrapOperation(
-            () -> client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapperSupplier));
+            () -> client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier));
     }
 
     @Override
@@ -264,35 +270,35 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
         throws TarantoolClientException {
         return wrapOperation(() -> client.callForMultiResult(
-            functionName, arguments, argumentsMapper, resultContainerSupplier, resultClass));
+            functionName, arguments, argumentsMapperSupplier, resultContainerSupplier, resultClass));
     }
 
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException {
         return wrapOperation(() -> client.callForMultiResult(
-            functionName, arguments, argumentsMapper, resultContainerSupplier, valueConverter));
+            functionName, arguments, argumentsMapperSupplier, resultContainerSupplier, valueConverter));
     }
 
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
         throws TarantoolClientException {
         return wrapOperation(
-            () -> client.callForMultiResult(functionName, arguments, argumentsMapper, resultMapperSupplier));
+            () -> client.callForMultiResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier));
     }
 
     @Override
@@ -385,9 +391,9 @@ public abstract class RetryingTarantoolClient<T extends Packable, R extends Coll
     @Override
     public CompletableFuture<List<?>> eval(
         String expression, Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
-        return wrapOperation(() -> client.eval(expression, arguments, argumentsMapper, resultMapperSupplier));
+        return wrapOperation(() -> client.eval(expression, arguments, argumentsMapperSupplier, resultMapperSupplier));
     }
 
     @Override

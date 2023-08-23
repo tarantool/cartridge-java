@@ -25,17 +25,17 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     protected final TarantoolCallOperations client;
     protected final String functionName;
     protected final Collection<?> arguments;
-    private final MessagePackObjectMapper argumentsMapper;
-    protected final Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier;
+    private final Supplier<MessagePackObjectMapper> argumentsMapperSupplier;
+    private final Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier;
 
     AbstractProxyOperation(
         TarantoolCallOperations client,
         String functionName,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier) {
         this.client = client;
-        this.argumentsMapper = argumentsMapper;
+        this.argumentsMapperSupplier = argumentsMapperSupplier;
         this.arguments = arguments;
         this.functionName = functionName;
         this.resultMapperSupplier = resultMapperSupplier;
@@ -53,13 +53,17 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return arguments;
     }
 
+    public Supplier<MessagePackObjectMapper> getArgumentsMapperSupplier() {
+        return argumentsMapperSupplier;
+    }
+
     public Supplier<CallResultMapper<T, SingleValueCallResult<T>>> getResultMapperSupplier() {
         return resultMapperSupplier;
     }
 
     @Override
     public CompletableFuture<T> execute() {
-        return client.callForSingleResult(functionName, arguments, argumentsMapper, resultMapperSupplier);
+        return client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
     }
 
     abstract static
@@ -68,7 +72,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         protected TarantoolCallOperations client;
         protected String functionName;
         protected EnumMap<ProxyOperationArgument, Object> arguments;
-        protected MessagePackObjectMapper argumentsMapper;
+        protected Supplier<MessagePackObjectMapper> argumentsMapperSupplier;
         protected Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier;
 
         GenericOperationsBuilder() {
@@ -115,11 +119,11 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         /**
          * Specify entity-to-MessagePack mapper for arguments contents conversion
          *
-         * @param objectMapper mapper for arguments entity-to-MessagePack entity conversion
+         * @param argumentsMapperSupplier mapper supplier for arguments entity-to-MessagePack entity conversion
          * @return builder
          */
-        public B withArgumentsMapper(MessagePackObjectMapper objectMapper) {
-            this.argumentsMapper = objectMapper;
+        public B withArgumentsMapperSupplier(Supplier<MessagePackObjectMapper> argumentsMapperSupplier) {
+            this.argumentsMapperSupplier = argumentsMapperSupplier;
             return self();
         }
 

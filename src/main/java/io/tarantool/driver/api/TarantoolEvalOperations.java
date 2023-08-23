@@ -72,7 +72,7 @@ public interface TarantoolEvalOperations {
      *
      * @param expression      lua expression, must not be null or empty
      * @param arguments       the list of function arguments
-     * @param argumentsMapper mapper for arguments object-to-MessagePack entity conversion
+     * @param argumentsMapperSupplier mapper supplier for arguments object-to-MessagePack entity conversion
      * @param resultMapperSupplier    mapper supplier for result value MessagePack entity-to-object conversion
      * @return some result
      * @throws TarantoolClientException if the client is not connected
@@ -80,6 +80,6 @@ public interface TarantoolEvalOperations {
     CompletableFuture<List<?>> eval(
         String expression,
         Collection<?> arguments,
-        MessagePackObjectMapper argumentsMapper,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException;
 }
