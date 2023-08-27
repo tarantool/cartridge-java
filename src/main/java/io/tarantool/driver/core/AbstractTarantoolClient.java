@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -69,6 +71,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     private final TarantoolConnectionListeners listeners;
     private final AtomicReference<TarantoolMetadata> metadataHolder = new AtomicReference<>();
     private final ResultMapperFactoryFactoryImpl mapperFactoryFactory;
+    private final Map<TarantoolRequestSignature, MessagePackObjectMapper> argumentsMapperCache;
+    private final Map<TarantoolRequestSignature, MessagePackValueMapper> resultMapperCache;
 
     private final SpacesMetadataProvider metadataProvider;
     private final ScheduledExecutorService timeoutScheduler;
@@ -114,6 +118,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
         this.config = config;
         this.mapperFactoryFactory = new ResultMapperFactoryFactoryImpl();
+        this.argumentsMapperCache = new ConcurrentHashMap<>();
+        this.resultMapperCache = new ConcurrentHashMap<>();
         this.eventLoopGroup = new NioEventLoopGroup(config.getEventLoopThreadsNumber());
         this.bootstrap = new Bootstrap()
             .group(eventLoopGroup)
@@ -279,7 +285,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> tupleClass)
         throws TarantoolClientException {
-        return call(functionName, arguments, argumentsMapperSupplier,
+        TarantoolRequestSignature signature = TarantoolRequestSignature.create(functionName, arguments, tupleClass);
+        return callForSingleResult(functionName, arguments, signature, argumentsMapperSupplier,
             () -> mapperFactoryFactory.getTarantoolResultMapper(config.getMessagePackMapper(), tupleClass));
     }
 
@@ -345,8 +352,10 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Class<S> resultClass)
         throws TarantoolClientException {
-        return callForSingleResult(functionName, arguments, argumentsMapperSupplier,
-            () -> mapperFactoryFactory.getDefaultSingleValueMapper(config.getMessagePackMapper(), resultClass));
+        TarantoolRequestSignature signature = TarantoolRequestSignature.create(functionName, arguments, resultClass);
+        return callForSingleResult(
+            functionName, arguments, signature, argumentsMapperSupplier,
+                () -> mapperFactoryFactory.getDefaultSingleValueMapper(config.getMessagePackMapper(), resultClass));
     }
 
     @Override
@@ -358,7 +367,21 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         throws TarantoolClientException {
         Supplier<CallResultMapper<S, SingleValueCallResult<S>>> resultMapperSupplier = () ->
             mapperFactoryFactory.getSingleValueResultMapper(valueConverter);
-        return callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
+        TarantoolRequestSignature signature = TarantoolRequestSignature.create(
+            functionName, arguments, valueConverter.getClass());
+        return callForSingleResult(functionName, arguments, signature, argumentsMapperSupplier, resultMapperSupplier);
+    }
+
+    private <S> CompletableFuture<S> callForSingleResult(
+        String functionName,
+        Collection<?> arguments,
+        TarantoolRequestSignature signature,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<CallResultMapper<S, SingleValueCallResult<S>>> resultMapperSupplier)
+        throws TarantoolClientException {
+        return makeRequestForSingleResult(
+            functionName, arguments, signature, argumentsMapperSupplier, resultMapperSupplier)
+            .thenApply(CallResult::value);
     }
 
     @Override
@@ -368,7 +391,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<S, SingleValueCallResult<S>>> resultMapperSupplier)
         throws TarantoolClientException {
-        return makeRequestForSingleResult(functionName, arguments, null, argumentsMapperSupplier, resultMapperSupplier)
+        return makeRequestForSingleResult(
+            functionName, arguments, null, argumentsMapperSupplier, resultMapperSupplier)
             .thenApply(CallResult::value);
     }
 
@@ -436,7 +460,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
         throws TarantoolClientException {
-        return callForMultiResult(functionName, arguments, argumentsMapperSupplier,
+        TarantoolRequestSignature signature = TarantoolRequestSignature.create(functionName, arguments, resultClass);
+        return callForMultiResult(functionName, arguments, signature, argumentsMapperSupplier,
             () -> mapperFactoryFactory.getDefaultMultiValueMapper(config.getMessagePackMapper(), resultClass));
     }
 
@@ -450,7 +475,21 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         throws TarantoolClientException {
         Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier = () ->
             mapperFactoryFactory.getMultiValueResultMapper(resultContainerSupplier, valueConverter);
-        return callForMultiResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
+        TarantoolRequestSignature signature = TarantoolRequestSignature.create(
+            functionName, arguments, valueConverter.getClass());
+        return callForMultiResult(functionName, arguments, signature, argumentsMapperSupplier, resultMapperSupplier);
+    }
+
+    private <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
+        String functionName,
+        Collection<?> arguments,
+        TarantoolRequestSignature signature,
+        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
+        throws TarantoolClientException {
+        return makeRequestForMultiResult(
+            functionName, arguments, signature, argumentsMapperSupplier, resultMapperSupplier)
+            .thenApply(CallResult::value);
     }
 
     @Override
@@ -497,9 +536,14 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
                 builder.withArguments(arguments);
             }
             builder.withSignature(requestSignature);
-            MessagePackValueMapper resultMapper = resultMapperSupplier.get();
+            MessagePackObjectMapper argumentsMapper = requestSignature != null ?
+                argumentsMapperCache.computeIfAbsent(requestSignature, s -> argumentsMapperSupplier.get()) :
+                argumentsMapperSupplier.get();
+            MessagePackValueMapper resultMapper = requestSignature != null ?
+                resultMapperCache.computeIfAbsent(requestSignature, s -> resultMapperSupplier.get()) :
+                resultMapperSupplier.get();
 
-            TarantoolCallRequest request = builder.build(argumentsMapperSupplier.get());
+            TarantoolCallRequest request = builder.build(argumentsMapper);
             return connectionManager().getConnection()
                 .thenCompose(c -> c.sendRequest(request).getFuture())
                 .thenApply(resultMapper::fromValue);
@@ -539,11 +583,16 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
         Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
         try {
+            TarantoolRequestSignature signature = TarantoolRequestSignature.create(expression, arguments, List.class);
+            MessagePackObjectMapper argumentsMapper = argumentsMapperCache.computeIfAbsent(
+                signature, s -> argumentsMapperSupplier.get());
+            MessagePackValueMapper resultMapper = resultMapperCache.computeIfAbsent(
+                signature, s -> resultMapperSupplier.get());
             TarantoolEvalRequest request = new TarantoolEvalRequest.Builder()
                 .withExpression(expression)
                 .withArguments(arguments)
-                .build(argumentsMapperSupplier.get());
-            MessagePackValueMapper resultMapper = resultMapperSupplier.get();
+                .withSignature(signature)
+                .build(argumentsMapper);
             return connectionManager().getConnection()
                 .thenCompose(c -> c.sendRequest(request).getFuture())
                 .thenApply(resultMapper::fromValue);
