@@ -32,9 +32,6 @@ public class TarantoolRequestMetadata {
 
     @Override
     public String toString() {
-        Optional<TarantoolRequestSignature> requestSignature = request.getSignature();
-        return !requestSignature.isPresent() ?
-            String.format("request id: %d", getRequestId()) :
-            String.format("request signature: %s", requestSignature.get());
+        return request.toString();
     }
 }
