@@ -56,14 +56,14 @@ public class RequestFutureManager implements AutoCloseable {
      */
     public TarantoolRequestMetadata submitRequest(TarantoolRequest request, int requestTimeout) {
         CompletableFuture<Value> requestFuture = new CompletableFuture<>();
-        TarantoolRequestMetadata requestMetadata = new TarantoolRequestMetadata(requestFuture);
-        long requestId = request.getHeader().getSync();
+        TarantoolRequestMetadata requestMetadata = new TarantoolRequestMetadata(request, requestFuture);
+        long requestId = requestMetadata.getRequestId();
         requestFuture.whenComplete((r, e) -> requestFutures.remove(requestId));
         requestFutures.put(requestId, requestMetadata);
         timeoutScheduler.schedule(() -> {
             if (!requestFuture.isDone()) {
                 requestFuture.completeExceptionally(new TimeoutException(String.format(
-                    "Failed to get response for request id: %d within %d ms", requestId, requestTimeout)));
+                    "Failed to get response for %s within %d ms", requestMetadata, requestTimeout)));
             }
         }, requestTimeout, TimeUnit.MILLISECONDS);
         return requestMetadata;
