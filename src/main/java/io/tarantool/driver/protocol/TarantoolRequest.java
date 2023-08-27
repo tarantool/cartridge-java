@@ -85,6 +85,13 @@ public abstract class TarantoolRequest {
         }
     }
 
+    @Override
+    public String toString() {
+        return !signature.isPresent() ?
+            String.format("request id: %d", header.getSync()) :
+            String.format("request signature: %s", signature.get());
+    }
+
     /**
      * Base class for request builder implementations
      */
