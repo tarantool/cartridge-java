@@ -1,5 +1,7 @@
 package io.tarantool.driver.protocol;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -68,5 +70,22 @@ public class TarantoolRequestSignature {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    /**
+     * Factory method for a typical RPC usage
+     *
+     * @param functionName name of the remote function
+     * @param arguments list of arguments for the remote function
+     * @param resultClass type of the expected result. It's necessary for polymorphic functions, e.g. accepting a
+     * Tarantool space as an argument
+     * @return new request signature
+     */
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments, Class<?> resultClass) {
+        List<Object> components = new ArrayList<>(arguments.size() + 2);
+        components.add(functionName);
+        components.addAll(arguments);
+        components.add(resultClass.getName());
+        return new TarantoolRequestSignature(components.toArray(new Object[]{}));
     }
 }

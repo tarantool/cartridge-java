@@ -18,6 +18,7 @@ import io.tarantool.driver.protocol.Packable;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import io.tarantool.driver.protocol.TarantoolProtocolException;
 import io.tarantool.driver.protocol.TarantoolRequest;
+import io.tarantool.driver.protocol.TarantoolRequestSignature;
 import io.tarantool.driver.protocol.requests.TarantoolCallRequest;
 import io.tarantool.driver.protocol.requests.TarantoolDeleteRequest;
 import io.tarantool.driver.protocol.requests.TarantoolInsertRequest;
@@ -28,7 +29,9 @@ import io.tarantool.driver.protocol.requests.TarantoolUpsertRequest;
 import org.msgpack.value.ArrayValue;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -47,6 +50,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
     private final TarantoolConnectionManager connectionManager;
     private final TarantoolSpaceMetadata spaceMetadata;
     private final TarantoolMetadataOperations metadataOperations;
+    private final Map<String, TarantoolRequestSignature> methodSignatures;
 
     public TarantoolSpace(
         TarantoolClientConfig config,
@@ -58,6 +62,28 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         this.connectionManager = connectionManager;
         this.spaceMetadata = spaceMetadata;
         this.metadataOperations = metadataOperations;
+        this.methodSignatures = new HashMap<>();
+        String spaceIdStr = String.valueOf(this.spaceId);
+        methodSignatures.put(
+            TarantoolDeleteRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolDeleteRequest.class.getName()));
+        methodSignatures.put(
+            TarantoolInsertRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolInsertRequest.class.getName()));
+        methodSignatures.put(
+            TarantoolReplaceRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolReplaceRequest.class.getName()));
+        methodSignatures.put(
+            TarantoolSelectRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolSelectRequest.class.getName()));
+        methodSignatures.put(
+            TarantoolUpdateRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolUpdateRequest.class.getName()));
+        methodSignatures.put(
+            TarantoolUpsertRequest.class.getName(),
+            new TarantoolRequestSignature(spaceIdStr, TarantoolUpsertRequest.class.getName()));
+        methodSignatures.put(
+            "truncate", new TarantoolRequestSignature(spaceIdStr, "truncate", TarantoolCallRequest.class.getName()));
     }
 
     @Override
@@ -74,6 +100,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withSpaceId(spaceId)
                 .withIndexId(indexQuery.getIndexId())
                 .withKeyValues(indexQuery.getKeyValues())
+                .withSignature(methodSignatures.get(TarantoolDeleteRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -101,6 +128,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
             TarantoolInsertRequest request = new TarantoolInsertRequest.Builder()
                 .withSpaceId(spaceId)
                 .withTuple(tuple)
+                .withSignature(methodSignatures.get(TarantoolInsertRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -128,6 +156,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
             TarantoolReplaceRequest request = new TarantoolReplaceRequest.Builder()
                 .withSpaceId(spaceId)
                 .withTuple(tuple)
+                .withSignature(methodSignatures.get(TarantoolReplaceRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -152,6 +181,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withKeyValues(indexQuery.getKeyValues())
                 .withLimit(conditions.getLimit())
                 .withOffset(conditions.getOffset())
+                .withSignature(methodSignatures.get(TarantoolSelectRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -198,6 +228,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withIndexId(indexQuery.getIndexId())
                 .withKeyValues(indexQuery.getKeyValues())
                 .withTupleOperations(fillFieldIndexFromMetadata(operations))
+                .withSignature(methodSignatures.get(TarantoolUpdateRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -225,6 +256,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
                 .withKeyValues(indexQuery.getKeyValues())
                 .withTuple(tuple)
                 .withTupleOperations(fillFieldIndexFromMetadata(operations))
+                .withSignature(methodSignatures.get(TarantoolUpsertRequest.class.getName()))
                 .build(config.getMessagePackMapper());
 
             return sendRequest(request, resultMapperSupplier);
@@ -244,6 +276,7 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
             String spaceName = spaceMetadata.getSpaceName();
             TarantoolCallRequest request = new TarantoolCallRequest.Builder()
                 .withFunctionName("box.space." + spaceName + ":truncate")
+                .withSignature(methodSignatures.get("truncate"))
                 .build(config.getMessagePackMapper());
             return sendRequest(request, resultMapperSupplier)
                 .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
