@@ -8,34 +8,44 @@ import java.util.Objects;
  * Represents a request signature, uniquely defining the operation and the argument types.
  * May include some argument values as well.
  *
+ * The hashcode calculation is not thread safe.
+ *
  * @author Alexey Kuzin
  */
 public class TarantoolRequestSignature {
 
-    private List<Object> components = new LinkedList<>();
+    private List<String> components = new LinkedList<>();
     private int hashCode = 1;
 
     /**
      * Constructor.
      *
-     * @param initialComponents initial signature components, must be hashable
+     * Stores either the component values if the component is of type String or the class names
+     * and calculates the hashcode from the passed initial set of components.
+     *
+     * @param initialComponents initial signature components
      */
     public TarantoolRequestSignature(Object... initialComponents) {
         for (Object component: initialComponents) {
-            components.add(component);
-            hashCode = 31 * hashCode + Objects.hashCode(component);
+            String componentValue = component instanceof String ? (String) component : component.getClass().getName();
+            components.add(componentValue);
+            hashCode = 31 * hashCode + Objects.hashCode(componentValue);
         }
     }
 
     /**
      * Add a signature component to the end of the components list
      *
-     * @param component signature component, must be hashable
+     * Appends either the component value if the component is of type String or the component class
+     * to the components list and re-calculates the hashcode.
+     *
+     * @param component signature component
      * @return this signature object instance
      */
     public TarantoolRequestSignature addComponent(Object component) {
-        components.add(component);
-        hashCode = 31 * hashCode + Objects.hashCode(component);
+        String componentValue = component instanceof String ? (String) component : component.getClass().getName();
+        components.add(componentValue);
+        hashCode = 31 * hashCode + Objects.hashCode(componentValue);
         return this;
     }
 
