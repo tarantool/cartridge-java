@@ -84,7 +84,9 @@ public class TarantoolRequestSignature {
     public static TarantoolRequestSignature create(String functionName, Collection<?> arguments, Class<?> resultClass) {
         List<Object> components = new ArrayList<>(arguments.size() + 2);
         components.add(functionName);
-        components.addAll(arguments);
+        for (Object argument : arguments) {
+            components.add(argument.getClass().getName());
+        }
         components.add(resultClass.getName());
         return new TarantoolRequestSignature(components.toArray(new Object[]{}));
     }

@@ -96,6 +96,10 @@ local function custom_crud_select(space_name)
     return crud.select(space_name)
 end
 
+local function custom_crud_get_one_record(space_name, tuple_id)
+    return crud.get(space_name, {tuple_id}).rows[1]
+end
+
 local function raising_error()
     error("Test error: raising_error() called")
 end
@@ -246,6 +250,7 @@ local function init(opts)
     rawset(_G, 'box_error_non_network_error', box_error_non_network_error)
     rawset(_G, 'crud_error_timeout', crud_error_timeout)
     rawset(_G, 'custom_crud_select', custom_crud_select)
+    rawset(_G, 'custom_crud_get_one_record', custom_crud_get_one_record)
     rawset(_G, 'get_routers_status', get_routers_status)
     rawset(_G, 'init_router_status', init_router_status)
     rawset(_G, 'test_no_such_procedure', test_no_such_procedure)
