@@ -24,10 +24,21 @@ public class DefaultInstantToExtensionValueConverter implements ObjectConverter<
     private static final byte DATETIME_TYPE = 0x04;
 
     private byte[] toBytes(Instant value) {
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
+        long seconds = value.getEpochSecond();
+        Integer nano = value.getNano();
+
+        int size = 8;
+        boolean withOptionalFields = !nano.equals(0);
+        if (withOptionalFields) {
+            size = 16;
+        }
+
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[size]);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        buffer.putLong(value.getEpochSecond());
-        buffer.putInt(value.getNano());
+        buffer.putLong(seconds);
+        if (withOptionalFields) {
+            buffer.putInt(nano);
+        }
         return buffer.array();
     }
 

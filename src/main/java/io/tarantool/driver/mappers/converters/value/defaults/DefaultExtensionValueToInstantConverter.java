@@ -19,9 +19,16 @@ public class DefaultExtensionValueToInstantConverter implements ValueConverter<E
     private static final byte DATETIME_TYPE = 0x04;
 
     private Instant fromBytes(byte[] bytes) {
+        int size = bytes.length;
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        return Instant.ofEpochSecond(buffer.getLong()).plusNanos(buffer.getInt());
+        long seconds = buffer.getLong();
+        int nsec = 0;
+        if (size == 16) {
+            nsec = buffer.getInt();
+        }
+
+        return Instant.ofEpochSecond(seconds, nsec);
     }
 
     @Override

@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import java.nio.charset.StandardCharsets;
@@ -78,6 +80,15 @@ public class ConvertersWithClusterClientIT extends SharedTarantoolContainer {
 
         //then
         Assertions.assertEquals(instant, fields.getInstant("instant_field"));
+    }
+
+    @Test
+    @EnabledIf("io.tarantool.driver.TarantoolUtils#versionWithInstant")
+    public void test_eval_shouldReturnDatetimeWithoutNsec() throws Exception {
+        Instant expected = LocalDateTime.of(1, 1, 1, 0, 0).toInstant(ZoneOffset.UTC);
+        List<?> result = client.eval("return require('datetime').new({year = 1})").get();
+
+        Assertions.assertEquals(expected, result.get(0));
     }
 
     @Test
