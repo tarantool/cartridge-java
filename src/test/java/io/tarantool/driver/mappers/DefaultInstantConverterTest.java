@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
+import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ExtensionValue;
 import org.msgpack.value.ImmutableExtensionValue;
 import org.msgpack.value.ValueFactory;
@@ -30,7 +31,8 @@ class DefaultInstantConverterTest {
         Base64.Encoder encoder = Base64.getEncoder();
         Instant instant = LocalDateTime.parse("2022-10-25T12:03:58").toInstant(ZoneOffset.UTC);
         byte[] result = ((MessageBufferPacker) packer.packValue(converter.toValue(instant))).toByteArray();
-        assertEquals("2ASu0FdjAAAAAAAAAAAAAAAA", encoder.encodeToString(result));
+        assertEquals("1wSu0FdjAAAAAA==", encoder.encodeToString(result));
+        packer.close();
     }
 
     @Test
@@ -39,8 +41,10 @@ class DefaultInstantConverterTest {
         Base64.Decoder base64decoder = Base64.getDecoder();
         Instant instant = LocalDateTime.parse("2022-10-25T12:03:58").toInstant(ZoneOffset.UTC);
         byte[] packed = base64decoder.decode("2ASu0FdjAAAAAAAAAAAAAAAA");
-        ExtensionValue value = MessagePack.newDefaultUnpacker(packed).unpackValue().asExtensionValue();
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(packed);
+        ExtensionValue value = unpacker.unpackValue().asExtensionValue();
         assertEquals(instant, converter.fromValue(value));
+        unpacker.close();
     }
 
     @Test
