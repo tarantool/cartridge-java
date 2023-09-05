@@ -24,7 +24,6 @@ import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactory;
 import io.tarantool.driver.mappers.TarantoolTupleResultMapperFactoryImpl;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
-import io.tarantool.driver.mappers.factories.ResultMapperFactoryFactoryImpl;
 import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import org.junit.jupiter.api.Test;
 
@@ -42,13 +41,13 @@ public class ProxyOperationBuildersTest {
     private static final ClusterTarantoolTupleClient client = new ClusterTarantoolTupleClient();
     private final MessagePackMapper defaultMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
+    private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
     TarantoolTupleResultMapperFactory tarantoolTupleResultMapperFactory =
         TarantoolTupleResultMapperFactoryImpl.getInstance();
     private final
     CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
         defaultResultMapper = tarantoolTupleResultMapperFactory
         .withSingleValueArrayToTarantoolTupleResultMapper(defaultMapper, null);
-    private final TarantoolTupleFactory factory = new DefaultTarantoolTupleFactory(defaultMapper);
 
     @Test
     public void deleteOperationBuilderTest() {
@@ -221,6 +220,7 @@ public class ProxyOperationBuildersTest {
                 .withOptions(ProxySelectOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withBatchSize(123456)
+                    .withMode("write")
                 )
                 .build();
 
@@ -228,6 +228,7 @@ public class ProxyOperationBuildersTest {
         options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
         options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 123456);
         options.put(CRUDSelectOptions.SELECT_LIMIT, 100L);
+        options.put(CRUDSelectOptions.MODE, "write");
 
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());

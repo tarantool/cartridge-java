@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### API changes
+- Add "mode" option for crud select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
+
 ### Bugfixes
 - Fix Instant converter to parse 8 bytes datetime ([#408](https://github.com/tarantool/cartridge-java/issues/408))
 
