@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.Mode;
+
 import java.util.Optional;
 
 /**
@@ -17,12 +19,8 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      * @param mode mode for operations (select, get, count).
      * @return this options instance.
      */
-    default T withMode(String mode) {
-        if (!mode.equals("read") && !mode.equals("write")) {
-            throw new IllegalArgumentException("Mode should be \"read\" or \"write\"");
-        }
-
-        addOption(MODE, mode);
+    default T withMode(Mode mode) {
+        addOption(MODE, mode.value());
         return self();
     }
 
@@ -31,8 +29,8 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      *
      * @return mode.
      */
-    default Optional<String> getMode() {
-        return getOption(MODE, String.class);
+    default Optional<Mode> getMode() {
+        return getOption(MODE, Mode.class);
     }
 
 }

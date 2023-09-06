@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.enums.crud.Mode;
 import io.tarantool.driver.api.space.options.proxy.ProxySelectOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -95,7 +96,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
     }
 
     @Test
-    public void withTimeout() throws ExecutionException, InterruptedException {
+    public void withTimeoutTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
             client.space(TEST_SPACE_NAME);
 
@@ -154,7 +155,7 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
     }
 
     @Test
-    public void withMode() throws ExecutionException, InterruptedException {
+    public void withModeTest() throws ExecutionException, InterruptedException {
         TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> operations =
             client.space(TEST_SPACE_NAME);
 
@@ -167,8 +168,8 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         crudSelectOpts = client.eval("return crud_select_opts").get();
         assertNull(((HashMap<?, ?>) crudSelectOpts.get(0)).get("mode"));
 
-        operations.select(Conditions.any(), ProxySelectOptions.create().withMode("write")).get();
+        operations.select(Conditions.any(), ProxySelectOptions.create().withMode(Mode.WRITE)).get();
         crudSelectOpts = client.eval("return crud_select_opts").get();
-        assertEquals("write", ((HashMap<?, ?>) crudSelectOpts.get(0)).get("mode"));
+        assertEquals(Mode.WRITE.value(), ((HashMap<?, ?>) crudSelectOpts.get(0)).get("mode"));
     }
 }

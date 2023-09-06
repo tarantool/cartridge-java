@@ -3,6 +3,7 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.space.options.enums.crud.Mode;
 import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
@@ -220,7 +221,7 @@ public class ProxyOperationBuildersTest {
                 .withOptions(ProxySelectOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withBatchSize(123456)
-                    .withMode("write")
+                    .withMode(Mode.WRITE)
                 )
                 .build();
 
@@ -228,7 +229,7 @@ public class ProxyOperationBuildersTest {
         options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
         options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 123456);
         options.put(CRUDSelectOptions.SELECT_LIMIT, 100L);
-        options.put(CRUDSelectOptions.MODE, "write");
+        options.put(CRUDSelectOptions.MODE, Mode.WRITE.value());
 
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());
