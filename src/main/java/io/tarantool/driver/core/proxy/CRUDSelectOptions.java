@@ -20,6 +20,7 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
     public static final String SELECT_AFTER = "after";
     public static final String SELECT_BATCH_SIZE = "batch_size";
     public static final String FIELDS = "fields";
+    public static final String MODE = "mode";
 
     private <B extends AbstractBuilder<B>> CRUDSelectOptions(AbstractBuilder<B> builder) {
         super(builder);
@@ -28,6 +29,7 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
         addOption(SELECT_AFTER, builder.after);
         addOption(SELECT_BATCH_SIZE, builder.selectBatchSize);
         addOption(FIELDS, builder.fields);
+        addOption(MODE, builder.mode);
     }
 
     /**
@@ -41,6 +43,7 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
         private Optional<Packable> after = Optional.empty();
         private Optional<Integer> selectBatchSize = Optional.empty();
         private Optional<List> fields = Optional.empty();
+        private Optional<String> mode = Optional.empty();
 
         public B withSelectLimit(Optional<Long> selectLimit) {
             this.selectLimit = selectLimit;
@@ -59,6 +62,11 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
 
         public B withFields(Optional<List> fields) {
             this.fields = fields;
+            return self();
+        }
+
+        public B withMode(Optional<String> mode) {
+            this.mode = mode;
             return self();
         }
     }
