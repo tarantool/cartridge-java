@@ -17,6 +17,7 @@ import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.options.UpdateOptions;
 import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
+import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
@@ -144,7 +145,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     @Override
     public CompletableFuture<R> insertMany(Collection<T> tuples) {
         return insertMany(tuples, rowsMetadataTupleResultMapper(), ProxyInsertManyOptions.create()
-            .withStopOnError(true)
+            .withStopOnError(StopOnError.TRUE)
             .withRollbackOnError(RollbackOnError.TRUE)
         );
     }
@@ -210,7 +211,7 @@ public abstract class ProxyTarantoolSpace<T extends Packable, R extends Collecti
     @Override
     public CompletableFuture<R> replaceMany(Collection<T> tuples) throws TarantoolClientException {
         return replaceMany(tuples, rowsMetadataTupleResultMapper(), ProxyReplaceManyOptions.create()
-            .withStopOnError(true)
+            .withStopOnError(StopOnError.TRUE)
             .withRollbackOnError(RollbackOnError.TRUE)
         );
     }
