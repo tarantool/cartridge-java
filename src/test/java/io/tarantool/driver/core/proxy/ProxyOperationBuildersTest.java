@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.options.enums.crud.Mode;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
+import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertOptions;
@@ -124,7 +125,7 @@ public class ProxyOperationBuildersTest {
                 .withOptions(ProxyInsertManyOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withRollbackOnError(RollbackOnError.TRUE)
-                    .withStopOnError(false)
+                    .withStopOnError(StopOnError.FALSE)
                 )
                 .build();
 
@@ -184,7 +185,7 @@ public class ProxyOperationBuildersTest {
                 .withOptions(ProxyReplaceManyOptions.create()
                     .withTimeout(client.getConfig().getRequestTimeout())
                     .withRollbackOnError(RollbackOnError.TRUE)
-                    .withStopOnError(false)
+                    .withStopOnError(StopOnError.FALSE)
                 )
                 .build();
 

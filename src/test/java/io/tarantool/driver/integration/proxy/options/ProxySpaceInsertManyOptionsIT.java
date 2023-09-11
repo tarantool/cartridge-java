@@ -7,6 +7,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertManyOptions;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
+import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -36,16 +37,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
 
-    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
     private static final DefaultMessagePackMapperFactory mapperFactory = DefaultMessagePackMapperFactory.getInstance();
     private static final TarantoolTupleFactory tupleFactory =
         new DefaultTarantoolTupleFactory(mapperFactory.defaultComplexTypesMapper());
-
-    public static String USER_NAME;
-    public static String PASSWORD;
-
     private static final String TEST_SPACE_NAME = "test__profile";
     private static final String PK_FIELD_NAME = "profile_id";
+    public static String USER_NAME;
+    public static String PASSWORD;
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> client;
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -67,13 +66,13 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
         client = new ProxyTarantoolTupleClient(clusterClient);
     }
 
+    private static void truncateSpace(String spaceName) {
+        client.space(spaceName).truncate().join();
+    }
+
     @BeforeEach
     public void truncateSpace() {
         truncateSpace(TEST_SPACE_NAME);
-    }
-
-    private static void truncateSpace(String spaceName) {
-        client.space(spaceName).truncate().join();
     }
 
     @Test
@@ -102,7 +101,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
             tarantoolTuples,
             ProxyInsertManyOptions.create()
                 .withRollbackOnError(RollbackOnError.FALSE)
-                .withStopOnError(false)
+                .withStopOnError(StopOnError.FALSE)
         ).get();
         crudInsertManyOpts = client.eval("return crud_insert_many_opts").get();
         assertEquals(false, ((HashMap) crudInsertManyOpts.get(0)).get("rollback_on_error"));

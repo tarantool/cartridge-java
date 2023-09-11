@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.ReplaceManyOptions;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
+import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
@@ -94,7 +95,7 @@ public class ProxySpaceReplaceManyOptionsIT extends SharedCartridgeContainer {
             tarantoolTuples,
             ProxyReplaceManyOptions.create()
                 .withRollbackOnError(RollbackOnError.FALSE)
-                .withStopOnError(false)
+                .withStopOnError(StopOnError.FALSE)
         ).get();
         crudReplaceManyOpts = client.eval("return crud_replace_many_opts").get();
         assertEquals(false, ((HashMap) crudReplaceManyOpts.get(0)).get("rollback_on_error"));
