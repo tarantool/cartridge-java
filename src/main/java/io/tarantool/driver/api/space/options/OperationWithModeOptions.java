@@ -10,7 +10,6 @@ import java.util.Optional;
  * @author Belonogov Nikolay
  */
 public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>> extends Options, Self<T> {
-    String MODE = "mode";
 
     /**
      * Specifies the mode for operations (select, count, get) on a specific node type (mode == "write" - master, mode
@@ -20,7 +19,7 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      * @return this options instance.
      */
     default T withMode(Mode mode) {
-        addOption(MODE, mode.value());
+        addOption(Mode.NAME, mode.value());
         return self();
     }
 
@@ -30,7 +29,7 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      * @return mode.
      */
     default Optional<Mode> getMode() {
-        return getOption(MODE, Mode.class);
+        return getOption(Mode.NAME, Mode.class);
     }
 
 }
