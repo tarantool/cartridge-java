@@ -10,6 +10,7 @@ public enum Mode {
     WRITE("write"),
     READ("read");
 
+    public static final String NAME = "mode";
     private final String value;
 
     Mode(String value) {
