@@ -6,8 +6,8 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertManyOptions;
+import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyInsertManyOptions;
-import io.tarantool.driver.api.space.options.proxy.ProxyReplaceManyOptions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -101,7 +101,7 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
         profileSpace.insertMany(
             tarantoolTuples,
             ProxyInsertManyOptions.create()
-                .withRollbackOnError(false)
+                .withRollbackOnError(RollbackOnError.FALSE)
                 .withStopOnError(false)
         ).get();
         crudInsertManyOpts = client.eval("return crud_insert_many_opts").get();

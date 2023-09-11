@@ -8,14 +8,7 @@ import java.util.Optional;
  * @author Alexey Kuzin
  */
 public interface ReplaceManyOptions<T extends ReplaceManyOptions<T>>
-    extends OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T> {
-    /**
-     * Return whether all changes should not be saved if any tuple replace
-     * was unsuccesful.
-     *
-     * @return true, if the operation should rollback on error
-     */
-    Optional<Boolean> getRollbackOnError();
+    extends OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T>, OperationWithRollbackOnErrorOptions<T> {
 
     /**
      * Return whether the operation should be interrupted if any tuple replace
