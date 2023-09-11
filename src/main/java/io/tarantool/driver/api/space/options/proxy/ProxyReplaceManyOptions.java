@@ -13,7 +13,6 @@ import java.util.Optional;
 public final class ProxyReplaceManyOptions extends BaseOptions
     implements ReplaceManyOptions<ProxyReplaceManyOptions> {
 
-    public static final String ROLLBACK_ON_ERROR = "rollback_on_error";
     public static final String STOP_ON_ERROR = "stop_on_error";
 
     private ProxyReplaceManyOptions() {
@@ -26,18 +25,6 @@ public final class ProxyReplaceManyOptions extends BaseOptions
      */
     public static ProxyReplaceManyOptions create() {
         return new ProxyReplaceManyOptions();
-    }
-
-    /**
-     * Specifies whether to not save any changes in the space if any tuple replace operation
-     * is unsuccesful. Default value is <code>true</code>.
-     *
-     * @param rollbackOnError should rollback batch on error
-     * @return this options instance
-     */
-    public ProxyReplaceManyOptions withRollbackOnError(boolean rollbackOnError) {
-        addOption(ROLLBACK_ON_ERROR, rollbackOnError);
-        return self();
     }
 
     /**
@@ -55,11 +42,6 @@ public final class ProxyReplaceManyOptions extends BaseOptions
     @Override
     public ProxyReplaceManyOptions self() {
         return this;
-    }
-
-    @Override
-    public Optional<Boolean> getRollbackOnError() {
-        return getOption(ROLLBACK_ON_ERROR, Boolean.class);
     }
 
     @Override
