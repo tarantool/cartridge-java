@@ -1,5 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 import io.tarantool.driver.protocol.Packable;
 
 import java.util.List;
@@ -16,20 +17,14 @@ import java.util.Optional;
  */
 final class CRUDSelectOptions extends CRUDBucketIdOptions {
 
-    public static final String SELECT_LIMIT = "first";
-    public static final String SELECT_AFTER = "after";
-    public static final String SELECT_BATCH_SIZE = "batch_size";
-    public static final String FIELDS = "fields";
-    public static final String MODE = "mode";
-
     private <B extends AbstractBuilder<B>> CRUDSelectOptions(AbstractBuilder<B> builder) {
         super(builder);
 
-        addOption(SELECT_LIMIT, builder.selectLimit);
-        addOption(SELECT_AFTER, builder.after);
-        addOption(SELECT_BATCH_SIZE, builder.selectBatchSize);
-        addOption(FIELDS, builder.fields);
-        addOption(MODE, builder.mode);
+        addOption(ProxyOption.FIRST, builder.first);
+        addOption(ProxyOption.AFTER, builder.after);
+        addOption(ProxyOption.BATCH_SIZE, builder.batchSize);
+        addOption(ProxyOption.FIELDS, builder.fields);
+        addOption(ProxyOption.MODE, builder.mode);
     }
 
     /**
@@ -39,24 +34,24 @@ final class CRUDSelectOptions extends CRUDBucketIdOptions {
      */
     protected abstract static class AbstractBuilder<B extends AbstractBuilder<B>>
         extends CRUDBucketIdOptions.AbstractBuilder<CRUDSelectOptions, B> {
-        private Optional<Long> selectLimit = Optional.empty();
+        private Optional<Long> first = Optional.empty();
         private Optional<Packable> after = Optional.empty();
-        private Optional<Integer> selectBatchSize = Optional.empty();
+        private Optional<Integer> batchSize = Optional.empty();
         private Optional<List> fields = Optional.empty();
         private Optional<String> mode = Optional.empty();
 
-        public B withSelectLimit(Optional<Long> selectLimit) {
-            this.selectLimit = selectLimit;
+        public B withSelectLimit(Optional<Long> first) {
+            this.first = first;
             return self();
         }
 
-        public B withSelectBatchSize(Optional<Integer> selectBatchSize) {
-            this.selectBatchSize = selectBatchSize;
+        public B withSelectBatchSize(Optional<Integer> batchSize) {
+            this.batchSize = batchSize;
             return self();
         }
 
-        public B withSelectAfter(Optional<Packable> startTuple) {
-            this.after = startTuple;
+        public B withSelectAfter(Optional<Packable> after) {
+            this.after = after;
             return self();
         }
 

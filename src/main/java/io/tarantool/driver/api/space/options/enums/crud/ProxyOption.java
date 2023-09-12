@@ -19,7 +19,11 @@ public enum ProxyOption {
 
     BUCKET_ID("bucket_id"),
 
-    BATCH_SIZE("batch_size");
+    BATCH_SIZE("batch_size"),
+
+    AFTER("after"),
+
+    FIRST("first");
 
     private final String name;
 

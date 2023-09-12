@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +17,21 @@ import java.util.Optional;
 abstract class CRUDAbstractOperationOptions {
 
     private final Map<String, Object> resultMap = new HashMap<>();
+
+    protected void addOption(ProxyOption option, Optional<?> value) {
+        if (value.isPresent()) {
+            resultMap.put(option.toString(), value.get());
+        }
+    }
+
+    /**
+     * Return serializable options representation.
+     *
+     * @return a map
+     */
+    public Map<String, Object> asMap() {
+        return resultMap;
+    }
 
     /**
      * Inheritable Builder for cluster proxy operation options.
@@ -37,20 +54,5 @@ abstract class CRUDAbstractOperationOptions {
         abstract B self();
 
         public abstract O build();
-    }
-
-    protected void addOption(String option, Optional<?> value) {
-        if (value.isPresent()) {
-            resultMap.put(option, value.get());
-        }
-    }
-
-    /**
-     * Return serializable options representation.
-     *
-     * @return a map
-     */
-    public Map<String, Object> asMap() {
-        return resultMap;
     }
 }

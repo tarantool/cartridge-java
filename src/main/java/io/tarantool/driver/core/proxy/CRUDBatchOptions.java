@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.Optional;
 
 /**
@@ -11,14 +13,11 @@ import java.util.Optional;
  */
 final class CRUDBatchOptions extends CRUDReturnOptions {
 
-    public static final String BATCH_STOP_ON_ERROR = "stop_on_error";
-    public static final String BATCH_ROLLBACK_ON_ERROR = "rollback_on_error";
-
     private <T extends AbstractBuilder<T>>
     CRUDBatchOptions(AbstractBuilder<T> builder) {
         super(builder);
-        addOption(BATCH_STOP_ON_ERROR, builder.stopOnError);
-        addOption(BATCH_ROLLBACK_ON_ERROR, builder.rollbackOnError);
+        addOption(ProxyOption.STOP_ON_ERROR, builder.stopOnError);
+        addOption(ProxyOption.ROLLBACK_ON_ERROR, builder.rollbackOnError);
     }
 
     protected abstract static class AbstractBuilder<B extends AbstractBuilder<B>>
