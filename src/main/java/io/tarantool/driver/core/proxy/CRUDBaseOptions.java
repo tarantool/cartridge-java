@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.Optional;
 
 /**
@@ -12,11 +14,9 @@ import java.util.Optional;
  */
 class CRUDBaseOptions extends CRUDAbstractOperationOptions {
 
-    public static final String TIMEOUT = "timeout";
-
     protected <O extends CRUDBaseOptions, T extends AbstractBuilder<O, T>>
     CRUDBaseOptions(AbstractBuilder<O, T> builder) {
-        addOption(TIMEOUT, builder.timeout);
+        addOption(ProxyOption.TIMEOUT, builder.timeout);
     }
 
     /**

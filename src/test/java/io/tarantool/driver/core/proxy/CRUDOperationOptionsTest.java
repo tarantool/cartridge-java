@@ -1,5 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.MessagePackMapper;
@@ -39,10 +40,10 @@ public class CRUDOperationOptionsTest {
 
         assertEquals(4, options.asMap().size());
 
-        assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
-        assertEquals(50L, options.asMap().get(CRUDSelectOptions.SELECT_LIMIT));
-        assertEquals(10, options.asMap().get(CRUDSelectOptions.SELECT_BATCH_SIZE));
-        assertEquals(tuple, options.asMap().get(CRUDSelectOptions.SELECT_AFTER));
+        assertEquals(1000, options.asMap().get(ProxyOption.TIMEOUT.toString()));
+        assertEquals(50L, options.asMap().get(ProxyOption.FIRST.toString()));
+        assertEquals(10, options.asMap().get(ProxyOption.BATCH_SIZE.toString()));
+        assertEquals(tuple, options.asMap().get(ProxyOption.AFTER.toString()));
     }
 
     @Test
@@ -52,7 +53,7 @@ public class CRUDOperationOptionsTest {
             .build();
 
         assertEquals(1, options.asMap().size());
-        assertEquals(1000, options.asMap().get(CRUDBaseOptions.TIMEOUT));
+        assertEquals(1000, options.asMap().get(ProxyOption.TIMEOUT.toString()));
     }
 
     @Test
@@ -63,7 +64,7 @@ public class CRUDOperationOptionsTest {
             .build();
 
         assertEquals(2, options.asMap().size());
-        assertEquals(false, options.asMap().get(CRUDBatchOptions.BATCH_STOP_ON_ERROR));
-        assertEquals(true, options.asMap().get(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR));
+        assertEquals(false, options.asMap().get(ProxyOption.STOP_ON_ERROR.toString()));
+        assertEquals(true, options.asMap().get(ProxyOption.ROLLBACK_ON_ERROR.toString()));
     }
 }

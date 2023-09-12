@@ -4,6 +4,7 @@ import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.options.enums.crud.Mode;
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
 import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 import io.tarantool.driver.api.space.options.proxy.ProxyDeleteOptions;
@@ -71,7 +72,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         assertEquals(client, deleteProxyOperation.getClient());
         assertEquals("function1", deleteProxyOperation.getFunctionName());
@@ -99,7 +100,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         assertEquals(client, insertOperation.getClient());
         assertEquals("function1", insertOperation.getFunctionName());
@@ -128,11 +129,10 @@ public class ProxyOperationBuildersTest {
                     .withStopOnError(StopOnError.FALSE)
                 )
                 .build();
-
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
-        options.put(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR, true);
-        options.put(CRUDBatchOptions.BATCH_STOP_ON_ERROR, false);
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.ROLLBACK_ON_ERROR.toString(), true);
+        options.put(ProxyOption.STOP_ON_ERROR.toString(), false);
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -159,7 +159,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -190,9 +190,9 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
-        options.put(CRUDBatchOptions.BATCH_ROLLBACK_ON_ERROR, true);
-        options.put(CRUDBatchOptions.BATCH_STOP_ON_ERROR, false);
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.ROLLBACK_ON_ERROR.toString(), true);
+        options.put(ProxyOption.STOP_ON_ERROR.toString(), false);
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -228,10 +228,10 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
-        options.put(CRUDSelectOptions.SELECT_BATCH_SIZE, 123456);
-        options.put(CRUDSelectOptions.SELECT_LIMIT, 100L);
-        options.put(CRUDSelectOptions.MODE, Mode.WRITE.value());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.BATCH_SIZE.toString(), 123456);
+        options.put(ProxyOption.FIRST.toString(), 100L);
+        options.put(ProxyOption.MODE.toString(), Mode.WRITE.value());
 
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());
@@ -261,9 +261,8 @@ public class ProxyOperationBuildersTest {
                     .withTimeout(client.getConfig().getRequestTimeout())
                 )
                 .build();
-
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -300,7 +299,7 @@ public class ProxyOperationBuildersTest {
                 .build();
 
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
@@ -323,9 +322,9 @@ public class ProxyOperationBuildersTest {
                 )
                 .build();
 
-        // when prepare HashMap with options
+        // when prepare Map with options
         Map<String, Object> options = new HashMap<>();
-        options.put(CRUDBaseOptions.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
 
         // then data is prepared check that is equals that we submitted to the builder
         assertEquals(client, truncateOperation.getClient());

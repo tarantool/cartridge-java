@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,12 +16,10 @@ import java.util.Optional;
  */
 class CRUDReturnOptions extends CRUDBaseOptions {
 
-    public static final String FIELDS = "fields";
-
     protected <O extends CRUDReturnOptions, B extends AbstractBuilder<O, B>>
     CRUDReturnOptions(CRUDReturnOptions.AbstractBuilder<O, B> builder) {
         super(builder);
-        addOption(FIELDS, builder.fields);
+        addOption(ProxyOption.FIELDS, builder.fields);
     }
 
     protected abstract static

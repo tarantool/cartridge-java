@@ -1,5 +1,7 @@
 package io.tarantool.driver.core.proxy;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,12 +15,10 @@ import java.util.Optional;
  */
 class CRUDDeleteOptions extends CRUDBucketIdOptions {
 
-    public static final String FIELDS = "fields";
-
     protected <O extends CRUDDeleteOptions, B extends AbstractBuilder<O, B>>
     CRUDDeleteOptions(CRUDDeleteOptions.AbstractBuilder<O, B> builder) {
         super(builder);
-        addOption(FIELDS, builder.fields);
+        addOption(ProxyOption.FIELDS, builder.fields);
     }
 
     protected abstract static
