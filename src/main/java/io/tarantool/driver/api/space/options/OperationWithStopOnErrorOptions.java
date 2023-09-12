@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
 
 import java.util.Optional;
@@ -20,7 +21,7 @@ public interface OperationWithStopOnErrorOptions<T extends OperationWithStopOnEr
      * @return this options instance
      */
     default T withStopOnError(StopOnError stopOnError) {
-        addOption(StopOnError.NAME, stopOnError.value());
+        addOption(ProxyOption.STOP_ON_ERROR, stopOnError.value());
         return self();
     }
 
@@ -31,6 +32,6 @@ public interface OperationWithStopOnErrorOptions<T extends OperationWithStopOnEr
      * @return true, if the operation should stop on error
      */
     default Optional<Boolean> getStopOnError() {
-        return getOption(StopOnError.NAME, Boolean.class);
+        return getOption(ProxyOption.STOP_ON_ERROR, Boolean.class);
     }
 }

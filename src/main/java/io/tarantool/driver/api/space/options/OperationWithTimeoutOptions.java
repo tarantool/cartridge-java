@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.Optional;
 
 /**
@@ -8,8 +10,6 @@ import java.util.Optional;
  * @author Alexey Kuzin
  */
 public interface OperationWithTimeoutOptions<T extends OperationWithTimeoutOptions<T>> extends Options, Self<T> {
-
-    String TIMEOUT = "timeout";
 
     /**
      * Specifies timeout for waiting for a server response for the operation.
@@ -22,7 +22,7 @@ public interface OperationWithTimeoutOptions<T extends OperationWithTimeoutOptio
         if (timeout <= 0) {
             throw new IllegalArgumentException("Timeout should be greater than 0");
         }
-        addOption(TIMEOUT, timeout);
+        addOption(ProxyOption.TIMEOUT, timeout);
         return self();
     }
 
@@ -32,6 +32,6 @@ public interface OperationWithTimeoutOptions<T extends OperationWithTimeoutOptio
      * @return timeout, in milliseconds.
      */
     default Optional<Integer> getTimeout() {
-        return getOption(TIMEOUT, Integer.class);
+        return getOption(ProxyOption.TIMEOUT, Integer.class);
     }
 }

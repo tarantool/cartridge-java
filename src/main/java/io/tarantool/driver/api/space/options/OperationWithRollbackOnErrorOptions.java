@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 import io.tarantool.driver.api.space.options.enums.crud.RollbackOnError;
 
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
  */
 public interface OperationWithRollbackOnErrorOptions<T extends OperationWithRollbackOnErrorOptions<T>>
     extends Options, Self<T> {
+
     /**
      * Specifies whether to not save any changes in the space if any tuple replace operation
      * is unsuccesful. Default value is <code>true</code>.
@@ -20,7 +22,7 @@ public interface OperationWithRollbackOnErrorOptions<T extends OperationWithRoll
      * @return this options instance
      */
     default T withRollbackOnError(RollbackOnError rollbackOnError) {
-        addOption(RollbackOnError.NAME, rollbackOnError.value());
+        addOption(ProxyOption.ROLLBACK_ON_ERROR, rollbackOnError.value());
         return self();
     }
 
@@ -31,6 +33,6 @@ public interface OperationWithRollbackOnErrorOptions<T extends OperationWithRoll
      * @return true, if the operation should rollback on error
      */
     default Optional<Boolean> getRollbackOnError() {
-        return getOption(RollbackOnError.NAME, Boolean.class);
+        return getOption(ProxyOption.ROLLBACK_ON_ERROR, Boolean.class);
     }
 }

@@ -12,7 +12,6 @@ public enum StopOnError {
 
     FALSE(false);
 
-    public static final String NAME = "stop_on_error";
     private final boolean value;
 
     StopOnError(boolean value) {
