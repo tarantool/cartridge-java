@@ -1,6 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
 import io.tarantool.driver.api.space.options.enums.crud.Mode;
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
 
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      * @return this options instance.
      */
     default T withMode(Mode mode) {
-        addOption(Mode.NAME, mode.value());
+        addOption(ProxyOption.MODE, mode.value());
         return self();
     }
 
@@ -29,7 +30,7 @@ public interface OperationWithModeOptions<T extends OperationWithModeOptions<T>>
      * @return mode.
      */
     default Optional<Mode> getMode() {
-        return getOption(Mode.NAME, Mode.class);
+        return getOption(ProxyOption.MODE, Mode.class);
     }
 
 }

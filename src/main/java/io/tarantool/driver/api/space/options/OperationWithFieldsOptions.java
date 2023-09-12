@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,8 +13,6 @@ import java.util.Optional;
 public interface OperationWithFieldsOptions<T extends OperationWithFieldsOptions<T>>
     extends Options, Self<T> {
 
-    String FIELDS = "fields";
-
     /**
      * Specifies list of fields names for getting only a subset of fields.
      * By default, all fields are returned.
@@ -21,7 +21,7 @@ public interface OperationWithFieldsOptions<T extends OperationWithFieldsOptions
      * @return this options instance
      */
     default T withFields(List<String> fields) {
-        addOption(FIELDS, fields);
+        addOption(ProxyOption.FIELDS, fields);
         return self();
     }
 
@@ -31,6 +31,6 @@ public interface OperationWithFieldsOptions<T extends OperationWithFieldsOptions
      * @return list of fields string names
      */
     default Optional<List> getFields() {
-        return getOption(FIELDS, List.class);
+        return getOption(ProxyOption.FIELDS, List.class);
     }
 }

@@ -1,7 +1,8 @@
 package io.tarantool.driver.api.space.options;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
+import java.util.EnumMap;
 import java.util.Optional;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Optional;
  */
 public abstract class BaseOptions implements Options {
 
-    private final Map<String, Object> resultMap = new HashMap<>();
+    private final EnumMap<ProxyOption, Object> resultMap = new EnumMap<>(ProxyOption.class);
 
     /**
      * Add an option value.
@@ -20,7 +21,7 @@ public abstract class BaseOptions implements Options {
      * @param option option name
      * @param value  option value
      */
-    public void addOption(String option, Object value) {
+    public void addOption(ProxyOption option, Object value) {
         resultMap.put(option, value);
     }
 
@@ -31,7 +32,7 @@ public abstract class BaseOptions implements Options {
      * @param optionClass option value type
      */
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> getOption(String option, Class<T> optionClass) {
+    public <T> Optional<T> getOption(ProxyOption option, Class<T> optionClass) {
         return Optional.ofNullable((T) resultMap.get(option));
     }
 }

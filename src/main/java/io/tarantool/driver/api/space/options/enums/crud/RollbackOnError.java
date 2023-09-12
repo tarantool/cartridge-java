@@ -12,7 +12,6 @@ public enum RollbackOnError {
 
     FALSE(false);
 
-    public static final String NAME = "rollback_on_error";
     private final boolean value;
 
     RollbackOnError(boolean value) {

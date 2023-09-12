@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.Optional;
 
 /**
@@ -9,8 +11,6 @@ import java.util.Optional;
  */
 public interface OperationWithBucketIdOptions<T extends OperationWithBucketIdOptions<T>>
     extends Options, Self<T> {
-
-    String BUCKET_ID = "bucket_id";
 
     /**
      * Specifies bucket id for an operation to perform it on storage with this bucket. It may be useful
@@ -26,7 +26,7 @@ public interface OperationWithBucketIdOptions<T extends OperationWithBucketIdOpt
      * @see <a href="https://github.com/tarantool/crud">crud</a>
      */
     default T withBucketId(Integer bucketId) {
-        addOption(BUCKET_ID, bucketId);
+        addOption(ProxyOption.BUCKET_ID, bucketId);
         return self();
     }
 
@@ -36,6 +36,6 @@ public interface OperationWithBucketIdOptions<T extends OperationWithBucketIdOpt
      * @return bucket id
      */
     default Optional<Integer> getBucketId() {
-        return getOption(BUCKET_ID, Integer.class);
+        return getOption(ProxyOption.BUCKET_ID, Integer.class);
     }
 }

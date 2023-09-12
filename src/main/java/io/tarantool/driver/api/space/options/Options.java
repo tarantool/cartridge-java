@@ -1,5 +1,7 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+
 import java.util.Optional;
 
 /**
@@ -16,7 +18,7 @@ public interface Options {
      * @param option name of option
      * @param value  value of option
      */
-    void addOption(String option, Object value);
+    void addOption(ProxyOption option, Object value);
 
     /**
      * Return option value by name.
@@ -26,5 +28,5 @@ public interface Options {
      * @param <T>         option value type
      * @return option value
      */
-    <T> Optional<T> getOption(String option, Class<T> optionClass);
+    <T> Optional<T> getOption(ProxyOption option, Class<T> optionClass);
 }
