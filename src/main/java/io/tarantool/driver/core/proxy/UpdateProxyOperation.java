@@ -33,7 +33,7 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T>
-        extends GenericOperationsBuilder<T, UpdateOptions, Builder<T>> {
+        extends GenericOperationsBuilder<T, UpdateOptions<?>, Builder<T>> {
         private TarantoolIndexQuery indexQuery;
         private TupleOperations operations;
 
@@ -56,16 +56,11 @@ public final class UpdateProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public UpdateProxyOperation<T> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDUpdateOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .build();
 
             List<?> arguments = Arrays.asList(spaceName,
                 indexQuery.getKeyValues(),
                 operations.asProxyOperationList(),
-                requestOptions.asMap());
+                options.asMap());
 
             return new UpdateProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

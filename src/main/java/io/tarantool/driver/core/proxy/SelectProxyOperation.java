@@ -5,12 +5,15 @@ import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
+import io.tarantool.driver.api.space.options.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.interfaces.SelectOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.protocol.Packable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,7 +38,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T>
-        extends GenericOperationsBuilder<T, SelectOptions, Builder<T>> {
+        extends GenericOperationsBuilder<T, SelectOptions<?>, Builder<T>> {
         private final TarantoolMetadataOperations operations;
         private final TarantoolSpaceMetadata metadata;
         private Conditions conditions;
@@ -56,19 +59,23 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public SelectProxyOperation<T> build() {
-            CRUDSelectOptions.Builder requestOptions = new CRUDSelectOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withSelectBatchSize(options.getBatchSize())
-                .withSelectLimit(Optional.of(conditions.getLimit()))
-                .withSelectAfter(Optional.ofNullable(conditions.getStartTuple()))
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .withMode(options.getMode());
+
+            Optional<Long> first = options.getFirst();
+            if (first.isPresent()) {
+                options.addOption(ProxyOption.FIRST, Math.min(conditions.getLimit(), first.get()));
+            } else {
+                options.addOption(ProxyOption.FIRST, conditions.getLimit());
+            }
+
+            Packable tuple = conditions.getStartTuple();
+            if (Objects.nonNull(tuple)) {
+                options.addOption(ProxyOption.AFTER, conditions.getStartTuple());
+            }
 
             List<?> arguments = Arrays.asList(
                 spaceName,
                 conditions.toProxyQuery(operations, metadata),
-                requestOptions.build().asMap()
+                options.asMap()
             );
 
             return new SelectProxyOperation<>(

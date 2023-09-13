@@ -35,7 +35,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, UpsertOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, UpsertOptions<?>, Builder<T, R>> {
         private T tuple;
         private TupleOperations operations;
 
@@ -58,17 +58,12 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public UpsertProxyOperation<T, R> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDUpsertOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .build();
 
             List<?> arguments = Arrays.asList(
                 spaceName,
                 tuple,
                 operations.asProxyOperationList(),
-                requestOptions.asMap()
+                options.asMap()
             );
 
             return new UpsertProxyOperation<>(

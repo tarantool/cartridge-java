@@ -34,7 +34,7 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, InsertOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, InsertOptions<?>, Builder<T, R>> {
         private T tuple;
 
         public Builder() {
@@ -51,13 +51,8 @@ public final class InsertProxyOperation<T extends Packable, R extends Collection
         }
 
         public InsertProxyOperation<T, R> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDInsertOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .build();
 
-            List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuple, options.asMap());
 
             return new InsertProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

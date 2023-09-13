@@ -32,7 +32,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T>
-        extends GenericOperationsBuilder<T, DeleteOptions, Builder<T>> {
+        extends GenericOperationsBuilder<T, DeleteOptions<?>, Builder<T>> {
         private TarantoolIndexQuery indexQuery;
 
         public Builder() {
@@ -49,13 +49,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         public DeleteProxyOperation<T> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDDeleteOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .build();
-
-            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
 
             return new DeleteProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

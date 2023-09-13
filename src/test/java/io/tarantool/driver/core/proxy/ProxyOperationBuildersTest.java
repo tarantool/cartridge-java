@@ -33,9 +33,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -227,19 +229,24 @@ public class ProxyOperationBuildersTest {
                 )
                 .build();
 
-        Map<String, Object> options = new HashMap<>();
-        options.put(ProxyOption.TIMEOUT.toString(), client.getConfig().getRequestTimeout());
-        options.put(ProxyOption.BATCH_SIZE.toString(), 123456);
-        options.put(ProxyOption.FIRST.toString(), 100L);
-        options.put(ProxyOption.MODE.toString(), Mode.WRITE.value());
+        EnumMap<ProxyOption, Object> options = new EnumMap<>(ProxyOption.class);
+        options.put(ProxyOption.TIMEOUT, client.getConfig().getRequestTimeout());
+        options.put(ProxyOption.BATCH_SIZE, 123456);
+        options.put(ProxyOption.FIRST, 100L);
+        options.put(ProxyOption.MODE, Mode.WRITE.value());
 
+        Map<String, Object> opt = options.entrySet().stream()
+            .collect(Collectors.toMap(
+                option -> option.getKey().toString(),
+                Map.Entry::getValue
+            ));
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());
         assertEquals(3, op.getArguments().size());
         assertEquals("space1", op.getArguments().get(0));
         assertEquals(selectArguments, op.getArguments().get(1));
         Map<String, Object> actualOptions = (Map<String, Object>) op.getArguments().get(2);
-        assertEquals(options.toString(), actualOptions.toString());
+        assertEquals(opt.toString(), actualOptions.toString());
         assertEquals(defaultResultMapper, op.getResultMapper());
     }
 

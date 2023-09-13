@@ -35,7 +35,7 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, ReplaceOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, ReplaceOptions<?>, Builder<T, R>> {
         private T tuple;
 
         public Builder() {
@@ -52,13 +52,8 @@ public final class ReplaceProxyOperation<T extends Packable, R extends Collectio
         }
 
         public ReplaceProxyOperation<T, R> build() {
-            CRUDBucketIdOptions requestOptions = new CRUDReplaceOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withBucketId(options.getBucketId())
-                .withFields(options.getFields())
-                .build();
 
-            List<?> arguments = Arrays.asList(spaceName, tuple, requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuple, options.asMap());
 
             return new ReplaceProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
