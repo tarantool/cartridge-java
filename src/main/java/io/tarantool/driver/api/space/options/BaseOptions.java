@@ -4,7 +4,10 @@ import io.tarantool.driver.api.space.options.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.interfaces.Options;
 
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Base functional for all operation options.
@@ -35,5 +38,14 @@ public abstract class BaseOptions implements Options {
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getOption(ProxyOption option, Class<T> optionClass) {
         return Optional.ofNullable((T) resultMap.get(option));
+    }
+
+    public Map<String, Object> asMap() {
+        return resultMap.entrySet().stream()
+            .filter(option -> Objects.nonNull(option.getValue()))
+            .collect(Collectors.toMap(
+                option -> option.getKey().toString(),
+                Map.Entry::getValue
+            ));
     }
 }
