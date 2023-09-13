@@ -10,6 +10,7 @@ import io.tarantool.driver.protocol.Packable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Proxy operation for replacing many records at once
@@ -34,7 +35,7 @@ public final class ReplaceManyProxyOperation<T extends Packable, R extends Colle
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, ReplaceManyOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, ReplaceManyOptions<?>, Builder<T, R>> {
         private Collection<T> tuples;
 
         public Builder() {
@@ -51,18 +52,11 @@ public final class ReplaceManyProxyOperation<T extends Packable, R extends Colle
         }
 
         public ReplaceManyProxyOperation<T, R> build() {
-            if (tuples == null) {
+            if (Objects.isNull(tuples)) {
                 throw new IllegalArgumentException("Tuples must be specified for batch replace operation");
             }
 
-            CRUDBatchOptions requestOptions = new CRUDBatchOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withStopOnError(options.getStopOnError())
-                .withRollbackOnError(options.getRollbackOnError())
-                .withFields(options.getFields())
-                .build();
-
-            List<?> arguments = Arrays.asList(spaceName, tuples, requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuples, options.asMap());
 
             return new ReplaceManyProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

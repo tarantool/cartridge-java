@@ -10,6 +10,7 @@ import io.tarantool.driver.protocol.Packable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Proxy operation for inserting many records at once
@@ -34,7 +35,7 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, InsertManyOptions, Builder<T, R>> {
+        extends GenericOperationsBuilder<R, InsertManyOptions<?>, Builder<T, R>> {
         private Collection<T> tuples;
 
         public Builder() {
@@ -51,18 +52,11 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
         }
 
         public InsertManyProxyOperation<T, R> build() {
-            if (tuples == null) {
+            if (Objects.isNull(tuples)) {
                 throw new IllegalArgumentException("Tuples must be specified for batch insert operation");
             }
 
-            CRUDBatchOptions requestOptions = new CRUDBatchOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .withStopOnError(options.getStopOnError())
-                .withRollbackOnError(options.getRollbackOnError())
-                .withFields(options.getFields())
-                .build();
-
-            List<?> arguments = Arrays.asList(spaceName, tuples, requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, tuples, options.asMap());
 
             return new InsertManyProxyOperation<>(
                 this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);

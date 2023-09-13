@@ -57,7 +57,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
     }
 
     public static final class Builder
-        extends AbstractProxyOperation.GenericOperationsBuilder<Void, OperationWithTimeoutOptions, Builder> {
+        extends AbstractProxyOperation.GenericOperationsBuilder<Void, OperationWithTimeoutOptions<?>, Builder> {
 
         public Builder() {
         }
@@ -73,11 +73,8 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          * @return TruncateProxyOperation instance
          */
         public TruncateProxyOperation build() {
-            CRUDBaseOptions requestOptions = new CRUDBaseOptions.Builder()
-                .withTimeout(options.getTimeout())
-                .build();
 
-            List<?> arguments = Arrays.asList(spaceName, requestOptions.asMap());
+            List<?> arguments = Arrays.asList(spaceName, options.asMap());
 
             return new TruncateProxyOperation(this.client, this.functionName, arguments);
         }
