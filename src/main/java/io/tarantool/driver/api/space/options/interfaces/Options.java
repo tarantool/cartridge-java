@@ -2,6 +2,7 @@ package io.tarantool.driver.api.space.options.interfaces;
 
 import io.tarantool.driver.api.space.options.enums.ProxyOption;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,4 +30,6 @@ public interface Options {
      * @return option value
      */
     <T> Optional<T> getOption(ProxyOption option, Class<T> optionClass);
+
+    Map<String, Object> asMap();
 }
