@@ -1,4 +1,4 @@
-package io.tarantool.driver.api.space.options.enums.crud;
+package io.tarantool.driver.api.space.options.enums;
 
 /**
  * Enum represents the CRUD predefined mode option values.

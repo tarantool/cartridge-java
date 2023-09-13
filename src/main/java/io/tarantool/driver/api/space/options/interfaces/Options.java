@@ -1,6 +1,6 @@
-package io.tarantool.driver.api.space.options;
+package io.tarantool.driver.api.space.options.interfaces;
 
-import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
+import io.tarantool.driver.api.space.options.enums.ProxyOption;
 
 import java.util.Optional;
 

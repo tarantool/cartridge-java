@@ -1,7 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
 import io.tarantool.driver.api.space.options.BaseOptions;
-import io.tarantool.driver.api.space.options.InsertManyOptions;
+import io.tarantool.driver.api.space.options.interfaces.InsertManyOptions;
 
 /**
  * Represent options for insert_many cluster proxy operation

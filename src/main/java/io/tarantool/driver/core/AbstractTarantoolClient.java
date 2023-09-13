@@ -31,7 +31,7 @@ import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
 import io.tarantool.driver.core.connection.TarantoolConnectionFactory;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;
 import io.tarantool.driver.core.metadata.SpacesMetadataProvider;

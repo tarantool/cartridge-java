@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space.options.proxy;
 
-import io.tarantool.driver.api.space.options.OperationWithTimeoutOptions;
+import io.tarantool.driver.api.space.options.contracts.OperationWithTimeoutOptions;
 import io.tarantool.driver.api.space.options.BaseOptions;
 
 /**

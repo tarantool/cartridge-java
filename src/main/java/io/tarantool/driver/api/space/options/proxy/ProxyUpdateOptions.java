@@ -1,7 +1,7 @@
 package io.tarantool.driver.api.space.options.proxy;
 
 import io.tarantool.driver.api.space.options.BaseOptions;
-import io.tarantool.driver.api.space.options.UpdateOptions;
+import io.tarantool.driver.api.space.options.interfaces.UpdateOptions;
 
 /**
  * Represent options for update cluster proxy operation

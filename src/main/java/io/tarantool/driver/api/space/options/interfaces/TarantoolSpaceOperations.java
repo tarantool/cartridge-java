@@ -1,16 +1,8 @@
-package io.tarantool.driver.api.space;
+package io.tarantool.driver.api.space.options.interfaces;
 
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.cursor.TarantoolCursor;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.options.DeleteOptions;
-import io.tarantool.driver.api.space.options.InsertManyOptions;
-import io.tarantool.driver.api.space.options.InsertOptions;
-import io.tarantool.driver.api.space.options.ReplaceManyOptions;
-import io.tarantool.driver.api.space.options.ReplaceOptions;
-import io.tarantool.driver.api.space.options.SelectOptions;
-import io.tarantool.driver.api.space.options.UpdateOptions;
-import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.Packable;

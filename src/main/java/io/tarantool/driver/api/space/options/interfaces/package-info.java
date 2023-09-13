@@ -3,4 +3,4 @@
  *
  * @author Alexey Kuzin
  */
-package io.tarantool.driver.api.space;
+package io.tarantool.driver.api.space.options.interfaces;

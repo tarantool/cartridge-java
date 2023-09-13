@@ -1,4 +1,9 @@
-package io.tarantool.driver.api.space.options;
+package io.tarantool.driver.api.space.options.interfaces;
+
+import io.tarantool.driver.api.space.options.contracts.OperationWithBucketIdOptions;
+import io.tarantool.driver.api.space.options.contracts.OperationWithFieldsOptions;
+import io.tarantool.driver.api.space.options.contracts.OperationWithModeOptions;
+import io.tarantool.driver.api.space.options.contracts.OperationWithTimeoutOptions;
 
 import java.util.Optional;
 

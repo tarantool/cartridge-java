@@ -5,7 +5,7 @@ import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.options.SelectOptions;
+import io.tarantool.driver.api.space.options.interfaces.SelectOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
