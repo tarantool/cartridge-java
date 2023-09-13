@@ -7,7 +7,7 @@ import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.TarantoolServerAddress;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -41,7 +41,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import static io.tarantool.driver.TarantoolUtils.retry;
 import static io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies.retryNetworkErrors;

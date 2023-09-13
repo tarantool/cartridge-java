@@ -1,7 +1,9 @@
-package io.tarantool.driver.api.space.options;
+package io.tarantool.driver.api.space.options.contracts;
 
-import io.tarantool.driver.api.space.options.enums.crud.ProxyOption;
-import io.tarantool.driver.api.space.options.enums.crud.StopOnError;
+import io.tarantool.driver.api.space.options.enums.ProxyOption;
+import io.tarantool.driver.api.space.options.enums.StopOnError;
+import io.tarantool.driver.api.space.options.interfaces.Options;
+import io.tarantool.driver.api.space.options.interfaces.Self;
 
 import java.util.Optional;
 

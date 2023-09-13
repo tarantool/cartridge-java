@@ -34,7 +34,7 @@ import io.tarantool.driver.api.metadata.TarantoolIndexType;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
-import io.tarantool.driver.api.space.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;

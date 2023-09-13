@@ -1,6 +1,6 @@
 package io.tarantool.driver.api.space.options.proxy;
 
-import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.interfaces.DeleteOptions;
 import io.tarantool.driver.api.space.options.BaseOptions;
 
 /**

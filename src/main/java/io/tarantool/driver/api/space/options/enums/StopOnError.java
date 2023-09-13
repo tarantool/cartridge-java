@@ -1,12 +1,12 @@
-package io.tarantool.driver.api.space.options.enums.crud;
+package io.tarantool.driver.api.space.options.enums;
 
 /**
- * Enum represents the CRUD predefined rollback_on_error option values.
+ * Enum represents the CRUD predefined stop_on_error option values.
  *
  * @author Belonogov Nikolay.
  * @see <a href="https://github.com/tarantool/crud">tarantool/crud</a>.
  */
-public enum RollbackOnError {
+public enum StopOnError {
 
     TRUE(true),
 
@@ -14,7 +14,7 @@ public enum RollbackOnError {
 
     private final boolean value;
 
-    RollbackOnError(boolean value) {
+    StopOnError(boolean value) {
         this.value = value;
     }
 

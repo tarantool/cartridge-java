@@ -1,4 +1,4 @@
-package io.tarantool.driver.api.space.options;
+package io.tarantool.driver.api.space.options.interfaces;
 
 
 /**

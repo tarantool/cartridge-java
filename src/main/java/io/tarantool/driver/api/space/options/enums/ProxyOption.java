@@ -1,4 +1,4 @@
-package io.tarantool.driver.api.space.options.enums.crud;
+package io.tarantool.driver.api.space.options.enums;
 
 /**
  * General enumeration class representing the names of CRUD options.
