@@ -3,11 +3,10 @@ package io.tarantool.driver.api.space.options;
 import io.tarantool.driver.api.space.options.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.interfaces.Options;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Base functional for all operation options.
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public abstract class BaseOptions implements Options {
 
-    private final EnumMap<ProxyOption, Object> resultMap = new EnumMap<>(ProxyOption.class);
+    private final Map<String, Object> resultMap = new HashMap<>();
 
     /**
      * Add an option value.
@@ -26,7 +25,9 @@ public abstract class BaseOptions implements Options {
      * @param value  option value
      */
     public void addOption(ProxyOption option, Object value) {
-        resultMap.put(option, value);
+        if (Objects.nonNull(value)) {
+            resultMap.put(option.toString(), value);
+        }
     }
 
     /**
@@ -37,15 +38,10 @@ public abstract class BaseOptions implements Options {
      */
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getOption(ProxyOption option, Class<T> optionClass) {
-        return Optional.ofNullable((T) resultMap.get(option));
+        return Optional.ofNullable((T) resultMap.get(option.toString()));
     }
 
     public Map<String, Object> asMap() {
-        return resultMap.entrySet().stream()
-            .filter(option -> Objects.nonNull(option.getValue()))
-            .collect(Collectors.toMap(
-                option -> option.getKey().toString(),
-                Map.Entry::getValue
-            ));
+        return resultMap;
     }
 }
