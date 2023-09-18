@@ -9,12 +9,9 @@ import io.tarantool.driver.api.space.options.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.interfaces.SelectOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.protocol.Packable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Proxy operation for select
@@ -60,17 +57,8 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public SelectProxyOperation<T> build() {
 
-            Optional<Long> first = options.getFirst();
-            if (first.isPresent()) {
-                options.addOption(ProxyOption.FIRST, Math.min(conditions.getLimit(), first.get()));
-            } else {
-                options.addOption(ProxyOption.FIRST, conditions.getLimit());
-            }
-
-            Packable tuple = conditions.getStartTuple();
-            if (Objects.nonNull(tuple)) {
-                options.addOption(ProxyOption.AFTER, conditions.getStartTuple());
-            }
+            options.addOption(ProxyOption.FIRST, conditions.getLimit());
+            options.addOption(ProxyOption.AFTER, conditions.getStartTuple());
 
             List<?> arguments = Arrays.asList(
                 spaceName,
