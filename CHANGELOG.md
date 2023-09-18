@@ -6,10 +6,6 @@
 
 - Add `"mode"` option for crud select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
 - Change using of proxy client parameters (`mode`, `rollback_on_error`, `stop_on_error`) with enum classes ([#419](https://github.com/tarantool/cartridge-java/issues/419))
-- Add `"after"` and `"first"` option for select operation like API in SelectOptions ([#417](https://github.com/tarantool/cartridge-java/issues/417)) 
-#### Note:
-- When using `Conditions:limit()` and `SelectOptions:first()` at the same time, the `smallest` one is selected. 
-- When using `Conditions:after()` and `SelectOptions:after()` at the same time, the `Conditions:after()` is selected.
 
 ### Bugfixes
 
