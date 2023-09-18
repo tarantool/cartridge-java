@@ -1,5 +1,5 @@
 /**
- * Contains interfaces and classes essential for proxy client
+ * Contains classes essential for proxy client
  *
  * @author Servey Volgin
  * @author Alexey Kuzin

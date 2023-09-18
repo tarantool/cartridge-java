@@ -3,11 +3,11 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.space.options.interfaces.DeleteOptions;
+import io.tarantool.driver.core.proxy.contracts.OperationWithIndexQueryBuilderOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
-import io.tarantool.driver.protocol.TarantoolIndexQuery;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,27 +32,22 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
      * The builder for this class.
      */
     public static final class Builder<T>
-        extends GenericOperationsBuilder<T, DeleteOptions<?>, Builder<T>> {
-        private TarantoolIndexQuery indexQuery;
+        extends GenericOperationsBuilder<T, DeleteOptions<?>, Builder<T>> implements
+        OperationWithIndexQueryBuilderOptions<Builder<T>> {
 
         public Builder() {
         }
 
         @Override
-        Builder<T> self() {
-            return this;
-        }
-
-        public Builder<T> withIndexQuery(TarantoolIndexQuery indexQuery) {
-            this.indexQuery = indexQuery;
+        public Builder<T> self() {
             return this;
         }
 
         public DeleteProxyOperation<T> build() {
-            List<?> arguments = Arrays.asList(spaceName, indexQuery.getKeyValues(), options.asMap());
 
             return new DeleteProxyOperation<>(
-                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
+                this.resultMapper);
         }
     }
 }

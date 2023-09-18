@@ -3,8 +3,9 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolVoidResult;
 import io.tarantool.driver.api.space.options.contracts.OperationWithTimeoutOptions;
+import io.tarantool.driver.core.proxy.interfaces.ProxyOperation;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +30,15 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
         this.functionName = functionName;
     }
 
+    /**
+     * Create a builder instance.
+     *
+     * @return a builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public TarantoolCallOperations getClient() {
         return client;
     }
@@ -47,15 +57,6 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
             .thenApply(v -> TarantoolVoidResult.INSTANCE.value());
     }
 
-    /**
-     * Create a builder instance.
-     *
-     * @return a builder
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder
         extends AbstractProxyOperation.GenericOperationsBuilder<Void, OperationWithTimeoutOptions<?>, Builder> {
 
@@ -63,7 +64,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
         }
 
         @Override
-        Builder self() {
+        public Builder self() {
             return this;
         }
 
@@ -74,9 +75,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          */
         public TruncateProxyOperation build() {
 
-            List<?> arguments = Arrays.asList(spaceName, options.asMap());
-
-            return new TruncateProxyOperation(this.client, this.functionName, arguments);
+            return new TruncateProxyOperation(this.client, this.functionName, new ArrayList<>(arguments.values()));
         }
     }
 }

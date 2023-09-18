@@ -3,14 +3,14 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.space.options.interfaces.InsertManyOptions;
+import io.tarantool.driver.core.proxy.contracts.OperationWithTuplesBuilderOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Proxy operation for inserting many records at once
@@ -35,31 +35,21 @@ public final class InsertManyProxyOperation<T extends Packable, R extends Collec
      * The builder for this class.
      */
     public static final class Builder<T extends Packable, R extends Collection<T>>
-        extends GenericOperationsBuilder<R, InsertManyOptions<?>, Builder<T, R>> {
-        private Collection<T> tuples;
+        extends GenericOperationsBuilder<R, InsertManyOptions<?>, Builder<T, R>> implements
+        OperationWithTuplesBuilderOptions<Builder<T, R>, T> {
 
         public Builder() {
         }
 
         @Override
-        Builder<T, R> self() {
-            return this;
-        }
-
-        public Builder<T, R> withTuples(Collection<T> tuples) {
-            this.tuples = tuples;
+        public Builder<T, R> self() {
             return this;
         }
 
         public InsertManyProxyOperation<T, R> build() {
-            if (Objects.isNull(tuples)) {
-                throw new IllegalArgumentException("Tuples must be specified for batch insert operation");
-            }
-
-            List<?> arguments = Arrays.asList(spaceName, tuples, options.asMap());
-
             return new InsertManyProxyOperation<>(
-                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
+                this.resultMapper);
         }
     }
 }

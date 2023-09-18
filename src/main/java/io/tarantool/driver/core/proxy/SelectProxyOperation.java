@@ -7,11 +7,14 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.space.options.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.interfaces.SelectOptions;
+import io.tarantool.driver.core.proxy.enums.ProxyOperationArgument;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Proxy operation for select
@@ -46,7 +49,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
         }
 
         @Override
-        Builder<T> self() {
+        public Builder<T> self() {
             return this;
         }
 
@@ -57,17 +60,19 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
 
         public SelectProxyOperation<T> build() {
 
-            options.addOption(ProxyOption.FIRST, conditions.getLimit());
-            options.addOption(ProxyOption.AFTER, conditions.getStartTuple());
+            addArgument(ProxyOperationArgument.PROXY_QUERY,
+                this.conditions.toProxyQuery(this.operations, this.metadata));
 
-            List<?> arguments = Arrays.asList(
-                spaceName,
-                conditions.toProxyQuery(operations, metadata),
-                options.asMap()
-            );
+            Map<String, Object> options = (Map<String, Object>) arguments.get(ProxyOperationArgument.OPTIONS);
+
+            options.put(ProxyOption.FIRST.toString(), conditions.getLimit());
+
+            Optional.ofNullable(conditions.getStartTuple())
+                .ifPresent(after -> options.put(ProxyOption.AFTER.toString(), after));
 
             return new SelectProxyOperation<>(
-                this.client, this.functionName, arguments, this.argumentsMapper, this.resultMapper);
+                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
+                this.resultMapper);
         }
     }
 }

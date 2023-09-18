@@ -3,9 +3,14 @@ package io.tarantool.driver.core.proxy;
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.space.options.interfaces.Options;
+import io.tarantool.driver.api.space.options.interfaces.Self;
+import io.tarantool.driver.core.proxy.enums.ProxyOperationArgument;
+import io.tarantool.driver.core.proxy.interfaces.BuilderOptions;
+import io.tarantool.driver.core.proxy.interfaces.ProxyOperation;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -21,8 +26,8 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     protected final TarantoolCallOperations client;
     protected final String functionName;
     protected final List<?> arguments;
-    private final MessagePackObjectMapper argumentsMapper;
     protected final CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
+    private final MessagePackObjectMapper argumentsMapper;
 
     AbstractProxyOperation(
         TarantoolCallOperations client,
@@ -59,18 +64,21 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
     }
 
     abstract static
-    class GenericOperationsBuilder<T, O extends Options, B extends GenericOperationsBuilder<T, O, B>> {
+    class GenericOperationsBuilder<T, O extends Options, B extends GenericOperationsBuilder<T, O, B>>
+        implements BuilderOptions, Self<B> {
         protected TarantoolCallOperations client;
-        protected String spaceName;
         protected String functionName;
         protected MessagePackObjectMapper argumentsMapper;
         protected CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
-        protected O options;
+        protected EnumMap<ProxyOperationArgument, Object> arguments;
 
         GenericOperationsBuilder() {
+            this.arguments = new EnumMap<>(ProxyOperationArgument.class);
         }
 
-        abstract B self();
+        public void addArgument(ProxyOperationArgument optionName, Object option) {
+            this.arguments.put(optionName, option);
+        }
 
         /**
          * Specify a client for sending and receiving requests from Tarantool server
@@ -90,7 +98,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
          * @return builder
          */
         public B withSpaceName(String spaceName) {
-            this.spaceName = spaceName;
+            addArgument(ProxyOperationArgument.SPACE_NAME, spaceName);
             return self();
         }
 
@@ -134,7 +142,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
          * @return builder
          */
         public B withOptions(O options) {
-            this.options = options;
+            addArgument(ProxyOperationArgument.OPTIONS, options.asMap());
             return self();
         }
     }
