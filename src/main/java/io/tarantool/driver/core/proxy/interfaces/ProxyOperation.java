@@ -1,4 +1,4 @@
-package io.tarantool.driver.core.proxy;
+package io.tarantool.driver.core.proxy.interfaces;
 
 import java.util.concurrent.CompletableFuture;
 

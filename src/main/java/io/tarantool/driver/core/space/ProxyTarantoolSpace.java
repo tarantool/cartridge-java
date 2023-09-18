@@ -31,7 +31,7 @@ import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.proxy.DeleteProxyOperation;
 import io.tarantool.driver.core.proxy.InsertManyProxyOperation;
 import io.tarantool.driver.core.proxy.InsertProxyOperation;
-import io.tarantool.driver.core.proxy.ProxyOperation;
+import io.tarantool.driver.core.proxy.interfaces.ProxyOperation;
 import io.tarantool.driver.core.proxy.ReplaceManyProxyOperation;
 import io.tarantool.driver.core.proxy.ReplaceProxyOperation;
 import io.tarantool.driver.core.proxy.SelectProxyOperation;
