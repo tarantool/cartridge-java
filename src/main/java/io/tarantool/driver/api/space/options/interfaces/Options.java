@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Marker interface for space operations options
+ * Marker interface for space operations options.
+ * <p> TODO: replace ProxyOption to general interface to have ability to use it not only in ProxyClient:
+ * <a href="https://github.com/tarantool/cartridge-java/issues/424">issue</a> </p>
  *
  * @author Artyom Dubinin
  * @author Alexey Kuzin
