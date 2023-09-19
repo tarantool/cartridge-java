@@ -6,7 +6,7 @@ import io.tarantool.driver.api.space.options.interfaces.Self;
 
 import java.util.Optional;
 
-public interface OperationWIthBatchSizeOptions<T extends OperationWithTimeoutOptions<T>> extends Options, Self<T> {
+public interface OperationWithBatchSizeOptions<T extends OperationWithBatchSizeOptions<T>> extends Options, Self<T> {
 
     /**
      * Specifies internal batch size for transferring data from storage nodes to router nodes.
