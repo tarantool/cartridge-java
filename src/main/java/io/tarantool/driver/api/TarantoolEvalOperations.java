@@ -48,7 +48,7 @@ public interface TarantoolEvalOperations {
      * @return some result
      * @throws TarantoolClientException if the client is not connected
      */
-    CompletableFuture<List<?>> eval(String expression, Supplier<MessagePackValueMapper> resultMapperSupplier)
+    CompletableFuture<List<?>> eval(String expression, Supplier<? extends MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException;
 
     /**
@@ -63,7 +63,7 @@ public interface TarantoolEvalOperations {
      * @throws TarantoolClientException if the client is not connected
      */
     CompletableFuture<List<?>> eval(
-        String expression, Collection<?> arguments, Supplier<MessagePackValueMapper> resultMapperSupplier)
+        String expression, Collection<?> arguments, Supplier<? extends MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException;
 
     /**
@@ -80,6 +80,6 @@ public interface TarantoolEvalOperations {
     CompletableFuture<List<?>> eval(
         String expression,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
-        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException;
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException;
 }

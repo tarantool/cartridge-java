@@ -133,7 +133,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> entityClass)
         throws TarantoolClientException;
 
@@ -151,7 +151,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> call(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException;
 
@@ -170,7 +170,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> resultClass)
         throws TarantoolClientException;
 
@@ -189,7 +189,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException;
 
@@ -208,7 +208,7 @@ public interface TarantoolCallOperations {
     <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException;
 
@@ -324,7 +324,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
         throws TarantoolClientException;
@@ -345,7 +345,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException;
@@ -365,7 +365,7 @@ public interface TarantoolCallOperations {
     <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
         throws TarantoolClientException;
 

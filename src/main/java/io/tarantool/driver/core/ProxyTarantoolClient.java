@@ -209,7 +209,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> entityClass) throws TarantoolClientException {
         return client.callForTupleResult(functionName, arguments, argumentsMapperSupplier, entityClass);
     }
@@ -218,7 +218,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> call(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
         return client.call(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
@@ -228,7 +228,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Class<T> resultClass)
         throws TarantoolClientException {
         return client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultClass);
@@ -238,7 +238,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         ValueConverter<Value, T> valueConverter)
         throws TarantoolClientException {
         return client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, valueConverter);
@@ -248,7 +248,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T> CompletableFuture<T> callForSingleResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<T, SingleValueCallResult<T>>> resultMapperSupplier)
         throws TarantoolClientException {
         return client.callForSingleResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
@@ -301,7 +301,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass) throws TarantoolClientException {
         return client.callForMultiResult(
@@ -312,7 +312,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter) throws TarantoolClientException {
         return client.callForMultiResult(
@@ -323,7 +323,7 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
         Supplier<CallResultMapper<R, MultiValueCallResult<T, R>>> resultMapperSupplier)
         throws TarantoolClientException {
         return client.callForMultiResult(functionName, arguments, argumentsMapperSupplier, resultMapperSupplier);
@@ -395,14 +395,15 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression, Supplier<MessagePackValueMapper> resultMapperSupplier)
+    public CompletableFuture<List<?>> eval(
+        String expression, Supplier<? extends MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         return client.eval(expression, resultMapperSupplier);
     }
 
     @Override
     public CompletableFuture<List<?>> eval(
-        String expression, Collection<?> arguments, Supplier<MessagePackValueMapper> resultMapperSupplier)
+        String expression, Collection<?> arguments, Supplier<? extends MessagePackValueMapper> resultMapperSupplier)
         throws TarantoolClientException {
         return client.eval(expression, arguments, resultMapperSupplier);
     }
@@ -411,8 +412,8 @@ public abstract class ProxyTarantoolClient<T extends Packable, R extends Collect
     public CompletableFuture<List<?>> eval(
         String expression,
         Collection<?> arguments,
-        Supplier<MessagePackObjectMapper> argumentsMapperSupplier,
-        Supplier<MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
+        Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
+        Supplier<? extends MessagePackValueMapper> resultMapperSupplier) throws TarantoolClientException {
         return client.eval(expression, arguments, argumentsMapperSupplier, resultMapperSupplier);
     }
 
