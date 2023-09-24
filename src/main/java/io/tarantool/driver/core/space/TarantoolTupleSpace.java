@@ -23,6 +23,7 @@ public class TarantoolTupleSpace extends
 
     private final TarantoolCallOperations client;
     private final TarantoolClientConfig config;
+    private final MessagePackValueMapper arrayTupleResultMapper;
 
     /**
      * Basic constructor
@@ -42,6 +43,8 @@ public class TarantoolTupleSpace extends
         super(config, connectionManager, metadataOperations, spaceMetadata);
         this.client = client;
         this.config = config;
+        this.arrayTupleResultMapper = client.getResultMapperFactoryFactory().getTarantoolTupleResultMapperFactory()
+            .withArrayValueToTarantoolTupleResultConverter(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override
@@ -51,8 +54,7 @@ public class TarantoolTupleSpace extends
 
     @Override
     protected MessagePackValueMapper arrayTupleResultMapper() {
-        return client.getResultMapperFactoryFactory().getTarantoolTupleResultMapperFactory()
-            .withArrayValueToTarantoolTupleResultConverter(config.getMessagePackMapper(), getMetadata());
+        return arrayTupleResultMapper;
     }
 
     @Override

@@ -24,6 +24,9 @@ public class ProxyTarantoolTupleSpace
 
     private final TarantoolClientConfig config;
     private final TarantoolCallOperations client;
+    private final
+        CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
+        rowsMetadataTupleResultMapper;
 
     /**
      * Basic constructor
@@ -43,6 +46,9 @@ public class ProxyTarantoolTupleSpace
         super(config, client, mappingConfig, metadataOperations, spaceMetadata);
         this.config = config;
         this.client = client;
+        this.rowsMetadataTupleResultMapper = client
+            .getResultMapperFactoryFactory().getTarantoolTupleResultMapperFactory()
+            .withSingleValueRowsMetadataToTarantoolTupleResultMapper(config.getMessagePackMapper(), getMetadata());
     }
 
     @Override
@@ -53,8 +59,7 @@ public class ProxyTarantoolTupleSpace
     @Override
     protected CallResultMapper<TarantoolResult<TarantoolTuple>, SingleValueCallResult<TarantoolResult<TarantoolTuple>>>
     rowsMetadataTupleResultMapper() {
-        return client.getResultMapperFactoryFactory().getTarantoolTupleResultMapperFactory()
-            .withSingleValueRowsMetadataToTarantoolTupleResultMapper(config.getMessagePackMapper(), getMetadata());
+        return rowsMetadataTupleResultMapper;
     }
 
     @Override
