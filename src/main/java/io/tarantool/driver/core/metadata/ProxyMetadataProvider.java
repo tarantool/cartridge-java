@@ -22,9 +22,11 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
 
     private final String metadataFunctionName;
     private final TarantoolCallOperations client;
+    private final CallResultMapper<TarantoolMetadataContainer, SingleValueCallResult<TarantoolMetadataContainer>>
+        metadataMapper;
     private final
     Supplier<CallResultMapper<TarantoolMetadataContainer, SingleValueCallResult<TarantoolMetadataContainer>>>
-        mapperSupplier;
+        metadataMapperSupplier;
 
     /**
      * Basic constructor
@@ -42,14 +44,15 @@ public class ProxyMetadataProvider implements TarantoolMetadataProvider {
         Class<? extends SingleValueCallResult<TarantoolMetadataContainer>> resultClass) {
         this.metadataFunctionName = metadataFunctionName;
         this.client = client;
-        this.mapperSupplier = () -> client.getResultMapperFactoryFactory()
+        this.metadataMapper = client.getResultMapperFactoryFactory()
             .<TarantoolMetadataContainer>singleValueResultMapperFactory()
             .withSingleValueResultConverter(metadataConverter, resultClass);
+        this.metadataMapperSupplier = () -> metadataMapper;
     }
 
     @Override
     public CompletableFuture<TarantoolMetadataContainer> getMetadata() {
-        return client.callForSingleResult(metadataFunctionName, mapperSupplier)
+        return client.callForSingleResult(metadataFunctionName, metadataMapperSupplier)
             .exceptionally(ex -> {
                 if (ex.getCause() != null && ex.getCause() instanceof TarantoolClientException) {
                     throw new TarantoolMetadataRequestException(metadataFunctionName, ex);
