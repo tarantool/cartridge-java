@@ -7,7 +7,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.space.ProxyTarantoolTupleSpace;
 

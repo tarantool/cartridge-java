@@ -1,6 +1,6 @@
 package io.tarantool.driver.core.proxy;
 
-import io.tarantool.driver.api.space.options.enums.ProxyOption;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.mappers.MessagePackMapper;

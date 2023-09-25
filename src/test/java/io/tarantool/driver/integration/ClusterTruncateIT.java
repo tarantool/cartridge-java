@@ -3,7 +3,7 @@ package io.tarantool.driver.integration;
 
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.core.tuple.TarantoolTupleImpl;
 import io.tarantool.driver.exceptions.TarantoolClientException;

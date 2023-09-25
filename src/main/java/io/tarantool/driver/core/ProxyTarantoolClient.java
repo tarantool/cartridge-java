@@ -13,7 +13,7 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
 import io.tarantool.driver.api.proxy.ProxyOperationsMappingConfig;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.core.metadata.DDLTarantoolSpaceMetadataConverter;
 import io.tarantool.driver.core.metadata.ProxyMetadataProvider;
 import io.tarantool.driver.core.metadata.TarantoolMetadata;

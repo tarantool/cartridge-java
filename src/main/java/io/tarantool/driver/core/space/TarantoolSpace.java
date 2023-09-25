@@ -6,7 +6,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.metadata.TarantoolIndexMetadata;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolSpaceMetadata;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.api.tuple.operations.TupleOperation;
 import io.tarantool.driver.api.tuple.operations.TupleOperations;
 import io.tarantool.driver.core.connection.TarantoolConnectionManager;

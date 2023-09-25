@@ -2,11 +2,9 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.space.options.interfaces.Options;
-import io.tarantool.driver.api.space.options.interfaces.Self;
+import io.tarantool.driver.api.space.options.Options;
+import io.tarantool.driver.api.space.options.Self;
 import io.tarantool.driver.core.proxy.enums.ProxyOperationArgument;
-import io.tarantool.driver.core.proxy.interfaces.BuilderOptions;
-import io.tarantool.driver.core.proxy.interfaces.ProxyOperation;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 

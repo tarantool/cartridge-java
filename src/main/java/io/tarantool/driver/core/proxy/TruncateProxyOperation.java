@@ -2,8 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolVoidResult;
-import io.tarantool.driver.api.space.options.contracts.OperationWithTimeoutOptions;
-import io.tarantool.driver.core.proxy.interfaces.ProxyOperation;
+import io.tarantool.driver.api.space.options.crud.OperationWithTimeoutOptions;
 
 import java.util.ArrayList;
 import java.util.List;

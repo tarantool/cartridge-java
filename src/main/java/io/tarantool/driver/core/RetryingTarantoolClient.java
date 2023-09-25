@@ -11,7 +11,7 @@ import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
 import io.tarantool.driver.api.retry.RequestRetryPolicy;
 import io.tarantool.driver.api.retry.RequestRetryPolicyFactory;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.core.space.RetryingTarantoolSpace;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.CallResultMapper;
