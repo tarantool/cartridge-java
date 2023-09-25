@@ -2,9 +2,7 @@ package io.tarantool.driver.core.proxy;
 
 import io.tarantool.driver.api.SingleValueCallResult;
 import io.tarantool.driver.api.TarantoolCallOperations;
-import io.tarantool.driver.api.space.options.interfaces.UpsertOptions;
-import io.tarantool.driver.core.proxy.contracts.OperationWithTupleBuilderOptions;
-import io.tarantool.driver.core.proxy.contracts.OperationWithTupleOperationBuilderOptions;
+import io.tarantool.driver.api.space.options.UpsertOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;

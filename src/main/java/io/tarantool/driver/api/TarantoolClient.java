@@ -4,7 +4,7 @@ import io.tarantool.driver.TarantoolVersion;
 import io.tarantool.driver.api.connection.TarantoolConnectionListeners;
 import io.tarantool.driver.api.metadata.TarantoolMetadataOperations;
 import io.tarantool.driver.api.metadata.TarantoolMetadataProvider;
-import io.tarantool.driver.api.space.options.interfaces.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.protocol.Packable;
 

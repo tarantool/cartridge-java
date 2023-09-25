@@ -1,7 +1,6 @@
 package io.tarantool.driver.api.space.options;
 
-import io.tarantool.driver.api.space.options.enums.ProxyOption;
-import io.tarantool.driver.api.space.options.interfaces.Options;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -6,8 +6,7 @@
 
 - Add `"mode"` option for select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
 - Change using of proxy client parameters (`mode`, `rollback_on_error`, `stop_on_error`) with enum classes ([#419](https://github.com/tarantool/cartridge-java/issues/419))
-- **[breaking change]** Move <operation-name>Options interfaces from `io.tarantool.driver.api.space.options.Options` package
-to `io.tarantool.driver.api.space.options.interfaces.Options` package.
+
 ### Bugfixes
 
 - Fix Instant converter to parse 8 bytes datetime ([#408](https://github.com/tarantool/cartridge-java/issues/408))
