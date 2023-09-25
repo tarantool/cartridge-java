@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @State(Scope.Benchmark)
-public class TarantoolSetup {
-    public Logger log = LoggerFactory.getLogger(TarantoolSetup.class);
+public class SingleInstanceTarantoolSetup {
+    public Logger log = LoggerFactory.getLogger(SingleInstanceTarantoolSetup.class);
 
     public TarantoolContainer tarantoolContainer = new TarantoolContainer()
         .withScriptFileName("org/testcontainers/containers/benchmark.lua")

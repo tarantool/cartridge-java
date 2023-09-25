@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class BenchmarkRunner {
+public class SingleInstanceBenchmarkRunner {
     public static void main(String[] args) throws Exception {
         org.openjdk.jmh.Main.main(args);
     }
@@ -29,7 +29,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void acceptingDiffTypes(TarantoolSetup plan, Blackhole bh) {
+    public void acceptingDiffTypes(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         List<?> result = plan.tarantoolClient.call(
             "return_arrays_with_different_types"
         ).join();
@@ -66,7 +66,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void acceptingDiffTypesAsTuplesAndUnpackIt(TarantoolSetup plan, Blackhole bh) {
+    public void acceptingDiffTypesAsTuplesAndUnpackIt(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
             "return_arrays_with_different_types",
             Collections.emptyList(),
@@ -104,7 +104,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void acceptingDiffTypesAsTuplesAndUnpackItWithTargetType(TarantoolSetup plan, Blackhole bh) {
+    public void acceptingDiffTypesAsTuplesAndUnpackItWithTargetType(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         TarantoolResult<TarantoolTuple> tuples = plan.tarantoolClient.call(
             "return_arrays_with_different_types",
             Collections.emptyList(),
@@ -142,7 +142,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void passingArrayOfArraysWithDiffTypes(TarantoolSetup plan, Blackhole bh) {
+    public void passingArrayOfArraysWithDiffTypes(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
             "empty_function", plan.arraysWithDiffElements).join());
     }
@@ -151,7 +151,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void passingArrayOfArraysWithNestedArrays(TarantoolSetup plan, Blackhole bh) {
+    public void passingArrayOfArraysWithNestedArrays(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
             "empty_function", plan.arraysWithNestedArrays).join());
     }
@@ -160,7 +160,7 @@ public class BenchmarkRunner {
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
     @OperationsPerInvocation(1000)
-    public void passingArrayOfArraysWithNestedMaps(TarantoolSetup plan, Blackhole bh) {
+    public void passingArrayOfArraysWithNestedMaps(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.tarantoolClient.call(
             "empty_function", plan.arraysWithNestedMaps).join());
     }
@@ -168,7 +168,7 @@ public class BenchmarkRunner {
     @Benchmark
     @Fork(1)
     @BenchmarkMode(Mode.Throughput)
-    public void spaceCall(TarantoolSetup plan, Blackhole bh) {
+    public void spaceCall(SingleInstanceTarantoolSetup plan, Blackhole bh) {
         bh.consume(plan.retryingTarantoolClient.space(
             "test_space"));
     }
