@@ -280,10 +280,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.openjdk.jmh</groupId>
-          <artifactId>jmh-generator-annprocess</artifactId>
-          <version>1.35</version>
-          <scope>test</scope>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.35</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -413,12 +413,19 @@
                             <arguments>
                                 <argument>-classpath</argument>
                                 <classpath />
-                                <argument>org.openjdk.jmh.Main</argument>]
+                                <argument>org.openjdk.jmh.Main</argument>
+                                <argument>${benchmark}</argument>
+                                <argument>${benchmarkArgs}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
+            <properties>
+                <skipTests>true</skipTests>
+                <benchmark>SingleInstanceBenchmarkRunner</benchmark>
+                <benchmarkArgs></benchmarkArgs>
+            </properties>
         </profile>
         <profile>
             <id>release</id>
