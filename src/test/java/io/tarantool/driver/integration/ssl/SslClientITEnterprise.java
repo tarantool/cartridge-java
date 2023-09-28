@@ -38,28 +38,27 @@ public class SslClientITEnterprise {
 
     private static TarantoolContainer containerWithSsl;
     private static TarantoolContainer containerWithoutSsl;
+    private static final String RESOURCE_PATH = "org/testcontainers/containers/enterprise/";
 
     @BeforeAll
     public static void setUp() throws URISyntaxException, SSLException {
         final File dockerfile = new File(
             SslClientITEnterprise.class.getClassLoader()
-                .getResource("org/testcontainers/containers/enterprise/Dockerfile").toURI()
+                .getResource(RESOURCE_PATH + "Dockerfile").toURI()
         );
         final Map<String, String> buildArgs = new HashMap<>();
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", System.getenv("SDK_VERSION"));
 
-        final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-            .withSslContext(getSslContext());
-
         containerWithSsl = new TarantoolContainer(
-            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
+            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
             .withScriptFileName("ssl_server.lua")
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
-            .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl")
-            .withLogConsumer(new Slf4jLogConsumer(log));
+            .withDirectoryBinding(RESOURCE_PATH + "ssl")
+            .withLogConsumer(new Slf4jLogConsumer(log))
+            .withSslContext(org.testcontainers.containers.SslContext.getSslContext());
 
         containerWithoutSsl = new TarantoolContainer(
             new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
@@ -67,7 +66,7 @@ public class SslClientITEnterprise {
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
-            .withDirectoryBinding("org/testcontainers/containers/enterprise")
+            .withDirectoryBinding(RESOURCE_PATH)
             .withLogConsumer(new Slf4jLogConsumer(log));
 
         if (!containerWithSsl.isRunning()) {
