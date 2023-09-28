@@ -2,17 +2,15 @@
 
 ## [Unreleased]
 
-### API changes
-
-- Add `"mode"` option for select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
-- Change using of proxy client parameters (`mode`, `rollback_on_error`, `stop_on_error`) with enum classes ([#419](https://github.com/tarantool/cartridge-java/issues/419))
-
 ### Bugfixes
 
 - Fix Instant converter to parse 8 bytes datetime ([#408](https://github.com/tarantool/cartridge-java/issues/408))
 
-### Internal changes
+### Internal and API changes
 
+- Bump testcontainers-java-tarantool to 1.0.1 ([#400](https://github.com/tarantool/cartridge-java/issues/400))
+- Add `"mode"` option for select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
+- Change using of proxy client parameters (`mode`, `rollback_on_error`, `stop_on_error`) with enum classes ([#419](https://github.com/tarantool/cartridge-java/issues/419))
 - Change using of option names with the String type in the internal API to using with the ProxyOption enum class ([#420](https://github.com/tarantool/cartridge-java/issues/420))
 
 ## [0.12.1] - 2023-08-04

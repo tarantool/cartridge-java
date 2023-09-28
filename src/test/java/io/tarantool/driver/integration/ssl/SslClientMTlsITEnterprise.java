@@ -39,6 +39,7 @@ public class SslClientMTlsITEnterprise {
     private static final Logger log = LoggerFactory.getLogger(SslClientMTlsITEnterprise.class);
 
     private static TarantoolContainer containerWithSsl;
+    private static final String RESOURCE_PATH = "org/testcontainers/containers/enterprise/ssl/mtls/";
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -50,18 +51,17 @@ public class SslClientMTlsITEnterprise {
         buildArgs.put("DOWNLOAD_SDK_URI", System.getenv("DOWNLOAD_SDK_URI"));
         buildArgs.put("SDK_VERSION", System.getenv("SDK_VERSION"));
 
-        final TarantoolClientBuilder tarantoolClientBuilder = TarantoolClientFactory.createClient()
-            .withSslContext(getSslContextWithCA())
-            .withConnectTimeout(5000);
-
         containerWithSsl = new TarantoolContainer(
-            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs), tarantoolClientBuilder)
+            new TarantoolImageParams("tarantool-enterprise", dockerfile, buildArgs))
             .withScriptFileName("mtls_server.lua")
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
-            .withDirectoryBinding("org/testcontainers/containers/enterprise/ssl/mtls")
-            .withLogConsumer(new Slf4jLogConsumer(log));
+            .withDirectoryBinding(RESOURCE_PATH)
+            .withLogConsumer(new Slf4jLogConsumer(log))
+            .withSslContext(org.testcontainers.containers.SslContext.getSslContext(
+                RESOURCE_PATH + "ca.key",
+                RESOURCE_PATH + "ca.crt"));
 
         if (!containerWithSsl.isRunning()) {
             containerWithSsl.start();
@@ -106,15 +106,15 @@ public class SslClientMTlsITEnterprise {
     private static SslContext getSslContextWithCA() throws Exception {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         final File keyCertChainFile = new File(classloader
-            .getResource("org/testcontainers/containers/enterprise/ssl/mtls/ca.crt").toURI());
+            .getResource(RESOURCE_PATH + "ca.crt").toURI());
         final File keyFile = new File(classloader
-            .getResource("org/testcontainers/containers/enterprise/ssl/mtls/ca.key").toURI());
+            .getResource(RESOURCE_PATH + "ca.key").toURI());
 
         String keyStoreFilePassword = "12345678";
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
         InputStream trustStore = classloader
-            .getResourceAsStream("org/testcontainers/containers/enterprise/ssl/mtls/trustStoreFile");
+            .getResourceAsStream(RESOURCE_PATH + "trustStoreFile");
         keyStore.load(trustStore, keyStoreFilePassword.toCharArray());
 
         TrustManagerFactory trustManagerFactory = TrustManagerFactory
