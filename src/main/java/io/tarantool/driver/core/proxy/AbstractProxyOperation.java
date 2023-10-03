@@ -8,8 +8,8 @@ import io.tarantool.driver.core.proxy.enums.ProxyOperationArgument;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
+import java.util.Collection;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -23,14 +23,14 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
 
     protected final TarantoolCallOperations client;
     protected final String functionName;
-    protected final List<?> arguments;
+    protected final Collection<?> arguments;
     protected final CallResultMapper<T, SingleValueCallResult<T>> resultMapper;
     private final MessagePackObjectMapper argumentsMapper;
 
     AbstractProxyOperation(
         TarantoolCallOperations client,
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         this.client = client;
@@ -48,7 +48,7 @@ abstract class AbstractProxyOperation<T> implements ProxyOperation<T> {
         return functionName;
     }
 
-    public List<?> getArguments() {
+    public Collection<?> getArguments() {
         return arguments;
     }
 

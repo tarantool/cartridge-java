@@ -7,9 +7,7 @@ import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.protocol.Packable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Proxy operation for upsert
@@ -24,7 +22,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
     UpsertProxyOperation(
         TarantoolCallOperations client,
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<R, SingleValueCallResult<R>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
@@ -48,8 +46,7 @@ public final class UpsertProxyOperation<T extends Packable, R extends Collection
         public UpsertProxyOperation<T, R> build() {
 
             return new UpsertProxyOperation<>(
-                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
-                this.resultMapper);
+                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
         }
     }
 }

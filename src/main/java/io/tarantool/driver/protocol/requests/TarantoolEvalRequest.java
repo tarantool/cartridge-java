@@ -7,8 +7,8 @@ import io.tarantool.driver.protocol.TarantoolRequestBody;
 import io.tarantool.driver.protocol.TarantoolRequestFieldType;
 import io.tarantool.driver.protocol.TarantoolRequestType;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,7 +52,7 @@ public final class TarantoolEvalRequest extends TarantoolRequest {
          * @param arguments eval arguments
          * @return builder
          */
-        public Builder withArguments(List<?> arguments) {
+        public Builder withArguments(Collection<?> arguments) {
             this.bodyMap.put(TarantoolRequestFieldType.IPROTO_TUPLE.getCode(), arguments);
             return this;
         }

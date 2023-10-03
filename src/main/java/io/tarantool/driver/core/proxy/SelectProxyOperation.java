@@ -11,8 +11,7 @@ import io.tarantool.driver.core.proxy.enums.ProxyOperationArgument;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
     private SelectProxyOperation(
         TarantoolCallOperations client,
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
@@ -71,8 +70,7 @@ public final class SelectProxyOperation<T> extends AbstractProxyOperation<T> {
                 .ifPresent(after -> options.put(ProxyOption.AFTER.toString(), after));
 
             return new SelectProxyOperation<>(
-                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
-                this.resultMapper);
+                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
         }
     }
 }

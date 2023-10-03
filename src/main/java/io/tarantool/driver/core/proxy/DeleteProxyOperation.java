@@ -6,8 +6,7 @@ import io.tarantool.driver.api.space.options.DeleteOptions;
 import io.tarantool.driver.mappers.CallResultMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Proxy operation for delete
@@ -21,7 +20,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
     private DeleteProxyOperation(
         TarantoolCallOperations client,
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         super(client, functionName, arguments, argumentsMapper, resultMapper);
@@ -45,8 +44,7 @@ public final class DeleteProxyOperation<T> extends AbstractProxyOperation<T> {
         public DeleteProxyOperation<T> build() {
 
             return new DeleteProxyOperation<>(
-                this.client, this.functionName, new ArrayList<>(arguments.values()), this.argumentsMapper,
-                this.resultMapper);
+                this.client, this.functionName, this.arguments.values(), this.argumentsMapper, this.resultMapper);
         }
     }
 }
