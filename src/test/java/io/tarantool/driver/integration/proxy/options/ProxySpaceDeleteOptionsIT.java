@@ -4,7 +4,7 @@ import io.tarantool.driver.api.TarantoolClient;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
-import io.tarantool.driver.api.space.options.TarantoolSpaceOperations;
+import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertOptions;
 import io.tarantool.driver.api.space.options.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.ProxyInsertOptions;
