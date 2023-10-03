@@ -6,25 +6,25 @@ import org.msgpack.value.ArrayValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueFactory;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * Default {@link List} to {@link ArrayValue} converter
+ * Default {@link Collection} to {@link ArrayValue} converter
  *
  * @author Alexey Kuzin
  */
-public class DefaultListToArrayValueConverter implements ObjectConverter<List<?>, ArrayValue> {
+public class DefaultCollectionToArrayValueConverter implements ObjectConverter<Collection<?>, ArrayValue> {
 
-    private static final long serialVersionUID = 20220418L;
+    private static final long serialVersionUID = 20231003L;
 
     private final MessagePackObjectMapper mapper;
 
-    public DefaultListToArrayValueConverter(MessagePackObjectMapper mapper) {
+    public DefaultCollectionToArrayValueConverter(MessagePackObjectMapper mapper) {
         this.mapper = mapper;
     }
 
     @Override
-    public ArrayValue toValue(List<?> object) {
+    public ArrayValue toValue(Collection<?> object) {
         Value[] values = new Value[object.size()];
         int i = 0;
         for (Object value : object) {

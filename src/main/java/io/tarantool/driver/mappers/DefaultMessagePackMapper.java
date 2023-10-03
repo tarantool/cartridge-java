@@ -5,6 +5,7 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.mappers.converters.ConverterWrapper;
 import io.tarantool.driver.mappers.converters.ObjectConverter;
 import io.tarantool.driver.mappers.converters.ValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultCollectionToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultListToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultMapToMapValueConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultArrayValueToListConverter;
@@ -14,7 +15,9 @@ import org.msgpack.value.NilValue;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueType;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -299,9 +302,10 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
 
         @Override
         public Builder withDefaultMapObjectConverter() {
-            mapper.registerObjectConverter(new DefaultMapToMapValueConverter(mapper));
+            DefaultMapToMapValueConverter converter = new DefaultMapToMapValueConverter(mapper);
+            mapper.registerObjectConverter(converter);
             Class<HashMap<?, ?>> cls = (Class<HashMap<?, ?>>) (Object) HashMap.class;
-            mapper.registerObjectConverter(cls, new DefaultMapToMapValueConverter(mapper));
+            mapper.registerObjectConverter(cls, converter);
             return this;
         }
 
@@ -312,10 +316,20 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         }
 
         @Override
+        public Builder withDefaultCollectionObjectConverter() {
+            DefaultCollectionToArrayValueConverter converter = new DefaultCollectionToArrayValueConverter(mapper);
+            mapper.registerObjectConverter(converter);
+            mapper.registerObjectConverter((Class<Collection<?>>) (Object) Collection.class, converter);
+            mapper.registerObjectConverter((Class<AbstractCollection<?>>) (Object) AbstractCollection.class, converter);
+            return this;
+        }
+
+        @Override
         public Builder withDefaultListObjectConverter() {
-            mapper.registerObjectConverter(new DefaultListToArrayValueConverter(mapper));
+            DefaultListToArrayValueConverter converter = new DefaultListToArrayValueConverter(mapper);
+            mapper.registerObjectConverter(converter);
             Class<ArrayList<?>> cls = (Class<ArrayList<?>>) (Object) ArrayList.class;
-            mapper.registerObjectConverter(cls, new DefaultListToArrayValueConverter(mapper));
+            mapper.registerObjectConverter(cls, converter);
             return this;
         }
 

@@ -1,5 +1,8 @@
 target/
 .idea/
+.settings/
+.classpath
+.project
 .rocks/
 tmp/
 *.iml
