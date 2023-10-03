@@ -3,9 +3,10 @@ package io.tarantool.driver.mappers.converters.value.defaults;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
 import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.Value;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Default {@link ArrayValue} to {@link List} converter
@@ -23,7 +24,11 @@ public class DefaultArrayValueToListConverter implements ValueConverter<ArrayVal
     }
 
     @Override
-    public List<?> fromValue(ArrayValue value) {
-        return value.list().stream().map(mapper::fromValue).collect(Collectors.toList());
+    public List<?> fromValue(ArrayValue values) {
+        ArrayList<Object> objects = new ArrayList<>(values.size());
+        for (Value value : values) {
+            objects.add(mapper.fromValue(value));
+        }
+        return objects;
     }
 }
