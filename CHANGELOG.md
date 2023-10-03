@@ -8,6 +8,7 @@
 
 ### Internal and API changes
 
+- **[breaking change]** replace `List` type with `Collection` for the `arguments` client API method parameters
 - Bump testcontainers-java-tarantool to 1.0.1 ([#400](https://github.com/tarantool/cartridge-java/issues/400))
 - Add `"mode"` option for select operation ([#107](https://github.com/tarantool/cartridge-java/issues/107))
 - Change using of proxy client parameters (`mode`, `rollback_on_error`, `stop_on_error`) with enum classes ([#419](https://github.com/tarantool/cartridge-java/issues/419))

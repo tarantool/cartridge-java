@@ -4,8 +4,7 @@ import io.tarantool.driver.api.TarantoolCallOperations;
 import io.tarantool.driver.api.TarantoolVoidResult;
 import io.tarantool.driver.api.space.options.crud.OperationWithTimeoutOptions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -18,12 +17,12 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
 
     private final TarantoolCallOperations client;
     private final String functionName;
-    private final List<?> arguments;
+    private final Collection<?> arguments;
 
     private TruncateProxyOperation(
         TarantoolCallOperations client,
         String functionName,
-        List<?> arguments) {
+        Collection<?> arguments) {
         this.client = client;
         this.arguments = arguments;
         this.functionName = functionName;
@@ -46,7 +45,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
         return functionName;
     }
 
-    public List<?> getArguments() {
+    public Collection<?> getArguments() {
         return arguments;
     }
 
@@ -74,7 +73,7 @@ public final class TruncateProxyOperation implements ProxyOperation<Void> {
          */
         public TruncateProxyOperation build() {
 
-            return new TruncateProxyOperation(this.client, this.functionName, new ArrayList<>(arguments.values()));
+            return new TruncateProxyOperation(this.client, this.functionName, this.arguments.values());
         }
     }
 }

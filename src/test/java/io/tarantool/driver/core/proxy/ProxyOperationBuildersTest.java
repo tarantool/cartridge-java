@@ -32,12 +32,14 @@ import io.tarantool.driver.protocol.TarantoolIndexQuery;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 
 public class ProxyOperationBuildersTest {
@@ -76,7 +78,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, deleteProxyOperation.getClient());
         assertEquals("function1", deleteProxyOperation.getFunctionName());
-        assertEquals(Arrays.asList("space1", Collections.singletonList(42L), options),
+        assertIterableEquals(Arrays.asList("space1", Collections.singletonList(42L), options),
             deleteProxyOperation.getArguments());
         assertEquals(defaultResultMapper, deleteProxyOperation.getResultMapper());
     }
@@ -104,7 +106,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, insertOperation.getClient());
         assertEquals("function1", insertOperation.getFunctionName());
-        assertEquals(Arrays.asList("space1", tarantoolTuple, options), insertOperation.getArguments());
+        assertIterableEquals(Arrays.asList("space1", tarantoolTuple, options), insertOperation.getArguments());
         assertEquals(defaultResultMapper, insertOperation.getResultMapper());
     }
 
@@ -136,7 +138,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
-        assertEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertIterableEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
         assertEquals(defaultResultMapper, operation.getResultMapper());
     }
 
@@ -163,7 +165,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
-        assertEquals(Arrays.asList("space1", tarantoolTuple, options), operation.getArguments());
+        assertIterableEquals(Arrays.asList("space1", tarantoolTuple, options), operation.getArguments());
         assertEquals(defaultResultMapper, operation.getResultMapper());
     }
 
@@ -196,7 +198,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
-        assertEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
+        assertIterableEquals(Arrays.asList("space1", tarantoolTuples, options), operation.getArguments());
         assertEquals(defaultResultMapper, operation.getResultMapper());
     }
 
@@ -236,9 +238,10 @@ public class ProxyOperationBuildersTest {
         assertEquals(client, op.getClient());
         assertEquals("function1", op.getFunctionName());
         assertEquals(3, op.getArguments().size());
-        assertEquals("space1", op.getArguments().get(0));
-        assertEquals(selectArguments, op.getArguments().get(1));
-        Map<String, Object> actualOptions = (Map<String, Object>) op.getArguments().get(2);
+        List<Object> argumentValues = new ArrayList<>(op.getArguments());
+        assertEquals("space1", argumentValues.get(0));
+        assertEquals(selectArguments, argumentValues.get(1));
+        Map<String, Object> actualOptions = (Map<String, Object>) argumentValues.get(2);
         assertEquals(options.toString(), actualOptions.toString());
         assertEquals(defaultResultMapper, op.getResultMapper());
     }
@@ -268,7 +271,7 @@ public class ProxyOperationBuildersTest {
         assertEquals("function1", operation.getFunctionName());
         assertEquals(4, operation.getArguments().size());
 
-        assertEquals(Arrays.asList("space1",
+        assertIterableEquals(Arrays.asList("space1",
                 Collections.singletonList(10),
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
             operation.getArguments());
@@ -303,7 +306,7 @@ public class ProxyOperationBuildersTest {
 
         assertEquals(client, operation.getClient());
         assertEquals("function1", operation.getFunctionName());
-        assertEquals(Arrays.asList("space1", tarantoolTuple,
+        assertIterableEquals(Arrays.asList("space1", tarantoolTuple,
                 TupleOperations.add(3, 90).andAdd(4, 5).asProxyOperationList(), options),
             operation.getArguments());
         assertEquals(defaultResultMapper, operation.getResultMapper());
@@ -329,6 +332,6 @@ public class ProxyOperationBuildersTest {
         // then data is prepared check that is equals that we submitted to the builder
         assertEquals(client, truncateOperation.getClient());
         assertEquals("function1", truncateOperation.getFunctionName());
-        assertEquals(Arrays.asList("space1", options), truncateOperation.getArguments());
+        assertIterableEquals(Arrays.asList("space1", options), truncateOperation.getArguments());
     }
 }

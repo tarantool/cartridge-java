@@ -234,13 +234,13 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public CompletableFuture<List<?>> call(String functionName, List<?> arguments)
+    public CompletableFuture<List<?>> call(String functionName, Collection<?> arguments)
         throws TarantoolClientException {
         return call(functionName, arguments, config.getMessagePackMapper());
     }
 
     @Override
-    public CompletableFuture<List<?>> call(String functionName, List<?> arguments, MessagePackMapper mapper)
+    public CompletableFuture<List<?>> call(String functionName, Collection<?> arguments, MessagePackMapper mapper)
         throws TarantoolClientException {
         return makeRequest(functionName, arguments, mapper, mapper);
     }
@@ -261,7 +261,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
-            String functionName, List<?> arguments, Class<T> tupleClass)
+            String functionName, Collection<?> arguments, Class<T> tupleClass)
         throws TarantoolClientException {
         return callForTupleResult(functionName, arguments, config.getMessagePackMapper(), tupleClass);
     }
@@ -269,7 +269,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T> CompletableFuture<T> call(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
         return call(functionName, arguments, config.getMessagePackMapper(), resultMapper);
@@ -278,7 +278,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T> CompletableFuture<TarantoolResult<T>> callForTupleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         Class<T> tupleClass)
         throws TarantoolClientException {
@@ -289,7 +289,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T> CompletableFuture<T> call(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper)
         throws TarantoolClientException {
@@ -299,7 +299,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         Class<S> resultClass)
         throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), resultClass);
@@ -308,7 +308,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         ValueConverter<Value, S> valueConverter)
         throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), valueConverter);
@@ -317,7 +317,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         CallResultMapper<S, SingleValueCallResult<S>> resultMapper) throws TarantoolClientException {
         return callForSingleResult(functionName, arguments, config.getMessagePackMapper(), resultMapper);
     }
@@ -344,7 +344,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         Class<S> resultClass)
         throws TarantoolClientException {
@@ -355,7 +355,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         ValueConverter<Value, S> valueConverter)
         throws TarantoolClientException {
@@ -366,7 +366,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <S> CompletableFuture<S> callForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<S, SingleValueCallResult<S>> resultMapper)
         throws TarantoolClientException {
@@ -377,7 +377,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
         throws TarantoolClientException {
@@ -388,7 +388,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter) throws TarantoolClientException {
         return callForMultiResult(functionName, arguments, config.getMessagePackMapper(),
@@ -398,7 +398,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) throws TarantoolClientException {
         return callForMultiResult(functionName, arguments, config.getMessagePackMapper(), resultMapper);
     }
@@ -432,7 +432,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         Supplier<R> resultContainerSupplier,
         Class<T> resultClass)
@@ -444,7 +444,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         Supplier<R> resultContainerSupplier,
         ValueConverter<Value, T> valueConverter)
@@ -456,7 +456,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public <T, R extends List<T>> CompletableFuture<R> callForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper)
         throws TarantoolClientException {
@@ -466,7 +466,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     private <T> CompletableFuture<CallResult<T>> makeRequestForSingleResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<T, SingleValueCallResult<T>> resultMapper) {
         return makeRequest(functionName, arguments, argumentsMapper, resultMapper);
@@ -474,7 +474,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     private <T, R extends List<T>> CompletableFuture<CallResult<R>> makeRequestForMultiResult(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         CallResultMapper<R, MultiValueCallResult<T, R>> resultMapper) {
         return makeRequest(functionName, arguments, argumentsMapper, resultMapper);
@@ -482,7 +482,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
 
     private <S> CompletableFuture<S> makeRequest(
         String functionName,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         MessagePackValueMapper resultMapper)
         throws TarantoolClientException {
@@ -507,7 +507,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression, List<?> arguments)
+    public CompletableFuture<List<?>> eval(String expression, Collection<?> arguments)
         throws TarantoolClientException {
         return eval(expression, arguments, config.getMessagePackMapper());
     }
@@ -519,7 +519,8 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     }
 
     @Override
-    public CompletableFuture<List<?>> eval(String expression, List<?> arguments, MessagePackValueMapper resultMapper)
+    public CompletableFuture<List<?>> eval(
+        String expression, Collection<?> arguments, MessagePackValueMapper resultMapper)
         throws TarantoolClientException {
         return eval(expression, arguments, config.getMessagePackMapper(), resultMapper);
     }
@@ -527,7 +528,7 @@ public abstract class AbstractTarantoolClient<T extends Packable, R extends Coll
     @Override
     public CompletableFuture<List<?>> eval(
         String expression,
-        List<?> arguments,
+        Collection<?> arguments,
         MessagePackObjectMapper argumentsMapper,
         MessagePackValueMapper resultMapper) throws TarantoolClientException {
         try {
