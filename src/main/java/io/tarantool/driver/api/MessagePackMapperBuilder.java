@@ -36,6 +36,13 @@ public interface MessagePackMapperBuilder {
     MessagePackMapperBuilder withDefaultArrayValueConverter();
 
     /**
+     * Configure the mapper with default {@link Collection} to {@code MP_ARRAY} entity converter
+     *
+     * @return builder
+     */
+    MessagePackMapperBuilder withDefaultCollectionObjectConverter();
+
+    /**
      * Configure the mapper with default {@link List} to {@code MP_ARRAY} entity converter
      *
      * @return builder

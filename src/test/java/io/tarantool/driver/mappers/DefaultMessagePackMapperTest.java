@@ -18,8 +18,11 @@ import org.msgpack.value.impl.ImmutableStringValueImpl;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.AbstractCollection;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -91,6 +94,43 @@ class DefaultMessagePackMapperTest {
         ArrayValue expectedValue = ValueFactory.newArray(
             ValueFactory.newString("Hello"), ValueFactory.newInteger(111));
         assertEquals(expectedValue, mapper.toValue(testList));
+
+        Collection<Object> testCollection = new AbstractCollection<Object>() {
+            public Iterator<Object> iterator() {
+                return new Iterator<Object>() {
+                    private Iterator<Object> i = testList.iterator();
+
+                    public boolean hasNext() {
+                        return i.hasNext();
+                    }
+
+                    public Object next() {
+                        return i.next();
+                    }
+
+                    public void remove() {
+                        i.remove();
+                    }
+                };
+            }
+
+            public int size() {
+                return testList.size();
+            }
+
+            public boolean isEmpty() {
+                return testList.isEmpty();
+            }
+
+            public void clear() {
+                testList.clear();
+            }
+
+            public boolean contains(Object v) {
+                return testList.contains(v);
+            }
+        };
+        assertEquals(expectedValue, mapper.toValue(testCollection));
 
         expectedValue = ValueFactory.newArray(new ImmutableLongValueImpl(1L), new ImmutableLongValueImpl(2L));
         assertEquals(expectedValue, mapper.toValue(new long[]{1L, 2L}));

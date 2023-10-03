@@ -131,6 +131,7 @@ public final class DefaultMessagePackMapperFactory {
                 .withDefaultArrayValueConverter()
                 .withDefaultMapObjectConverter()
                 .withDefaultMapValueConverter()
+                .withDefaultCollectionObjectConverter()
                 .build();
 
         // internal types converter
