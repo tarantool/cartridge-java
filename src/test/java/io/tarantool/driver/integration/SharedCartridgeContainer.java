@@ -55,6 +55,6 @@ public abstract class SharedCartridgeContainer {
     }
 
     protected static void stopInstance(String instanceName) throws IOException, InterruptedException {
-        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", "--data-dir=/tmp/data", instanceName);
+        container.execInContainer("cartridge", "stop", "--run-dir=/tmp/run", instanceName);
     }
 }

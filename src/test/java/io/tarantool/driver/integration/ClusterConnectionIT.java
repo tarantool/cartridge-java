@@ -1,33 +1,53 @@
 package io.tarantool.driver.integration;
 
-import io.tarantool.driver.api.TarantoolClientConfig;
-import io.tarantool.driver.api.TarantoolClusterAddressProvider;
-import io.tarantool.driver.api.TarantoolServerAddress;
-import io.tarantool.driver.api.connection.TarantoolConnection;
-import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
-import io.tarantool.driver.auth.SimpleTarantoolCredentials;
-import io.tarantool.driver.core.ClusterTarantoolTupleClient;
-import io.tarantool.driver.core.ProxyTarantoolTupleClient;
-import io.tarantool.driver.core.RetryingTarantoolTupleClient;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.rnorth.ducttape.unreliables.Unreliables;
-import org.testcontainers.containers.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.rnorth.ducttape.unreliables.Unreliables;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.TarantoolCartridgeContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import io.tarantool.driver.TarantoolUtils;
+import io.tarantool.driver.api.TarantoolClient;
+import io.tarantool.driver.api.TarantoolClientConfig;
+import io.tarantool.driver.api.TarantoolClientFactory;
+import io.tarantool.driver.api.TarantoolClusterAddressProvider;
+import io.tarantool.driver.api.TarantoolResult;
+import io.tarantool.driver.api.TarantoolServerAddress;
+import io.tarantool.driver.api.conditions.Conditions;
+import io.tarantool.driver.api.connection.TarantoolConnection;
+import io.tarantool.driver.api.retry.TarantoolRequestRetryPolicies;
+import io.tarantool.driver.api.tuple.TarantoolTuple;
+import io.tarantool.driver.auth.SimpleTarantoolCredentials;
+import io.tarantool.driver.auth.TarantoolCredentials;
+import io.tarantool.driver.cluster.BinaryClusterDiscoveryEndpoint;
+import io.tarantool.driver.cluster.BinaryDiscoveryClusterAddressProvider;
+import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
+import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.ClusterTarantoolTupleClient;
+import io.tarantool.driver.core.ProxyTarantoolTupleClient;
+import io.tarantool.driver.core.RetryingTarantoolTupleClient;
 
 /**
  * @author Alexey Kuzin
@@ -49,9 +69,9 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
     private TarantoolClientConfig.Builder prepareConfig() {
         return TarantoolClientConfig.builder()
-            .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
-            .withConnectTimeout(1000)
-            .withReadTimeout(1000);
+                   .withCredentials(new SimpleTarantoolCredentials(USER_NAME, PASSWORD))
+                   .withConnectTimeout(1000)
+                   .withReadTimeout(1000);
     }
 
     private RetryingTarantoolTupleClient setupRouterClient(int port, int retries, long delay) {
@@ -59,7 +79,8 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
             prepareConfig().build(), container.getRouterHost(), container.getMappedPort(port));
 
         return new RetryingTarantoolTupleClient(new ProxyTarantoolTupleClient(clusterClient),
-            TarantoolRequestRetryPolicies.byNumberOfAttempts(retries).withDelay(delay).build());
+                                                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries)
+                                                    .withDelay(delay).build());
     }
 
     private RetryingTarantoolTupleClient setupClusterClient(
@@ -70,7 +91,240 @@ public class ClusterConnectionIT extends SharedCartridgeContainer {
 
         ProxyTarantoolTupleClient client = new ProxyTarantoolTupleClient(clusterClient);
         return new RetryingTarantoolTupleClient(client,
-            TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> true).withDelay(delay).build());
+                                                TarantoolRequestRetryPolicies.byNumberOfAttempts(retries, e -> true)
+                                                    .withDelay(delay).build());
+    }
+
+    // TODO: Add parallel threads
+    // TODO: A lot of routers
+    // TODO: Parallel round robin and default as test parameter
+    @Test
+    void test_roundRobin_shouldWorkCorrectly_withDiscoveryAndConnections()
+        throws ExecutionException, InterruptedException {
+
+        TarantoolCartridgeContainer testContainer = runIndependentContainer();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clusterClient =
+            getTarantoolClusterClientWithDiscovery(testContainer, 2, 2_000);
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient1 = getSimpleClient(testContainer,
+            3301);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient2 = getSimpleClient(testContainer,
+            3302);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient3 = getSimpleClient(testContainer,
+            3303);
+
+        int batch = 1500;
+        int batchPerConnect =
+            batch / 3 / 2; // 1_500 calls on 3 routers on 2 connection == 1_500 / 6 == 250 calls per connect
+        for (int i = 0; i < batch; i++) {
+            clusterClient.callForSingleResult(
+                "simple_long_running_function", Arrays.asList(0, true), Boolean.class).get();
+        }
+
+        for (TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> router : Arrays.asList(routerClient1,
+            routerClient2,
+            routerClient3)) {
+            assertEquals(Arrays.asList(batchPerConnect, batchPerConnect), getCallCountersPerConnection(router));
+        }
+    }
+
+    @Test
+    void test_roundRobin_shouldWorkCorrectly_withDiscoveryAndConnections_andRouterJoining()
+        throws ExecutionException, InterruptedException {
+
+        TarantoolCartridgeContainer testContainer = runIndependentContainer();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clusterClient =
+            getTarantoolClusterClientWithDiscovery(testContainer, 2, 2_000);
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient1 = getSimpleClient(testContainer,
+            3301);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient2 = getSimpleClient(testContainer,
+            3302);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient3 = getSimpleClient(testContainer,
+            3303);
+        // 3306 is not in cluster topology yet
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient4 = getSimpleClient(testContainer,
+            3306);
+
+        // add new router
+        // put 3306 in topology as router
+        routerClient1.eval("cartridge = require('cartridge') " +
+                               "replicasets = { " +
+                               "                { " +
+                               "                    alias = 'app-router-fourth', " +
+                               "                    roles = { 'vshard-router', 'app.roles.custom', 'app.roles" +
+                               ".api_router' }, " +
+                               "                    join_servers = { { uri = 'localhost:3306' } } " +
+                               "                }} " +
+                               "cartridge.admin_edit_topology({ replicasets = replicasets }) ").join();
+
+        int batch = 2000;
+        int batchPerConnect =
+            batch / 4 / 2; // 2_000 calls on 4 routers on 2 connection == 2_000 / 8 == 250 calls per connect
+        for (int i = 0; i < batch; i++) {
+            clusterClient.callForSingleResult(
+                "simple_long_running_function", Arrays.asList(0, true), Boolean.class).get();
+        }
+
+        AtomicInteger sum = new AtomicInteger();
+        for (TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> router :
+            Arrays.asList(routerClient1, routerClient2, routerClient3)) {
+            assertEquals(2, getCallCountersPerConnection(router).stream().filter(cnt -> {
+                sum.addAndGet(cnt);
+                return cnt > batchPerConnect; // because forth router was in starting stage some time
+            }).count());
+        }
+        assertEquals(2, getCallCountersPerConnection(routerClient4).stream().filter(cnt -> {
+            sum.addAndGet(cnt);
+            return 0 < cnt && cnt < batchPerConnect;
+        }).count());
+        assertEquals(batch, sum.get());
+    }
+
+    @Test
+    void test_roundRobin_shouldWorkCorrectly_withDiscoveryAndConnections_andRouterDying()
+        throws ExecutionException, InterruptedException, IOException {
+
+        TarantoolCartridgeContainer testContainer = runIndependentContainer();
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> clusterClient =
+            getTarantoolClusterClientWithDiscovery(testContainer, 2, 2_000);
+
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient1 = getSimpleClient(testContainer,
+            3301);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient2 = getSimpleClient(testContainer,
+            3302);
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient3 = getSimpleClient(testContainer,
+            3303);
+        // 3306 is not in cluster topology yet
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> routerClient4 = getSimpleClient(testContainer,
+            3306);
+
+        // add new router
+        // put 3306 in topology as router
+        routerClient1.eval("cartridge = require('cartridge') " +
+                               "replicasets = { " +
+                               "                { " +
+                               "                    alias = 'app-router-fourth', " +
+                               "                    roles = { 'vshard-router', 'app.roles.custom', 'app.roles" +
+                               ".api_router' }, " +
+                               "                    join_servers = { { uri = 'localhost:3306' } } " +
+                               "                }} " +
+                               "cartridge.admin_edit_topology({ replicasets = replicasets }) ").join();
+
+        String healthyCmd = "return cartridge.is_healthy()";
+
+        TarantoolUtils.retry(() -> {
+            try {
+                assertEquals(true, testContainer.executeCommand(healthyCmd).get().get(0));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        stopInstance("fourth-router");
+
+        int batch = 2000;
+        int batchPerConnect =
+            batch / 4 / 2; // 2_000 calls on 4 routers on 2 connection == 2_000 / 8 == 250 calls per connect
+        for (int i = 0; i < batch; i++) {
+            clusterClient.callForSingleResult(
+                "simple_long_running_function", Arrays.asList(0, true), Boolean.class).get();
+        }
+
+        AtomicInteger sum = new AtomicInteger();
+        for (TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> router :
+            Arrays.asList(routerClient1, routerClient2, routerClient3)) {
+            assertEquals(2, getCallCountersPerConnection(router).stream().filter(cnt -> {
+                sum.addAndGet(cnt);
+                return cnt > batchPerConnect;
+            }).count());
+        }
+        assertEquals(2, getCallCountersPerConnection(routerClient4).stream().filter(cnt -> {
+            sum.addAndGet(cnt);
+            return 0 < cnt && cnt < batchPerConnect;
+        }).count());
+        assertEquals(batch, sum.get());
+    }
+
+    private static TarantoolCartridgeContainer runIndependentContainer() {
+        TarantoolCartridgeContainer container =
+            new TarantoolCartridgeContainer(
+                "cartridge/instances.yml",
+                "cartridge/topology.lua")
+                .withDirectoryBinding("cartridge")
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(ClusterConnectionIT.class)))
+                .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
+                .withStartupTimeout(Duration.ofMinutes(2));
+        container.start();
+        return container;
+    }
+
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> getSimpleClient(
+        TarantoolCartridgeContainer testContainer, Integer port) {
+        return TarantoolClientFactory.createClient()
+                   .withAddress(testContainer.getRouterHost(), testContainer.getMappedPort(port))
+                   .withCredentials(testContainer.getUsername(), testContainer.getPassword())
+                   .build();
+    }
+
+    private static TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>>
+    getTarantoolClusterClientWithDiscovery(TarantoolCartridgeContainer testContainer,
+        int connections, int delay) {
+        String host = testContainer.getRouterHost();
+        int port = testContainer.getRouterPort();
+        String username = testContainer.getUsername();
+        String password = testContainer.getPassword();
+
+        TarantoolCredentials credentials = new SimpleTarantoolCredentials(
+            username,
+            password
+        );
+        TarantoolClientConfig config = TarantoolClientConfig.builder()
+                                           .withCredentials(credentials)
+                                           .build();
+
+        BinaryClusterDiscoveryEndpoint endpoint = new BinaryClusterDiscoveryEndpoint.Builder()
+                                                      .withClientConfig(config)
+                                                      .withEntryFunction("get_routers")
+                                                      .withEndpointProvider(() -> Collections.singletonList(
+                                                          new TarantoolServerAddress(
+                                                              host, port
+                                                          )))
+                                                      .build();
+
+        TarantoolClusterDiscoveryConfig clusterDiscoveryConfig = new TarantoolClusterDiscoveryConfig.Builder()
+                                                                     .withDelay(delay)
+                                                                     .withEndpoint(endpoint)
+                                                                     .build();
+
+        BinaryDiscoveryClusterAddressProvider discoveryProvider = new BinaryDiscoveryClusterAddressProvider(
+            clusterDiscoveryConfig);
+
+        TarantoolClusterAddressProvider wrapperDiscoveryProvider
+            = new TestWrappedClusterAddressProvider(discoveryProvider, testContainer); // because we use docker ports
+
+        return TarantoolClientFactory.createClient()
+                   .withAddressProvider(wrapperDiscoveryProvider)
+                   .withCredentials(username, password)
+                   .withConnections(connections)
+                   .build();
+    }
+
+    @NotNull
+    private static List<Integer> getCallCountersPerConnection(
+        TarantoolClient<TarantoolTuple, TarantoolResult<TarantoolTuple>> router)
+        throws ExecutionException, InterruptedException {
+        TarantoolResult<TarantoolTuple> tuples = router.space("request_counters")
+                                                     .select(
+                                                         Conditions.indexGreaterThan(
+                                                             "count",
+                                                             Collections.singletonList(0))).get();
+        return tuples.stream()
+                   .map(tuple -> tuple.getInteger("count"))
+                   .collect(Collectors.toList());
     }
 
     @Test
