@@ -30,6 +30,6 @@ public class DefaultCollectionToArrayValueConverter implements ObjectConverter<C
         for (Object value : object) {
             values[i++] = value == null ? ValueFactory.newNil() : mapper.toValue(value);
         }
-        return ValueFactory.newArray(values, false);
+        return ValueFactory.newArray(values, true);
     }
 }
