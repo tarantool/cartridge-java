@@ -5,7 +5,8 @@ align="right">
 
 # Java driver for Tarantool Cartridge
 
-[![java-driver:ubuntu/master Actions Status](https://github.com/tarantool/cartridge-java/workflows/ubuntu-master/badge.svg)](https://github.com/tarantool/cartridge-java/actions)
+[![Tests Community](https://github.com/tarantool/cartridge-java/actions/workflows/tests-ce.yml/badge.svg)](https://github.com/tarantool/cartridge-java/actions/workflows/tests-ce.yml)
+[![Tests Enterprise](https://github.com/tarantool/cartridge-java/actions/workflows/tests-ee.yml/badge.svg)](https://github.com/tarantool/cartridge-java/actions/workflows/tests-ee.yml)
 
 Java driver for Tarantool Cartridge for Tarantool versions 1.10+ based on the asynchronous
 [Netty](https://netty.io) framework and official
