@@ -14,16 +14,20 @@ public final class TarantoolUtils {
     private TarantoolUtils() {
     }
 
-    public static boolean versionGreaterOrEqualThen(String tarantoolVersion) {
-        Assert.notNull(tarantoolVersion, "tarantoolVersion must not be null");
+    public static boolean versionGreaterOrEqualThen(String minimum) {
+        Assert.notNull(minimum, "minimum must not be null");
         String tarantoolCiVersion = java.lang.System.getenv(TARANTOOL_VERSION);
-        if (tarantoolCiVersion == null || tarantoolCiVersion.isEmpty()) {
-            return true;
-        }
-        TarantoolVersion ciVersion = new TarantoolVersion(tarantoolCiVersion);
-        TarantoolVersion version = new TarantoolVersion(tarantoolVersion);
-        return ciVersion.getMajor() >= version.getMajor() &&
-            ciVersion.getMinor() >= version.getMinor();
+        return versionGreaterOrEqualThen(tarantoolCiVersion, minimum);
+    }
+
+    public static boolean versionGreaterOrEqualThen(String current, String minimum) {
+        return current == null || current.isEmpty() ||
+               versionGreaterOrEqualThen(new TarantoolVersion(current), new TarantoolVersion(minimum));
+    }
+
+    public static boolean versionGreaterOrEqualThen(TarantoolVersion current, TarantoolVersion minimum) {
+        return current.getMajor() > minimum.getMajor() ||
+               current.getMajor().equals(minimum.getMajor()) && current.getMinor() >= minimum.getMinor();
     }
 
     public static boolean versionWithUUID() {
