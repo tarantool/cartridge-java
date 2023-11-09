@@ -1,66 +1,58 @@
 package io.tarantool.driver.codecs;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import io.tarantool.driver.protocol.TarantoolResponse;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
+import org.msgpack.core.buffer.ByteBufferInput;
 
 import java.util.List;
+import java.nio.ByteBuffer;
 
 /**
  * Converts Tarantool server responses from MessagePack frames to Java objects
  *
  * @author Alexey Kuzin
  */
-public class MessagePackFrameDecoder extends ReplayingDecoder<MessagePackFrameDecoder.DecoderState> {
+public class MessagePackFrameDecoder extends ByteToMessageDecoder {
 
     private static final int MINIMAL_HEADER_SIZE = 5; // MP_UINT32
+    private static final int MINIMAL_BODY_SIZE = 1 * 1024 * 1024; // 1 MB
     private int size;
-
-    public MessagePackFrameDecoder() {
-        super(DecoderState.LENGTH);
-    }
+    private final ByteBuffer lenBuffer = ByteBuffer.allocateDirect(MINIMAL_HEADER_SIZE);
+    private final ByteBufferInput lenBufferInput = new ByteBufferInput(lenBuffer);
+    private final MessageUnpacker lenUnpacker = new MessagePack.UnpackerConfig().newUnpacker(lenBufferInput);
+    private final ByteBuffer bodyBuffer = ByteBuffer.allocateDirect(MINIMAL_BODY_SIZE);
+    private final ByteBufferInput bodyBufferInput = new ByteBufferInput(bodyBuffer);
+    private final MessageUnpacker bodyUnpacker = new MessagePack.UnpackerConfig().newUnpacker(bodyBufferInput);
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list)
         throws Exception {
-
-        switch (state()) {
-            case LENGTH:
-                ByteBuf lenBuf = byteBuf.readBytes(MINIMAL_HEADER_SIZE);
-                try (ByteBufInputStream in = new ByteBufInputStream(lenBuf)) {
-                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
-                    size = unpacker.unpackInt();
-                    unpacker.close();
-                    checkpoint(DecoderState.BODY);
-                }
-                lenBuf.release();
-            case BODY:
-                if (size > 0) {
-                    if (byteBuf.readableBytes() < size) {
-                        return;
-                    }
-                    ByteBuf bodyBuf = byteBuf.readBytes(size);
-                    try (ByteBufInputStream in = new ByteBufInputStream(bodyBuf)) {
-                        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(in);
-                        list.add(TarantoolResponse.fromMessagePack(unpacker));
-                        unpacker.close();
-                        size = 0;
-                    }
-                    bodyBuf.release();
-                }
-                checkpoint(DecoderState.LENGTH);
-                break;
-            default:
-                throw new Error("Shouldn't reach here.");
+        if (byteBuf.readableBytes() < MINIMAL_HEADER_SIZE) {
+            return;
         }
-    }
 
-    protected enum DecoderState {
-        LENGTH,
-        BODY
+        byteBuf.markReaderIndex();
+        lenBuffer.clear();
+        lenBufferInput.reset(lenBuffer);
+        lenUnpacker.reset(lenBufferInput);
+        byteBuf.readBytes(lenBuffer);
+        size = lenUnpacker.unpackInt();
+
+        if (byteBuf.readableBytes() < size) {
+            byteBuf.resetReaderIndex();
+            return;
+        }
+
+        bodyBuffer.clear();
+        bodyBuffer.limit(size);
+        bodyBufferInput.reset(bodyBuffer);
+        bodyUnpacker.reset(bodyBufferInput);
+        byteBuf.readBytes(bodyBuffer);
+        list.add(TarantoolResponse.fromMessagePack(bodyUnpacker));
+        size = 0;
     }
 }
