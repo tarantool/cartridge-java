@@ -161,39 +161,76 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <V extends Value, O> V toValue(O o) {
-        Function<String, Optional<ObjectConverter<O, V>>> getter =
-            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                .map(c -> (ObjectConverter<O, V>) c.getConverter())
-                .filter(c -> c.canConvertObject(o))
-                .findFirst();
-
-        ObjectConverter<O, V> converter = getObjectConverter(o, getter);
+        ObjectConverter<O, V> converter = getObjectConverter(o);
         return converter.toValue(o);
     }
 
     @SuppressWarnings("unchecked")
-    private <V extends Value, O> ObjectConverter<O, V>
-    getObjectConverter(O o, Function<String, Optional<ObjectConverter<O, V>>> getter) {
+    private <V extends Value, O> ObjectConverter<O, V> getObjectConverter(O o) {
         if (o == null) {
             return (ObjectConverter<O, V>) nilConverter;
         }
-        Optional<ObjectConverter<O, V>> converter = findObjectConverter(o.getClass(), getter);
+        Optional<ObjectConverter<O, V>> converter = findObjectConverter(o, o.getClass());
         if (!converter.isPresent()) {
             throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
         }
         return converter.get();
     }
 
-    private <T> Optional<T> findObjectConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
-        Optional<T> converter = getter.apply(objectClass.getTypeName());
+    @SuppressWarnings("unchecked")
+    private <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(O o, String typeName) {
+        ObjectConverter<O, V> converter;
+        List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> wrappers =
+            objectConverters.getOrDefault(typeName, Collections.emptyList());
+        for (ConverterWrapper<ObjectConverter<?, ? extends Value>> wrapper : wrappers) {
+            converter = (ObjectConverter<O, V>) wrapper.getConverter();
+            if (converter.canConvertObject(o)) {
+                return Optional.of(converter);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private <V extends Value, O> Optional<ObjectConverter<O, V>> findObjectConverter(O o, Class<?> objectClass) {
+        Optional<ObjectConverter<O, V>> converter = getObjectConverter(o, objectClass.getTypeName());
         if (!converter.isPresent() && objectClass.getSuperclass() != null) {
-            converter = findObjectConverter(objectClass.getSuperclass(), getter);
+            converter = findObjectConverter(o, objectClass.getSuperclass());
         }
         if (!converter.isPresent()) {
             for (Class<?> iface : objectClass.getInterfaces()) {
-                converter = findObjectConverter(iface, getter);
+                converter = findObjectConverter(o, iface);
+                if (converter.isPresent()) {
+                    break;
+                }
+            }
+        }
+        return converter;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverterByTargetType(
+        String typeName, Class<? extends V> valueClass) {
+        List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> wrappers =
+            objectConverters.getOrDefault(typeName, Collections.emptyList());
+        for (ConverterWrapper<ObjectConverter<?, ? extends Value>> wrapper : wrappers) {
+            if (checkConverterByTargetType(wrapper.getTargetClass(), valueClass)) {
+                return Optional.of((ObjectConverter<O, V>) wrapper.getConverter());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private <V extends Value, O> Optional<ObjectConverter<O, V>> findObjectConverter(
+        Class<?> objectClass, Class<? extends V> valueClass) {
+        Optional<ObjectConverter<O, V>> converter = getObjectConverterByTargetType(
+            objectClass.getTypeName(), valueClass);
+        if (!converter.isPresent() && objectClass.getSuperclass() != null) {
+            converter = findObjectConverter(objectClass.getSuperclass(), valueClass);
+        }
+        if (!converter.isPresent()) {
+            for (Class<?> iface : objectClass.getInterfaces()) {
+                converter = findObjectConverter(iface, valueClass);
                 if (converter.isPresent()) {
                     break;
                 }
@@ -203,16 +240,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(
-        Class<O> objectClass,
-        Class<V> valueClass) {
-        Function<String, Optional<ObjectConverter<O, V>>> getter =
-            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                .filter(c -> checkConverterByTargetType(c.getTargetClass(), valueClass))
-                .map(c -> (ObjectConverter<O, V>) c.getConverter())
-                .findFirst();
-        return findObjectConverter(objectClass, getter);
+        Class<? extends O> objectClass, Class<? extends V> valueClass) {
+        return findObjectConverter(objectClass, valueClass);
     }
 
     /**
