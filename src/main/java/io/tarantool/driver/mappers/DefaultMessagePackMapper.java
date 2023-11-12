@@ -64,32 +64,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
             .collect(Collectors.toMap(Map.Entry::getKey, e -> new ArrayList<>(e.getValue())));
     }
 
-    @SuppressWarnings("unchecked")
-    private <V extends Value, O> ObjectConverter<O, V>
-    getObjectConverter(O o, Function<String, Optional<ObjectConverter<O, V>>> getter) {
-        if (o == null) {
-            return (ObjectConverter<O, V>) nilConverter;
-        }
-        Optional<ObjectConverter<O, V>> converter = findObjectConverter(o.getClass(), getter);
-        if (!converter.isPresent()) {
-            throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
-        }
-        return converter.get();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <V extends Value, O> V toValue(O o) {
-        Function<String, Optional<ObjectConverter<O, V>>> getter =
-            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                .map(c -> (ObjectConverter<O, V>) c.getConverter())
-                .filter(c -> c.canConvertObject(o))
-                .findFirst();
-
-        ObjectConverter<O, V> converter = getObjectConverter(o, getter);
-        return converter.toValue(o);
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <V extends Value, O> O fromValue(V v) {
@@ -121,24 +95,28 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         return converter.get().fromValue(v);
     }
 
-    private <T> Optional<T> findObjectConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
-        Optional<T> converter = getter.apply(objectClass.getTypeName());
-        if (!converter.isPresent() && objectClass.getSuperclass() != null) {
-            converter = findObjectConverter(objectClass.getSuperclass(), getter);
-        }
-        if (!converter.isPresent()) {
-            for (Class<?> iface : objectClass.getInterfaces()) {
-                converter = findObjectConverter(iface, getter);
-                if (converter.isPresent()) {
-                    break;
-                }
-            }
-        }
-        return converter;
-    }
-
     private <T> Optional<T> findValueConverter(ValueType valueType, Function<ValueType, Optional<T>> getter) {
         return getter.apply(valueType);
+    }
+
+    /**
+     * Check if the specified converter can convert to the specified object type
+     */
+    private boolean checkConverterByTargetType(Class<?> targetClassOfConverter, Class<?> targetClass) {
+        return targetClassOfConverter.isAssignableFrom(targetClass);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(
+        ValueType valueType,
+        Class<O> targetClass) {
+        Function<ValueType, Optional<ValueConverter<V, O>>> getter =
+            typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
+                .filter(c -> checkConverterByTargetType(c.getTargetClass(), targetClass))
+                .map(c -> (ValueConverter<V, O>) c.getConverter())
+                .findFirst();
+        return findValueConverter(valueType, getter);
     }
 
     /**
@@ -182,24 +160,59 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         converters.add(0, new ConverterWrapper<>(converter, Object.class));
     }
 
-    /**
-     * Check if the specified converter can convert to the specified object type
-     */
-    private boolean checkConverterByTargetType(Class<?> targetClassOfConverter, Class<?> targetClass) {
-        return targetClassOfConverter.isAssignableFrom(targetClass);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends Value, O> V toValue(O o) {
+        Function<String, Optional<ObjectConverter<O, V>>> getter =
+            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
+                .map(c -> (ObjectConverter<O, V>) c.getConverter())
+                .filter(c -> c.canConvertObject(o))
+                .findFirst();
+
+        ObjectConverter<O, V> converter = getObjectConverter(o, getter);
+        return converter.toValue(o);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V extends Value, O> ObjectConverter<O, V>
+    getObjectConverter(O o, Function<String, Optional<ObjectConverter<O, V>>> getter) {
+        if (o == null) {
+            return (ObjectConverter<O, V>) nilConverter;
+        }
+        Optional<ObjectConverter<O, V>> converter = findObjectConverter(o.getClass(), getter);
+        if (!converter.isPresent()) {
+            throw new MessagePackObjectMapperException("ObjectConverter for type %s is not found", o.getClass());
+        }
+        return converter.get();
+    }
+
+    private <T> Optional<T> findObjectConverter(Class<?> objectClass, Function<String, Optional<T>> getter) {
+        Optional<T> converter = getter.apply(objectClass.getTypeName());
+        if (!converter.isPresent() && objectClass.getSuperclass() != null) {
+            converter = findObjectConverter(objectClass.getSuperclass(), getter);
+        }
+        if (!converter.isPresent()) {
+            for (Class<?> iface : objectClass.getInterfaces()) {
+                converter = findObjectConverter(iface, getter);
+                if (converter.isPresent()) {
+                    break;
+                }
+            }
+        }
+        return converter;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(
-        ValueType valueType,
-        Class<O> targetClass) {
-        Function<ValueType, Optional<ValueConverter<V, O>>> getter =
-            typeName -> valueConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                .filter(c -> checkConverterByTargetType(c.getTargetClass(), targetClass))
-                .map(c -> (ValueConverter<V, O>) c.getConverter())
+    public <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(
+        Class<O> objectClass,
+        Class<V> valueClass) {
+        Function<String, Optional<ObjectConverter<O, V>>> getter =
+            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
+                .filter(c -> checkConverterByTargetType(c.getTargetClass(), valueClass))
+                .map(c -> (ObjectConverter<O, V>) c.getConverter())
                 .findFirst();
-        return findValueConverter(valueType, getter);
+        return findObjectConverter(objectClass, getter);
     }
 
     /**
@@ -252,19 +265,6 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> converters =
             objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new LinkedList<>());
         converters.add(0, new ConverterWrapper<>(converter, valueClass));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <V extends Value, O> Optional<ObjectConverter<O, V>> getObjectConverter(
-        Class<O> objectClass,
-        Class<V> valueClass) {
-        Function<String, Optional<ObjectConverter<O, V>>> getter =
-            typeName -> objectConverters.getOrDefault(typeName, Collections.emptyList()).stream()
-                .filter(c -> checkConverterByTargetType(c.getTargetClass(), valueClass))
-                .map(c -> (ObjectConverter<O, V>) c.getConverter())
-                .findFirst();
-        return findObjectConverter(objectClass, getter);
     }
 
     @Override
