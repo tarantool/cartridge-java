@@ -111,7 +111,7 @@ public abstract class AbstractResultMapper<T> implements MessagePackValueMapper 
     @Override
     public <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(
         ValueType valueType,
-        Class<O> objectClass) {
+        Class<? extends O> objectClass) {
         return valueMapper.getValueConverter(valueType, objectClass);
     }
 }
