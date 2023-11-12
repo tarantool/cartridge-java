@@ -64,5 +64,6 @@ public interface MessagePackValueMapper {
      * @param <O>         java object's type that the converter accepts and/or returns
      * @return a nullable converter instance wrapped in {@code Optional}
      */
-    <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(ValueType valueType, Class<O> objectClass);
+    <V extends Value, O> Optional<ValueConverter<V, O>> getValueConverter(
+        ValueType valueType, Class<? extends O> objectClass);
 }
