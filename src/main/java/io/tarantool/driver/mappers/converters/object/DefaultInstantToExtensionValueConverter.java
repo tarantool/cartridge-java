@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Instant;
 
+import static io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToInstantConverter.DATETIME_TYPE;
+
 /**
  * Default {@link java.time.Instant} to {@link ExtensionValue} converter
  *
@@ -20,8 +22,6 @@ import java.time.Instant;
 public class DefaultInstantToExtensionValueConverter implements ObjectConverter<Instant, ExtensionValue> {
 
     private static final long serialVersionUID = 20221025L;
-
-    private static final byte DATETIME_TYPE = 0x04;
 
     private byte[] toBytes(Instant value) {
         long seconds = value.getEpochSecond();

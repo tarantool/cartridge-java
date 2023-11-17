@@ -16,7 +16,12 @@ import java.time.Instant;
 public class DefaultExtensionValueToInstantConverter implements ValueConverter<ExtensionValue, Instant> {
 
     private static final long serialVersionUID = 20221025L;
-    private static final byte DATETIME_TYPE = 0x04;
+    /**
+     * @see
+     * <a href="https://github.com/tarantool/tarantool/blob/master/src/lib/core/mp_extension_types.h#L47">
+     * mp_extension_type#MP_DATETIME</a>
+     */
+    public static final byte DATETIME_TYPE = 0x04;
 
     private Instant fromBytes(byte[] bytes) {
         int size = bytes.length;
