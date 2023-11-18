@@ -37,7 +37,6 @@ public class ClusterTarantoolSetup {
             "cartridge-java-test",
             "cartridge/instances.yml",
             "cartridge/topology.lua")
-            .withDirectoryBinding("cartridge")
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 5))
             .withStartupTimeout(Duration.ofMinutes(2));
@@ -55,8 +54,8 @@ public class ClusterTarantoolSetup {
                 new TarantoolServerAddress(tarantoolContainer.getRouterHost(), tarantoolContainer.getMappedPort(3303))
             )
             .withCredentials(tarantoolContainer.getUsername(), tarantoolContainer.getPassword())
-            .withConnections(10)
-            .withEventLoopThreadsNumber(10)
+            .withConnections(2)
+            .withEventLoopThreadsNumber(2)
             .withRequestTimeout(10000)
             .withProxyMethodMapping()
             .build();
