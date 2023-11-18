@@ -1,11 +1,17 @@
 # Changelog
 
 ## [Unreleased]
+
+### Bugfixes
+
+- Significantly reduce memory allocation overhead and excessive GC pressure ([#401](https://github.com/tarantool/cartridge-java/issues/401))
+
 ### Internal and API changes
 
 - Bump org.testcontainers:junit-jupiter version to 1.19.3 ([#442](https://github.com/tarantool/cartridge-java/issues/442))
 - Bump testcontainers-java-tarantool version to 1.2.0 ([#442](https://github.com/tarantool/cartridge-java/issues/442))
 - Bump netty version to 4.1.104.Final ([#446](https://github.com/tarantool/cartridge-java/issues/446))
+- Bump msgpack-java version to 0.9.6
 
 ### Features
 
