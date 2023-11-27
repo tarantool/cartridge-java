@@ -30,6 +30,7 @@ import io.tarantool.driver.exceptions.TarantoolClientException;
 import io.tarantool.driver.exceptions.TarantoolSpaceFieldNotFoundException;
 import io.tarantool.driver.mappers.MessagePackMapper;
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
+import io.tarantool.driver.mappers.converters.Interval;
 import io.tarantool.driver.utils.Assert;
 
 /**
@@ -378,6 +379,16 @@ public class TarantoolTupleImpl implements TarantoolTuple {
     @Override
     public Instant getInstant(String fieldName) {
         return getObject(fieldName, Instant.class).orElse(null);
+    }
+
+    @Override
+    public Interval getInterval(int fieldPosition) {
+        return getObject(fieldPosition, Interval.class).orElse(null);
+    }
+
+    @Override
+    public Interval getInterval(String fieldName) {
+        return getObject(fieldName, Interval.class).orElse(null);
     }
 
     @Override

@@ -134,6 +134,19 @@ if major >= 2 and minor >= 10 and patch > 1 then
             }
     )
     space_with_instant:create_index('id', { parts = { 'id' }, if_not_exists = true, })
+
+    -- test space for check interval
+    local space_with_interval = box.schema.space.create(
+        'space_with_interval',
+        {
+            format = {
+                { 'id', 'unsigned' },
+                { 'interval_field', 'interval',},
+            },
+            if_not_exists = true,
+        }
+    )
+    space_with_interval:create_index('id', { parts = { 'id' }, if_not_exists = true, })
 end
 
 --functions

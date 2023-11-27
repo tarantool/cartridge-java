@@ -1,6 +1,7 @@
 package io.tarantool.driver.mappers.factories;
 
 import io.tarantool.driver.mappers.DefaultMessagePackMapper;
+import io.tarantool.driver.mappers.converters.Interval;
 import io.tarantool.driver.mappers.converters.object.DefaultBigDecimalToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultBooleanToBooleanValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultByteArrayToBinaryValueConverter;
@@ -9,6 +10,7 @@ import io.tarantool.driver.mappers.converters.object.DefaultDoubleToFloatValueCo
 import io.tarantool.driver.mappers.converters.object.DefaultFloatToFloatValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultInstantToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultIntegerToIntegerValueConverter;
+import io.tarantool.driver.mappers.converters.object.DefaultIntervalToExtensionValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultLongArrayToArrayValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultLongToIntegerValueConverter;
 import io.tarantool.driver.mappers.converters.object.DefaultNilValueToNullConverter;
@@ -21,6 +23,7 @@ import io.tarantool.driver.mappers.converters.value.defaults.DefaultArrayValueTo
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultBinaryValueToByteArrayConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultBooleanValueToBooleanConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToBigDecimalConverter;
+import io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToIntervalConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultExtensionValueToUUIDConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultFloatValueToDoubleConverter;
 import io.tarantool.driver.mappers.converters.value.defaults.DefaultFloatValueToFloatConverter;
@@ -86,6 +89,7 @@ public final class DefaultMessagePackMapperFactory {
             .withValueConverter(ValueType.EXTENSION, BigDecimal.class,
                 new DefaultExtensionValueToBigDecimalConverter())
             .withValueConverter(ValueType.EXTENSION, Instant.class, new DefaultExtensionValueToInstantConverter())
+            .withValueConverter(ValueType.EXTENSION, Interval.class, new DefaultExtensionValueToIntervalConverter())
             .withValueConverter(ValueType.NIL, Object.class, new DefaultNilValueToNullConverter())
             //TODO: Potential issue https://github.com/tarantool/cartridge-java/issues/118
             .withObjectConverter(Character.class, StringValue.class, new DefaultCharacterToStringValueConverter())
@@ -102,6 +106,7 @@ public final class DefaultMessagePackMapperFactory {
             .withObjectConverter(BigDecimal.class, ExtensionValue.class,
                 new DefaultBigDecimalToExtensionValueConverter())
             .withObjectConverter(Instant.class, ExtensionValue.class, new DefaultInstantToExtensionValueConverter())
+            .withObjectConverter(Interval.class, ExtensionValue.class, new DefaultIntervalToExtensionValueConverter())
             .build();
     }
 

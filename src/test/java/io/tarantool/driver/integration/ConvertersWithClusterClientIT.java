@@ -8,6 +8,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
+import io.tarantool.driver.mappers.converters.Interval;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,6 +64,23 @@ public class ConvertersWithClusterClientIT extends SharedTarantoolContainer {
 
         //then
         Assertions.assertEquals(uuid, fields.getUUID("uuid_field"));
+    }
+
+    @Test
+    @EnabledIf("io.tarantool.driver.TarantoolUtils#versionWithInstant")
+    public void test_boxSelect_shouldReturnTupleWithInterval() throws Exception {
+        //given
+        Interval interval = new Interval().setDay(1).setSec(123);
+        client.space("space_with_interval")
+            .insert(tupleFactory.create(1, interval)).get();
+
+        //when
+        TarantoolTuple fields = client
+            .space("space_with_interval")
+            .select(Conditions.equals("id", 1)).get().get(0);
+
+        //then
+        Assertions.assertEquals(interval, fields.getInterval("interval_field"));
     }
 
     @Test
