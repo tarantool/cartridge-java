@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Features
+
+- Add Interval type support ([#447](https://github.com/tarantool/cartridge-java/issues/447))
+
 ## [0.13.0] - 2023-11-16
 
 ### Internal and API changes

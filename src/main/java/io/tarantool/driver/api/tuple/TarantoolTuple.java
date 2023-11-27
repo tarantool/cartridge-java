@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import io.tarantool.driver.mappers.converters.Interval;
 import io.tarantool.driver.protocol.Packable;
 
 /**
@@ -297,6 +298,22 @@ public interface TarantoolTuple extends Iterable<TarantoolField>, Packable {
      * @return value
      */
     Instant getInstant(String fieldName);
+
+    /**
+     * Get the field value converted to {@link Interval}
+     *
+     * @param fieldPosition the field position from the tuple start, starting from 0
+     * @return value
+     */
+    Interval getInterval(int fieldPosition);
+
+    /**
+     * Get the field value converted to {@link Interval}
+     *
+     * @param fieldName the field name, must not be null
+     * @return value
+     */
+    Interval getInterval(String fieldName);
 
     /**
      * Get the field value converted to {@link BigDecimal}
