@@ -1,14 +1,14 @@
 testapp.1:
   workdir: ./tmp/db_dev/3301
-  advertise_uri: localhost:3301
+  advertise_uri: 0.0.0.0:3301
   http_port: 8081
 
 testapp.2:
   workdir: ./tmp/db_dev/3302
-  advertise_uri: localhost:3302
+  advertise_uri: 0.0.0.0:3302
   http_port: 8082
 
 testapp.3:
   workdir: ./tmp/db_dev/3303
-  advertise_uri: localhost:3303
+  advertise_uri: 0.0.0.0:3303
   http_port: 8083

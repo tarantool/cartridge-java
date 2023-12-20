@@ -23,7 +23,6 @@ abstract class CartridgeMixedInstancesContainer {
                         "cartridge-java-test-mixed",
                         "cartridge/instances_mixed.yml",
                         "cartridge/topology_mixed.lua")
-                        .withDirectoryBinding("cartridge")
                         .withLogConsumer(new Slf4jLogConsumer(logger))
                         .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 3))
                         .withStartupTimeout(Duration.ofMinutes(2))

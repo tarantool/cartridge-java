@@ -16,7 +16,7 @@ local ok, err = cartridge.cfg({
         'app.roles.api_storage',
         'app.roles.custom',
     },
-    cluster_cookie = 'testapp-cluster-cookie',
+    cluster_cookie = 'secret-cluster-cookie',
 }, {
     readahead = 10 * 1024 * 1024, -- 10 MB
     net_msg_max = 11140,
