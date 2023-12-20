@@ -56,6 +56,7 @@ public class SslClientITEnterprise {
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
+            .withDirectoryBinding(RESOURCE_PATH + "ssl")
             .withLogConsumer(new Slf4jLogConsumer(log))
             .withSslContext(org.testcontainers.containers.SslContext.getSslContext());
 
@@ -65,6 +66,7 @@ public class SslClientITEnterprise {
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
+            .withDirectoryBinding(RESOURCE_PATH)
             .withLogConsumer(new Slf4jLogConsumer(log));
 
         if (!containerWithSsl.isRunning()) {

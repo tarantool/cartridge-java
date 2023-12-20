@@ -57,6 +57,7 @@ public class SslClientMTlsITEnterprise {
             .withUsername("test_user")
             .withPassword("test_password")
             .withMemtxMemory(256 * 1024 * 1024)
+            .withDirectoryBinding(RESOURCE_PATH)
             .withLogConsumer(new Slf4jLogConsumer(log))
             .withSslContext(org.testcontainers.containers.SslContext.getSslContext(
                 RESOURCE_PATH + "ca.key",
