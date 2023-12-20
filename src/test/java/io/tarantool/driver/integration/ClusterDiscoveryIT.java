@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class ClusterDiscoveryIT extends SharedCartridgeContainer {
 
-    private static final String TEST_ROUTER1_URI = "localhost:3301";
-    private static final String TEST_ROUTER2_URI = "localhost:3302";
+    private static final String TEST_ROUTER1_URI = "0.0.0.0:3301";
+    private static final String TEST_ROUTER2_URI = "0.0.0.0:3302";
 
     @BeforeAll
     public static void setUp() {

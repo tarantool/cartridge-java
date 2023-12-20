@@ -258,13 +258,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.4</version>
+            <version>1.19.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.tarantool</groupId>
             <artifactId>testcontainers-java-tarantool</artifactId>
-            <version>1.0.1</version>
+            <version>1.2.0</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

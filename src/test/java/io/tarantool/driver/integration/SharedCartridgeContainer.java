@@ -21,7 +21,7 @@ public abstract class SharedCartridgeContainer {
             "cartridge-java-test",
             "cartridge/instances.yml",
             "cartridge/topology.lua")
-            .withDirectoryBinding("cartridge")
+            .withEnv("TARANTOOL_CLUSTER_COOKIE", "secret-cluster-cookie")
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .waitingFor(Wait.forLogMessage(".*Listening HTTP on.*", 4))
             .withStartupTimeout(Duration.ofMinutes(2));
