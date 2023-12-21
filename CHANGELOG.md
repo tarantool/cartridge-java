@@ -5,6 +5,7 @@
 
 - Bump org.testcontainers:junit-jupiter version to 1.19.3 ([#442](https://github.com/tarantool/cartridge-java/issues/442))
 - Bump testcontainers-java-tarantool version to 1.2.0 ([#442](https://github.com/tarantool/cartridge-java/issues/442))
+- Bump netty version to 4.1.104.Final ([#446](https://github.com/tarantool/cartridge-java/issues/446))
 
 ### Features
 
