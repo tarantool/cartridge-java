@@ -54,7 +54,7 @@
 
     <properties>
         <jackson.version>2.14.0</jackson.version>
-        <netty.version>4.1.78.Final</netty.version>
+        <netty.version>4.1.104.Final</netty.version>
         <checkstyle.config>${project.basedir}/src/test/resources/io/tarantool/driver/checkstyle.xml</checkstyle.config>
         <checkstyle.suppressions>${project.basedir}/src/test/resources/io/tarantool/driver/suppressions.xml</checkstyle.suppressions>
         <logging.config>${project.basedir}/src/test/resources/logback-test.xml</logging.config>
