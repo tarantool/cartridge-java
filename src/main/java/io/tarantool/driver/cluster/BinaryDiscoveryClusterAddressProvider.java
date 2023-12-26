@@ -113,4 +113,14 @@ public class BinaryDiscoveryClusterAddressProvider extends AbstractDiscoveryClus
             throw new TarantoolClientException("Cluster discovery task error", e);
         }
     }
+
+    @Override
+    public void close() {
+        super.close();
+        try {
+            client.close();
+        } catch (Exception e) {
+            throw new TarantoolClientException(e);
+        }
+    }
 }

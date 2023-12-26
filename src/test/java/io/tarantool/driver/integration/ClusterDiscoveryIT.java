@@ -1,5 +1,6 @@
 package io.tarantool.driver.integration;
 
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolClusterAddressProvider;
 import io.tarantool.driver.api.TarantoolServerAddress;
@@ -11,11 +12,13 @@ import io.tarantool.driver.cluster.HTTPClusterDiscoveryEndpoint;
 import io.tarantool.driver.cluster.HTTPDiscoveryClusterAddressProvider;
 import io.tarantool.driver.cluster.TarantoolClusterDiscoveryConfig;
 import io.tarantool.driver.cluster.TestWrappedClusterAddressProvider;
+import io.tarantool.driver.core.AbstractTarantoolClient;
 import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.exceptions.TarantoolClientException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -74,6 +77,23 @@ public class ClusterDiscoveryIT extends SharedCartridgeContainer {
         Set<TarantoolServerAddress> nodeSet = new HashSet<>(nodes);
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER1_URI)));
         assertTrue(nodeSet.contains(new TarantoolServerAddress(TEST_ROUTER2_URI)));
+    }
+
+    @Test
+    public void binaryClusterDiscovererCloseTest() throws IllegalAccessException, NoSuchFieldException {
+        TarantoolClusterAddressProvider addressProvider = getBinaryProvider();
+
+        Field clientField = BinaryDiscoveryClusterAddressProvider.class.getDeclaredField("client");
+        clientField.setAccessible(true);
+        AbstractTarantoolClient abstractTarantoolClient = (AbstractTarantoolClient) clientField.get(addressProvider);
+
+        Field eventLoopGroupField = AbstractTarantoolClient.class.getDeclaredField("eventLoopGroup");
+        eventLoopGroupField.setAccessible(true);
+        NioEventLoopGroup eventLoopGroup = (NioEventLoopGroup) eventLoopGroupField.get(abstractTarantoolClient);
+
+        addressProvider.close();
+
+        assertTrue(eventLoopGroup.isShuttingDown() || eventLoopGroup.isShutdown());
     }
 
     private TarantoolClusterAddressProvider getBinaryProvider() {
