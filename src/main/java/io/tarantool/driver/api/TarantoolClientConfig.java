@@ -27,6 +27,7 @@ public class TarantoolClientConfig {
     private static final int DEFAULT_CONNECTIONS = 1;
     private static final int DEFAULT_CURSOR_BATCH_SIZE = 100;
     private static final int DEFAULT_EVENT_LOOP_THREADS_NUMBER = 0;
+    private static final int DEFAULT_WRITE_BATCH_SIZE = 128;
 
     private TarantoolCredentials credentials;
     private int connectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -34,6 +35,7 @@ public class TarantoolClientConfig {
     private int requestTimeout = DEFAULT_REQUEST_TIMEOUT;
     private int connections = DEFAULT_CONNECTIONS;
     private int eventLoopThreadsNumber = DEFAULT_EVENT_LOOP_THREADS_NUMBER;
+    private int writeBatchSize = DEFAULT_WRITE_BATCH_SIZE;
     private MessagePackMapper messagePackMapper =
         DefaultMessagePackMapperFactory.getInstance().defaultComplexTypesMapper();
     private ConnectionSelectionStrategyFactory connectionSelectionStrategyFactory =
@@ -63,6 +65,7 @@ public class TarantoolClientConfig {
         this.isSecure.set(config.isSecure.get());
         this.sslContext = config.getSslContext();
         this.eventLoopThreadsNumber = config.getEventLoopThreadsNumber();
+        this.writeBatchSize = config.getWriteBatchSize();
     }
 
     /**
@@ -269,6 +272,24 @@ public class TarantoolClientConfig {
     }
 
     /**
+     * Get maximum number of requests to be sent in one batch to the server.
+     *
+     * @return a positive integer value
+     */
+    public int getWriteBatchSize() {
+        return writeBatchSize;
+    }
+
+    /**
+     * Set maximum number of requests to be sent in one batch to the server.
+     *
+     * @param writeBatchSize maximum number of requests in batch
+     */
+    public void setWriteBatchSize(int writeBatchSize) {
+        this.writeBatchSize = writeBatchSize;
+    }
+
+    /**
      * A builder for {@link TarantoolClientConfig}
      */
     public static final class Builder {
@@ -416,6 +437,20 @@ public class TarantoolClientConfig {
         public Builder withEventLoopThreadsNumber(int eventLoopThreadsNumber) {
             Assert.state(eventLoopThreadsNumber > 0, "EventLoopThreadsNumber should be equals or greater than 0");
             config.setEventLoopThreadsNumber(eventLoopThreadsNumber);
+            return this;
+        }
+
+        /**
+         * Specify request batch size. Increase this number if this client instance does much
+         * more writes than reads, but the bigger is this number, the more memory will be used by the
+         * client and the bigger will be the amount of outbound bytes sent at once. Default is 128
+         *
+         * @param writeBatchSize maximum number of requests in batch
+         * @return builder
+         */
+        public Builder withWriteBatchSize(int writeBatchSize) {
+            Assert.state(writeBatchSize > 0, "WriteBatchSize should be equal or greater than 0");
+            config.setWriteBatchSize(writeBatchSize);
             return this;
         }
 

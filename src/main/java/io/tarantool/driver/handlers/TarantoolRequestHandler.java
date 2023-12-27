@@ -28,7 +28,7 @@ public class TarantoolRequestHandler extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         TarantoolRequest request = (TarantoolRequest) msg;
-        ctx.write(request).addListener((ChannelFutureListener) channelFuture -> {
+        ctx.writeAndFlush(request, promise).addListener((ChannelFutureListener) channelFuture -> {
             if (!channelFuture.isSuccess()) {
                 TarantoolRequestMetadata requestMeta = futureManager.getRequest(request.getHeader().getSync());
                 // The request metadata may has been deleted already after timeout
