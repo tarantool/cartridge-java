@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.ssl.SslContext;
 import io.tarantool.driver.TarantoolVersionHolder;
 import io.tarantool.driver.api.TarantoolClientConfig;
@@ -56,7 +57,9 @@ public class TarantoolChannelInitializer extends ChannelInitializer<SocketChanne
         }
 
         // greeting and authentication (will be removed after successful authentication)
-        pipeline.addLast("TarantoolAuthenticationHandler",
+        pipeline
+            .addLast("FlushConsolidationHandler", new FlushConsolidationHandler(config.getWriteBatchSize(), true))
+            .addLast("TarantoolAuthenticationHandler",
                 new TarantoolAuthenticationHandler<>(
                     connectionFuture,
                     versionHolder,
