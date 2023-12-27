@@ -249,21 +249,22 @@ public abstract class AbstractTarantoolConnectionManager implements TarantoolCon
         List<CompletableFuture<TarantoolConnection>> connections = connectionFactory
             .multiConnection(serverAddress.getSocketAddress(), connectionCount, connectionListeners).stream()
             .peek(cf -> cf.thenApply(conn -> {
-                    if (conn.isConnected()) {
+                    if (conn != null && conn.isConnected()) {
                         logger.info("Connected to Tarantool server at {}", conn.getRemoteAddress());
+
+                        conn.addConnectionFailureListener((c, ex) -> {
+                            // Connection lost, signal the next thread coming
+                            // for connection to start the init sequence
+                            connectionMode.set(ConnectionMode.PARTIAL);
+                            try {
+                                c.close();
+                            } catch (Exception e) {
+                                logger.info("Failed to close the connection: {}", e.getMessage());
+                            }
+                        });
+                        conn.addConnectionCloseListener(
+                            c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
                     }
-                    conn.addConnectionFailureListener((c, ex) -> {
-                        // Connection lost, signal the next thread coming
-                        // for connection to start the init sequence
-                        connectionMode.set(ConnectionMode.PARTIAL);
-                        try {
-                            c.close();
-                        } catch (Exception e) {
-                            logger.info("Failed to close the connection: {}", e.getMessage());
-                        }
-                    });
-                    conn.addConnectionCloseListener(
-                        c -> logger.info("Disconnected from {}", c.getRemoteAddress()));
                     return conn;
                 })
             )

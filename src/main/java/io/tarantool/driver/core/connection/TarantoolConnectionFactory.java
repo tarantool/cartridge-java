@@ -97,7 +97,7 @@ public class TarantoolConnectionFactory {
 
         return result.handle((connection, ex) -> {
             if (ex != null) {
-                logger.warn("Connection failed: {}", ex.getMessage());
+                logger.error(String.format("Failed to connect to the Tarantool server at %s", serverAddress), ex);
                 future.channel().close();
             }
             return connection;
