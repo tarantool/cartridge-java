@@ -416,8 +416,10 @@ public class ClusterTarantoolTupleClientIT extends SharedTarantoolContainer {
     @Test
     public void testCallReturnLongValue() throws Exception {
         client.getVersion();
-        List<?> result = client.call("user_function_return_long_value").get();
+        List<Integer> result = client.callForSingleResult(
+            "user_function_return_long_value", List.class).get();
 
-        assertEquals(1, result.size());
+        assertEquals(2800 * 3, result.size());
+        assertFalse(result.stream().anyMatch(v -> v != 1));
     }
 }
