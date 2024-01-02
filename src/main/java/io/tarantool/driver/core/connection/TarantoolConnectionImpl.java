@@ -79,7 +79,7 @@ public class TarantoolConnectionImpl implements TarantoolConnection {
                 requestFuture.completeExceptionally(
                     new RuntimeException("Failed to send the request to Tarantool server", f.cause()));
             } else {
-                logger.debug("Request {} sent, status Success", request.getHeader().getSync());
+                logger.trace("Request {} sent, status Success", request);
             }
         });
 
