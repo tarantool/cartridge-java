@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,8 +77,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         ValueConverter<V, O> converter;
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> wrappers =
             valueConverters.getOrDefault(valueType, Collections.emptyList());
-        for (ConverterWrapper<ValueConverter<? extends Value, ?>> wrapper : wrappers) {
-            converter = (ValueConverter<V, O>) wrapper.getConverter();
+        for (int i = 0; i < wrappers.size(); i++) {
+            converter = (ValueConverter<V, O>) wrappers.get(i).getConverter();
             if (converter.canConvertValue(v)) {
                 return Optional.of(converter);
             }
@@ -103,7 +102,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         ValueConverter<V, O> converter;
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> wrappers =
             valueConverters.getOrDefault(valueType, Collections.emptyList());
-        for (ConverterWrapper<ValueConverter<? extends Value, ?>> wrapper : wrappers) {
+        ConverterWrapper<ValueConverter<? extends Value, ?>> wrapper;
+        for (int i = 0; i < wrappers.size(); i++) {
+            wrapper = wrappers.get(i);
             if (checkConverterByTargetType(wrapper.getTargetClass(), targetClass)) {
                 converter = (ValueConverter<V, O>) wrapper.getConverter();
                 if (converter.canConvertValue(v)) {
@@ -126,7 +127,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         ValueType valueType, Class<? extends O> targetClass) {
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> wrappers =
             valueConverters.getOrDefault(valueType, Collections.emptyList());
-        for (ConverterWrapper<ValueConverter<? extends Value, ?>> wrapper : wrappers) {
+        ConverterWrapper<ValueConverter<? extends Value, ?>> wrapper;
+        for (int i = 0; i < wrappers.size(); i++) {
+            wrapper = wrappers.get(i);
             if (checkConverterByTargetType(wrapper.getTargetClass(), targetClass)) {
                 return Optional.of((ValueConverter<V, O>) wrapper.getConverter());
             }
@@ -169,7 +172,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         Class<? extends O> objectClass,
         ValueConverter<V, ? extends O> converter) {
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> converters =
-            valueConverters.computeIfAbsent(valueType, k -> new LinkedList<>());
+            valueConverters.computeIfAbsent(valueType, k -> new ArrayList<>());
         converters.add(0, new ConverterWrapper<>(converter, objectClass));
     }
 
@@ -177,7 +180,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         ValueType valueType,
         ValueConverter<V, ? extends O> converter) {
         List<ConverterWrapper<ValueConverter<? extends Value, ?>>> converters =
-            valueConverters.computeIfAbsent(valueType, k -> new LinkedList<>());
+            valueConverters.computeIfAbsent(valueType, k -> new ArrayList<>());
         converters.add(0, new ConverterWrapper<>(converter, Object.class));
     }
 
@@ -204,8 +207,8 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         ObjectConverter<O, V> converter;
         List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> wrappers =
             objectConverters.getOrDefault(typeName, Collections.emptyList());
-        for (ConverterWrapper<ObjectConverter<?, ? extends Value>> wrapper : wrappers) {
-            converter = (ObjectConverter<O, V>) wrapper.getConverter();
+        for (int i = 0; i < wrappers.size(); i++) {
+            converter = (ObjectConverter<O, V>) wrappers.get(i).getConverter();
             if (converter.canConvertObject(o)) {
                 return Optional.of(converter);
             }
@@ -234,7 +237,9 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         String typeName, Class<? extends V> valueClass) {
         List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> wrappers =
             objectConverters.getOrDefault(typeName, Collections.emptyList());
-        for (ConverterWrapper<ObjectConverter<?, ? extends Value>> wrapper : wrappers) {
+        ConverterWrapper<ObjectConverter<?, ? extends Value>> wrapper;
+        for (int i = 0; i < wrappers.size(); i++) {
+            wrapper = wrappers.get(i);
             if (checkConverterByTargetType(wrapper.getTargetClass(), valueClass)) {
                 return Optional.of((ObjectConverter<O, V>) wrapper.getConverter());
             }
@@ -314,7 +319,7 @@ public class DefaultMessagePackMapper implements MessagePackMapper {
         Class<V> valueClass,
         ObjectConverter<O, V> converter) {
         List<ConverterWrapper<ObjectConverter<?, ? extends Value>>> converters =
-            objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new LinkedList<>());
+            objectConverters.computeIfAbsent(objectClass.getTypeName(), k -> new ArrayList<>());
         converters.add(0, new ConverterWrapper<>(converter, valueClass));
     }
 
