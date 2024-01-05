@@ -100,7 +100,7 @@ public final class TarantoolHeader implements Packable {
      * @return MessagePack representation of the header
      */
     public Value toMessagePackValue(MessagePackObjectMapper mapper) {
-        Map<IntegerValue, IntegerValue> values = new HashMap<>();
+        Map<IntegerValue, IntegerValue> values = new HashMap<>(3, 1);
         values.put(ValueFactory.newInteger(IPROTO_REQUEST_TYPE), ValueFactory.newInteger(code));
         values.put(ValueFactory.newInteger(IPROTO_SYNC), ValueFactory.newInteger(sync));
         if (schemaVersion != null) {
