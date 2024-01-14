@@ -2,13 +2,15 @@ package io.tarantool.driver.protocol;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.msgpack.value.Value;
+
 import io.tarantool.driver.mappers.MessagePackObjectMapper;
 import io.tarantool.driver.mappers.MessagePackValueMapper;
+import io.tarantool.driver.mappers.converters.ValueConverter;
 
 /**
  * Represents a request signature, uniquely defining the operation and the
@@ -18,10 +20,18 @@ import io.tarantool.driver.mappers.MessagePackValueMapper;
  *
  * @author Alexey Kuzin
  */
-public class TarantoolRequestSignature {
+public final class TarantoolRequestSignature {
 
-    private List<String> components = new LinkedList<>();
+    private List<String> components = new ArrayList<>();
     private int hashCode = 1;
+
+    /**
+     * Constructor.
+     *
+     * Creates an empty signature - do not use it without providing the components!
+     */
+    public TarantoolRequestSignature() {
+    }
 
     /**
      * Constructor.
@@ -32,8 +42,11 @@ public class TarantoolRequestSignature {
      *
      * @param initialComponents initial signature components
      */
-    public TarantoolRequestSignature(Object... initialComponents) {
+    private TarantoolRequestSignature(Object[] initialComponents) {
         for (Object component : initialComponents) {
+            if (component == null) {
+                continue;
+            }
             String componentValue = component instanceof String ? (String) component : component.getClass().getName();
             components.add(componentValue);
             hashCode = 31 * hashCode + Objects.hashCode(componentValue);
@@ -50,9 +63,11 @@ public class TarantoolRequestSignature {
      * @return this signature object instance
      */
     public TarantoolRequestSignature addComponent(Object component) {
-        String componentValue = component instanceof String ? (String) component : component.getClass().getName();
-        components.add(componentValue);
-        hashCode = 31 * hashCode + Objects.hashCode(componentValue);
+        if (component != null) {
+            String componentValue = component instanceof String ? (String) component : component.getClass().getName();
+            components.add(componentValue);
+            hashCode = 31 * hashCode + Objects.hashCode(componentValue);
+        }
         return this;
     }
 
@@ -78,28 +93,107 @@ public class TarantoolRequestSignature {
     }
 
     /**
+     * Factory method for building the common signature part
+     *
+     * @param functionName            name of the remote function
+     * @param arguments               list of arguments for the remote function
+     * @param argumentsMapperSupplier arguments mapper supplier
+     * @return new request signature
+     */
+    private static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
+            Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier) {
+        Object[] components = new Object[arguments.size() + 2];
+        int i = 0;
+        components[i++] = functionName;
+        for (Object argument : arguments) {
+            components[i++] = argument.getClass().getName();
+        }
+        components[i++] = Integer.toHexString(argumentsMapperSupplier.hashCode());
+        return new TarantoolRequestSignature(components);
+    }
+
+    /**
+     * Factory method for caching default result mapper suppliers
+     *
+     * @param functionName            name of the remote function
+     * @param arguments               list of arguments for the remote function
+     * @param argumentsMapperSupplier arguments mapper supplier
+     * @param resultClass             type of the expected result. It's necessary
+     *                                for polymorphic functions, e.g. accepting a
+     *                                Tarantool space as an argument
+     * @return new request signature
+     */
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
+            Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier, Class<?> resultClass) {
+        return TarantoolRequestSignature.create(functionName, arguments, argumentsMapperSupplier)
+            .addComponent(resultClass.getName());
+    }
+
+    /**
+     * Factory method for caching default result mapper suppliers
+     *
+     * @param functionName            name of the remote function
+     * @param arguments               list of arguments for the remote function
+     * @param argumentsMapperSupplier arguments mapper supplier
+     * @param valueConverter          single value result converter
+     * @return new request signature
+     */
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
+            Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
+            ValueConverter<Value, ?> valueConverter) {
+        return TarantoolRequestSignature.create(functionName, arguments, argumentsMapperSupplier)
+            .addComponent(Integer.toHexString(valueConverter.hashCode()));
+    }
+
+    /**
+     * Factory method for caching default multi value result mapper suppliers
+     *
+     * @param functionName            name of the remote function
+     * @param arguments               list of arguments for the remote function
+     * @param argumentsMapperSupplier arguments mapper supplier
+     * @param resultContainerSupplier multi value result container supplier
+     * @param valueConverter          multi value result container item converter
+     * @return new request signature
+     */
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
+            Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
+            Supplier<?> resultContainerSupplier, ValueConverter<Value, ?> valueConverter) {
+        return TarantoolRequestSignature.create(functionName, arguments, argumentsMapperSupplier)
+            .addComponent(Integer.toHexString(resultContainerSupplier.hashCode()))
+            .addComponent(Integer.toHexString(valueConverter.hashCode()));
+    }
+
+    /**
+     * Factory method for caching default multi value result mapper suppliers
+     *
+     * @param functionName            name of the remote function
+     * @param arguments               list of arguments for the remote function
+     * @param argumentsMapperSupplier arguments mapper supplier
+     * @param resultContainerSupplier multi value result container supplier
+     * @param resultClass             multi value result item class
+     * @return new request signature
+     */
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
+            Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
+            Supplier<?> resultContainerSupplier, Class<?> resultClass) {
+        return TarantoolRequestSignature.create(functionName, arguments, argumentsMapperSupplier)
+            .addComponent(Integer.toHexString(resultContainerSupplier.hashCode()))
+            .addComponent(resultClass.getName());
+    }
+
+    /**
      * Factory method for a typical RPC usage
      *
      * @param functionName            name of the remote function
      * @param arguments               list of arguments for the remote function
-     * @param resultClass             type of the expected result. It's necessary
-     *                                for polymorphic functions, e.g. accepting a
-     *                                Tarantool space as an argument
      * @param argumentsMapperSupplier arguments mapper supplier
      * @param resultMapperSupplier    result mapper supplier
      * @return new request signature
      */
-    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments, Class<?> resultClass,
+    public static TarantoolRequestSignature create(String functionName, Collection<?> arguments,
             Supplier<? extends MessagePackObjectMapper> argumentsMapperSupplier,
             Supplier<? extends MessagePackValueMapper> resultMapperSupplier) {
-        List<Object> components = new ArrayList<>(arguments.size() + 4);
-        components.add(functionName);
-        for (Object argument : arguments) {
-            components.add(argument.getClass().getName());
-        }
-        components.add(resultClass.getName());
-        components.add(Integer.toHexString(argumentsMapperSupplier.hashCode()));
-        components.add(Integer.toHexString(resultMapperSupplier.hashCode()));
-        return new TarantoolRequestSignature(components.toArray(new Object[] {}));
+        return TarantoolRequestSignature.create(functionName, arguments, argumentsMapperSupplier)
+            .addComponent(Integer.toHexString(resultMapperSupplier.hashCode()));
     }
 }

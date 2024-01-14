@@ -28,36 +28,36 @@ public class TarantoolRequestSignatureTest {
         testCases.put(
             "empty and non-empty signatures should be not equal",
             new TarantoolRequestSignatureTestCase(
-                new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"})),
+                new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"})),
                 new TarantoolRequestSignature(),
                 false
             ));
         testCases.put(
             "two signatures can be equal with different component contents",
             new TarantoolRequestSignatureTestCase(
-                new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"})),
-                new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param three", 4})),
+                new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"})),
+                new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param three", 4})),
                 true
             ));
         testCases.put(
             "two signatures with different String components should not be equal",
             new TarantoolRequestSignatureTestCase(
-                new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"})),
-                new TarantoolRequestSignature(
-                    "other_function", Arrays.asList(new Object[]{"param three", 4})),
+                new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"})),
+                new TarantoolRequestSignature()
+                    .addComponent("other_function").addComponent(Arrays.asList(new Object[]{"param three", 4})),
                 false
             ));
         testCases.put(
             "two signatures should not be equal with different component order",
             new TarantoolRequestSignatureTestCase(
-                new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"})),
-                new TarantoolRequestSignature(
-                    Arrays.asList(new Object[]{"param three", 4}), "function"),
+                new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"})),
+                new TarantoolRequestSignature()
+                    .addComponent(Arrays.asList(new Object[]{"param three", 4})).addComponent("function"),
                 false
             ));
 
@@ -75,10 +75,10 @@ public class TarantoolRequestSignatureTest {
 
     @Test
     public void testSignatureAddComponent() {
-        TarantoolRequestSignature signature = new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"}));
-        TarantoolRequestSignature updatedSignature = new TarantoolRequestSignature(
-                    "function", Arrays.asList(new Object[]{"param one", "param two"}));
+        TarantoolRequestSignature signature = new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"}));
+        TarantoolRequestSignature updatedSignature = new TarantoolRequestSignature()
+                    .addComponent("function").addComponent(Arrays.asList(new Object[]{"param one", "param two"}));
         updatedSignature.addComponent("one more parameter");
         assertNotEquals(signature.hashCode(), updatedSignature.hashCode());
         assertNotEquals(signature, updatedSignature, "updated signature should not be equal to the source");
