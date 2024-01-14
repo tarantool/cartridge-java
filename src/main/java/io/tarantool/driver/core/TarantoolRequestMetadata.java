@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import org.msgpack.value.Value;
 
 import io.tarantool.driver.protocol.TarantoolRequest;
-import io.tarantool.driver.protocol.TarantoolRequestSignature;
 
 /**
  * Intermediate request metadata holder

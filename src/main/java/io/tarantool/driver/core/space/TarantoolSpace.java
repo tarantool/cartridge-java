@@ -66,24 +66,32 @@ public abstract class TarantoolSpace<T extends Packable, R extends Collection<T>
         String spaceIdStr = String.valueOf(this.spaceId);
         methodSignatures.put(
             TarantoolDeleteRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolDeleteRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolDeleteRequest.class.getName()));
         methodSignatures.put(
             TarantoolInsertRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolInsertRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolInsertRequest.class.getName()));
         methodSignatures.put(
             TarantoolReplaceRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolReplaceRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolReplaceRequest.class.getName()));
         methodSignatures.put(
             TarantoolSelectRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolSelectRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolSelectRequest.class.getName()));
         methodSignatures.put(
             TarantoolUpdateRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolUpdateRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolUpdateRequest.class.getName()));
         methodSignatures.put(
             TarantoolUpsertRequest.class.getName(),
-            new TarantoolRequestSignature(spaceIdStr, TarantoolUpsertRequest.class.getName()));
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent(TarantoolUpsertRequest.class.getName()));
         methodSignatures.put(
-            "truncate", new TarantoolRequestSignature(spaceIdStr, "truncate", TarantoolCallRequest.class.getName()));
+            "truncate",
+            new TarantoolRequestSignature()
+                .addComponent(spaceIdStr).addComponent("truncate").addComponent(TarantoolCallRequest.class.getName()));
     }
 
     @Override

@@ -7,6 +7,7 @@ import io.tarantool.driver.mappers.converters.ValueConverter;
 import org.msgpack.value.Value;
 import org.msgpack.value.ValueType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
