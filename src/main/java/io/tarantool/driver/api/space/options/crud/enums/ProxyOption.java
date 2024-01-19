@@ -23,7 +23,9 @@ public enum ProxyOption {
 
     AFTER("after"),
 
-    FIRST("first");
+    FIRST("first"),
+
+    YIELD_EVERY("yield_every");
 
     private final String name;
 
