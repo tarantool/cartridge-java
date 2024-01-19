@@ -204,4 +204,38 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(firstHalf, resultAfterInsertWithFirst.size());
     }
+
+    @Test
+    public void withAfterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolResult<TarantoolTuple> emptyResult = profileSpace.select(Conditions.any()).join();
+        assertEquals(0, emptyResult.size());
+
+        TarantoolTuple tuple;
+        TarantoolTuple insertedTuple;
+        final int tupleCount = 100;
+        for (int i = 0; i < tupleCount; i++) {
+            tuple = tupleFactory.create(i, null, String.valueOf(i), i);
+            insertedTuple = profileSpace.insert(tuple).join().get(0);
+            assertEquals(insertedTuple.getObject(0), tuple.getObject(0));
+            assertEquals(insertedTuple.getObject(2), tuple.getObject(2));
+            assertEquals(insertedTuple.getObject(3), tuple.getObject(3));
+            assertEquals(insertedTuple.getObject(4), tuple.getObject(4));
+        }
+
+        TarantoolResult<TarantoolTuple> resultAfterInsert = profileSpace.select(Conditions.any()).join();
+        assertEquals(tupleCount, resultAfterInsert.size());
+
+        final int median = tupleCount / 2;
+        TarantoolTuple medianTuple = tupleFactory.create(median,
+                                                        null,
+                                                        String.valueOf(median),
+                                                        median);
+
+        TarantoolResult<TarantoolTuple> resultAfterInsertWithAfterOption =
+            profileSpace.select(Conditions.after(medianTuple)).join();
+        assertEquals(median - 1, resultAfterInsertWithAfterOption.size());
+    }
 }
