@@ -8,6 +8,7 @@ import io.tarantool.driver.api.space.options.crud.enums.Mode;
 import io.tarantool.driver.api.space.options.SelectOptions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.ProxySelectOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -237,5 +238,21 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         TarantoolResult<TarantoolTuple> resultAfterInsertWithAfterOption =
             profileSpace.select(Conditions.after(medianTuple)).join();
         assertEquals(median - 1, resultAfterInsertWithAfterOption.size());
+    }
+
+    @Test
+    public void withYieldEveryTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        profileSpace.select(Conditions.any()).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertNull(((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.YIELD_EVERY.toString()));
+
+        final int yieldEvery = 2_000;
+        profileSpace.select(Conditions.any(), ProxySelectOptions.create().withYieldEvery(yieldEvery)).join();
+        crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertEquals(yieldEvery,
+            ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.YIELD_EVERY.toString()));
     }
 }

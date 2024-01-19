@@ -5,6 +5,7 @@ import io.tarantool.driver.api.space.options.crud.OperationWithBucketIdOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithFieldsOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithModeOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithTimeoutOptions;
+import io.tarantool.driver.api.space.options.crud.OperationWithYieldEveryOptions;
 
 /**
  * Marker interface for space select operation options
@@ -16,5 +17,5 @@ import io.tarantool.driver.api.space.options.crud.OperationWithTimeoutOptions;
  */
 public interface SelectOptions<T extends SelectOptions<T>>
     extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T>,
-    OperationWithModeOptions<T>, OperationWithBatchSizeOptions<T> {
+            OperationWithModeOptions<T>, OperationWithBatchSizeOptions<T>, OperationWithYieldEveryOptions<T> {
 }
