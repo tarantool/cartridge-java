@@ -5,6 +5,7 @@ import io.tarantool.driver.api.TarantoolClientConfig;
 import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.ReplaceManyOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.crud.enums.RollbackOnError;
 import io.tarantool.driver.api.space.options.crud.enums.StopOnError;
 import io.tarantool.driver.api.space.options.ProxyReplaceManyOptions;
@@ -170,5 +171,25 @@ public class ProxySpaceReplaceManyOptionsIT extends SharedCartridgeContainer {
             assertEquals(i, tuple.getInteger(0));
             assertEquals(String.valueOf(i), tuple.getString(1));
         }
+    }
+
+    @Test
+    public void withVsharRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(0, null, "0", 0, 0),
+            tupleFactory.create(1, null, "1", 1, 1));
+
+        final String groupName = "default";
+        ReplaceManyOptions<ProxyReplaceManyOptions> options = ProxyReplaceManyOptions.create()
+                                                                                     .withVshardRouter(groupName);
+
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replaceMany(tarantoolTuples, options).join();
+        List<?> crudReplaceManyOpts = client.eval("return crud_replace_many_opts").join();
+
+        assertEquals(groupName, ((HashMap<?, ?>) crudReplaceManyOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+        assertEquals(2, replaceResult.size());
     }
 }

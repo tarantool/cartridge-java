@@ -318,4 +318,19 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.BALANCE.toString()));
     }
+
+    @Test
+    public void withVshardRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> operations =
+            client.space(TEST_SPACE_NAME);
+
+        operations.select(Conditions.any()).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertNull(((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+
+        final String routerName = "default";
+        operations.select(Conditions.any(), ProxySelectOptions.create().withVshardRouter(routerName)).join();
+        crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertEquals(routerName, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
 }
