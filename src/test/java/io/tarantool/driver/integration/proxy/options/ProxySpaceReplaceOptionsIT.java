@@ -8,6 +8,7 @@ import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.ReplaceOptions;
 import io.tarantool.driver.api.space.options.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.ProxyReplaceOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -166,5 +167,22 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
         assertEquals(2, tuple.size());
         assertEquals(1, tuple.getInteger(0));
         assertEquals("FIO", tuple.getString(1));
+    }
+
+    @Test
+    public void withVsharRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+
+        final String groupName = "default";
+        ReplaceOptions<ProxyReplaceOptions> options = ProxyReplaceOptions.create().withVshardRouter(groupName);
+
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replace(tarantoolTuple, options).join();
+        List<?> crudReplaceOpts = client.eval("return crud_replace_opts").join();
+
+        assertEquals(1, replaceResult.size());
+        assertEquals(groupName, ((HashMap<?, ?>) crudReplaceOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
     }
 }

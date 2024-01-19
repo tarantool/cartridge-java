@@ -33,7 +33,9 @@ public enum ProxyOption {
 
     PREFER_REPLICA("prefer_replica"),
 
-    BALANCE("balance");
+    BALANCE("balance"),
+
+    VSHARD_ROUTER("vshard_router");
 
     private final String name;
 

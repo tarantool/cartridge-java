@@ -6,6 +6,7 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.InsertManyOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.space.options.crud.enums.RollbackOnError;
 import io.tarantool.driver.api.space.options.crud.enums.StopOnError;
 import io.tarantool.driver.api.space.options.ProxyInsertManyOptions;
@@ -187,5 +188,24 @@ public class ProxySpaceInsertManyOptionsIT extends SharedCartridgeContainer {
             assertEquals(i, tuple.getInteger(0));
             assertEquals(String.valueOf(i), tuple.getString(1));
         }
+    }
+
+    @Test
+    public void withVshardRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(0, null, "0", 0, 0),
+            tupleFactory.create(1, null, "1", 1, 1));
+
+        final String groupName = "default";
+        InsertManyOptions<ProxyInsertManyOptions> options = ProxyInsertManyOptions.create()
+                                                                                  .withVshardRouter(groupName);
+
+        TarantoolResult<TarantoolTuple> insertManyResult = profileSpace.insertMany(tarantoolTuples, options).join();
+        List<?> crudInsertManyOpts = client.eval("return crud_insert_many_opts").join();
+        assertEquals(2, insertManyResult.size());
+        assertEquals(groupName, ((HashMap<?, ?>) crudInsertManyOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
     }
 }

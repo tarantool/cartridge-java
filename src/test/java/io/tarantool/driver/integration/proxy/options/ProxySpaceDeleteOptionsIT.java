@@ -9,6 +9,7 @@ import io.tarantool.driver.api.space.options.InsertOptions;
 import io.tarantool.driver.api.space.options.ProxyDeleteOptions;
 import io.tarantool.driver.api.space.options.ProxyInsertOptions;
 import io.tarantool.driver.api.space.options.DeleteOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -160,5 +161,26 @@ public class ProxySpaceDeleteOptionsIT extends SharedCartridgeContainer {
         assertEquals(2, tuple.size());
         assertEquals(1, tuple.getInteger(0));
         assertEquals("FIO", tuple.getString(1));
+    }
+
+    @Test
+    public void withVshardRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        profileSpace.insert(tarantoolTuple).join();
+
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+        final String groupName = "default";
+        DeleteOptions<ProxyDeleteOptions> options = ProxyDeleteOptions.create().withVshardRouter(groupName);
+
+        TarantoolResult<TarantoolTuple> deleteResult = profileSpace.delete(conditions, options).join();
+        TarantoolResult<TarantoolTuple> selectResultAfterDelete = profileSpace.select(Conditions.any()).join();
+        List<?> crudDeleteOpts = client.eval("return crud_delete_opts").join();
+
+        assertEquals(groupName, ((HashMap<?, ?>) crudDeleteOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+        assertEquals(1, deleteResult.size());
+        assertEquals(0, selectResultAfterDelete.size());
     }
 }

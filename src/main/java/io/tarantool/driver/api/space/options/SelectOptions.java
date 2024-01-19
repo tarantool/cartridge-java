@@ -9,6 +9,7 @@ import io.tarantool.driver.api.space.options.crud.OperationWithForceMapCallOptio
 import io.tarantool.driver.api.space.options.crud.OperationWithModeOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithPreferReplicaOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithTimeoutOptions;
+import io.tarantool.driver.api.space.options.crud.OperationWithVshardRouterOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithYieldEveryOptions;
 
 /**
@@ -23,5 +24,5 @@ public interface SelectOptions<T extends SelectOptions<T>>
     extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T>,
             OperationWithModeOptions<T>, OperationWithBatchSizeOptions<T>, OperationWithYieldEveryOptions<T>,
             OperationWithForceMapCallOptions<T>, OperationWithFullScanOptions<T>, OperationWithPreferReplicaOptions<T>,
-            OperationWithBalanceOptions<T> {
+            OperationWithBalanceOptions<T>, OperationWithVshardRouterOptions<T> {
 }

@@ -7,6 +7,7 @@ import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.UpdateOptions;
 import io.tarantool.driver.api.space.options.ProxyUpdateOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -158,4 +159,25 @@ public class ProxySpaceUpdateOptionsIT extends SharedCartridgeContainer {
         assertEquals(1, tuple.getInteger(0));
         assertEquals("FIO", tuple.getString(1));
     }
+
+    @Test
+    public void withVshardRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+
+        final String groupName = "default";
+        UpdateOptions<ProxyUpdateOptions> options = ProxyUpdateOptions.create().withVshardRouter(groupName);
+
+        TarantoolTuple insertTuple = profileSpace.insert(tarantoolTuple).join().get(0);
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, insertTuple, options).join();
+
+        List<?> crudUpdateOpts = client.eval("return crud_update_opts").join();
+
+        assertEquals(1, updateResult.size());
+        assertEquals(groupName, ((HashMap<?, ?>) crudUpdateOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
 }
+

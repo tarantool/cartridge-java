@@ -6,6 +6,8 @@ import io.tarantool.driver.api.TarantoolResult;
 import io.tarantool.driver.api.conditions.Conditions;
 import io.tarantool.driver.api.space.TarantoolSpaceOperations;
 import io.tarantool.driver.api.space.options.ProxyUpsertOptions;
+import io.tarantool.driver.api.space.options.UpsertOptions;
+import io.tarantool.driver.api.space.options.crud.enums.ProxyOption;
 import io.tarantool.driver.api.tuple.DefaultTarantoolTupleFactory;
 import io.tarantool.driver.api.tuple.TarantoolTuple;
 import io.tarantool.driver.api.tuple.TarantoolTupleFactory;
@@ -126,5 +128,22 @@ public class ProxySpaceUpsertOptionsIT extends SharedCartridgeContainer {
         ).get();
         crudUpsertOpts = client.eval("return crud_upsert_opts").get();
         assertEquals(bucketId, ((HashMap) crudUpsertOpts.get(0)).get("bucket_id"));
+    }
+
+    @Test
+    public void withVshardRouterTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+
+        final String groupName = "default";
+        UpsertOptions<ProxyUpsertOptions> options = ProxyUpsertOptions.create().withVshardRouter(groupName);
+
+        profileSpace.upsert(conditions, tarantoolTuple, TupleOperations.set("age", 50), options).join();
+        List<?> crudUpsertOpts = client.eval("return crud_upsert_opts").join();
+
+        assertEquals(groupName, ((HashMap<?, ?>) crudUpsertOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
     }
 }
