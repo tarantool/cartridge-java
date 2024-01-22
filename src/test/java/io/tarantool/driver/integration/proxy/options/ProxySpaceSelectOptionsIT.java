@@ -302,4 +302,20 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.PREFER_REPLICA.toString()));
     }
+
+    @Test
+    public void withBalanceTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> operations =
+            client.space(TEST_SPACE_NAME);
+
+        SelectOptions<ProxySelectOptions> options = ProxySelectOptions.create().balance();
+
+        assertTrue(options.getBalance().isPresent());
+        assertTrue(options.getBalance().get());
+
+        operations.select(Conditions.any(), options).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+
+        assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.BALANCE.toString()));
+    }
 }

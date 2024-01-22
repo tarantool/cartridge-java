@@ -31,7 +31,9 @@ public enum ProxyOption {
 
     FULL_SCAN("fullscan"),
 
-    PREFER_REPLICA("prefer_replica");
+    PREFER_REPLICA("prefer_replica"),
+
+    BALANCE("balance");
 
     private final String name;
 
