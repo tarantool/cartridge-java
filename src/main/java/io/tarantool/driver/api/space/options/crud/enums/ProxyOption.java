@@ -25,7 +25,9 @@ public enum ProxyOption {
 
     FIRST("first"),
 
-    YIELD_EVERY("yield_every");
+    YIELD_EVERY("yield_every"),
+
+    FORCE_MAP_CALL("force_map_call");
 
     private final String name;
 

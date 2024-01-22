@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Artyom Dubinin
@@ -254,5 +255,20 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         crudSelectOpts = client.eval("return crud_select_opts").join();
         assertEquals(yieldEvery,
             ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.YIELD_EVERY.toString()));
+    }
+
+    @Test
+    public void withForceMapCallTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        SelectOptions<ProxySelectOptions> options = ProxySelectOptions.create().forceMapCall();
+
+        assertTrue(options.getForceMapCall().isPresent());
+        assertTrue(options.getForceMapCall().get());
+
+        profileSpace.select(Conditions.any(), options).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.FORCE_MAP_CALL.toString()));
     }
 }
