@@ -29,7 +29,9 @@ public enum ProxyOption {
 
     FORCE_MAP_CALL("force_map_call"),
 
-    FULL_SCAN("fullscan");
+    FULL_SCAN("fullscan"),
+
+    PREFER_REPLICA("prefer_replica");
 
     private final String name;
 
