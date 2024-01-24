@@ -271,4 +271,19 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
         assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.FORCE_MAP_CALL.toString()));
     }
+
+    @Test
+    public void withFullScanTest() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> operations =
+            client.space(TEST_SPACE_NAME);
+
+        SelectOptions<ProxySelectOptions> options = ProxySelectOptions.create().fullScan();
+
+        assertTrue(options.getFullScan().isPresent());
+        assertTrue(options.getFullScan().get());
+
+        operations.select(Conditions.any(), options).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+        assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.FULL_SCAN.toString()));
+    }
 }
