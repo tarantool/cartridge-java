@@ -17,6 +17,7 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -332,5 +333,23 @@ public class ProxySpaceSelectOptionsIT extends SharedCartridgeContainer {
         operations.select(Conditions.any(), ProxySelectOptions.create().withVshardRouter(routerName)).join();
         crudSelectOpts = client.eval("return crud_select_opts").join();
         assertEquals(routerName, ((HashMap<?, ?>) crudSelectOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        SelectOptions<ProxySelectOptions> options = ProxySelectOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolResult<TarantoolTuple> selectResult = profileSpace.select(Conditions.any(), options).join();
+        List<?> crudSelectOpts = client.eval("return crud_select_opts").join();
+
+        assertEquals(0, selectResult.size());
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudSelectOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
     }
 }

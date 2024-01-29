@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Artyom Dubinin
@@ -182,5 +183,27 @@ public class ProxySpaceDeleteOptionsIT extends SharedCartridgeContainer {
         assertEquals(groupName, ((HashMap<?, ?>) crudDeleteOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
         assertEquals(1, deleteResult.size());
         assertEquals(0, selectResultAfterDelete.size());
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        profileSpace.insert(tarantoolTuple).join();
+
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+        DeleteOptions<ProxyDeleteOptions> options = ProxyDeleteOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolResult<TarantoolTuple> deleteResultWithOptions = profileSpace.delete(conditions, options).join();
+        List<?> crudDeleteOpts = client.eval("return crud_delete_opts").join();
+
+        assertEquals(true,
+            ((HashMap<?, ?>) crudDeleteOpts.get(0)).get(ProxyOption.FETCH_LATEST_METADATA.toString()));
+        assertEquals(1, deleteResultWithOptions.size());
     }
 }

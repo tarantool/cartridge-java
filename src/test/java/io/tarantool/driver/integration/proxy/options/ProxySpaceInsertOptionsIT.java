@@ -20,6 +20,7 @@ import io.tarantool.driver.exceptions.TarantoolInternalException;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.integration.Utils;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -284,5 +285,24 @@ public class ProxySpaceInsertOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(1, insertResult.size());
         assertEquals(groupName, ((HashMap<?, ?>) crudInsertOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(0, null, "0", 0, 0);
+        InsertOptions<ProxyInsertOptions> options = ProxyInsertOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolResult<TarantoolTuple> insertResult = profileSpace.insert(tarantoolTuple, options).join();
+        List<?> crudInsertOpts = client.eval("return crud_insert_opts").join();
+
+        assertEquals(1, insertResult.size());
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudInsertOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
     }
 }

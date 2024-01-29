@@ -3,6 +3,7 @@ package io.tarantool.driver.api.space.options;
 import io.tarantool.driver.api.space.options.crud.OperationWithBalanceOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithBatchSizeOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithBucketIdOptions;
+import io.tarantool.driver.api.space.options.crud.OperationWithFetchLatestMetadataOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithFieldsOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithFullScanOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithForceMapCallOptions;
@@ -24,5 +25,6 @@ public interface SelectOptions<T extends SelectOptions<T>>
     extends OperationWithBucketIdOptions<T>, OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T>,
             OperationWithModeOptions<T>, OperationWithBatchSizeOptions<T>, OperationWithYieldEveryOptions<T>,
             OperationWithForceMapCallOptions<T>, OperationWithFullScanOptions<T>, OperationWithPreferReplicaOptions<T>,
-            OperationWithBalanceOptions<T>, OperationWithVshardRouterOptions<T> {
+            OperationWithBalanceOptions<T>, OperationWithVshardRouterOptions<T>,
+            OperationWithFetchLatestMetadataOptions<T> {
 }

@@ -35,7 +35,9 @@ public enum ProxyOption {
 
     BALANCE("balance"),
 
-    VSHARD_ROUTER("vshard_router");
+    VSHARD_ROUTER("vshard_router"),
+
+    FETCH_LATEST_METADATA("fetch_latest_metadata");
 
     private final String name;
 
