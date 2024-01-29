@@ -12,6 +12,13 @@
 - Bump testcontainers-java-tarantool version to 1.2.0 ([#442](https://github.com/tarantool/cartridge-java/issues/442))
 - Bump netty version to 4.1.104.Final ([#446](https://github.com/tarantool/cartridge-java/issues/446))
 - Bump msgpack-java version to 0.9.6
+- Add support for crud `yield_every` option ([#458](https://github.com/tarantool/cartridge-java/pull/468))
+- Add support for crud `force_map_call` option ([#459](https://github.com/tarantool/cartridge-java/pull/469))
+- Add support for crud `fullscan` option ([#460](https://github.com/tarantool/cartridge-java/pull/470))
+- Add support for crud `prefer_replica` option ([#461](https://github.com/tarantool/cartridge-java/pull/471))
+- Add support for crud `balance` option ([#462](https://github.com/tarantool/cartridge-java/pull/472))
+- Add support for crud `vshard_router` option ([#463](https://github.com/tarantool/cartridge-java/pull/473))
+- Add support for crud `fetch_latest_metadata` option ([#465](https://github.com/tarantool/cartridge-java/pull/474))
 
 ### Features
 

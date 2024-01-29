@@ -1,5 +1,6 @@
 package io.tarantool.driver.api.space.options;
 
+import io.tarantool.driver.api.space.options.crud.OperationWithFetchLatestMetadataOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithFieldsOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithRollbackOnErrorOptions;
 import io.tarantool.driver.api.space.options.crud.OperationWithStopOnErrorOptions;
@@ -13,5 +14,6 @@ import io.tarantool.driver.api.space.options.crud.OperationWithVshardRouterOptio
  */
 public interface InsertManyOptions<T extends InsertManyOptions<T>>
     extends OperationWithTimeoutOptions<T>, OperationWithFieldsOptions<T>, OperationWithRollbackOnErrorOptions<T>,
-            OperationWithStopOnErrorOptions<T>, OperationWithVshardRouterOptions<T> {
+            OperationWithStopOnErrorOptions<T>, OperationWithVshardRouterOptions<T>,
+            OperationWithFetchLatestMetadataOptions<T> {
 }

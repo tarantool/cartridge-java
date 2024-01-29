@@ -17,6 +17,7 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Artyom Dubinin
@@ -145,5 +147,24 @@ public class ProxySpaceUpsertOptionsIT extends SharedCartridgeContainer {
         List<?> crudUpsertOpts = client.eval("return crud_upsert_opts").join();
 
         assertEquals(groupName, ((HashMap<?, ?>) crudUpsertOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+        UpsertOptions<ProxyUpsertOptions> options = ProxyUpsertOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        profileSpace.upsert(conditions, tarantoolTuple, TupleOperations.set("age", 50), options).join();
+        List<?> crudUpsertOpts = client.eval("return crud_upsert_opts").join();
+
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudUpsertOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
     }
 }

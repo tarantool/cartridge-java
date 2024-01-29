@@ -16,6 +16,7 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Artyom Dubinin
@@ -179,5 +181,25 @@ public class ProxySpaceUpdateOptionsIT extends SharedCartridgeContainer {
         assertEquals(1, updateResult.size());
         assertEquals(groupName, ((HashMap<?, ?>) crudUpdateOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
     }
-}
 
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+        Conditions conditions = Conditions.equals(PK_FIELD_NAME, 1);
+        UpdateOptions<ProxyUpdateOptions> options = ProxyUpdateOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolTuple insertTuple = profileSpace.insert(tarantoolTuple).join().get(0);
+        TarantoolResult<TarantoolTuple> updateResult = profileSpace.update(conditions, insertTuple, options).join();
+        List<?> crudUpdateOpts = client.eval("return crud_update_opts").join();
+
+        assertEquals(1, updateResult.size());
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudUpdateOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
+    }
+}

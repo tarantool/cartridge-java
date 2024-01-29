@@ -17,6 +17,7 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Artyom Dubinin
@@ -184,5 +186,25 @@ public class ProxySpaceReplaceOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(1, replaceResult.size());
         assertEquals(groupName, ((HashMap<?, ?>) crudReplaceOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        TarantoolTuple tarantoolTuple = tupleFactory.create(1, null, "FIO", 50, 100);
+
+        ReplaceOptions<ProxyReplaceOptions> options = ProxyReplaceOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolResult<TarantoolTuple> replaceResult = profileSpace.replace(tarantoolTuple, options).join();
+        List<?> crudReplaceOpts = client.eval("return crud_replace_opts").join();
+
+        assertEquals(1, replaceResult.size());
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudReplaceOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
     }
 }

@@ -17,6 +17,7 @@ import io.tarantool.driver.core.ClusterTarantoolTupleClient;
 import io.tarantool.driver.core.ProxyTarantoolTupleClient;
 import io.tarantool.driver.integration.SharedCartridgeContainer;
 import io.tarantool.driver.mappers.factories.DefaultMessagePackMapperFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexey Kuzin
@@ -191,5 +193,28 @@ public class ProxySpaceReplaceManyOptionsIT extends SharedCartridgeContainer {
 
         assertEquals(groupName, ((HashMap<?, ?>) crudReplaceManyOpts.get(0)).get(ProxyOption.VSHARD_ROUTER.toString()));
         assertEquals(2, replaceResult.size());
+    }
+
+    @Test
+    public void withFetchLatestMetadata() {
+        TarantoolSpaceOperations<TarantoolTuple, TarantoolResult<TarantoolTuple>> profileSpace =
+            client.space(TEST_SPACE_NAME);
+
+        List<TarantoolTuple> tarantoolTuples = Arrays.asList(
+            tupleFactory.create(0, null, "0", 0, 0),
+            tupleFactory.create(1, null, "1", 1, 1)
+                                                            );
+
+        ReplaceManyOptions<ProxyReplaceManyOptions> options = ProxyReplaceManyOptions.create().fetchLatestMetadata();
+
+        assertTrue(options.getFetchLatestMetadata().isPresent());
+        assertTrue(options.getFetchLatestMetadata().get());
+
+        TarantoolResult<TarantoolTuple> replaceManyResult = profileSpace.replaceMany(tarantoolTuples, options).join();
+        List<?> crudReplaceManyOpts = client.eval("return crud_replace_many_opts").join();
+
+        assertEquals(2, replaceManyResult.size());
+        Assertions.assertEquals(true, ((HashMap<?, ?>) crudReplaceManyOpts.get(0))
+            .get(ProxyOption.FETCH_LATEST_METADATA.toString()));
     }
 }
