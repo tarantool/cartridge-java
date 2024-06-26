@@ -13,7 +13,7 @@ public interface OperationWithYieldEveryOptions<T extends OperationWithYieldEver
      * Sets number of tuples processed on storage to yield after, "yield_every" should be > 0.
      * @param yieldEvery number of tuples processed on storage to yield after, "yield_every" should be > 0.
      * @return this option instance.
-     * @throws IllegalArgumentException if yieldEvery < 0.
+     * @throws IllegalArgumentException {@code if yieldEvery < 0}.
      */
     default T withYieldEvery(int yieldEvery) throws IllegalArgumentException {
         if (yieldEvery <= 0) {

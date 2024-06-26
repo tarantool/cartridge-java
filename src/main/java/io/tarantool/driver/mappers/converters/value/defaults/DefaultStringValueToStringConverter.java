@@ -15,6 +15,6 @@ public class DefaultStringValueToStringConverter implements ValueConverter<Strin
 
     @Override
     public String fromValue(StringValue value) {
-        return value.asString();
+        return value.toString();
     }
 }

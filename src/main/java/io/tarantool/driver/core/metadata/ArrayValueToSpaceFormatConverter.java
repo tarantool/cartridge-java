@@ -43,8 +43,8 @@ public final class ArrayValueToSpaceFormatConverter
             spaceFormatMetadata.put(
                 fieldMap.get(FORMAT_FIELD_NAME).toString(),
                 new TarantoolFieldMetadataImpl(
-                    fieldMap.get(FORMAT_FIELD_NAME).asStringValue().asString(),
-                    fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().asString(),
+                    fieldMap.get(FORMAT_FIELD_NAME).asStringValue().toString(),
+                    fieldMap.get(FORMAT_FIELD_TYPE).asStringValue().toString(),
                     fieldPosition,
                     isNullable.isPresent() && isNullable.get().asBooleanValue().getBoolean()
                 )

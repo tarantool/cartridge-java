@@ -94,7 +94,7 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
 
             TarantoolSpaceMetadataImpl spaceMetadata = new TarantoolSpaceMetadataImpl();
             spaceMetadata.setOwnerId(ID_UNKNOWN);
-            spaceMetadata.setSpaceName(nameValue.asStringValue().asString());
+            spaceMetadata.setSpaceName(nameValue.asStringValue().toString());
 
             Value formatValue = space.get(SPACE_FORMAT_KEY);
             if (formatValue == null) {
@@ -140,14 +140,14 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
                 throw new TarantoolClientException(
                     "Unsupported index metadata format: key '" + INDEX_NAME_KEY + "' must have string value");
             }
-            String indexName = indexNameValue.asStringValue().asString();
+            String indexName = indexNameValue.asStringValue().toString();
 
             Value indexTypeValue = indexMap.get(INDEX_TYPE_KEY);
             if (indexTypeValue == null || !indexTypeValue.isStringValue()) {
                 throw new TarantoolClientException(
                     "Unsupported index metadata format: key '" + INDEX_TYPE_KEY + "' must have string value");
             }
-            String indexType = indexTypeValue.asStringValue().asString();
+            String indexType = indexTypeValue.asStringValue().toString();
 
             Value indexUniqueValue = indexMap.get(INDEX_UNIQUE_KEY);
             if (indexUniqueValue == null || !indexUniqueValue.isBooleanValue()) {
@@ -196,7 +196,7 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
                     int fieldNumber;
                     Object fieldPath;
                     if (fieldPathValue.isStringValue()) {
-                        fieldPath = fieldPathValue.asStringValue().asString();
+                        fieldPath = fieldPathValue.asStringValue().toString();
                         fieldNumber = getFieldNumberFromFieldPath(fields, (String) fieldPath);
                     } else {
                         fieldNumber = fieldPathValue.asIntegerValue().asInt();
@@ -208,7 +208,7 @@ public final class DDLTarantoolSpaceMetadataConverter implements ValueConverter<
                         throw new TarantoolClientException("Unsupported index metadata format: key '" +
                             INDEX_PARTS_TYPE_KEY + "' must have string value");
                     }
-                    String fieldType = fieldTypeValue.asStringValue().asString();
+                    String fieldType = fieldTypeValue.asStringValue().toString();
 
                     return new TarantoolIndexPartMetadataImpl<>(fieldNumber, fieldType, fieldPath);
                 })

@@ -61,13 +61,13 @@ public class TarantoolIndexMetadataConverter implements ValueConverter<ArrayValu
                 indexParts = indexPartsValue.list().stream()
                     .map(partValue -> new TarantoolIndexPartMetadataImpl<>(
                         partValue.asArrayValue().get(0).asIntegerValue().asInt(),
-                        partValue.asArrayValue().get(1).asStringValue().asString()
+                        partValue.asArrayValue().get(1).asStringValue().toString()
                     )).collect(Collectors.toList());
             } else {
                 indexParts = indexPartsValue.list().stream()
                     .map(partValue -> new TarantoolIndexPartMetadataImpl<>(
                         partValue.asMapValue().map().get(INDEX_FIELD_KEY).asIntegerValue().asInt(),
-                        partValue.asMapValue().map().get(INDEX_TYPE_KEY).asStringValue().asString()
+                        partValue.asMapValue().map().get(INDEX_TYPE_KEY).asStringValue().toString()
                     )).collect(Collectors.toList());
             }
         }
