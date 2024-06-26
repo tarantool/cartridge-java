@@ -39,7 +39,7 @@
  *                     // the default parameters are set to unlimited, though
  *                     new TarantoolSelectOptions(),
  *                     // convert raw MessagePack array to object by hand
- *                     (v) -> new CustomTuple(v.get(0).asIntegerValue().asInt(), v.get(1).asStringValue().asString()))
+ *                     (v) -> new CustomTuple(v.get(0).asIntegerValue().asInt(), v.get(1).asStringValue().toString()))
  *             .get();
  *
  *         customTuples.forEach(

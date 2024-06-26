@@ -15,13 +15,13 @@ public class DefaultStringValueToCharacterConverter implements ValueConverter<St
 
     @Override
     public Character fromValue(StringValue value) {
-        String stringFromStringValue = value.asString();
+        String stringFromStringValue = value.toString();
         return stringFromStringValue.charAt(0);
     }
 
     @Override
     public boolean canConvertValue(StringValue value) {
-        String stringFromStringValue = value.asString();
+        String stringFromStringValue = value.toString();
         return stringFromStringValue.length() == 1;
     }
 }

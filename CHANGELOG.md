@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.14.0] - 2024-06-26
+
 ### Bugfixes
 
 - Significantly reduce memory allocation overhead and excessive GC pressure ([#401](https://github.com/tarantool/cartridge-java/issues/401))
@@ -19,6 +21,7 @@
 - Add support for crud `balance` option ([#462](https://github.com/tarantool/cartridge-java/pull/472))
 - Add support for crud `vshard_router` option ([#463](https://github.com/tarantool/cartridge-java/pull/473))
 - Add support for crud `fetch_latest_metadata` option ([#465](https://github.com/tarantool/cartridge-java/pull/474))
+- Use toString in StringValues to map incorrect UTF-8 string
 
 ### Features
 
