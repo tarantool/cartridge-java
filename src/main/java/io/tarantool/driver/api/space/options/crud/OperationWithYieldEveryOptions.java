@@ -10,8 +10,8 @@ public interface OperationWithYieldEveryOptions<T extends OperationWithYieldEver
     extends Options, Self<T> {
 
     /**
-     * Sets number of tuples processed on storage to yield after, "yield_every" should be > 0.
-     * @param yieldEvery number of tuples processed on storage to yield after, "yield_every" should be > 0.
+     * Sets number of tuples processed on storage to yield after, "yield_every" should be &gt; 0.
+     * @param yieldEvery number of tuples processed on storage to yield after, "yield_every" should be &gt; 0.
      * @return this option instance.
      * @throws IllegalArgumentException {@code if yieldEvery < 0}.
      */
