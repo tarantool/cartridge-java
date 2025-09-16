@@ -49,7 +49,7 @@
         <connection>scm:git:git@github.com/tarantool/cartridge-java.git</connection>
         <developerConnection>scm:git:git@github.com:tarantool/cartridge-java.git</developerConnection>
         <url>http://github.com/tarantool/cartridge-java/tree/master</url>
-      <tag>v0.13.0</tag>
+      <tag>v0.14.3</tag>
     </scm>
 
     <properties>
@@ -68,16 +68,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <compilerVersion>1.8</compilerVersion>
                     <fork>true</fork>
                     <debug>true</debug>
                     <optimize>true</optimize>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
-                    <source>8</source>
-                    <target>8</target>
+                    <release>8</release> 
                     <excludes>
                         <exclude>**/package-info.java</exclude>
                     </excludes>
@@ -96,8 +94,8 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <!-- Enforce JDK 1.8+ for compilation. -->
-                                    <version>[1.8.0,)</version>
+                                    <!-- Enforce JDK 1.11+ for compilation. -->
+                                    <version>[1.11.0,)</version>
                                 </requireJavaVersion>
                                 <requireMavenVersion>
                                     <version>[3.1.1,)</version>
@@ -175,7 +173,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
             </plugin>
@@ -502,11 +500,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
             <id>sonatype-nexus-staging</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 </project>
